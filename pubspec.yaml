@@ -1,0 +1,99 @@
+name: school_management
+description: Multi-tenant School Management SaaS Application
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+  
+  # Backend & Auth
+  supabase_flutter: ^2.3.2
+  
+  # Local Database (Offline-first)
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  
+  # Routing
+  go_router: ^13.1.0
+  
+  # UI Components
+  flutter_svg: ^2.0.9
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  
+  # Charts & Visualization
+  fl_chart: ^0.66.0
+  
+  # PDF Generation
+  pdf: ^3.10.7
+  printing: ^5.12.0
+  
+  # Forms & Validation
+  reactive_forms: ^17.0.1
+  
+  # Notifications
+  firebase_core: ^2.25.4
+  firebase_messaging: ^14.7.15
+  flutter_local_notifications: ^16.3.0
+  
+  # Utils
+  intl: ^0.20.2
+  uuid: ^4.3.3
+  path_provider: ^2.1.2
+  share_plus: ^7.2.1
+  url_launcher: ^6.2.3
+  permission_handler: ^11.2.0
+  connectivity_plus: ^5.0.2
+  
+  # UI Helpers
+  flutter_animate: ^4.3.0
+  google_fonts: ^6.1.0
+  lottie: ^3.0.0
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^4.0.0
+  image_picker: ^1.0.7
+  file_picker: ^6.1.1
+  
+  # Glassmorphism
+  glass_kit: ^3.0.0
+  blur: ^3.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  
+  # Code Generation
+  build_runner: ^2.4.8
+  riverpod_generator: ^2.3.9
+  isar_generator: ^3.1.0+1
+  json_serializable: ^6.7.1
+  freezed: ^2.4.6
+  freezed_annotation: ^2.4.1
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+  
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700

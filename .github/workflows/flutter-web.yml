@@ -31,7 +31,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Flutter web
-        run: flutter build web --release
+        run: flutter build web --release --base-href /Flutter-school-management-/
 
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3

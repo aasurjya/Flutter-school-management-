@@ -172,6 +172,7 @@ class AdminDashboardScreen extends ConsumerWidget {
       crossAxisCount: 2,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
+      childAspectRatio: 0.9,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: [
@@ -234,7 +235,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             icon: Icons.person_add,
             label: 'Add Student',
             color: AppColors.primary,
-            onTap: () => context.push(AppRoutes.students),
+            onTap: () => context.push(AppRoutes.studentManagement),
           ),
           const SizedBox(width: 12),
           _QuickActionCard(

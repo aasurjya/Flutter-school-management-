@@ -122,14 +122,27 @@ class SchoolClass {
           .toList();
     }
 
+    int? _parseInt(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is double) return value.toInt();
+      return int.tryParse(value.toString());
+    }
+
+    DateTime _parseDate(dynamic value) {
+      if (value == null) return DateTime.now();
+      if (value is DateTime) return value;
+      return DateTime.tryParse(value.toString()) ?? DateTime.now();
+    }
+
     return SchoolClass(
       id: json['id'],
       tenantId: json['tenant_id'],
       name: json['name'],
-      numericName: json['numeric_name'],
+      numericName: _parseInt(json['numeric_name']),
       description: json['description'],
-      sequenceOrder: json['sequence_order'],
-      createdAt: DateTime.parse(json['created_at']),
+      sequenceOrder: _parseInt(json['sequence_order']) ?? 0,
+      createdAt: _parseDate(json['created_at']),
       sections: sections,
     );
   }
@@ -179,19 +192,32 @@ class Section {
   });
 
   factory Section.fromJson(Map<String, dynamic> json) {
+    int? _parseInt(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is double) return value.toInt();
+      return int.tryParse(value.toString());
+    }
+
+    DateTime _parseDate(dynamic value) {
+      if (value == null) return DateTime.now();
+      if (value is DateTime) return value;
+      return DateTime.tryParse(value.toString()) ?? DateTime.now();
+    }
+
     return Section(
       id: json['id'],
       tenantId: json['tenant_id'],
       classId: json['class_id'],
       academicYearId: json['academic_year_id'],
       name: json['name'],
-      capacity: json['capacity'] ?? 40,
+      capacity: _parseInt(json['capacity']) ?? 40,
       classTeacherId: json['class_teacher_id'],
       roomNumber: json['room_number'],
-      createdAt: DateTime.parse(json['created_at']),
+      createdAt: _parseDate(json['created_at']),
       className: json['class']?['name'],
       classTeacherName: json['class_teacher']?['full_name'],
-      studentCount: json['student_count'],
+      studentCount: _parseInt(json['student_count']),
     );
   }
 

@@ -94,6 +94,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     switch (primaryRole) {
       case 'super_admin':
+        print('_navigateToDashboard: navigating to super admin dashboard');
+        context.go(AppRoutes.superAdminDashboard);
+        break;
       case 'tenant_admin':
       case 'principal':
         print('_navigateToDashboard: navigating to admin dashboard');
@@ -342,10 +345,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          _buildDemoAccount('Admin', 'admin@demo.edu', 'password123'),
-          _buildDemoAccount('Teacher', 'teacher@demo.edu', 'password123'),
-          _buildDemoAccount('Student', 'student@demo.edu', 'password123'),
-          _buildDemoAccount('Parent', 'parent@demo.edu', 'password123'),
+          _buildDemoAccount('Admin', 'admin@demo-school.edu', 'Demo123!'),
+          _buildDemoAccount('Teacher', 'teacher@demo-school.edu', 'Demo123!'),
+          _buildDemoAccount('Student', 'student@demo-school.edu', 'Demo123!'),
+          _buildDemoAccount('Parent', 'parent@demo-school.edu', 'Demo123!'),
         ],
       ),
     );

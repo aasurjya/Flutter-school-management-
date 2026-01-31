@@ -244,3 +244,7 @@ This project is licensed under the MIT License.
 ## 🤝 Contributing
 
 Contributions are welcome! Please read our contributing guidelines before submitting PRs.
+
+
+Email: superadmin@schoolsaas.com
+Password: SuperAdmin@123

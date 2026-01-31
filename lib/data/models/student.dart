@@ -7,6 +7,8 @@ class Student {
   final String? rollNumber;
   final String firstName;
   final String? lastName;
+  final String? email;
+  final String? phone;
   final DateTime dateOfBirth;
   final String? gender;
   final String? bloodGroup;
@@ -21,6 +23,8 @@ class Student {
   final String? medicalConditions;
   final DateTime admissionDate;
   final String? previousSchool;
+  final String paymentStatus;
+  final double? paymentAmount;
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -37,6 +41,8 @@ class Student {
     this.rollNumber,
     required this.firstName,
     this.lastName,
+    this.email,
+    this.phone,
     required this.dateOfBirth,
     this.gender,
     this.bloodGroup,
@@ -51,6 +57,8 @@ class Student {
     this.medicalConditions,
     required this.admissionDate,
     this.previousSchool,
+    this.paymentStatus = 'pending',
+    this.paymentAmount,
     this.isActive = true,
     required this.createdAt,
     required this.updatedAt,
@@ -84,6 +92,8 @@ class Student {
       rollNumber: json['roll_number'],
       firstName: json['first_name'],
       lastName: json['last_name'],
+      email: json['email'],
+      phone: json['phone'],
       dateOfBirth: DateTime.parse(json['date_of_birth']),
       gender: json['gender'],
       bloodGroup: json['blood_group'],
@@ -98,6 +108,10 @@ class Student {
       medicalConditions: json['medical_conditions'],
       admissionDate: DateTime.parse(json['admission_date']),
       previousSchool: json['previous_school'],
+      paymentStatus: json['payment_status'] ?? 'pending',
+      paymentAmount: json['payment_amount'] != null
+          ? (json['payment_amount'] as num).toDouble()
+          : null,
       isActive: json['is_active'] ?? true,
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
@@ -115,6 +129,8 @@ class Student {
       'roll_number': rollNumber,
       'first_name': firstName,
       'last_name': lastName,
+      'email': email,
+      'phone': phone,
       'date_of_birth': dateOfBirth.toIso8601String().split('T')[0],
       'gender': gender,
       'blood_group': bloodGroup,
@@ -129,6 +145,8 @@ class Student {
       'medical_conditions': medicalConditions,
       'admission_date': admissionDate.toIso8601String().split('T')[0],
       'previous_school': previousSchool,
+      'payment_status': paymentStatus,
+      'payment_amount': paymentAmount,
       'is_active': isActive,
     };
   }

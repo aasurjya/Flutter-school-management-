@@ -25,14 +25,40 @@ VALUES (
 -- =============================================
 
 -- Admin user
-INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, role, raw_app_meta_data)
+INSERT INTO auth.users (
+  id, instance_id, aud, email, encrypted_password, email_confirmed_at, role,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new,
+  email_change_token_current, phone, phone_change, phone_change_token, is_sso_user
+)
 VALUES (
   '11111111-1111-1111-1111-111111111111',
+  '00000000-0000-0000-0000-000000000000',
+  'authenticated',
   'admin@demo-school.edu',
   crypt('Demo123!', gen_salt('bf')),
   NOW(),
   'authenticated',
-  '{"tenant_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "roles": ["tenant_admin"]}'::jsonb
+  '{"provider": "email", "providers": ["email"]}'::jsonb,
+  '{"full_name": "Rajesh Kumar (Admin)"}'::jsonb,
+  NOW(),
+  NOW(),
+  '', '', '', '', '',
+  NULL, '', '',
+  false
+);
+
+-- Admin identity (required for auth to work)
+INSERT INTO auth.identities (id, user_id, provider_id, provider, identity_data, last_sign_in_at, created_at, updated_at)
+VALUES (
+  '11111111-1111-1111-1111-111111111111',
+  '11111111-1111-1111-1111-111111111111',
+  'admin@demo-school.edu',
+  'email',
+  '{"sub": "11111111-1111-1111-1111-111111111111", "email": "admin@demo-school.edu", "email_verified": true, "phone_verified": false}'::jsonb,
+  NOW(),
+  NOW(),
+  NOW()
 );
 
 INSERT INTO users (id, tenant_id, email, full_name, phone)
@@ -53,14 +79,40 @@ VALUES (
 );
 
 -- Teacher user
-INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, role, raw_app_meta_data)
+INSERT INTO auth.users (
+  id, instance_id, aud, email, encrypted_password, email_confirmed_at, role,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new,
+  email_change_token_current, phone, phone_change, phone_change_token, is_sso_user
+)
 VALUES (
   '22222222-2222-2222-2222-222222222222',
+  '00000000-0000-0000-0000-000000000000',
+  'authenticated',
   'teacher@demo-school.edu',
   crypt('Demo123!', gen_salt('bf')),
   NOW(),
   'authenticated',
-  '{"tenant_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "roles": ["teacher"]}'::jsonb
+  '{"provider": "email", "providers": ["email"]}'::jsonb,
+  '{"full_name": "Priya Sharma (Teacher)"}'::jsonb,
+  NOW(),
+  NOW(),
+  '', '', '', '', '',
+  NULL, '', '',
+  false
+);
+
+-- Teacher identity
+INSERT INTO auth.identities (id, user_id, provider_id, provider, identity_data, last_sign_in_at, created_at, updated_at)
+VALUES (
+  '22222222-2222-2222-2222-222222222222',
+  '22222222-2222-2222-2222-222222222222',
+  'teacher@demo-school.edu',
+  'email',
+  '{"sub": "22222222-2222-2222-2222-222222222222", "email": "teacher@demo-school.edu", "email_verified": true, "phone_verified": false}'::jsonb,
+  NOW(),
+  NOW(),
+  NOW()
 );
 
 INSERT INTO users (id, tenant_id, email, full_name, phone)
@@ -81,14 +133,40 @@ VALUES (
 );
 
 -- Student user
-INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, role, raw_app_meta_data)
+INSERT INTO auth.users (
+  id, instance_id, aud, email, encrypted_password, email_confirmed_at, role,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new,
+  email_change_token_current, phone, phone_change, phone_change_token, is_sso_user
+)
 VALUES (
   '33333333-3333-3333-3333-333333333333',
+  '00000000-0000-0000-0000-000000000000',
+  'authenticated',
   'student@demo-school.edu',
   crypt('Demo123!', gen_salt('bf')),
   NOW(),
   'authenticated',
-  '{"tenant_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "roles": ["student"]}'::jsonb
+  '{"provider": "email", "providers": ["email"]}'::jsonb,
+  '{"full_name": "Aarav Singh (Student)"}'::jsonb,
+  NOW(),
+  NOW(),
+  '', '', '', '', '',
+  NULL, '', '',
+  false
+);
+
+-- Student identity
+INSERT INTO auth.identities (id, user_id, provider_id, provider, identity_data, last_sign_in_at, created_at, updated_at)
+VALUES (
+  '33333333-3333-3333-3333-333333333333',
+  '33333333-3333-3333-3333-333333333333',
+  'student@demo-school.edu',
+  'email',
+  '{"sub": "33333333-3333-3333-3333-333333333333", "email": "student@demo-school.edu", "email_verified": true, "phone_verified": false}'::jsonb,
+  NOW(),
+  NOW(),
+  NOW()
 );
 
 INSERT INTO users (id, tenant_id, email, full_name, phone)
@@ -109,14 +187,40 @@ VALUES (
 );
 
 -- Parent user
-INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, role, raw_app_meta_data)
+INSERT INTO auth.users (
+  id, instance_id, aud, email, encrypted_password, email_confirmed_at, role,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new,
+  email_change_token_current, phone, phone_change, phone_change_token, is_sso_user
+)
 VALUES (
   '44444444-4444-4444-4444-444444444444',
+  '00000000-0000-0000-0000-000000000000',
+  'authenticated',
   'parent@demo-school.edu',
   crypt('Demo123!', gen_salt('bf')),
   NOW(),
   'authenticated',
-  '{"tenant_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "roles": ["parent"]}'::jsonb
+  '{"provider": "email", "providers": ["email"]}'::jsonb,
+  '{"full_name": "Vikram Singh (Parent)"}'::jsonb,
+  NOW(),
+  NOW(),
+  '', '', '', '', '',
+  NULL, '', '',
+  false
+);
+
+-- Parent identity
+INSERT INTO auth.identities (id, user_id, provider_id, provider, identity_data, last_sign_in_at, created_at, updated_at)
+VALUES (
+  '44444444-4444-4444-4444-444444444444',
+  '44444444-4444-4444-4444-444444444444',
+  'parent@demo-school.edu',
+  'email',
+  '{"sub": "44444444-4444-4444-4444-444444444444", "email": "parent@demo-school.edu", "email_verified": true, "phone_verified": false}'::jsonb,
+  NOW(),
+  NOW(),
+  NOW()
 );
 
 INSERT INTO users (id, tenant_id, email, full_name, phone)
@@ -209,11 +313,11 @@ VALUES (
   '2020-06-01'
 );
 
--- Teacher assignment
+-- Teacher assignment (teacher_id references users.id)
 INSERT INTO teacher_assignments (tenant_id, teacher_id, section_id, subject_id, academic_year_id)
 VALUES (
   'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-  'ffffffff-ffff-ffff-ffff-ffffffffffff',
+  '22222222-2222-2222-2222-222222222222',
   'dddddddd-dddd-dddd-dddd-dddddddddd01',
   'eeeeeeee-eeee-eeee-eeee-eeeeeeeeee01',
   'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
@@ -304,30 +408,30 @@ VALUES (
   '2024-09-25'
 );
 
--- Create exam subjects
-INSERT INTO exam_subjects (id, tenant_id, exam_id, subject_id, section_id, max_marks, passing_marks, exam_date)
-VALUES 
-  ('88888888-8888-8888-8888-888888888801', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '77777777-7777-7777-7777-777777777777', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeee01', 'dddddddd-dddd-dddd-dddd-dddddddddd01', 100, 35, '2024-09-16'),
-  ('88888888-8888-8888-8888-888888888802', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '77777777-7777-7777-7777-777777777777', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeee02', 'dddddddd-dddd-dddd-dddd-dddddddddd01', 100, 35, '2024-09-17'),
-  ('88888888-8888-8888-8888-888888888803', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '77777777-7777-7777-7777-777777777777', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeee03', 'dddddddd-dddd-dddd-dddd-dddddddddd01', 100, 35, '2024-09-18');
+ -- Create exam subjects
+ INSERT INTO exam_subjects (id, tenant_id, exam_id, subject_id, class_id, max_marks, passing_marks, exam_date)
+ VALUES 
+   ('88888888-8888-8888-8888-888888888801', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '77777777-7777-7777-7777-777777777777', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeee01', 'cccccccc-cccc-cccc-cccc-cccccccccc10', 100, 35, '2024-09-16'),
+   ('88888888-8888-8888-8888-888888888802', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '77777777-7777-7777-7777-777777777777', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeee02', 'cccccccc-cccc-cccc-cccc-cccccccccc10', 100, 35, '2024-09-17'),
+   ('88888888-8888-8888-8888-888888888803', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '77777777-7777-7777-7777-777777777777', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeee03', 'cccccccc-cccc-cccc-cccc-cccccccccc10', 100, 35, '2024-09-18');
 
--- Insert marks for Math
-INSERT INTO marks (tenant_id, exam_subject_id, student_id, marks_obtained, grade, marked_by)
-VALUES 
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888801', '55555555-5555-5555-5555-555555555555', 85, 'A', '22222222-2222-2222-2222-222222222222'),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888801', '55555555-5555-5555-5555-555555555556', 92, 'A+', '22222222-2222-2222-2222-222222222222'),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888801', '55555555-5555-5555-5555-555555555557', 78, 'B+', '22222222-2222-2222-2222-222222222222'),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888801', '55555555-5555-5555-5555-555555555558', 88, 'A', '22222222-2222-2222-2222-222222222222'),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888801', '55555555-5555-5555-5555-555555555559', 65, 'B', '22222222-2222-2222-2222-222222222222');
-
--- Insert marks for English
-INSERT INTO marks (tenant_id, exam_subject_id, student_id, marks_obtained, grade, marked_by)
-VALUES 
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888802', '55555555-5555-5555-5555-555555555555', 90, 'A+', '22222222-2222-2222-2222-222222222222'),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888802', '55555555-5555-5555-5555-555555555556', 85, 'A', '22222222-2222-2222-2222-222222222222'),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888802', '55555555-5555-5555-5555-555555555557', 72, 'B', '22222222-2222-2222-2222-222222222222'),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888802', '55555555-5555-5555-5555-555555555558', 95, 'A+', '22222222-2222-2222-2222-222222222222'),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888802', '55555555-5555-5555-5555-555555555559', 68, 'B', '22222222-2222-2222-2222-222222222222');
+ -- Insert marks for Math
+ INSERT INTO marks (tenant_id, exam_subject_id, student_id, marks_obtained, entered_by)
+ VALUES 
+   ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888801', '55555555-5555-5555-5555-555555555555', 85, '22222222-2222-2222-2222-222222222222'),
+   ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888801', '55555555-5555-5555-5555-555555555556', 92, '22222222-2222-2222-2222-222222222222'),
+   ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888801', '55555555-5555-5555-5555-555555555557', 78, '22222222-2222-2222-2222-222222222222'),
+   ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888801', '55555555-5555-5555-5555-555555555558', 88, '22222222-2222-2222-2222-222222222222'),
+   ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888801', '55555555-5555-5555-5555-555555555559', 65, '22222222-2222-2222-2222-222222222222');
+ 
+ -- Insert marks for English
+ INSERT INTO marks (tenant_id, exam_subject_id, student_id, marks_obtained, entered_by)
+ VALUES 
+   ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888802', '55555555-5555-5555-5555-555555555555', 90, '22222222-2222-2222-2222-222222222222'),
+   ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888802', '55555555-5555-5555-5555-555555555556', 85, '22222222-2222-2222-2222-222222222222'),
+   ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888802', '55555555-5555-5555-5555-555555555557', 72, '22222222-2222-2222-2222-222222222222'),
+   ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888802', '55555555-5555-5555-5555-555555555558', 95, '22222222-2222-2222-2222-222222222222'),
+   ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '88888888-8888-8888-8888-888888888802', '55555555-5555-5555-5555-555555555559', 68, '22222222-2222-2222-2222-222222222222');
 
 -- =============================================
 -- 9. FEE STRUCTURE
@@ -339,10 +443,13 @@ VALUES
   ('99999999-9999-9999-9999-999999999902', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Transport Fee', 'Monthly transport fee', true),
   ('99999999-9999-9999-9999-999999999903', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Lab Fee', 'Annual laboratory fee', false);
 
-INSERT INTO fee_structures (id, tenant_id, name, class_id, academic_year_id, fee_head_id, amount, due_day)
+-- fee_structures schema:
+-- id, tenant_id, academic_year_id, class_id, fee_head_id, amount, due_date, term_id, is_mandatory
+-- We only seed required columns and leave others NULL/default.
+INSERT INTO fee_structures (id, tenant_id, academic_year_id, class_id, fee_head_id, amount)
 VALUES 
-  ('aaaa0001-0000-0000-0000-000000000001', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Class 10 Tuition', 'cccccccc-cccc-cccc-cccc-cccccccccc10', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '99999999-9999-9999-9999-999999999901', 5000.00, 10),
-  ('aaaa0001-0000-0000-0000-000000000002', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Class 10 Transport', 'cccccccc-cccc-cccc-cccc-cccccccccc10', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '99999999-9999-9999-9999-999999999902', 1500.00, 10);
+  ('aaaa0001-0000-0000-0000-000000000001', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'cccccccc-cccc-cccc-cccc-cccccccccc10', '99999999-9999-9999-9999-999999999901', 5000.00),
+  ('aaaa0001-0000-0000-0000-000000000002', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'cccccccc-cccc-cccc-cccc-cccccccccc10', '99999999-9999-9999-9999-999999999902', 1500.00);
 
 -- =============================================
 -- 10. ANNOUNCEMENTS

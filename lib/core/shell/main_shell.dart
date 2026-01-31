@@ -104,7 +104,7 @@ class _MainShellState extends ConsumerState<MainShell> {
       case 'principal':
         return [
           AppRoutes.adminDashboard,
-          AppRoutes.students,
+          AppRoutes.studentManagement,
           AppRoutes.attendance,
           AppRoutes.fees,
           AppRoutes.messages,

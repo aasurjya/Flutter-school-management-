@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/attendance.dart';
+import '../../../attendance/providers/attendance_provider.dart';
+import '../../../students/providers/students_provider.dart';
 
 class MarkAttendanceScreen extends ConsumerStatefulWidget {
   final String sectionId;
@@ -22,6 +24,7 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
   late List<StudentAttendanceRecord> _students;
   bool _isSubmitting = false;
   bool _hasChanges = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -30,19 +33,76 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
   }
 
   void _loadStudents() {
-    // TODO: Load from repository
-    _students = _mockStudents
-        .map((s) => StudentAttendanceRecord(
-              studentId: s['id'] as String,
-              studentName: s['name'] as String,
-              rollNumber: s['rollNo'] as String,
-              photoUrl: null,
-            ))
-        .toList();
+    _fetchStudentsAndExistingAttendance();
+  }
+
+  Future<void> _fetchStudentsAndExistingAttendance() async {
+    setState(() {
+      _isLoading = true;
+      _students = [];
+      _hasChanges = false;
+    });
+
+    try {
+      final studentRepo = ref.read(studentRepositoryProvider);
+      final attendanceRepo = ref.read(attendanceRepositoryProvider);
+
+      final date = widget.date != null
+          ? DateTime.parse(widget.date!)
+          : DateTime.now();
+
+      // Load active students for this section from Supabase
+      final students = await studentRepo.getStudentsBySection(widget.sectionId);
+
+      // Load any existing attendance records for this date/section
+      final existing = await attendanceRepo.getAttendanceBySection(
+        sectionId: widget.sectionId,
+        date: date,
+      );
+
+      final existingByStudentId = {
+        for (final a in existing) a.studentId: a,
+      };
+
+      _students = students.map((s) {
+        final Attendance? a = existingByStudentId[s.id];
+        return StudentAttendanceRecord(
+          studentId: s.id,
+          studentName: s.fullName,
+          rollNumber: a?.studentRollNumber ?? s.rollNumber,
+          photoUrl: s.photoUrl,
+          status: a?.status ?? AttendanceStatus.present,
+          remarks: a?.remarks,
+        );
+      }).toList();
+
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load students: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Mark Attendance')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final presentCount = _students.where((s) => s.status == AttendanceStatus.present).length;
     final absentCount = _students.where((s) => s.status == AttendanceStatus.absent).length;
     final lateCount = _students.where((s) => s.status == AttendanceStatus.late).length;
@@ -206,8 +266,21 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      // TODO: Submit to repository
-      await Future.delayed(const Duration(seconds: 1));
+      final attendanceRepo = ref.read(attendanceRepositoryProvider);
+
+      await attendanceRepo.markBulkAttendance(
+        sectionId: widget.sectionId,
+        date: widget.date != null
+            ? DateTime.parse(widget.date!)
+            : DateTime.now(),
+        attendanceRecords: _students
+            .map((s) => {
+                  'student_id': s.studentId,
+                  'status': s.status.dbValue,
+                  'remarks': s.remarks,
+                })
+            .toList(),
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -494,16 +567,4 @@ class _StatusButton extends StatelessWidget {
   }
 }
 
-// Mock data
-final _mockStudents = [
-  {'id': '1', 'name': 'Arjun Kumar', 'rollNo': '01'},
-  {'id': '2', 'name': 'Priya Sharma', 'rollNo': '02'},
-  {'id': '3', 'name': 'Rahul Singh', 'rollNo': '03'},
-  {'id': '4', 'name': 'Sneha Patel', 'rollNo': '04'},
-  {'id': '5', 'name': 'Amit Gupta', 'rollNo': '05'},
-  {'id': '6', 'name': 'Neha Verma', 'rollNo': '06'},
-  {'id': '7', 'name': 'Vikram Joshi', 'rollNo': '07'},
-  {'id': '8', 'name': 'Kavita Reddy', 'rollNo': '08'},
-  {'id': '9', 'name': 'Rohan Mishra', 'rollNo': '09'},
-  {'id': '10', 'name': 'Ananya Das', 'rollNo': '10'},
-];
+// Mock list removed – data now loaded from Supabase

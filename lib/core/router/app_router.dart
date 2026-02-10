@@ -1,6 +1,11 @@
+import 'dart:async';
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
@@ -208,15 +213,28 @@ class AppRoutes {
 
 /// Router provider
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateProvider);
+  final supabase = ref.read(supabaseProvider);
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
     debugLogDiagnostics: true,
+    refreshListenable: GoRouterRefreshStream(
+      supabase.auth.onAuthStateChange.map((event) => event.session),
+    ),
     redirect: (context, state) {
-      final isLoggedIn = authState.value != null;
+      // Read current session and user synchronously on every redirect
+      final session = supabase.auth.currentSession;
+      final currentUser = ref.read(currentUserProvider);
+      final isLoggedIn = session != null || currentUser != null;
       final isLoggingIn = state.matchedLocation == AppRoutes.login;
       final isSplash = state.matchedLocation == AppRoutes.splash;
+
+      developer.log(
+        'Router redirect: location=${state.matchedLocation}, '
+        'session=${session != null}, currentUser=${currentUser != null}, '
+        'isLoggedIn=$isLoggedIn',
+        name: 'AppRouter',
+      );
 
       // If on splash, don't redirect
       if (isSplash) return null;
@@ -689,29 +707,42 @@ String _getDashboardRoute(Ref ref) {
   final currentUser = ref.read(currentUserProvider);
   final primaryRole = currentUser?.primaryRole;
 
-  print('_getDashboardRoute: currentUser = $currentUser');
-  print('_getDashboardRoute: primaryRole = $primaryRole');
-  print('_getDashboardRoute: user roles = ${currentUser?.roles}');
+  developer.log('Getting dashboard route for role: $primaryRole',
+      name: 'AppRouter');
 
   switch (primaryRole) {
     case 'super_admin':
-      print('_getDashboardRoute: returning /super-admin');
       return AppRoutes.superAdminDashboard;
     case 'tenant_admin':
     case 'principal':
-      print('_getDashboardRoute: returning /admin');
       return AppRoutes.adminDashboard;
     case 'teacher':
-      print('_getDashboardRoute: returning /teacher');
       return AppRoutes.teacherDashboard;
     case 'student':
-      print('_getDashboardRoute: returning /student');
       return AppRoutes.studentDashboard;
     case 'parent':
-      print('_getDashboardRoute: returning /parent');
       return AppRoutes.parentDashboard;
     default:
-      print('_getDashboardRoute: ERROR - no valid role found, returning /login');
+      developer.log('No valid role found, redirecting to login',
+          name: 'AppRouter', level: 800);
       return AppRoutes.login;
+  }
+}
+
+/// Converts a [Stream] into a [ChangeNotifier] for GoRouter's refreshListenable
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen((_) {
+      notifyListeners();
+    });
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
   }
 }

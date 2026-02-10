@@ -84,17 +84,21 @@ class Student {
           .toList();
     }
 
+    final dobRaw = json['date_of_birth'];
+    final admissionDateRaw = json['admission_date'];
+
     return Student(
-      id: json['id'],
-      tenantId: json['tenant_id'],
+      id: json['id'] ?? '',
+      tenantId: json['tenant_id'] ?? '',
       userId: json['user_id'],
-      admissionNumber: json['admission_number'],
+      admissionNumber: json['admission_number'] ?? '',
       rollNumber: json['roll_number'],
-      firstName: json['first_name'],
+      firstName: json['first_name'] ?? '',
       lastName: json['last_name'],
       email: json['email'],
       phone: json['phone'],
-      dateOfBirth: DateTime.parse(json['date_of_birth']),
+      dateOfBirth:
+          dobRaw != null ? DateTime.parse(dobRaw) : DateTime.now(),
       gender: json['gender'],
       bloodGroup: json['blood_group'],
       nationality: json['nationality'],
@@ -106,15 +110,21 @@ class Student {
       pincode: json['pincode'],
       photoUrl: json['photo_url'],
       medicalConditions: json['medical_conditions'],
-      admissionDate: DateTime.parse(json['admission_date']),
+      admissionDate: admissionDateRaw != null
+          ? DateTime.parse(admissionDateRaw)
+          : DateTime.now(),
       previousSchool: json['previous_school'],
       paymentStatus: json['payment_status'] ?? 'pending',
       paymentAmount: json['payment_amount'] != null
           ? (json['payment_amount'] as num).toDouble()
           : null,
       isActive: json['is_active'] ?? true,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.now(),
       currentEnrollment: enrollment,
       parents: parents,
     );

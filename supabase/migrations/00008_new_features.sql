@@ -495,13 +495,14 @@ SELECT
     COALESCE(
         (SELECT
             CASE
-                WHEN AVG(er.marks_obtained * 100.0 / e.total_marks) < 40 THEN 100
-                WHEN AVG(er.marks_obtained * 100.0 / e.total_marks) < 60 THEN 50
+                WHEN AVG(m.marks_obtained * 100.0 / es.max_marks) < 40 THEN 100
+                WHEN AVG(m.marks_obtained * 100.0 / es.max_marks) < 60 THEN 50
                 ELSE 0
             END
-         FROM exam_results er
-         JOIN exams e ON e.id = er.exam_id
-         WHERE er.student_id = s.id
+         FROM marks m
+         JOIN exam_subjects es ON es.id = m.exam_subject_id
+         JOIN exams e ON e.id = es.exam_id
+         WHERE m.student_id = s.id
          AND e.created_at >= CURRENT_DATE - INTERVAL '90 days'
         ), 50
     ) * 0.4 as academic_risk,

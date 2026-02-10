@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -46,28 +48,60 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Future<void> _checkAuth() async {
+    // Allow splash animation to play
     await Future.delayed(const Duration(seconds: 2));
-    
+
     if (!mounted) return;
 
     final authState = ref.read(authStateProvider);
-    
+
     authState.when(
-      data: (session) {
+      data: (session) async {
         if (session != null) {
-          // User is logged in, navigate to dashboard
-          _navigateToDashboard();
+          developer.log('SplashScreen: Session found, loading user profile',
+              name: 'SplashScreen');
+
+          // Ensure user profile is loaded
+          try {
+            await ref.read(authNotifierProvider.notifier).refreshProfile();
+
+            if (!mounted) return;
+
+            final currentUser = ref.read(currentUserProvider);
+            developer.log(
+                'SplashScreen: User profile loaded - role: ${currentUser?.primaryRole}',
+                name: 'SplashScreen');
+
+            if (currentUser != null) {
+              _navigateToDashboard();
+            } else {
+              // User profile not found, sign out and go to login
+              developer.log(
+                  'SplashScreen: User profile not found, redirecting to login',
+                  name: 'SplashScreen',
+                  level: 800);
+              await ref.read(authNotifierProvider.notifier).signOut();
+              if (mounted) context.go(AppRoutes.login);
+            }
+          } catch (e) {
+            developer.log('SplashScreen: Error loading profile - $e',
+                name: 'SplashScreen', level: 900);
+            if (mounted) context.go(AppRoutes.login);
+          }
         } else {
-          // User is not logged in, navigate to login
+          developer.log('SplashScreen: No session, redirecting to login',
+              name: 'SplashScreen');
           context.go(AppRoutes.login);
         }
       },
       loading: () {
-        // Still loading, wait a bit more
+        developer.log('SplashScreen: Auth state loading, waiting...',
+            name: 'SplashScreen');
         Future.delayed(const Duration(seconds: 1), _checkAuth);
       },
-      error: (_, __) {
-        // Error, navigate to login
+      error: (error, _) {
+        developer.log('SplashScreen: Auth error - $error',
+            name: 'SplashScreen', level: 900);
         context.go(AppRoutes.login);
       },
     );
@@ -77,8 +111,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     final currentUser = ref.read(currentUserProvider);
     final primaryRole = currentUser?.primaryRole;
 
+    developer.log('SplashScreen: Navigating to dashboard for role: $primaryRole',
+        name: 'SplashScreen');
+
     switch (primaryRole) {
       case 'super_admin':
+        context.go(AppRoutes.superAdminDashboard);
+        break;
       case 'tenant_admin':
       case 'principal':
         context.go(AppRoutes.adminDashboard);
@@ -93,6 +132,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         context.go(AppRoutes.parentDashboard);
         break;
       default:
+        developer.log('SplashScreen: Unknown role, going to login',
+            name: 'SplashScreen', level: 800);
         context.go(AppRoutes.login);
     }
   }

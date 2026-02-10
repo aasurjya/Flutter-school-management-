@@ -1,0 +1,346 @@
+-- =============================================
+-- Performance Optimization
+-- Phase 9: Indexes, Partitioning, Archival
+-- =============================================
+
+-- =============================================
+-- COMPOSITE INDEXES FOR COMMON QUERY PATTERNS
+-- =============================================
+
+-- Attendance queries
+CREATE INDEX IF NOT EXISTS idx_attendance_student_date_range ON attendance(student_id, date)
+    WHERE status != 'present';
+
+CREATE INDEX IF NOT EXISTS idx_attendance_date_status ON attendance(date, status)
+    WHERE status IN ('absent', 'late');
+
+-- Marks queries
+CREATE INDEX IF NOT EXISTS idx_marks_student_exam_subject ON marks(student_id, exam_subject_id);
+
+CREATE INDEX IF NOT EXISTS idx_marks_exam_subject_student ON marks(exam_subject_id, student_id)
+    INCLUDE (marks_obtained);
+
+-- Invoice and payment queries
+CREATE INDEX IF NOT EXISTS idx_invoices_student_status_year ON invoices(student_id, status, academic_year_id);
+
+CREATE INDEX IF NOT EXISTS idx_invoices_due_date_status ON invoices(due_date, status)
+    WHERE status IN ('pending', 'partial', 'overdue');
+
+CREATE INDEX IF NOT EXISTS idx_payments_date_status ON payments(paid_at DESC, status)
+    WHERE status = 'completed';
+
+-- Student enrollment queries
+CREATE INDEX IF NOT EXISTS idx_enrollments_year_section ON student_enrollments(academic_year_id, section_id)
+    INCLUDE (student_id);
+
+CREATE INDEX IF NOT EXISTS idx_enrollments_student_year ON student_enrollments(student_id, academic_year_id)
+    INCLUDE (section_id);
+
+-- =============================================
+-- PARTIAL INDEXES FOR FILTERED QUERIES
+-- =============================================
+
+-- Active students only
+CREATE INDEX IF NOT EXISTS idx_active_students ON students(tenant_id, id)
+    WHERE is_active = true;
+
+-- Pending payments
+CREATE INDEX IF NOT EXISTS idx_pending_payments ON payments(tenant_id, created_at DESC)
+    WHERE status IN ('pending', 'processing');
+
+-- Overdue invoices
+CREATE INDEX IF NOT EXISTS idx_overdue_invoices ON invoices(tenant_id, due_date DESC)
+    WHERE status = 'overdue';
+
+-- Active staff
+CREATE INDEX IF NOT EXISTS idx_active_staff ON staff(tenant_id, id)
+    WHERE is_active = true;
+
+-- Unresolved behavior incidents
+CREATE INDEX IF NOT EXISTS idx_unresolved_incidents ON behavior_incidents(student_id, incident_date DESC)
+    WHERE resolved = false;
+
+-- =============================================
+-- COVERING INDEXES (INCLUDE COLUMNS)
+-- =============================================
+
+-- Student basic info lookup
+CREATE INDEX IF NOT EXISTS idx_students_covering ON students(id)
+    INCLUDE (full_name, roll_number, is_active, email);
+
+-- Staff basic info lookup
+CREATE INDEX IF NOT EXISTS idx_staff_covering ON staff(id)
+    INCLUDE (full_name, email, employee_id, is_active);
+
+-- Invoice summary
+CREATE INDEX IF NOT EXISTS idx_invoices_covering ON invoices(id)
+    INCLUDE (invoice_number, student_id, total_amount, status, due_date);
+
+-- =============================================
+-- TEXT SEARCH INDEXES
+-- =============================================
+
+-- Full-text search on students
+CREATE INDEX IF NOT EXISTS idx_students_fulltext ON students
+    USING gin(to_tsvector('english', coalesce(full_name, '') || ' ' || coalesce(email, '') || ' ' || coalesce(roll_number, '')));
+
+-- Full-text search on staff
+CREATE INDEX IF NOT EXISTS idx_staff_fulltext ON staff
+    USING gin(to_tsvector('english', coalesce(full_name, '') || ' ' || coalesce(email, '') || ' ' || coalesce(employee_id, '')));
+
+-- =============================================
+-- TABLE PARTITIONING
+-- =============================================
+
+-- Partition audit_logs by created_at (monthly)
+-- Note: This requires recreating the table as partitioned
+
+-- Create partitioned table
+CREATE TABLE IF NOT EXISTS audit_logs_partitioned (
+    LIKE audit_logs INCLUDING ALL
+) PARTITION BY RANGE (created_at);
+
+-- Create partitions for current and future months
+DO $$
+DECLARE
+    v_start_date DATE;
+    v_end_date DATE;
+    v_partition_name TEXT;
+    v_i INT;
+BEGIN
+    -- Create partitions for the last 12 months and next 12 months
+    FOR v_i IN -12..12 LOOP
+        v_start_date := date_trunc('month', NOW() + (v_i || ' months')::INTERVAL)::DATE;
+        v_end_date := (v_start_date + INTERVAL '1 month')::DATE;
+        v_partition_name := 'audit_logs_' || to_char(v_start_date, 'YYYY_MM');
+
+        EXECUTE format(
+            'CREATE TABLE IF NOT EXISTS %I PARTITION OF audit_logs_partitioned
+             FOR VALUES FROM (%L) TO (%L)',
+            v_partition_name,
+            v_start_date,
+            v_end_date
+        );
+    END LOOP;
+END $$;
+
+-- Partition attendance by attendance_date (yearly)
+CREATE TABLE IF NOT EXISTS attendance_partitioned (
+    LIKE attendance INCLUDING ALL
+) PARTITION BY RANGE (attendance_date);
+
+-- Create partitions for current year and next year
+DO $$
+DECLARE
+    v_year INT;
+    v_start_date DATE;
+    v_end_date DATE;
+    v_partition_name TEXT;
+BEGIN
+    FOR v_year IN EXTRACT(YEAR FROM NOW())::INT - 1 .. EXTRACT(YEAR FROM NOW())::INT + 2 LOOP
+        v_start_date := (v_year || '-01-01')::DATE;
+        v_end_date := ((v_year + 1) || '-01-01')::DATE;
+        v_partition_name := 'attendance_' || v_year;
+
+        EXECUTE format(
+            'CREATE TABLE IF NOT EXISTS %I PARTITION OF attendance_partitioned
+             FOR VALUES FROM (%L) TO (%L)',
+            v_partition_name,
+            v_start_date,
+            v_end_date
+        );
+    END LOOP;
+END $$;
+
+-- =============================================
+-- ARCHIVAL TABLES
+-- =============================================
+
+-- Archive table for old attendance
+CREATE TABLE IF NOT EXISTS archived_attendance (
+    LIKE attendance INCLUDING ALL,
+    archived_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_archived_attendance_student ON archived_attendance(student_id, attendance_date DESC);
+CREATE INDEX IF NOT EXISTS idx_archived_attendance_date ON archived_attendance(attendance_date);
+
+-- Archive table for old marks
+CREATE TABLE IF NOT EXISTS archived_marks (
+    LIKE marks INCLUDING ALL,
+    archived_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_archived_marks_student ON archived_marks(student_id);
+CREATE INDEX IF NOT EXISTS idx_archived_marks_exam ON archived_marks(exam_subject_id);
+
+-- Archive table for old messages
+CREATE TABLE IF NOT EXISTS archived_messages (
+    LIKE messages INCLUDING ALL,
+    archived_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_archived_messages_thread ON archived_messages(thread_id, created_at DESC);
+
+-- Archive table for old payments
+CREATE TABLE IF NOT EXISTS archived_payments (
+    LIKE payments INCLUDING ALL,
+    archived_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_archived_payments_student ON archived_payments(student_id, paid_at DESC);
+
+-- =============================================
+-- STORED PROCEDURES FOR ARCHIVAL
+-- =============================================
+
+-- Archive old academic year data
+CREATE OR REPLACE FUNCTION archive_old_academic_year_data(p_year_id UUID)
+RETURNS TABLE(
+    attendance_archived INT,
+    marks_archived INT,
+    messages_archived INT
+) AS $$
+DECLARE
+    v_attendance_count INT;
+    v_marks_count INT;
+    v_messages_count INT;
+BEGIN
+    -- Archive attendance
+    INSERT INTO archived_attendance
+    SELECT a.*, NOW()
+    FROM attendance a
+    JOIN student_enrollments se ON a.student_id = se.student_id
+    WHERE se.academic_year_id = p_year_id;
+
+    GET DIAGNOSTICS v_attendance_count = ROW_COUNT;
+
+    -- Archive marks
+    INSERT INTO archived_marks
+    SELECT m.*, NOW()
+    FROM marks m
+    JOIN exam_subjects es ON m.exam_subject_id = es.id
+    JOIN exams e ON es.exam_id = e.id
+    WHERE e.academic_year_id = p_year_id;
+
+    GET DIAGNOSTICS v_marks_count = ROW_COUNT;
+
+    -- Archive old messages (older than 2 years)
+    INSERT INTO archived_messages
+    SELECT m.*, NOW()
+    FROM messages m
+    WHERE m.created_at < NOW() - INTERVAL '2 years';
+
+    GET DIAGNOSTICS v_messages_count = ROW_COUNT;
+
+    -- Delete archived data from main tables
+    DELETE FROM attendance WHERE id IN (SELECT id FROM archived_attendance WHERE archived_at > NOW() - INTERVAL '1 hour');
+    DELETE FROM marks WHERE id IN (SELECT id FROM archived_marks WHERE archived_at > NOW() - INTERVAL '1 hour');
+    DELETE FROM messages WHERE id IN (SELECT id FROM archived_messages WHERE archived_at > NOW() - INTERVAL '1 hour');
+
+    RETURN QUERY SELECT v_attendance_count, v_marks_count, v_messages_count;
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION archive_old_academic_year_data IS 'Archives attendance, marks, and messages for a completed academic year';
+
+-- =============================================
+-- MATERIALIZED VIEW REFRESH STRATEGY
+-- =============================================
+
+CREATE OR REPLACE FUNCTION refresh_all_materialized_views()
+RETURNS VOID AS $$
+BEGIN
+    -- Refresh student performance view
+    REFRESH MATERIALIZED VIEW CONCURRENTLY mv_student_performance;
+
+    -- Add other materialized views here as they are created
+    -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_class_statistics;
+    -- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_fee_collection_summary;
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION refresh_all_materialized_views IS 'Refreshes all materialized views - run daily via scheduler';
+
+-- =============================================
+-- VACUUM AND ANALYZE PROCEDURES
+-- =============================================
+
+CREATE OR REPLACE FUNCTION vacuum_analyze_large_tables()
+RETURNS VOID AS $$
+BEGIN
+    -- Vacuum and analyze frequently updated tables
+    VACUUM ANALYZE attendance;
+    VACUUM ANALYZE marks;
+    VACUUM ANALYZE messages;
+    VACUUM ANALYZE invoices;
+    VACUUM ANALYZE payments;
+    VACUUM ANALYZE audit_logs;
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION vacuum_analyze_large_tables IS 'Performs VACUUM ANALYZE on large, frequently updated tables';
+
+-- =============================================
+-- QUERY PERFORMANCE MONITORING
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS slow_query_log (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    query_text TEXT,
+    execution_time_ms INT,
+    rows_returned INT,
+    user_id UUID,
+    called_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_slow_query_log_time ON slow_query_log(execution_time_ms DESC, called_at DESC);
+
+COMMENT ON TABLE slow_query_log IS 'Log of slow queries for performance analysis';
+
+-- =============================================
+-- TABLE STATISTICS
+-- =============================================
+
+-- Update table statistics for better query planning
+DO $$
+BEGIN
+    -- Set statistics target for commonly filtered columns
+    ALTER TABLE students ALTER COLUMN tenant_id SET STATISTICS 1000;
+    ALTER TABLE students ALTER COLUMN is_active SET STATISTICS 1000;
+
+    ALTER TABLE attendance ALTER COLUMN student_id SET STATISTICS 1000;
+    ALTER TABLE attendance ALTER COLUMN attendance_date SET STATISTICS 1000;
+
+    ALTER TABLE marks ALTER COLUMN student_id SET STATISTICS 1000;
+    ALTER TABLE marks ALTER COLUMN exam_subject_id SET STATISTICS 1000;
+
+    ALTER TABLE invoices ALTER COLUMN student_id SET STATISTICS 1000;
+    ALTER TABLE invoices ALTER COLUMN status SET STATISTICS 1000;
+END $$;
+
+-- =============================================
+-- CONNECTION POOLING CONFIGURATION
+-- =============================================
+
+-- Note: Connection pooling is typically configured at the application or proxy level (PgBouncer, Supavisor)
+-- This is a placeholder for documentation
+
+COMMENT ON DATABASE postgres IS 'Recommended connection pooling settings:
+- Pool mode: Transaction
+- Max client connections: 1000
+- Default pool size: 20
+- Min pool size: 5
+- Reserve pool size: 3
+- Server idle timeout: 600
+- Server lifetime: 3600';
+
+-- =============================================
+-- QUERY HINTS AND COMMENTS
+-- =============================================
+
+-- Add comments to tables to help with query optimization
+COMMENT ON TABLE students IS 'Main student records table. Index on (tenant_id, is_active) for active student queries.';
+COMMENT ON TABLE attendance IS 'Daily attendance records. Consider partitioning by date for large datasets.';
+COMMENT ON TABLE marks IS 'Student marks/grades. Index on (student_id, exam_subject_id) for report generation.';
+COMMENT ON TABLE invoices IS 'Fee invoices. Index on (student_id, status, due_date) for payment tracking.';

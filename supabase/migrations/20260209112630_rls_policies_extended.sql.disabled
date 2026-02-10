@@ -1,0 +1,705 @@
+-- =============================================
+-- Extended Row Level Security Policies
+-- Phase 10: RLS for All New Tables (Migrations 00009-00017)
+-- =============================================
+
+-- =============================================
+-- AI & PREDICTIVE ANALYTICS POLICIES
+-- =============================================
+
+-- ML Models (Admin only)
+CREATE POLICY "Admins view ML models"
+ON ml_models FOR SELECT
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+CREATE POLICY "Admins manage ML models"
+ON ml_models FOR ALL
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- Student Performance Predictions
+CREATE POLICY "View own predictions"
+ON student_performance_predictions FOR SELECT
+USING (
+    tenant_id = (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) AND (
+        public.is_admin() OR
+        public.has_role('teacher') OR
+        (student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())) OR
+        (student_id IN (
+            SELECT sp.student_id FROM student_parents sp
+            JOIN parents p ON sp.parent_id = p.id
+            WHERE p.user_id = auth.uid()
+        ))
+    )
+);
+
+CREATE POLICY "Admins manage predictions"
+ON student_performance_predictions FOR ALL
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND public.is_admin());
+
+-- Feature Snapshots (Admin and ML system only)
+CREATE POLICY "Admins view feature snapshots"
+ON student_feature_snapshots FOR SELECT
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND public.is_admin());
+
+CREATE POLICY "System manage feature snapshots"
+ON student_feature_snapshots FOR ALL
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND public.is_admin());
+
+-- Student Interventions
+CREATE POLICY "View interventions"
+ON student_interventions FOR SELECT
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        public.is_admin() OR
+        assigned_to = auth.uid() OR
+        (student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())) OR
+        (student_id IN (
+            SELECT sp.student_id FROM student_parents sp
+            JOIN parents p ON sp.parent_id = p.id
+            WHERE p.user_id = auth.uid()
+        ))
+    )
+);
+
+CREATE POLICY "Manage interventions"
+ON student_interventions FOR ALL
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (public.is_admin() OR public.has_role('teacher')));
+
+-- Early Warning Alerts
+CREATE POLICY "View alerts"
+ON early_warning_alerts FOR SELECT
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        public.is_admin() OR
+        assigned_to = auth.uid() OR
+        public.has_role('teacher')
+    )
+);
+
+CREATE POLICY "Manage alerts"
+ON early_warning_alerts FOR ALL
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (public.is_admin() OR public.has_role('teacher')));
+
+-- Alert Rules (Admin only)
+CREATE POLICY "View alert rules"
+ON alert_rules FOR SELECT
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+CREATE POLICY "Manage alert rules"
+ON alert_rules FOR ALL
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- =============================================
+-- FEE MANAGEMENT POLICIES
+-- =============================================
+
+-- Payment Plans
+CREATE POLICY "View own payment plans"
+ON fee_payment_plans FOR SELECT
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        public.is_admin() OR
+        public.has_role('accountant') OR
+        (student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())) OR
+        (student_id IN (
+            SELECT sp.student_id FROM student_parents sp
+            JOIN parents p ON sp.parent_id = p.id
+            WHERE p.user_id = auth.uid()
+        ))
+    )
+);
+
+CREATE POLICY "Accountants manage payment plans"
+ON fee_payment_plans FOR ALL
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (public.is_admin() OR public.has_role('accountant')));
+
+-- Payment Installments
+CREATE POLICY "View own installments"
+ON payment_installments FOR SELECT
+USING (
+    payment_plan_id IN (
+        SELECT fpp.id FROM fee_payment_plans fpp
+        WHERE (fpp.student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid()))
+           OR (fpp.student_id IN (
+               SELECT sp.student_id FROM student_parents sp
+               JOIN parents p ON sp.parent_id = p.id
+               WHERE p.user_id = auth.uid()
+           ))
+           OR public.is_admin()
+           OR public.has_role('accountant')
+    )
+);
+
+CREATE POLICY "Accountants manage installments"
+ON payment_installments FOR ALL
+USING (
+    payment_plan_id IN (
+        SELECT id FROM fee_payment_plans
+        WHERE (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id()
+    ) AND (public.is_admin() OR public.has_role('accountant'))
+);
+
+-- Dunning Workflows (Admin only)
+CREATE POLICY "View dunning workflows"
+ON fee_dunning_workflows FOR SELECT
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+CREATE POLICY "Manage dunning workflows"
+ON fee_dunning_workflows FOR ALL
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- Dunning Actions (Admin and accountant)
+CREATE POLICY "View dunning actions"
+ON dunning_actions FOR SELECT
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (public.is_admin() OR public.has_role('accountant')));
+
+CREATE POLICY "Manage dunning actions"
+ON dunning_actions FOR ALL
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (public.is_admin() OR public.has_role('accountant')));
+
+-- Fee Concessions
+CREATE POLICY "View concessions"
+ON fee_concessions FOR SELECT
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        public.is_admin() OR
+        public.has_role('accountant') OR
+        (student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())) OR
+        (student_id IN (
+            SELECT sp.student_id FROM student_parents sp
+            JOIN parents p ON sp.parent_id = p.id
+            WHERE p.user_id = auth.uid()
+        ))
+    )
+);
+
+CREATE POLICY "Manage concessions"
+ON fee_concessions FOR ALL
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (public.is_admin() OR public.has_role('accountant')));
+
+-- Concession Applications
+CREATE POLICY "View concession applications"
+ON concession_applications FOR SELECT
+USING (
+    invoice_id IN (
+        SELECT i.id FROM invoices i
+        WHERE i.student_id IN (
+            SELECT s.id FROM students s
+            WHERE s.user_id = auth.uid()
+               OR s.id IN (
+                   SELECT sp.student_id FROM student_parents sp
+                   JOIN parents p ON sp.parent_id = p.id
+                   WHERE p.user_id = auth.uid()
+               )
+        ) OR public.is_admin() OR public.has_role('accountant')
+    )
+);
+
+-- =============================================
+-- BEHAVIORAL TRACKING POLICIES
+-- =============================================
+
+-- Behavior Incidents (Restricted visibility)
+CREATE POLICY "View behavior incidents"
+ON behavior_incidents FOR SELECT
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        public.is_admin() OR
+        reported_by = auth.uid() OR
+        auth.uid() = ANY(witnesses) OR
+        public.has_role('teacher')
+    )
+);
+
+CREATE POLICY "Manage behavior incidents"
+ON behavior_incidents FOR ALL
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (public.is_admin() OR public.has_role('teacher')));
+
+-- Disciplinary Actions
+CREATE POLICY "View disciplinary actions"
+ON disciplinary_actions FOR SELECT
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        public.is_admin() OR
+        issued_by = auth.uid() OR
+        (student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())) OR
+        (student_id IN (
+            SELECT sp.student_id FROM student_parents sp
+            JOIN parents p ON sp.parent_id = p.id
+            WHERE p.user_id = auth.uid()
+        ))
+    )
+);
+
+CREATE POLICY "Manage disciplinary actions"
+ON disciplinary_actions FOR ALL
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND public.is_admin());
+
+-- Counseling Sessions (Highly confidential)
+CREATE POLICY "View counseling sessions"
+ON counseling_sessions FOR SELECT
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        counselor_id = auth.uid() OR
+        (NOT is_confidential AND public.is_admin()) OR
+        auth.uid() = ANY(shared_with)
+    )
+);
+
+CREATE POLICY "Manage counseling sessions"
+ON counseling_sessions FOR ALL
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        counselor_id = auth.uid() OR
+        public.is_admin()
+    )
+);
+
+-- Student Conduct Grades
+CREATE POLICY "View conduct grades"
+ON student_conduct_grades FOR SELECT
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        public.is_admin() OR
+        public.has_role('teacher') OR
+        (student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())) OR
+        (student_id IN (
+            SELECT sp.student_id FROM student_parents sp
+            JOIN parents p ON sp.parent_id = p.id
+            WHERE p.user_id = auth.uid()
+        ))
+    )
+);
+
+CREATE POLICY "Manage conduct grades"
+ON student_conduct_grades FOR ALL
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (public.is_admin() OR public.has_role('teacher')));
+
+-- Behavior Intervention Plans
+CREATE POLICY "View intervention plans"
+ON behavior_intervention_plans FOR SELECT
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        public.is_admin() OR
+        auth.uid() = ANY(support_staff) OR
+        public.has_role('teacher')
+    )
+);
+
+CREATE POLICY "Manage intervention plans"
+ON behavior_intervention_plans FOR ALL
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND public.is_admin());
+
+-- =============================================
+-- SKILLS & COMPETENCIES POLICIES
+-- =============================================
+
+-- Competency Frameworks (Public read, admin write)
+CREATE POLICY "View competency frameworks"
+ON competency_frameworks FOR SELECT
+USING (tenant_id = public.tenant_id());
+
+CREATE POLICY "Manage competency frameworks"
+ON competency_frameworks FOR ALL
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- Competencies (Public read, admin write)
+CREATE POLICY "View competencies"
+ON competencies FOR SELECT
+USING (framework_id IN (SELECT id FROM competency_frameworks WHERE tenant_id = public.tenant_id()));
+
+CREATE POLICY "Manage competencies"
+ON competencies FOR ALL
+USING (
+    framework_id IN (SELECT id FROM competency_frameworks WHERE tenant_id = public.tenant_id())
+    AND public.is_admin()
+);
+
+-- Student Competency Assessments
+CREATE POLICY "View competency assessments"
+ON student_competency_assessments FOR SELECT
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        public.is_admin() OR
+        public.has_role('teacher') OR
+        (student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())) OR
+        (student_id IN (
+            SELECT sp.student_id FROM student_parents sp
+            JOIN parents p ON sp.parent_id = p.id
+            WHERE p.user_id = auth.uid()
+        ))
+    )
+);
+
+CREATE POLICY "Manage competency assessments"
+ON student_competency_assessments FOR ALL
+USING ((SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (public.is_admin() OR public.has_role('teacher')));
+
+-- Learning Objectives (Public read, admin write)
+CREATE POLICY "View learning objectives"
+ON learning_objectives FOR SELECT
+USING (
+    subject_id IN (SELECT id FROM subjects WHERE tenant_id = public.tenant_id()) OR
+    class_id IN (SELECT id FROM classes WHERE tenant_id = public.tenant_id())
+);
+
+CREATE POLICY "Manage learning objectives"
+ON learning_objectives FOR ALL
+USING (
+    (subject_id IN (SELECT id FROM subjects WHERE tenant_id = public.tenant_id()) OR
+     class_id IN (SELECT id FROM classes WHERE tenant_id = public.tenant_id()))
+    AND public.is_admin()
+);
+
+-- Student Skills Portfolio
+CREATE POLICY "View skills portfolio"
+ON student_skills_portfolio FOR SELECT
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        public.is_admin() OR
+        (student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())) OR
+        (student_id IN (
+            SELECT sp.student_id FROM student_parents sp
+            JOIN parents p ON sp.parent_id = p.id
+            WHERE p.user_id = auth.uid()
+        ))
+    )
+);
+
+CREATE POLICY "Manage skills portfolio"
+ON student_skills_portfolio FOR ALL
+USING (
+    (SELECT tenant_id FROM students WHERE id = student_id LIMIT 1) = public.tenant_id() AND (
+        public.is_admin() OR
+        (student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid()))
+    )
+);
+
+-- =============================================
+-- ASSET, HR & ALUMNI POLICIES
+-- =============================================
+
+-- Assets
+CREATE POLICY "View assets"
+ON assets FOR SELECT
+USING (tenant_id = public.tenant_id() AND (public.is_admin() OR assigned_to = auth.uid()));
+
+CREATE POLICY "Manage assets"
+ON assets FOR ALL
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- Asset Categories
+CREATE POLICY "View asset categories"
+ON asset_categories FOR SELECT
+USING (tenant_id = public.tenant_id());
+
+CREATE POLICY "Manage asset categories"
+ON asset_categories FOR ALL
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- Asset Maintenance
+CREATE POLICY "View asset maintenance"
+ON asset_maintenance FOR SELECT
+USING (
+    asset_id IN (
+        SELECT id FROM assets
+        WHERE tenant_id = public.tenant_id()
+          AND (public.is_admin() OR assigned_to = auth.uid())
+    )
+);
+
+CREATE POLICY "Manage asset maintenance"
+ON asset_maintenance FOR ALL
+USING (asset_id IN (SELECT id FROM assets WHERE tenant_id = public.tenant_id() AND public.is_admin()));
+
+-- Staff Attendance
+CREATE POLICY "View staff attendance"
+ON staff_attendance FOR SELECT
+USING (
+    staff_id IN (
+        SELECT id FROM staff
+        WHERE tenant_id = public.tenant_id()
+          AND (public.is_admin() OR public.has_role('principal') OR user_id = auth.uid())
+    )
+);
+
+CREATE POLICY "Manage staff attendance"
+ON staff_attendance FOR ALL
+USING (
+    staff_id IN (
+        SELECT id FROM staff
+        WHERE tenant_id = public.tenant_id()
+          AND (public.is_admin() OR user_id = auth.uid())
+    )
+);
+
+-- Staff Leave Applications
+CREATE POLICY "View staff leave"
+ON staff_leave_applications FOR SELECT
+USING (
+    staff_id IN (
+        SELECT id FROM staff
+        WHERE tenant_id = public.tenant_id()
+          AND (public.is_admin() OR public.has_role('principal') OR user_id = auth.uid())
+    )
+);
+
+CREATE POLICY "Manage staff leave"
+ON staff_leave_applications FOR ALL
+USING (
+    staff_id IN (
+        SELECT id FROM staff
+        WHERE tenant_id = public.tenant_id()
+          AND (public.is_admin() OR user_id = auth.uid())
+    )
+);
+
+-- Payroll (Sensitive - Admin and own record only)
+CREATE POLICY "View payroll"
+ON payroll FOR SELECT
+USING (
+    tenant_id = public.tenant_id() AND (
+        public.is_admin() OR
+        staff_id IN (SELECT id FROM staff WHERE user_id = auth.uid())
+    )
+);
+
+CREATE POLICY "Manage payroll"
+ON payroll FOR ALL
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- Performance Reviews
+CREATE POLICY "View performance reviews"
+ON performance_reviews FOR SELECT
+USING (
+    staff_id IN (
+        SELECT id FROM staff
+        WHERE tenant_id = public.tenant_id()
+          AND (public.is_admin() OR reviewer_id = auth.uid() OR user_id = auth.uid())
+    )
+);
+
+CREATE POLICY "Manage performance reviews"
+ON performance_reviews FOR ALL
+USING (
+    staff_id IN (
+        SELECT id FROM staff
+        WHERE tenant_id = public.tenant_id()
+          AND (public.is_admin() OR reviewer_id = auth.uid())
+    )
+);
+
+-- Alumni (Public read based on visibility)
+CREATE POLICY "View alumni"
+ON alumni FOR SELECT
+USING (
+    tenant_id = public.tenant_id() AND (
+        profile_visibility = 'public' OR
+        public.is_admin() OR
+        student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())
+    )
+);
+
+CREATE POLICY "Manage alumni"
+ON alumni FOR ALL
+USING (
+    tenant_id = public.tenant_id() AND (
+        public.is_admin() OR
+        student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())
+    )
+);
+
+-- Alumni Events
+CREATE POLICY "View alumni events"
+ON alumni_events FOR SELECT
+USING (tenant_id = public.tenant_id() AND (is_published OR public.is_admin()));
+
+CREATE POLICY "Manage alumni events"
+ON alumni_events FOR ALL
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- Alumni Event Registrations
+CREATE POLICY "View event registrations"
+ON alumni_event_registrations FOR SELECT
+USING (
+    event_id IN (SELECT id FROM alumni_events WHERE tenant_id = public.tenant_id())
+    AND (public.is_admin() OR alumni_id IN (SELECT id FROM alumni WHERE student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())))
+);
+
+CREATE POLICY "Manage event registrations"
+ON alumni_event_registrations FOR ALL
+USING (
+    event_id IN (SELECT id FROM alumni_events WHERE tenant_id = public.tenant_id())
+    AND (public.is_admin() OR alumni_id IN (SELECT id FROM alumni WHERE student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())))
+);
+
+-- Alumni Donations
+CREATE POLICY "View donations"
+ON alumni_donations FOR SELECT
+USING (
+    tenant_id = public.tenant_id() AND (
+        public.is_admin() OR
+        (NOT is_anonymous AND alumni_id IN (SELECT id FROM alumni WHERE student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid())))
+    )
+);
+
+CREATE POLICY "Manage donations"
+ON alumni_donations FOR ALL
+USING (
+    tenant_id = public.tenant_id() AND (
+        public.is_admin() OR
+        alumni_id IN (SELECT id FROM alumni WHERE student_id IN (SELECT s.id FROM students s WHERE s.user_id = auth.uid()))
+    )
+);
+
+-- =============================================
+-- ADMISSIONS PIPELINE POLICIES
+-- =============================================
+
+-- Admission Inquiries
+CREATE POLICY "View admissions inquiries"
+ON admission_inquiries FOR SELECT
+USING (tenant_id = public.tenant_id() AND (public.is_admin() OR assigned_to = auth.uid()));
+
+CREATE POLICY "Manage admissions inquiries"
+ON admission_inquiries FOR ALL
+USING (tenant_id = public.tenant_id() AND (public.is_admin() OR assigned_to = auth.uid()));
+
+-- Admission Applications
+CREATE POLICY "View applications"
+ON admission_applications FOR SELECT
+USING (tenant_id = public.tenant_id() AND (public.is_admin() OR assigned_to = auth.uid()));
+
+CREATE POLICY "Manage applications"
+ON admission_applications FOR ALL
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- Entrance Tests
+CREATE POLICY "View entrance tests"
+ON admission_entrance_tests FOR SELECT
+USING (
+    application_id IN (
+        SELECT id FROM admission_applications
+        WHERE tenant_id = public.tenant_id()
+          AND (public.is_admin() OR evaluator_id = auth.uid())
+    )
+);
+
+CREATE POLICY "Manage entrance tests"
+ON admission_entrance_tests FOR ALL
+USING (
+    application_id IN (
+        SELECT id FROM admission_applications
+        WHERE tenant_id = public.tenant_id() AND public.is_admin()
+    )
+);
+
+-- Admission Interviews
+CREATE POLICY "View interviews"
+ON admission_interviews FOR SELECT
+USING (
+    application_id IN (
+        SELECT id FROM admission_applications
+        WHERE tenant_id = public.tenant_id()
+          AND (public.is_admin() OR interviewer_id = auth.uid() OR auth.uid() = ANY(panel_members))
+    )
+);
+
+CREATE POLICY "Manage interviews"
+ON admission_interviews FOR ALL
+USING (
+    application_id IN (
+        SELECT id FROM admission_applications
+        WHERE tenant_id = public.tenant_id()
+          AND (public.is_admin() OR interviewer_id = auth.uid())
+    )
+);
+
+-- Admission Campaigns
+CREATE POLICY "View campaigns"
+ON admission_campaigns FOR SELECT
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+CREATE POLICY "Manage campaigns"
+ON admission_campaigns FOR ALL
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- =============================================
+-- AUDIT & SECURITY POLICIES
+-- =============================================
+
+-- Audit Logs (Super admin only)
+CREATE POLICY "Super admins view audit logs"
+ON audit_logs FOR SELECT
+USING (tenant_id = public.tenant_id() AND public.has_role('super_admin'));
+
+-- Data Access Logs (Super admin only)
+CREATE POLICY "Super admins view access logs"
+ON data_access_logs FOR SELECT
+USING (tenant_id = public.tenant_id() AND public.has_role('super_admin'));
+
+-- Login Audit (Own records and admin)
+CREATE POLICY "View login audit"
+ON login_audit FOR SELECT
+USING (user_id = auth.uid() OR public.has_role('super_admin'));
+
+-- Data Retention Policies (Admin only)
+CREATE POLICY "View retention policies"
+ON data_retention_policies FOR SELECT
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+CREATE POLICY "Manage retention policies"
+ON data_retention_policies FOR ALL
+USING (tenant_id = public.tenant_id() AND public.has_role('super_admin'));
+
+-- Encryption Keys (Super admin only)
+CREATE POLICY "Super admins manage encryption keys"
+ON encryption_keys FOR ALL
+USING (tenant_id = public.tenant_id() AND public.has_role('super_admin'));
+
+-- Data Subject Requests
+CREATE POLICY "View data requests"
+ON data_subject_requests FOR SELECT
+USING (tenant_id = public.tenant_id() AND (public.is_admin() OR assigned_to = auth.uid()));
+
+CREATE POLICY "Manage data requests"
+ON data_subject_requests FOR ALL
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- =============================================
+-- INTEGRATION LOGS POLICIES
+-- =============================================
+
+-- Payment Gateway Transactions (Admin and accountant)
+CREATE POLICY "View gateway transactions"
+ON payment_gateway_transactions FOR SELECT
+USING (tenant_id = public.tenant_id() AND (public.is_admin() OR public.has_role('accountant')));
+
+CREATE POLICY "Manage gateway transactions"
+ON payment_gateway_transactions FOR ALL
+USING (tenant_id = public.tenant_id() AND (public.is_admin() OR public.has_role('accountant')));
+
+-- SMS Logs (Admin only)
+CREATE POLICY "View sms logs"
+ON sms_logs FOR SELECT
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- Email Logs (Admin only)
+CREATE POLICY "View email logs"
+ON email_logs FOR SELECT
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- Push Notification Logs (Admin only)
+CREATE POLICY "View push logs"
+ON push_notification_logs FOR SELECT
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- Webhook Logs (Admin only)
+CREATE POLICY "View webhook logs"
+ON webhook_logs FOR SELECT
+USING (tenant_id = public.tenant_id() AND public.is_admin());
+
+-- API Usage Logs (Admin only)
+CREATE POLICY "View api usage"
+ON api_usage_logs FOR SELECT
+USING (tenant_id = public.tenant_id() AND public.is_admin());

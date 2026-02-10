@@ -1,7 +1,11 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/config/app_environment.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
@@ -21,6 +25,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -30,6 +35,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
+    // Clear previous error
+    setState(() => _errorMessage = null);
+
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -37,7 +45,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    print('LoginScreen: Starting login for email: $email');
+    developer.log('LoginScreen: Starting login for email: $email',
+        name: 'LoginScreen');
 
     try {
       await ref.read(authNotifierProvider.notifier).signIn(
@@ -45,25 +54,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             password: password,
           );
 
-      print('LoginScreen: Login API call successful, checking user state...');
+      developer.log('LoginScreen: Login successful', name: 'LoginScreen');
 
       if (mounted) {
         final currentUser = ref.read(currentUserProvider);
-        print('LoginScreen: currentUser after login: $currentUser');
-        print('LoginScreen: primaryRole: ${currentUser?.primaryRole}');
-        print('LoginScreen: roles: ${currentUser?.roles}');
+        developer.log(
+            'LoginScreen: User loaded - role: ${currentUser?.primaryRole}',
+            name: 'LoginScreen');
 
-        _navigateToDashboard();
+        if (currentUser != null) {
+          _navigateToDashboard();
+        } else {
+          setState(() {
+            _errorMessage = 'User profile not found. Please contact support.';
+          });
+        }
+      }
+    } on AuthException catch (e) {
+      developer.log('LoginScreen: Auth error - ${e.message}',
+          name: 'LoginScreen', level: 900);
+      if (mounted) {
+        setState(() {
+          _errorMessage = _getAuthErrorMessage(e);
+        });
       }
     } catch (e) {
-      print('LoginScreen: Login failed with error: $e');
+      developer.log('LoginScreen: Unexpected error - $e',
+          name: 'LoginScreen', level: 1000);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_getErrorMessage(e)),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        setState(() {
+          _errorMessage = _getErrorMessage(e);
+        });
       }
     } finally {
       if (mounted) {
@@ -72,50 +93,63 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  String _getAuthErrorMessage(AuthException error) {
+    final message = error.message.toLowerCase();
+    if (message.contains('invalid login credentials') ||
+        message.contains('invalid_credentials')) {
+      return 'Invalid email or password. Please check your credentials.';
+    } else if (message.contains('email not confirmed')) {
+      return 'Please verify your email address before logging in.';
+    } else if (message.contains('user not found')) {
+      return 'No account found with this email address.';
+    } else if (message.contains('too many requests')) {
+      return 'Too many login attempts. Please wait and try again.';
+    }
+    return error.message;
+  }
+
   String _getErrorMessage(Object error) {
     final message = error.toString().toLowerCase();
-    if (message.contains('invalid login credentials')) {
-      return 'Invalid email or password';
-    } else if (message.contains('email not confirmed')) {
-      return 'Please verify your email address';
-    } else if (message.contains('network')) {
-      return 'Network error. Please check your connection';
+    if (message.contains('network') ||
+        message.contains('socket') ||
+        message.contains('connection')) {
+      return 'Network error. Please check your internet connection.';
+    } else if (message.contains('timeout')) {
+      return 'Connection timed out. Please try again.';
+    } else if (message.contains('profile not found')) {
+      return 'User profile not found. Please contact administrator.';
     }
-    return 'Login failed. Please try again';
+    return 'An unexpected error occurred. Please try again.';
   }
 
   void _navigateToDashboard() {
     final currentUser = ref.read(currentUserProvider);
     final primaryRole = currentUser?.primaryRole;
 
-    print('_navigateToDashboard: currentUser = $currentUser');
-    print('_navigateToDashboard: primaryRole = $primaryRole');
-    print('_navigateToDashboard: user roles = ${currentUser?.roles}');
+    developer.log('Navigating to dashboard for role: $primaryRole',
+        name: 'LoginScreen');
 
     switch (primaryRole) {
       case 'super_admin':
-        print('_navigateToDashboard: navigating to super admin dashboard');
         context.go(AppRoutes.superAdminDashboard);
         break;
       case 'tenant_admin':
       case 'principal':
-        print('_navigateToDashboard: navigating to admin dashboard');
         context.go(AppRoutes.adminDashboard);
         break;
       case 'teacher':
-        print('_navigateToDashboard: navigating to teacher dashboard');
         context.go(AppRoutes.teacherDashboard);
         break;
       case 'student':
-        print('_navigateToDashboard: navigating to student dashboard');
         context.go(AppRoutes.studentDashboard);
         break;
       case 'parent':
-        print('_navigateToDashboard: navigating to parent dashboard');
         context.go(AppRoutes.parentDashboard);
         break;
       default:
-        print('_navigateToDashboard: ERROR - no valid role found, navigating to admin dashboard as default');
+        // Default to admin dashboard if role is not recognized
+        developer.log('Unknown role: $primaryRole, defaulting to admin',
+            name: 'LoginScreen', level: 800);
         context.go(AppRoutes.adminDashboard);
     }
   }
@@ -133,7 +167,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: isDark
+            colors: Theme.of(context).brightness == Brightness.dark
                 ? [
                     const Color(0xFF1a1a2e),
                     const Color(0xFF16213e),
@@ -155,14 +189,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Logo and Title
                 _buildHeader(),
                 SizedBox(height: size.height * 0.06),
+                // Quick login shortcuts
+                _buildQuickLoginButtons(),
+                const SizedBox(height: 16),
+                // Error message
+                if (_errorMessage != null) _buildErrorBanner(),
                 // Login Form
                 _buildLoginForm(isDark),
                 const SizedBox(height: 24),
                 // Forgot Password
                 TextButton(
-                  onPressed: () {
-                    // TODO: Implement forgot password
-                  },
+                  onPressed: _handleForgotPassword,
                   child: Text(
                     'Forgot Password?',
                     style: TextStyle(
@@ -171,13 +208,114 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
-                // Demo accounts info
-                _buildDemoInfo(isDark),
+                // Environment indicator (only in non-production)
+                if (!AppEnvironment.isProduction) ...[
+                  const SizedBox(height: 16),
+                  _buildEnvironmentBadge(),
+                ],
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// Quick-fill demo credentials for faster testing
+  Widget _buildQuickLoginButtons() {
+    const password = 'Demo@2026';
+    final demoUsers = [
+      (
+        label: 'Admin',
+        email: 'admin@demo-school.edu',
+      ),
+      (
+        label: 'Teacher',
+        email: 'teacher@demo-school.edu',
+      ),
+      (
+        label: 'Student',
+        email: 'student@demo-school.edu',
+      ),
+      (
+        label: 'Parent',
+        email: 'parent@demo-school.edu',
+      ),
+    ];
+
+    return GlassCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              Icon(Icons.bolt, color: Colors.amber),
+              SizedBox(width: 8),
+              Text(
+                'Quick Login',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final user in demoUsers)
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.login, size: 18),
+                  label: Text(user.label),
+                  onPressed: () {
+                    _emailController.text = user.email;
+                    _passwordController.text = password;
+                    _handleLogin();
+                  },
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorBanner() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.error.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.error.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: AppColors.error, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              _errorMessage!,
+              style: TextStyle(
+                color: AppColors.error,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, size: 18),
+            color: AppColors.error,
+            onPressed: () => setState(() => _errorMessage = null),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        ],
       ),
     );
   }
@@ -239,6 +377,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
+              autocorrect: false,
+              enableSuggestions: false,
               decoration: InputDecoration(
                 labelText: 'Email',
                 hintText: 'Enter your email',
@@ -312,77 +452,136 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildDemoInfo(bool isDark) {
+  Widget _buildEnvironmentBadge() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withOpacity(0.05)
-            : AppColors.info.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.info.withOpacity(0.3),
-        ),
+        color: AppColors.warning.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.warning.withOpacity(0.3)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.info_outline,
-                size: 20,
-                color: AppColors.info,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Demo Accounts',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.info,
-                ),
-              ),
-            ],
+          Icon(Icons.bug_report, size: 16, color: AppColors.warning),
+          const SizedBox(width: 6),
+          Text(
+            AppEnvironment.environmentName,
+            style: TextStyle(
+              color: AppColors.warning,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          const SizedBox(height: 12),
-          _buildDemoAccount('Admin', 'admin@demo-school.edu', 'Demo123!'),
-          _buildDemoAccount('Teacher', 'teacher@demo-school.edu', 'Demo123!'),
-          _buildDemoAccount('Student', 'student@demo-school.edu', 'Demo123!'),
-          _buildDemoAccount('Parent', 'parent@demo-school.edu', 'Demo123!'),
         ],
       ),
     );
   }
 
-  Widget _buildDemoAccount(String role, String email, String password) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
+  void _handleForgotPassword() {
+    showDialog(
+      context: context,
+      builder: (context) => _ForgotPasswordDialog(),
+    );
+  }
+}
+
+class _ForgotPasswordDialog extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_ForgotPasswordDialog> createState() =>
+      _ForgotPasswordDialogState();
+}
+
+class _ForgotPasswordDialogState extends ConsumerState<_ForgotPasswordDialog> {
+  final _emailController = TextEditingController();
+  bool _isLoading = false;
+  String? _message;
+  bool _isSuccess = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleResetPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty ||
+        !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      setState(() {
+        _message = 'Please enter a valid email address';
+        _isSuccess = false;
+      });
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final authRepo = ref.read(authRepositoryProvider);
+      await authRepo.resetPassword(email);
+      setState(() {
+        _message = 'Password reset email sent. Please check your inbox.';
+        _isSuccess = true;
+      });
+    } catch (e) {
+      setState(() {
+        _message = 'Failed to send reset email. Please try again.';
+        _isSuccess = false;
+      });
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Reset Password'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            width: 70,
-            child: Text(
-              role,
-              style: const TextStyle(fontWeight: FontWeight.w500),
+          const Text(
+            'Enter your email address and we\'ll send you a link to reset your password.',
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              hintText: 'Enter your email',
+              prefixIcon: Icon(Icons.email_outlined),
             ),
           ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                _emailController.text = email;
-                _passwordController.text = password;
-              },
-              child: Text(
-                email,
-                style: TextStyle(
-                  color: AppColors.primary,
-                  decoration: TextDecoration.underline,
-                ),
+          if (_message != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              _message!,
+              style: TextStyle(
+                color: _isSuccess ? AppColors.success : AppColors.error,
+                fontSize: 13,
               ),
             ),
-          ),
+          ],
         ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _isLoading ? null : _handleResetPassword,
+          child: _isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Send Reset Link'),
+        ),
+      ],
     );
   }
 }

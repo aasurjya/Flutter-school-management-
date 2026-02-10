@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/app_config.dart';
+import 'core/config/app_environment.dart';
 import 'core/config/supabase_config.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -18,7 +19,10 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Initialize Supabase
+  // Initialize environment configuration first
+  await AppEnvironment.initialize();
+
+  // Initialize Supabase with environment-based credentials
   await Supabase.initialize(
     url: SupabaseConfig.url,
     anonKey: SupabaseConfig.anonKey,
@@ -44,7 +48,7 @@ class SchoolManagementApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: AppConfig.appName,
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: !AppEnvironment.isProduction,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,

@@ -107,6 +107,10 @@ class _MainShellState extends ConsumerState<MainShell> {
           AppRoutes.studentManagement,
           AppRoutes.attendance,
           AppRoutes.fees,
+          AppRoutes.library,
+          AppRoutes.transport,
+          AppRoutes.hostel,
+          AppRoutes.canteen,
           AppRoutes.messages,
         ];
       case 'teacher':
@@ -114,6 +118,10 @@ class _MainShellState extends ConsumerState<MainShell> {
           AppRoutes.teacherDashboard,
           AppRoutes.attendance,
           AppRoutes.exams,
+          AppRoutes.library,
+          AppRoutes.transport,
+          AppRoutes.hostel,
+          AppRoutes.canteen,
           AppRoutes.messages,
         ];
       case 'student':
@@ -121,6 +129,10 @@ class _MainShellState extends ConsumerState<MainShell> {
           AppRoutes.studentDashboard,
           AppRoutes.attendance,
           AppRoutes.exams,
+          AppRoutes.library,
+          AppRoutes.transport,
+          AppRoutes.hostel,
+          AppRoutes.canteen,
           AppRoutes.messages,
         ];
       case 'parent':
@@ -128,6 +140,10 @@ class _MainShellState extends ConsumerState<MainShell> {
           AppRoutes.parentDashboard,
           AppRoutes.attendance,
           AppRoutes.fees,
+          AppRoutes.library,
+          AppRoutes.transport,
+          AppRoutes.hostel,
+          AppRoutes.canteen,
           AppRoutes.messages,
         ];
       default:
@@ -231,6 +247,26 @@ const _adminNavItems = [
     label: 'Fees',
   ),
   _NavItemData(
+    icon: Icons.library_books_outlined,
+    activeIcon: Icons.library_books,
+    label: 'Library',
+  ),
+  _NavItemData(
+    icon: Icons.directions_bus_outlined,
+    activeIcon: Icons.directions_bus,
+    label: 'Transport',
+  ),
+  _NavItemData(
+    icon: Icons.apartment_outlined,
+    activeIcon: Icons.apartment,
+    label: 'Hostel',
+  ),
+  _NavItemData(
+    icon: Icons.restaurant_outlined,
+    activeIcon: Icons.restaurant,
+    label: 'Canteen',
+  ),
+  _NavItemData(
     icon: Icons.message_outlined,
     activeIcon: Icons.message,
     label: 'Messages',
@@ -252,6 +288,26 @@ const _teacherNavItems = [
     icon: Icons.assignment_outlined,
     activeIcon: Icons.assignment,
     label: 'Exams',
+  ),
+  _NavItemData(
+    icon: Icons.library_books_outlined,
+    activeIcon: Icons.library_books,
+    label: 'Library',
+  ),
+  _NavItemData(
+    icon: Icons.directions_bus_outlined,
+    activeIcon: Icons.directions_bus,
+    label: 'Transport',
+  ),
+  _NavItemData(
+    icon: Icons.apartment_outlined,
+    activeIcon: Icons.apartment,
+    label: 'Hostel',
+  ),
+  _NavItemData(
+    icon: Icons.restaurant_outlined,
+    activeIcon: Icons.restaurant,
+    label: 'Canteen',
   ),
   _NavItemData(
     icon: Icons.message_outlined,
@@ -277,6 +333,26 @@ const _studentNavItems = [
     label: 'Results',
   ),
   _NavItemData(
+    icon: Icons.library_books_outlined,
+    activeIcon: Icons.library_books,
+    label: 'Library',
+  ),
+  _NavItemData(
+    icon: Icons.directions_bus_outlined,
+    activeIcon: Icons.directions_bus,
+    label: 'Transport',
+  ),
+  _NavItemData(
+    icon: Icons.apartment_outlined,
+    activeIcon: Icons.apartment,
+    label: 'Hostel',
+  ),
+  _NavItemData(
+    icon: Icons.restaurant_outlined,
+    activeIcon: Icons.restaurant,
+    label: 'Canteen',
+  ),
+  _NavItemData(
     icon: Icons.message_outlined,
     activeIcon: Icons.message,
     label: 'Messages',
@@ -298,6 +374,26 @@ const _parentNavItems = [
     icon: Icons.payment_outlined,
     activeIcon: Icons.payment,
     label: 'Fees',
+  ),
+  _NavItemData(
+    icon: Icons.library_books_outlined,
+    activeIcon: Icons.library_books,
+    label: 'Library',
+  ),
+  _NavItemData(
+    icon: Icons.directions_bus_outlined,
+    activeIcon: Icons.directions_bus,
+    label: 'Transport',
+  ),
+  _NavItemData(
+    icon: Icons.apartment_outlined,
+    activeIcon: Icons.apartment,
+    label: 'Hostel',
+  ),
+  _NavItemData(
+    icon: Icons.restaurant_outlined,
+    activeIcon: Icons.restaurant,
+    label: 'Canteen',
   ),
   _NavItemData(
     icon: Icons.message_outlined,

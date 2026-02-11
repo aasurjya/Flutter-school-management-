@@ -107,13 +107,13 @@ class _StudentTimetableScreenState extends ConsumerState<StudentTimetableScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.weekend, size: 64, color: Colors.grey[300]),
+          Icon(Icons.weekend, size: 64, color: Theme.of(context).colorScheme.outlineVariant),
           const SizedBox(height: 16),
           Text(
             'No classes on $day',
             style: TextStyle(
               fontSize: 18,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -262,7 +262,7 @@ class _PeriodCard extends StatelessWidget {
                     width: 80,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
                     ),
                     child: Column(
@@ -277,13 +277,13 @@ class _PeriodCard extends StatelessWidget {
                         Container(
                           width: 1,
                           height: 20,
-                          color: color.withOpacity(0.3),
+                          color: color.withValues(alpha: 0.3),
                         ),
                         Text(
                           _formatTime(entry['endTime'] as String?),
                           style: TextStyle(
                             fontSize: 12,
-                            color: color.withOpacity(0.8),
+                            color: color.withValues(alpha: 0.8),
                           ),
                         ),
                       ],
@@ -301,7 +301,7 @@ class _PeriodCard extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: color.withOpacity(0.1),
+                                  color: color.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -318,7 +318,7 @@ class _PeriodCard extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: Colors.orange.withOpacity(0.1),
+                                    color: Colors.orange.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Text(
@@ -345,13 +345,13 @@ class _PeriodCard extends StatelessWidget {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                Icon(Icons.person, size: 14, color: Colors.grey[600]),
+                                Icon(Icons.person, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                                 const SizedBox(width: 4),
                                 Text(
                                   entry['teacherName'] as String,
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.grey[600],
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],
@@ -361,13 +361,13 @@ class _PeriodCard extends StatelessWidget {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                Icon(Icons.room, size: 14, color: Colors.grey[600]),
+                                Icon(Icons.room, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                                 const SizedBox(width: 4),
                                 Text(
                                   'Room ${entry['roomNumber']}',
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.grey[600],
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],
@@ -475,7 +475,7 @@ class _TimetableEntryCard extends StatelessWidget {
                     width: 80,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
                     ),
                     child: Column(
@@ -490,13 +490,13 @@ class _TimetableEntryCard extends StatelessWidget {
                         Container(
                           width: 1,
                           height: 20,
-                          color: color.withOpacity(0.3),
+                          color: color.withValues(alpha: 0.3),
                         ),
                         Text(
                           _formatTime(entry.endTime),
                           style: TextStyle(
                             fontSize: 12,
-                            color: color.withOpacity(0.8),
+                            color: color.withValues(alpha: 0.8),
                           ),
                         ),
                       ],
@@ -514,7 +514,7 @@ class _TimetableEntryCard extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: color.withOpacity(0.1),
+                                  color: color.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -531,7 +531,7 @@ class _TimetableEntryCard extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: Colors.orange.withOpacity(0.1),
+                                    color: Colors.orange.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Text(
@@ -558,13 +558,13 @@ class _TimetableEntryCard extends StatelessWidget {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                Icon(Icons.person, size: 14, color: Colors.grey[600]),
+                                Icon(Icons.person, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                                 const SizedBox(width: 4),
                                 Text(
                                   entry.teacherName!,
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.grey[600],
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],
@@ -574,13 +574,13 @@ class _TimetableEntryCard extends StatelessWidget {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                Icon(Icons.room, size: 14, color: Colors.grey[600]),
+                                Icon(Icons.room, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                                 const SizedBox(width: 4),
                                 Text(
                                   'Room ${entry.roomNumber}',
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.grey[600],
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],

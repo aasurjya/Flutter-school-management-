@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../data/models/attendance.dart';
 import '../../../attendance/providers/attendance_provider.dart';
 import '../../../students/providers/students_provider.dart';
@@ -81,12 +82,7 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load students: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        context.showErrorSnackBar('Failed to load students: $e');
       }
       setState(() {
         _isLoading = false;
@@ -283,22 +279,12 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Attendance submitted successfully'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        context.showSuccessSnackBar('Attendance submitted successfully');
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to submit: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        context.showErrorSnackBar('Failed to submit: $e');
       }
     } finally {
       if (mounted) {
@@ -326,7 +312,7 @@ class _SummaryChip extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -369,7 +355,7 @@ class _StudentAttendanceCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: _getStatusColor(student.status).withOpacity(0.3),
+          color: _getStatusColor(student.status).withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),
@@ -381,7 +367,7 @@ class _StudentAttendanceCard extends StatelessWidget {
               children: [
                 // Student Info
                 CircleAvatar(
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                   child: Text(
                     student.studentName.substring(0, 1),
                     style: const TextStyle(
@@ -535,7 +521,7 @@ class _StatusButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? color : color.withOpacity(0.1),
+            color: isSelected ? color : color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: color,

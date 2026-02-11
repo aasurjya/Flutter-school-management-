@@ -113,7 +113,7 @@ class _LegendItem extends StatelessWidget {
           width: 16,
           height: 16,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
             border: Border.all(color: color, width: 2),
             borderRadius: BorderRadius.circular(4),
           ),
@@ -151,7 +151,7 @@ class _RadarChartPainter extends CustomPainter {
 
     // Draw background circles
     final gridPaint = Paint()
-      ..color = Colors.grey.withOpacity(0.3)
+      ..color = Colors.grey.withValues(alpha: 0.3)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
@@ -245,7 +245,7 @@ class _RadarChartPainter extends CustomPainter {
 
     final path = Path();
     final fillPaint = Paint()
-      ..color = color.withOpacity(0.2)
+      ..color = color.withValues(alpha: 0.2)
       ..style = PaintingStyle.fill;
 
     final strokePaint = Paint()

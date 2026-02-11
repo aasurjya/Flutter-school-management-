@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 
 import '../../../data/models/tenant.dart';
 import '../../../data/repositories/tenant_repository.dart';
 
 /// Tenant repository provider
 final tenantRepositoryProvider = Provider<TenantRepository>((ref) {
-  return TenantRepository(Supabase.instance.client);
+  return TenantRepository(ref.watch(supabaseProvider));
 });
 
 /// All tenants provider

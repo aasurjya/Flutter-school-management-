@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../data/models/announcement.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../announcements/providers/announcement_provider.dart';
@@ -90,12 +91,12 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
             Icon(
               isDraft ? Icons.drafts : Icons.campaign,
               size: 64,
-              color: Colors.grey[300],
+              color: Theme.of(context).colorScheme.outlineVariant,
             ),
             const SizedBox(height: 16),
             Text(
               isDraft ? 'No drafts' : 'No published announcements',
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -278,7 +279,7 @@ class _AnnouncementCardReal extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.1),
+                color: AppColors.warning.withValues(alpha: 0.1),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Row(
@@ -299,7 +300,7 @@ class _AnnouncementCardReal extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _getPriorityColor(announcement.priority).withOpacity(0.1),
+                        color: _getPriorityColor(announcement.priority).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -348,24 +349,24 @@ class _AnnouncementCardReal extends StatelessWidget {
                   announcement.content,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.access_time, size: 14, color: Colors.grey[500]),
+                    Icon(Icons.access_time, size: 14, color: Theme.of(context).colorScheme.outline),
                     const SizedBox(width: 4),
                     Text(
                       _formatDateTime(announcement.createdAt),
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
                     ),
                     if (announcement.createdByName != null) ...[
                       const SizedBox(width: 12),
-                      Icon(Icons.person, size: 14, color: Colors.grey[500]),
+                      Icon(Icons.person, size: 14, color: Theme.of(context).colorScheme.outline),
                       const SizedBox(width: 4),
                       Text(
                         announcement.createdByName!,
-                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                        style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
                       ),
                     ],
                   ],
@@ -434,7 +435,7 @@ class _AnnouncementCard extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withOpacity(0.1),
+                  color: AppColors.warning.withValues(alpha: 0.1),
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                 ),
                 child: const Row(
@@ -455,7 +456,7 @@ class _AnnouncementCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _getCategoryColor(category).withOpacity(0.1),
+                          color: _getCategoryColor(category).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -495,23 +496,23 @@ class _AnnouncementCard extends StatelessWidget {
                     announcement['content'],
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.access_time, size: 14, color: Colors.grey[500]),
+                      Icon(Icons.access_time, size: 14, color: Theme.of(context).colorScheme.outline),
                       const SizedBox(width: 4),
                       Text(
                         _formatDateTime(createdAt),
-                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                        style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
                       ),
                       const SizedBox(width: 12),
-                      Icon(Icons.person, size: 14, color: Colors.grey[500]),
+                      Icon(Icons.person, size: 14, color: Theme.of(context).colorScheme.outline),
                       const SizedBox(width: 4),
                       Text(
                         announcement['createdBy'],
-                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                        style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
                       ),
                     ],
                   ),
@@ -609,26 +610,26 @@ class _AnnouncementDetailSheet extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                      Icon(Icons.access_time, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       const SizedBox(width: 8),
                       Text(
                         DateFormat('MMM d, yyyy h:mm a').format(announcement['createdAt'] as DateTime),
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.person, size: 16, color: Colors.grey[600]),
+                      Icon(Icons.person, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       const SizedBox(width: 8),
-                      Text('Posted by ${announcement['createdBy']}', style: TextStyle(color: Colors.grey[600])),
+                      Text('Posted by ${announcement['createdBy']}', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.people, size: 16, color: Colors.grey[600]),
+                      Icon(Icons.people, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Wrap(
@@ -820,7 +821,7 @@ class _CreateAnnouncementSheetState extends State<_CreateAnnouncementSheet> {
           }
         });
       },
-      selectedColor: AppColors.primary.withOpacity(0.2),
+      selectedColor: AppColors.primary.withValues(alpha: 0.2),
       checkmarkColor: AppColors.primary,
     );
   }
@@ -828,11 +829,6 @@ class _CreateAnnouncementSheetState extends State<_CreateAnnouncementSheet> {
   void _save(bool publish) {
     if (!_formKey.currentState!.validate()) return;
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(publish ? 'Announcement published' : 'Draft saved'),
-        backgroundColor: AppColors.success,
-      ),
-    );
+    context.showSuccessSnackBar(publish ? 'Announcement published' : 'Draft saved');
   }
 }

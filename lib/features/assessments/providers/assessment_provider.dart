@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/quiz.dart';
 import '../../../data/repositories/assessment_repository.dart';
 
 final assessmentRepositoryProvider = Provider<AssessmentRepository>((ref) {
-  return AssessmentRepository(Supabase.instance.client);
+  return AssessmentRepository(ref.watch(supabaseProvider));
 });
 
 // ==================== QUIZ PROVIDERS ====================

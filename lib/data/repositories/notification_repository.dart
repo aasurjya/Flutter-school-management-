@@ -110,7 +110,7 @@ class NotificationRepository extends BaseRepository {
   }) {
     return subscribeToTable(
       'notifications',
-      filter: 'user_id=eq.$currentUserId',
+      filter: (column: 'user_id', value: currentUserId ?? ''),
       onInsert: (payload) {
         final notification = AppNotification.fromJson(payload.newRecord);
         onNewNotification(notification);

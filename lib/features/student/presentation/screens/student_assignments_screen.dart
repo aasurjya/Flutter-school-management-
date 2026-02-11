@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../data/models/assignment.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../assignments/providers/assignments_provider.dart';
 import '../../../students/providers/students_provider.dart';
@@ -155,7 +157,7 @@ class _AssignmentsList extends ConsumerWidget {
   void _showAssignmentDetail(
     BuildContext context,
     WidgetRef ref,
-    dynamic assignment,
+    Assignment assignment,
     String studentId,
   ) {
     showModalBottomSheet(
@@ -171,7 +173,7 @@ class _AssignmentsList extends ConsumerWidget {
 }
 
 class _AssignmentCard extends StatelessWidget {
-  final dynamic assignment;
+  final Assignment assignment;
   final String studentId;
   final VoidCallback onTap;
 
@@ -217,7 +219,7 @@ class _AssignmentCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -252,7 +254,7 @@ class _AssignmentCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -294,7 +296,7 @@ class _AssignmentCard extends StatelessWidget {
 }
 
 class _AssignmentDetailSheet extends ConsumerStatefulWidget {
-  final dynamic assignment;
+  final Assignment assignment;
   final String studentId;
 
   const _AssignmentDetailSheet({
@@ -444,7 +446,7 @@ class _AssignmentDetailSheetState extends ConsumerState<_AssignmentDetailSheet> 
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
+                  color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(Icons.check_circle, color: AppColors.success),
@@ -479,7 +481,7 @@ class _AssignmentDetailSheetState extends ConsumerState<_AssignmentDetailSheet> 
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(submission.feedback!),
@@ -501,7 +503,7 @@ class _AssignmentDetailSheetState extends ConsumerState<_AssignmentDetailSheet> 
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.info.withOpacity(0.1),
+                  color: AppColors.info.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(Icons.hourglass_empty, color: AppColors.info),
@@ -603,21 +605,11 @@ class _AssignmentDetailSheetState extends ConsumerState<_AssignmentDetailSheet> 
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Assignment submitted successfully!'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        context.showSuccessSnackBar('Assignment submitted successfully!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        context.showErrorSnackBar('Error: $e');
       }
     } finally {
       if (mounted) {

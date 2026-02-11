@@ -192,7 +192,7 @@ class AttendanceRepository extends BaseRepository {
   }) {
     return subscribeToTable(
       'attendance',
-      filter: 'section_id=eq.$sectionId',
+      filter: (column: 'section_id', value: sectionId),
       onInsert: onUpdate,
       onUpdate: onUpdate,
     );

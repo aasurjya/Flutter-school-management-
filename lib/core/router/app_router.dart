@@ -10,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
+import '../providers/supabase_provider.dart';
 import '../../features/dashboard/presentation/screens/admin_dashboard_screen.dart';
 import '../../features/dashboard/presentation/screens/parent_dashboard_screen.dart';
 import '../../features/dashboard/presentation/screens/student_dashboard_screen.dart';
@@ -387,7 +388,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
-            path: '/library/book/:bookId',
+            path: AppRoutes.libraryBookDetail,
             builder: (context, state) => BookDetailScreen(
               bookId: state.pathParameters['bookId']!,
             ),
@@ -405,7 +406,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
-            path: '/transport/route/:routeId',
+            path: AppRoutes.transportRouteDetail,
             builder: (context, state) => RouteDetailScreen(
               routeId: state.pathParameters['routeId']!,
             ),
@@ -423,11 +424,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
-            path: '/hostel/my-room',
+            path: AppRoutes.hostelMyRoom,
             builder: (context, state) => const MyHostelScreen(),
           ),
           GoRoute(
-            path: '/hostel/:hostelId',
+            path: AppRoutes.hostelDetail,
             builder: (context, state) => HostelDetailScreen(
               hostelId: state.pathParameters['hostelId']!,
             ),
@@ -441,7 +442,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           // ==================== HEALTH ====================
           GoRoute(
-            path: '/health/:studentId',
+            path: AppRoutes.healthProfile,
             builder: (context, state) => StudentHealthProfileScreen(
               studentId: state.pathParameters['studentId']!,
             ),
@@ -449,7 +450,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           // ==================== GAMIFICATION ====================
           GoRoute(
-            path: '/gamification/achievements/:studentId',
+            path: AppRoutes.achievements,
             builder: (context, state) => AchievementsScreen(
               studentId: state.pathParameters['studentId']!,
             ),
@@ -461,7 +462,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           // ==================== INSIGHTS ====================
           GoRoute(
-            path: '/insights/:studentId',
+            path: AppRoutes.childInsights,
             builder: (context, state) => ChildInsightsScreen(
               studentId: state.pathParameters['studentId']!,
             ),
@@ -475,14 +476,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
-            path: '/assessments/take/:quizId',
+            path: AppRoutes.takeQuiz,
             builder: (context, state) => TakeQuizScreen(
               quizId: state.pathParameters['quizId']!,
               studentId: state.uri.queryParameters['studentId'] ?? '',
             ),
           ),
           GoRoute(
-            path: '/assessments/result/:attemptId',
+            path: AppRoutes.quizResult,
             builder: (context, state) => QuizResultScreen(
               attemptId: state.pathParameters['attemptId']!,
             ),
@@ -496,7 +497,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
-            path: '/ptm/:scheduleId/book',
+            path: AppRoutes.ptmBook,
             builder: (context, state) => BookAppointmentScreen(
               scheduleId: state.pathParameters['scheduleId']!,
             ),
@@ -534,7 +535,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
-            path: '/reports/:reportId',
+            path: AppRoutes.reportDetail,
             builder: (context, state) => ReportCardViewScreen(
               reportId: state.pathParameters['reportId']!,
             ),
@@ -556,7 +557,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           // Class Analytics
           GoRoute(
-            path: '/teacher/class-analytics/:sectionId',
+            path: AppRoutes.classAnalytics,
             builder: (context, state) => ClassAnalyticsScreen(
               sectionId: state.pathParameters['sectionId']!,
               sectionName: state.uri.queryParameters['name'],
@@ -605,7 +606,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           // Parent Child Results
           GoRoute(
-            path: '/parent/child/:childId/results',
+            path: AppRoutes.childResults,
             builder: (context, state) => ChildResultsScreen(
               childId: state.pathParameters['childId']!,
               childName: state.uri.queryParameters['name'],
@@ -626,7 +627,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           // Teacher Class Students
           GoRoute(
-            path: '/teacher/class/:sectionId/students',
+            path: AppRoutes.classStudents,
             builder: (context, state) => ClassStudentsScreen(
               sectionId: state.pathParameters['sectionId']!,
               className: state.uri.queryParameters['name'],
@@ -635,7 +636,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           // Parent Fee Payment
           GoRoute(
-            path: '/parent/child/:childId/fees',
+            path: AppRoutes.feePayment,
             builder: (context, state) => FeePaymentScreen(
               childId: state.pathParameters['childId']!,
               childName: state.uri.queryParameters['name'],
@@ -686,7 +687,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           // Tenant Detail
           GoRoute(
-            path: '/super-admin/tenants/:tenantId',
+            path: AppRoutes.tenantDetail,
             builder: (context, state) => TenantDetailScreen(
               tenantId: state.pathParameters['tenantId']!,
             ),

@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/achievement.dart';
 import '../../../data/repositories/gamification_repository.dart';
 
 final gamificationRepositoryProvider = Provider<GamificationRepository>((ref) {
-  return GamificationRepository(Supabase.instance.client);
+  return GamificationRepository(ref.watch(supabaseProvider));
 });
 
 // Achievements providers

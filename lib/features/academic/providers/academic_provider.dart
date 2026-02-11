@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 
 import '../../../data/models/academic.dart';
 import '../../../data/repositories/academic_repository.dart';
 
 final academicRepositoryProvider = Provider<AcademicRepository>((ref) {
-  return AcademicRepository(Supabase.instance.client);
+  return AcademicRepository(ref.watch(supabaseProvider));
 });
 
 final classesProvider = FutureProvider<List<SchoolClass>>((ref) async {

@@ -40,7 +40,7 @@ class _MainShellState extends ConsumerState<MainShell> {
         color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -75,15 +75,15 @@ class _MainShellState extends ConsumerState<MainShell> {
       case 'super_admin':
       case 'tenant_admin':
       case 'principal':
-        return _adminNavItems;
+        return [_dashboardItem, _studentsItem, _attendanceItem, _feesItem, ..._commonTrailingItems];
       case 'teacher':
-        return _teacherNavItems;
+        return [_dashboardItem, _attendanceItem, _examsItem, ..._commonTrailingItems];
       case 'student':
-        return _studentNavItems;
+        return [_dashboardItem, _attendanceItem, _resultsItem, ..._commonTrailingItems];
       case 'parent':
-        return _parentNavItems;
+        return [_dashboardItem, _attendanceItem, _feesItem, ..._commonTrailingItems];
       default:
-        return _studentNavItems;
+        return [_dashboardItem, _attendanceItem, _resultsItem, ..._commonTrailingItems];
     }
   }
 
@@ -97,57 +97,28 @@ class _MainShellState extends ConsumerState<MainShell> {
     return 0;
   }
 
+  static const _commonTrailingRoutes = [
+    AppRoutes.library,
+    AppRoutes.transport,
+    AppRoutes.hostel,
+    AppRoutes.canteen,
+    AppRoutes.messages,
+  ];
+
   List<String> _getRoutes(String role) {
     switch (role) {
       case 'super_admin':
       case 'tenant_admin':
       case 'principal':
-        return [
-          AppRoutes.adminDashboard,
-          AppRoutes.studentManagement,
-          AppRoutes.attendance,
-          AppRoutes.fees,
-          AppRoutes.library,
-          AppRoutes.transport,
-          AppRoutes.hostel,
-          AppRoutes.canteen,
-          AppRoutes.messages,
-        ];
+        return [AppRoutes.adminDashboard, AppRoutes.studentManagement, AppRoutes.attendance, AppRoutes.fees, ..._commonTrailingRoutes];
       case 'teacher':
-        return [
-          AppRoutes.teacherDashboard,
-          AppRoutes.attendance,
-          AppRoutes.exams,
-          AppRoutes.library,
-          AppRoutes.transport,
-          AppRoutes.hostel,
-          AppRoutes.canteen,
-          AppRoutes.messages,
-        ];
+        return [AppRoutes.teacherDashboard, AppRoutes.attendance, AppRoutes.exams, ..._commonTrailingRoutes];
       case 'student':
-        return [
-          AppRoutes.studentDashboard,
-          AppRoutes.attendance,
-          AppRoutes.exams,
-          AppRoutes.library,
-          AppRoutes.transport,
-          AppRoutes.hostel,
-          AppRoutes.canteen,
-          AppRoutes.messages,
-        ];
+        return [AppRoutes.studentDashboard, AppRoutes.attendance, AppRoutes.exams, ..._commonTrailingRoutes];
       case 'parent':
-        return [
-          AppRoutes.parentDashboard,
-          AppRoutes.attendance,
-          AppRoutes.fees,
-          AppRoutes.library,
-          AppRoutes.transport,
-          AppRoutes.hostel,
-          AppRoutes.canteen,
-          AppRoutes.messages,
-        ];
+        return [AppRoutes.parentDashboard, AppRoutes.attendance, AppRoutes.fees, ..._commonTrailingRoutes];
       default:
-        return [AppRoutes.studentDashboard];
+        return [AppRoutes.studentDashboard, AppRoutes.attendance, AppRoutes.exams, ..._commonTrailingRoutes];
     }
   }
 
@@ -184,7 +155,7 @@ class _NavItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withOpacity(0.1)
+              ? AppColors.primary.withValues(alpha: 0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -224,180 +195,30 @@ class _NavItemData {
   });
 }
 
-// Navigation items for each role
-const _adminNavItems = [
-  _NavItemData(
-    icon: Icons.dashboard_outlined,
-    activeIcon: Icons.dashboard,
-    label: 'Dashboard',
-  ),
-  _NavItemData(
-    icon: Icons.people_outlined,
-    activeIcon: Icons.people,
-    label: 'Students',
-  ),
-  _NavItemData(
-    icon: Icons.fact_check_outlined,
-    activeIcon: Icons.fact_check,
-    label: 'Attendance',
-  ),
-  _NavItemData(
-    icon: Icons.payment_outlined,
-    activeIcon: Icons.payment,
-    label: 'Fees',
-  ),
-  _NavItemData(
-    icon: Icons.library_books_outlined,
-    activeIcon: Icons.library_books,
-    label: 'Library',
-  ),
-  _NavItemData(
-    icon: Icons.directions_bus_outlined,
-    activeIcon: Icons.directions_bus,
-    label: 'Transport',
-  ),
-  _NavItemData(
-    icon: Icons.apartment_outlined,
-    activeIcon: Icons.apartment,
-    label: 'Hostel',
-  ),
-  _NavItemData(
-    icon: Icons.restaurant_outlined,
-    activeIcon: Icons.restaurant,
-    label: 'Canteen',
-  ),
-  _NavItemData(
-    icon: Icons.message_outlined,
-    activeIcon: Icons.message,
-    label: 'Messages',
-  ),
-];
+// Shared navigation items
+const _dashboardItem = _NavItemData(
+  icon: Icons.dashboard_outlined, activeIcon: Icons.dashboard, label: 'Dashboard',
+);
+const _attendanceItem = _NavItemData(
+  icon: Icons.fact_check_outlined, activeIcon: Icons.fact_check, label: 'Attendance',
+);
+const _studentsItem = _NavItemData(
+  icon: Icons.people_outlined, activeIcon: Icons.people, label: 'Students',
+);
+const _feesItem = _NavItemData(
+  icon: Icons.payment_outlined, activeIcon: Icons.payment, label: 'Fees',
+);
+const _examsItem = _NavItemData(
+  icon: Icons.assignment_outlined, activeIcon: Icons.assignment, label: 'Exams',
+);
+const _resultsItem = _NavItemData(
+  icon: Icons.assignment_outlined, activeIcon: Icons.assignment, label: 'Results',
+);
 
-const _teacherNavItems = [
-  _NavItemData(
-    icon: Icons.dashboard_outlined,
-    activeIcon: Icons.dashboard,
-    label: 'Dashboard',
-  ),
-  _NavItemData(
-    icon: Icons.fact_check_outlined,
-    activeIcon: Icons.fact_check,
-    label: 'Attendance',
-  ),
-  _NavItemData(
-    icon: Icons.assignment_outlined,
-    activeIcon: Icons.assignment,
-    label: 'Exams',
-  ),
-  _NavItemData(
-    icon: Icons.library_books_outlined,
-    activeIcon: Icons.library_books,
-    label: 'Library',
-  ),
-  _NavItemData(
-    icon: Icons.directions_bus_outlined,
-    activeIcon: Icons.directions_bus,
-    label: 'Transport',
-  ),
-  _NavItemData(
-    icon: Icons.apartment_outlined,
-    activeIcon: Icons.apartment,
-    label: 'Hostel',
-  ),
-  _NavItemData(
-    icon: Icons.restaurant_outlined,
-    activeIcon: Icons.restaurant,
-    label: 'Canteen',
-  ),
-  _NavItemData(
-    icon: Icons.message_outlined,
-    activeIcon: Icons.message,
-    label: 'Messages',
-  ),
-];
-
-const _studentNavItems = [
-  _NavItemData(
-    icon: Icons.dashboard_outlined,
-    activeIcon: Icons.dashboard,
-    label: 'Dashboard',
-  ),
-  _NavItemData(
-    icon: Icons.fact_check_outlined,
-    activeIcon: Icons.fact_check,
-    label: 'Attendance',
-  ),
-  _NavItemData(
-    icon: Icons.assignment_outlined,
-    activeIcon: Icons.assignment,
-    label: 'Results',
-  ),
-  _NavItemData(
-    icon: Icons.library_books_outlined,
-    activeIcon: Icons.library_books,
-    label: 'Library',
-  ),
-  _NavItemData(
-    icon: Icons.directions_bus_outlined,
-    activeIcon: Icons.directions_bus,
-    label: 'Transport',
-  ),
-  _NavItemData(
-    icon: Icons.apartment_outlined,
-    activeIcon: Icons.apartment,
-    label: 'Hostel',
-  ),
-  _NavItemData(
-    icon: Icons.restaurant_outlined,
-    activeIcon: Icons.restaurant,
-    label: 'Canteen',
-  ),
-  _NavItemData(
-    icon: Icons.message_outlined,
-    activeIcon: Icons.message,
-    label: 'Messages',
-  ),
-];
-
-const _parentNavItems = [
-  _NavItemData(
-    icon: Icons.dashboard_outlined,
-    activeIcon: Icons.dashboard,
-    label: 'Dashboard',
-  ),
-  _NavItemData(
-    icon: Icons.fact_check_outlined,
-    activeIcon: Icons.fact_check,
-    label: 'Attendance',
-  ),
-  _NavItemData(
-    icon: Icons.payment_outlined,
-    activeIcon: Icons.payment,
-    label: 'Fees',
-  ),
-  _NavItemData(
-    icon: Icons.library_books_outlined,
-    activeIcon: Icons.library_books,
-    label: 'Library',
-  ),
-  _NavItemData(
-    icon: Icons.directions_bus_outlined,
-    activeIcon: Icons.directions_bus,
-    label: 'Transport',
-  ),
-  _NavItemData(
-    icon: Icons.apartment_outlined,
-    activeIcon: Icons.apartment,
-    label: 'Hostel',
-  ),
-  _NavItemData(
-    icon: Icons.restaurant_outlined,
-    activeIcon: Icons.restaurant,
-    label: 'Canteen',
-  ),
-  _NavItemData(
-    icon: Icons.message_outlined,
-    activeIcon: Icons.message,
-    label: 'Messages',
-  ),
+const _commonTrailingItems = [
+  _NavItemData(icon: Icons.library_books_outlined, activeIcon: Icons.library_books, label: 'Library'),
+  _NavItemData(icon: Icons.directions_bus_outlined, activeIcon: Icons.directions_bus, label: 'Transport'),
+  _NavItemData(icon: Icons.apartment_outlined, activeIcon: Icons.apartment, label: 'Hostel'),
+  _NavItemData(icon: Icons.restaurant_outlined, activeIcon: Icons.restaurant, label: 'Canteen'),
+  _NavItemData(icon: Icons.message_outlined, activeIcon: Icons.message, label: 'Messages'),
 ];

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 
 class TenantDetailScreen extends ConsumerStatefulWidget {
@@ -71,7 +72,7 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+                    colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
                   ),
                 ),
                 child: SafeArea(
@@ -97,7 +98,7 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(_tenant['name'], style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                                  Text('${_tenant['subdomain']}.schoolsaas.com', style: TextStyle(color: Colors.white.withOpacity(0.8))),
+                                  Text('${_tenant['subdomain']}.schoolsaas.com', style: TextStyle(color: Colors.white.withValues(alpha: 0.8))),
                                 ],
                               ),
                             ),
@@ -239,7 +240,7 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: _tenant['storageUsed'] / _tenant['storageLimit'],
-                    backgroundColor: Colors.grey.withOpacity(0.2),
+                    backgroundColor: Colors.grey.withValues(alpha: 0.2),
                     valueColor: const AlwaysStoppedAnimation(AppColors.info),
                     minHeight: 8,
                   ),
@@ -280,7 +281,7 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
         const Text('Recent Users', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: 12),
         ...List.generate(5, (i) => ListTile(
-          leading: CircleAvatar(backgroundColor: AppColors.primary.withOpacity(0.1), child: Text('U${i + 1}')),
+          leading: CircleAvatar(backgroundColor: AppColors.primary.withValues(alpha: 0.1), child: Text('U${i + 1}')),
           title: Text('User ${i + 1}'),
           subtitle: Text(i % 2 == 0 ? 'Teacher' : 'Admin'),
           trailing: Text('Active ${i + 1}h ago', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
@@ -344,7 +345,7 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: AppColors.success.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                  decoration: BoxDecoration(color: AppColors.success.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
                   child: const Icon(Icons.check_circle, color: AppColors.success, size: 20),
                 ),
                 const SizedBox(width: 12),
@@ -425,7 +426,7 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
         break;
       case 'activate':
         setState(() => _tenant['status'] = 'active');
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tenant activated'), backgroundColor: AppColors.success));
+        context.showSuccessSnackBar('Tenant activated');
         break;
       case 'delete':
         _showConfirmDialog('Delete Tenant', 'This will permanently delete all data. This action cannot be undone.', AppColors.error, () {
@@ -533,7 +534,7 @@ class _UserTypeCard extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
             child: Icon(icon, color: color),
           ),
           const SizedBox(width: 16),

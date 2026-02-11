@@ -113,7 +113,7 @@ class StudentHealthProfileScreen extends ConsumerWidget {
                           children: record.allergies
                               .map((a) => Chip(
                                     label: Text(a),
-                                    backgroundColor: Colors.red.withOpacity(0.1),
+                                    backgroundColor: Colors.red.withValues(alpha: 0.1),
                                     labelStyle: const TextStyle(color: Colors.red),
                                   ))
                               .toList(),
@@ -132,7 +132,7 @@ class StudentHealthProfileScreen extends ConsumerWidget {
                           children: record.chronicConditions
                               .map((c) => Chip(
                                     label: Text(c),
-                                    backgroundColor: Colors.orange.withOpacity(0.1),
+                                    backgroundColor: Colors.orange.withValues(alpha: 0.1),
                                     labelStyle: const TextStyle(color: Colors.orange),
                                   ))
                               .toList(),
@@ -445,7 +445,7 @@ class _SeverityIcon extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
       child: Icon(icon, color: color),

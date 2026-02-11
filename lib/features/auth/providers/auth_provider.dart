@@ -3,12 +3,8 @@ import 'dart:developer' as developer;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/user.dart';
-
-/// Supabase client provider
-final supabaseProvider = Provider<SupabaseClient>((ref) {
-  return Supabase.instance.client;
-});
 
 /// Auth state provider (Supabase session)
 final authStateProvider = StreamProvider<Session?>((ref) {

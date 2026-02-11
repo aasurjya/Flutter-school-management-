@@ -39,7 +39,7 @@ class BookDetailScreen extends ConsumerWidget {
                         color: Theme.of(context).colorScheme.surfaceContainerHighest,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -90,8 +90,8 @@ class BookDetailScreen extends ConsumerWidget {
                             ),
                             decoration: BoxDecoration(
                               color: book.isAvailable
-                                  ? Colors.green.withOpacity(0.1)
-                                  : Colors.red.withOpacity(0.1),
+                                  ? Colors.green.withValues(alpha: 0.1)
+                                  : Colors.red.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(

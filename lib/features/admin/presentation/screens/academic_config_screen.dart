@@ -80,7 +80,7 @@ class _AcademicConfigScreenState extends ConsumerState<AcademicConfigScreen> {
                     ),
                   ),
                   selected: isSelected,
-                  selectedTileColor: AppColors.primary.withOpacity(0.1),
+                  selectedTileColor: AppColors.primary.withValues(alpha: 0.1),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -151,8 +151,8 @@ class _AcademicYearsConfig extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: item['isCurrent'] == true 
-                ? AppColors.success.withOpacity(0.1)
-                : Colors.grey.withOpacity(0.1),
+                ? AppColors.success.withValues(alpha: 0.1)
+                : Colors.grey.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -253,7 +253,7 @@ class _TermsConfig extends StatelessWidget {
       items: terms,
       itemBuilder: (item) => ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.info.withOpacity(0.1),
+          backgroundColor: AppColors.info.withValues(alpha: 0.1),
           child: const Icon(Icons.date_range, color: AppColors.info),
         ),
         title: Text(item['name'] as String),
@@ -295,7 +295,7 @@ class _ClassesConfig extends StatelessWidget {
       items: classes,
       itemBuilder: (item) => ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.primary.withOpacity(0.1),
+          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
           child: Text(
             '${item['displayOrder']}',
             style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
@@ -343,8 +343,8 @@ class _SectionsConfig extends StatelessWidget {
         return ListTile(
           leading: CircleAvatar(
             backgroundColor: isFull 
-                ? AppColors.warning.withOpacity(0.1)
-                : AppColors.success.withOpacity(0.1),
+                ? AppColors.warning.withValues(alpha: 0.1)
+                : AppColors.success.withValues(alpha: 0.1),
             child: Text(
               (item['name'] as String).split(' ').last,
               style: TextStyle(
@@ -362,7 +362,7 @@ class _SectionsConfig extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.1),
+                    color: AppColors.warning.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: const Text(
@@ -407,7 +407,7 @@ class _SubjectsConfig extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: _getSubjectColor(item['type'] as String).withOpacity(0.1),
+            color: _getSubjectColor(item['type'] as String).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -427,7 +427,7 @@ class _SubjectsConfig extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: _getSubjectColor(item['type'] as String).withOpacity(0.1),
+                color: _getSubjectColor(item['type'] as String).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -527,7 +527,7 @@ class _GradingScalesConfig extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _getGradeColor(g['grade'] as String).withOpacity(0.1),
+                            color: _getGradeColor(g['grade'] as String).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 
 class MarksEntryScreen extends ConsumerStatefulWidget {
   final String examId;
@@ -58,7 +59,7 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
             padding: const EdgeInsets.all(16),
             color: Theme.of(context).brightness == Brightness.dark
                 ? Colors.black12
-                : AppColors.primary.withOpacity(0.05),
+                : AppColors.primary.withValues(alpha: 0.05),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -121,7 +122,7 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
               ),
             ),
             child: Row(
@@ -225,12 +226,7 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
     }
 
     if (hasErrors) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter valid marks (0-100)'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      context.showErrorSnackBar('Please enter valid marks (0-100)');
       return;
     }
 
@@ -240,22 +236,12 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
       await Future.delayed(const Duration(seconds: 1));
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Marks submitted successfully'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        context.showSuccessSnackBar('Marks submitted successfully');
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to submit: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        context.showErrorSnackBar('Failed to submit: $e');
       }
     } finally {
       if (mounted) {
@@ -278,7 +264,7 @@ class _InfoChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -362,7 +348,7 @@ class _MarksEntryCard extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
@@ -407,10 +393,10 @@ class _MarksEntryCard extends StatelessWidget {
                   ),
                   filled: true,
                   fillColor: controller.text.isEmpty
-                      ? Colors.grey.withOpacity(0.05)
+                      ? Colors.grey.withValues(alpha: 0.05)
                       : isPassing
-                          ? AppColors.success.withOpacity(0.05)
-                          : AppColors.error.withOpacity(0.05),
+                          ? AppColors.success.withValues(alpha: 0.05)
+                          : AppColors.error.withValues(alpha: 0.05),
                 ),
                 onChanged: onChanged,
               ),

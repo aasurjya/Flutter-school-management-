@@ -84,7 +84,7 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            color: AppColors.primary.withOpacity(0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search students...',
@@ -194,7 +194,7 @@ class _StudentCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: AppColors.primary.withOpacity(0.1),
+                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                 child: Text(
                   student['name'].split(' ').map((n) => n[0]).take(2).join(),
                   style: const TextStyle(
@@ -332,7 +332,7 @@ class _StudentDetailSheet extends StatelessWidget {
                       ),
                       Text(
                         'Roll No: ${student['rollNo']}',
-                        style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                       ),
                     ],
                   ),
@@ -432,9 +432,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [

@@ -137,7 +137,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
                         CircularProgressIndicator(
                           value: percentage / 100,
                           strokeWidth: 10,
-                          backgroundColor: Colors.grey.withOpacity(0.2),
+                          backgroundColor: Colors.grey.withValues(alpha: 0.2),
                           valueColor: AlwaysStoppedAnimation(_getGradeColor(grade)),
                         ),
                         Column(
@@ -252,7 +252,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
                         width: 50,
                         height: 50,
                         decoration: BoxDecoration(
-                          color: _getGradeColor(grade).withOpacity(0.1),
+                          color: _getGradeColor(grade).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Center(
@@ -282,7 +282,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
                                     borderRadius: BorderRadius.circular(4),
                                     child: LinearProgressIndicator(
                                       value: percentage / 100,
-                                      backgroundColor: Colors.grey.withOpacity(0.2),
+                                      backgroundColor: Colors.grey.withValues(alpha: 0.2),
                                       valueColor: AlwaysStoppedAnimation(
                                         isPassed ? AppColors.success : AppColors.error,
                                       ),
@@ -402,7 +402,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
                       show: true,
                       horizontalInterval: 25,
                       getDrawingHorizontalLine: (value) {
-                        return FlLine(color: Colors.grey.withOpacity(0.2), strokeWidth: 1);
+                        return FlLine(color: Colors.grey.withValues(alpha: 0.2), strokeWidth: 1);
                       },
                       drawVerticalLine: false,
                     ),
@@ -421,7 +421,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
                           ),
                           BarChartRodData(
                             toY: avgEstimate.clamp(0, 100),
-                            color: Colors.grey.withOpacity(0.5),
+                            color: Colors.grey.withValues(alpha: 0.5),
                             width: 12,
                             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                           ),
@@ -438,7 +438,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
               children: [
                 _buildLegendItem(AppColors.primary, 'Your Child'),
                 const SizedBox(width: 24),
-                _buildLegendItem(Colors.grey.withOpacity(0.5), 'Class Average'),
+                _buildLegendItem(Colors.grey.withValues(alpha: 0.5), 'Class Average'),
               ],
             ),
           ],
@@ -488,7 +488,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
                   show: true,
                   horizontalInterval: 20,
                   getDrawingHorizontalLine: (value) {
-                    return FlLine(color: Colors.grey.withOpacity(0.2), strokeWidth: 1);
+                    return FlLine(color: Colors.grey.withValues(alpha: 0.2), strokeWidth: 1);
                   },
                   drawVerticalLine: false,
                 ),
@@ -536,7 +536,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
                     dotData: const FlDotData(show: true),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                     ),
                   ),
                 ],

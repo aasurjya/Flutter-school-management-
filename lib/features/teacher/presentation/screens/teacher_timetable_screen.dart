@@ -92,7 +92,7 @@ class _TeacherTimetableScreenState extends ConsumerState<TeacherTimetableScreen>
 
     return Container(
       padding: const EdgeInsets.all(16),
-      color: AppColors.primary.withOpacity(0.05),
+      color: AppColors.primary.withValues(alpha: 0.05),
       child: Row(
         children: [
           Icon(Icons.calendar_today, color: AppColors.primary, size: 20),
@@ -101,13 +101,13 @@ class _TeacherTimetableScreenState extends ConsumerState<TeacherTimetableScreen>
           const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
             child: Text('$classCount classes', style: const TextStyle(fontSize: 12, color: AppColors.primary)),
           ),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: AppColors.success.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: AppColors.success.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
             child: Text('$freeCount free', style: const TextStyle(fontSize: 12, color: AppColors.success)),
           ),
         ],
@@ -175,14 +175,14 @@ class _PeriodCard extends StatelessWidget {
                     width: 80,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
                     ),
                     child: Column(
                       children: [
                         Text(_formatTime(entry['startTime']), style: TextStyle(fontWeight: FontWeight.bold, color: color)),
-                        Container(width: 1, height: 16, color: color.withOpacity(0.3)),
-                        Text(_formatTime(entry['endTime']), style: TextStyle(fontSize: 12, color: color.withOpacity(0.8))),
+                        Container(width: 1, height: 16, color: color.withValues(alpha: 0.3)),
+                        Text(_formatTime(entry['endTime']), style: TextStyle(fontSize: 12, color: color.withValues(alpha: 0.8))),
                       ],
                     ),
                   ),
@@ -196,14 +196,14 @@ class _PeriodCard extends StatelessWidget {
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                                decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
                                 child: Text('Period ${entry['period']}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: color)),
                               ),
                               if (isBreak) ...[
                                 const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                                  decoration: BoxDecoration(color: Colors.orange.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
                                   child: const Text('BREAK', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.orange)),
                                 ),
                               ],
@@ -211,7 +211,7 @@ class _PeriodCard extends StatelessWidget {
                                 const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(color: AppColors.success.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                                  decoration: BoxDecoration(color: AppColors.success.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
                                   child: const Text('FREE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.success)),
                                 ),
                               ],

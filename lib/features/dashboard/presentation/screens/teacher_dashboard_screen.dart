@@ -119,7 +119,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                 Text(
                                   'Good Morning,',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
+                                    color: Colors.white.withValues(alpha: 0.8),
                                     fontSize: 14,
                                   ),
                                 ),
@@ -229,17 +229,17 @@ class TeacherDashboardScreen extends ConsumerWidget {
             margin: EdgeInsets.only(right: index < schedule.length - 1 ? 12 : 0),
             decoration: BoxDecoration(
               gradient: isCurrent ? AppColors.primaryGradient : null,
-              color: isBreak ? AppColors.warning.withOpacity(0.1) : (isCurrent ? null : Colors.white),
+              color: isBreak ? AppColors.warning.withValues(alpha: 0.1) : (isCurrent ? null : Colors.white),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isCurrent
                     ? Colors.transparent
-                    : (isBreak ? AppColors.warning : Colors.grey.withOpacity(0.2)),
+                    : (isBreak ? AppColors.warning : Colors.grey.withValues(alpha: 0.2)),
               ),
               boxShadow: isCurrent
                   ? [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.3),
+                        color: AppColors.primary.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -308,7 +308,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,7 +331,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.success.withOpacity(0.1),
+                          color: AppColors.success.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -394,7 +394,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
             leading: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.1),
+                color: AppColors.warning.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(task['icon'] as IconData, color: AppColors.warning, size: 20),

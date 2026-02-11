@@ -263,7 +263,7 @@ class AssignmentRepository extends BaseRepository {
   }) {
     return subscribeToTable(
       'assignments',
-      filter: 'section_id=eq.$sectionId',
+      filter: (column: 'section_id', value: sectionId),
       onInsert: onUpdate,
       onUpdate: onUpdate,
     );

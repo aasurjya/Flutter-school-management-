@@ -270,7 +270,7 @@ class _ChatItem extends StatelessWidget {
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(vertical: 4),
       leading: CircleAvatar(
-        backgroundColor: avatarColor.withOpacity(0.1),
+        backgroundColor: avatarColor.withValues(alpha: 0.1),
         child: Icon(
           isGroup ? Icons.group : Icons.person,
           color: avatarColor,
@@ -361,7 +361,7 @@ class _AnnouncementCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   margin: const EdgeInsets.only(right: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.error.withOpacity(0.1),
+                    color: AppColors.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: const Text(
@@ -439,10 +439,10 @@ class _NotificationItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isRead ? Colors.white : AppColors.primary.withOpacity(0.05),
+        color: isRead ? Colors.white : AppColors.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isRead ? Colors.grey.withOpacity(0.2) : AppColors.primary.withOpacity(0.2),
+          color: isRead ? Colors.grey.withValues(alpha: 0.2) : AppColors.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -451,7 +451,7 @@ class _NotificationItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(iconData, color: color, size: 20),
@@ -539,7 +539,7 @@ class _ChatDetailScreen extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundColor: AppColors.primary.withOpacity(0.1),
+              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
               child: Icon(
                 isGroup ? Icons.group : Icons.person,
                 color: AppColors.primary,
@@ -602,7 +602,7 @@ class _ChatDetailScreen extends StatelessWidget {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),
@@ -624,7 +624,7 @@ class _ChatDetailScreen extends StatelessWidget {
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: Colors.grey.withOpacity(0.1),
+                        fillColor: Colors.grey.withValues(alpha: 0.1),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 8,
@@ -674,7 +674,7 @@ class _MessageBubble extends StatelessWidget {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isMe ? AppColors.primary : Colors.grey.withOpacity(0.1),
+          color: isMe ? AppColors.primary : Colors.grey.withValues(alpha: 0.1),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),

@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/student.dart';
 import '../../../data/repositories/student_repository.dart';
 
 final studentRepositoryProvider = Provider<StudentRepository>((ref) {
-  return StudentRepository(Supabase.instance.client);
+  return StudentRepository(ref.watch(supabaseProvider));
 });
 
 final studentsProvider = FutureProvider.family<List<Student>, StudentsFilter>(
@@ -42,7 +42,7 @@ final parentChildrenProvider = FutureProvider.family<List<Map<String, dynamic>>,
 
 final currentStudentProvider = FutureProvider<Student?>((ref) async {
   final repository = ref.watch(studentRepositoryProvider);
-  final userId = Supabase.instance.client.auth.currentUser?.id;
+  final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
   if (userId == null) return null;
   return repository.getStudentByUserId(userId);
 });

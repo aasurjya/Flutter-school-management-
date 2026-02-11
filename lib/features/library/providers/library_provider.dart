@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/library.dart';
 import '../../../data/repositories/library_repository.dart';
 
 final libraryRepositoryProvider = Provider<LibraryRepository>((ref) {
-  return LibraryRepository(Supabase.instance.client);
+  return LibraryRepository(ref.watch(supabaseProvider));
 });
 
 // Books providers
@@ -47,7 +47,7 @@ final bookIssuesProvider = FutureProvider.family<List<BookIssue>, IssuesFilter>(
 
 final myBooksProvider = FutureProvider<List<BookIssue>>((ref) async {
   final repository = ref.watch(libraryRepositoryProvider);
-  final userId = Supabase.instance.client.auth.currentUser?.id;
+  final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
   if (userId == null) return [];
   return repository.getMyBooks(userId);
 });

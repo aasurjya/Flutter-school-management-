@@ -180,15 +180,15 @@ class _StatusBadge extends StatelessWidget {
     String text;
 
     if (issue.isOverdue) {
-      backgroundColor = Colors.red.withOpacity(0.1);
+      backgroundColor = Colors.red.withValues(alpha: 0.1);
       textColor = Colors.red;
       text = 'Overdue by ${issue.daysOverdue} days';
     } else if (issue.daysRemaining <= 3) {
-      backgroundColor = Colors.orange.withOpacity(0.1);
+      backgroundColor = Colors.orange.withValues(alpha: 0.1);
       textColor = Colors.orange;
       text = '${issue.daysRemaining} days remaining';
     } else {
-      backgroundColor = Colors.green.withOpacity(0.1);
+      backgroundColor = Colors.green.withValues(alpha: 0.1);
       textColor = Colors.green;
       text = '${issue.daysRemaining} days remaining';
     }

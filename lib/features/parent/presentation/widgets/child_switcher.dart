@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/providers/supabase_provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../students/providers/students_provider.dart';
@@ -12,7 +12,7 @@ class ChildSwitcher extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
     if (userId == null) {
       return const SizedBox.shrink();
     }
@@ -36,7 +36,7 @@ class ChildSwitcher extends ConsumerWidget {
             height: 80,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Center(
@@ -113,8 +113,8 @@ class _ChildCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected 
-              ? AppColors.primary.withOpacity(0.1) 
-              : Colors.grey.withOpacity(0.05),
+              ? AppColors.primary.withValues(alpha: 0.1) 
+              : Colors.grey.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? AppColors.primary : Colors.transparent,
@@ -123,7 +123,7 @@ class _ChildCard extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.2),
+                    color: AppColors.primary.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   )
@@ -209,7 +209,7 @@ class ChildSwitcherCompact extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
     if (userId == null) {
       return const SizedBox.shrink();
     }
@@ -233,7 +233,7 @@ class ChildSwitcherCompact extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -259,7 +259,7 @@ class ChildSwitcherCompact extends ConsumerWidget {
                   children: [
                     CircleAvatar(
                       radius: 16,
-                      backgroundColor: AppColors.primary.withOpacity(0.1),
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                       backgroundImage: child['photo_url'] != null
                           ? NetworkImage(child['photo_url'])
                           : null,

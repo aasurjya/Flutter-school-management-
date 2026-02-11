@@ -38,8 +38,8 @@ class HostelDetailScreen extends ConsumerWidget {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: hostel.type == 'boys'
-                                ? Colors.blue.withOpacity(0.1)
-                                : Colors.pink.withOpacity(0.1),
+                                ? Colors.blue.withValues(alpha: 0.1)
+                                : Colors.pink.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -244,7 +244,7 @@ class _RoomCard extends StatelessWidget {
 
     return Card(
       color: isFull
-          ? Colors.red.withOpacity(0.1)
+          ? Colors.red.withValues(alpha: 0.1)
           : Theme.of(context).colorScheme.surfaceContainerHighest,
       child: InkWell(
         onTap: () => _showRoomDetails(context),

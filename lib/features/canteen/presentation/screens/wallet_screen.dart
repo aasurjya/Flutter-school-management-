@@ -38,7 +38,7 @@ class WalletScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -211,8 +211,8 @@ class _TransactionsList extends ConsumerWidget {
             return ListTile(
               leading: CircleAvatar(
                 backgroundColor: txn.isCredit
-                    ? Colors.green.withOpacity(0.1)
-                    : Colors.red.withOpacity(0.1),
+                    ? Colors.green.withValues(alpha: 0.1)
+                    : Colors.red.withValues(alpha: 0.1),
                 child: Icon(
                   txn.isCredit
                       ? Icons.arrow_downward

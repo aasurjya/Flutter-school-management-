@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 
 import '../../../data/models/announcement.dart';
 import '../../../data/repositories/announcement_repository.dart';
 
 /// Repository provider
 final announcementRepositoryProvider = Provider<AnnouncementRepository>((ref) {
-  return AnnouncementRepository(Supabase.instance.client);
+  return AnnouncementRepository(ref.watch(supabaseProvider));
 });
 
 /// All announcements provider (for admin)

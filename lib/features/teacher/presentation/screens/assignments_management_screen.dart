@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../data/models/assignment.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../assignments/providers/assignments_provider.dart';
 
@@ -122,7 +124,7 @@ class _AssignmentsList extends ConsumerWidget {
     );
   }
 
-  void _showAssignmentDetail(BuildContext context, dynamic assignment) {
+  void _showAssignmentDetail(BuildContext context, Assignment assignment) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -133,7 +135,7 @@ class _AssignmentsList extends ConsumerWidget {
 }
 
 class _AssignmentCard extends StatelessWidget {
-  final dynamic assignment;
+  final Assignment assignment;
   final VoidCallback onTap;
 
   const _AssignmentCard({
@@ -187,7 +189,7 @@ class _AssignmentCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(assignment.status, isPastDue).withOpacity(0.1),
+                      color: _getStatusColor(assignment.status, isPastDue).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -224,7 +226,7 @@ class _AssignmentCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: submittedCount / totalStudents,
-                    backgroundColor: Colors.grey.withOpacity(0.2),
+                    backgroundColor: Colors.grey.withValues(alpha: 0.2),
                     valueColor: const AlwaysStoppedAnimation(AppColors.primary),
                     minHeight: 6,
                   ),
@@ -267,7 +269,7 @@ class _AssignmentCard extends StatelessWidget {
 }
 
 class _AssignmentDetailSheet extends ConsumerWidget {
-  final dynamic assignment;
+  final Assignment assignment;
 
   const _AssignmentDetailSheet({required this.assignment});
 
@@ -316,7 +318,7 @@ class _AssignmentDetailSheet extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   '${assignment.subjectName ?? ''} • ${assignment.sectionName ?? ''}',
-                  style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -337,7 +339,7 @@ class _AssignmentDetailSheet extends ConsumerWidget {
           if (assignment.status == 'draft')
             Container(
               padding: const EdgeInsets.all(12),
-              color: Colors.amber.withOpacity(0.1),
+              color: Colors.amber.withValues(alpha: 0.1),
               child: Row(
                 children: [
                   const Icon(Icons.info_outline, color: Colors.amber),
@@ -396,7 +398,7 @@ class _AssignmentDetailSheet extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -415,15 +417,11 @@ class _AssignmentDetailSheet extends ConsumerWidget {
       await ref.read(assignmentsNotifierProvider.notifier).publishAssignment(assignment.id);
       if (context.mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Assignment published'), backgroundColor: AppColors.success),
-        );
+        context.showSuccessSnackBar('Assignment published');
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
-        );
+        context.showErrorSnackBar('Error: $e');
       }
     }
   }
@@ -486,18 +484,11 @@ class _AssignmentDetailSheet extends ConsumerWidget {
                 );
                 if (context.mounted) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Submission graded'),
-                      backgroundColor: AppColors.success,
-                    ),
-                  );
+                  context.showSuccessSnackBar('Submission graded');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
-                  );
+                  context.showErrorSnackBar('Error: $e');
                 }
               }
             },
@@ -529,7 +520,7 @@ class _SubmissionCard extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: AppColors.primary.withOpacity(0.1),
+            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             child: Text(
               (submission.studentName ?? 'S')[0].toUpperCase(),
               style: const TextStyle(
@@ -558,7 +549,7 @@ class _SubmissionCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.warning.withOpacity(0.1),
+                          color: AppColors.warning.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(
@@ -585,7 +576,7 @@ class _SubmissionCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.1),
+                color: AppColors.success.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -812,18 +803,11 @@ class _CreateAssignmentSheetState extends ConsumerState<_CreateAssignmentSheet> 
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(publish ? 'Assignment published' : 'Draft saved'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        context.showSuccessSnackBar(publish ? 'Assignment published' : 'Draft saved');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
-        );
+        context.showErrorSnackBar('Error: $e');
       }
     } finally {
       if (mounted) {

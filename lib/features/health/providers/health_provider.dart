@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/health_record.dart';
 import '../../../data/repositories/health_repository.dart';
 
 final healthRepositoryProvider = Provider<HealthRepository>((ref) {
-  return HealthRepository(Supabase.instance.client);
+  return HealthRepository(ref.watch(supabaseProvider));
 });
 
 // Health record providers

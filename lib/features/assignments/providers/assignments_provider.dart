@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/assignment.dart';
 import '../../../data/repositories/assignment_repository.dart';
 
 final assignmentRepositoryProvider = Provider<AssignmentRepository>((ref) {
-  return AssignmentRepository(Supabase.instance.client);
+  return AssignmentRepository(ref.watch(supabaseProvider));
 });
 
 final assignmentsProvider = FutureProvider.family<List<Assignment>, AssignmentsFilter>(

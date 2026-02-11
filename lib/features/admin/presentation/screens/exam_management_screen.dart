@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 
 class ExamManagementScreen extends ConsumerStatefulWidget {
@@ -129,7 +130,7 @@ class _ExamManagementScreenState extends ConsumerState<ExamManagementScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.1),
+                    color: AppColors.success.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Row(
@@ -182,9 +183,7 @@ class _ExamManagementScreenState extends ConsumerState<ExamManagementScreen>
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Results published successfully'), backgroundColor: AppColors.success),
-              );
+              context.showSuccessSnackBar('Results published successfully');
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
             child: const Text('Publish'),
@@ -229,7 +228,7 @@ class _ExamCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(status).withOpacity(0.1),
+                      color: _getStatusColor(status).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -267,7 +266,7 @@ class _ExamCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.info.withOpacity(0.1),
+                      color: AppColors.info.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -348,7 +347,7 @@ class _ExamDetailSheet extends StatelessWidget {
                       ),
                       Text(
                         '${DateFormat('MMM d').format(exam['startDate'])} - ${DateFormat('MMM d, yyyy').format(exam['endDate'])}',
-                        style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                       ),
                     ],
                   ),
@@ -558,9 +557,7 @@ class _CreateExamSheetState extends ConsumerState<_CreateExamSheet> {
     await Future.delayed(const Duration(seconds: 1));
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Exam created successfully'), backgroundColor: AppColors.success),
-      );
+      context.showSuccessSnackBar('Exam created successfully');
     }
   }
 }

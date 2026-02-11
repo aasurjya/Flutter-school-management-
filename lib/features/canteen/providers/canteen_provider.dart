@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/canteen.dart';
 import '../../../data/repositories/canteen_repository.dart';
 
 final canteenRepositoryProvider = Provider<CanteenRepository>((ref) {
-  return CanteenRepository(Supabase.instance.client);
+  return CanteenRepository(ref.watch(supabaseProvider));
 });
 
 // Menu providers
@@ -30,7 +30,7 @@ final walletProvider = FutureProvider.family<Wallet?, WalletFilter>(
 
 final currentUserWalletProvider = FutureProvider<Wallet?>((ref) async {
   final repository = ref.watch(canteenRepositoryProvider);
-  final userId = Supabase.instance.client.auth.currentUser?.id;
+  final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
   if (userId == null) return null;
   return repository.getOrCreateWallet(userId: userId);
 });

@@ -208,7 +208,7 @@ class _AnalyticsTab extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -244,7 +244,7 @@ class _AnalyticsTab extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Row(
@@ -307,8 +307,8 @@ class _ExamCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: isOngoing
-                      ? AppColors.success.withOpacity(0.1)
-                      : AppColors.info.withOpacity(0.1),
+                      ? AppColors.success.withValues(alpha: 0.1)
+                      : AppColors.info.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -434,7 +434,7 @@ class _ResultCard extends StatelessWidget {
                       flex: 3,
                       child: LinearProgressIndicator(
                         value: (s['marks'] as int) / (s['total'] as int),
-                        backgroundColor: Colors.grey.withOpacity(0.2),
+                        backgroundColor: Colors.grey.withValues(alpha: 0.2),
                         valueColor: AlwaysStoppedAnimation(
                           (s['marks'] as int) >= 80 ? AppColors.success : AppColors.warning,
                         ),
@@ -492,7 +492,7 @@ class _SubjectPerformanceCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -504,7 +504,7 @@ class _SubjectPerformanceCard extends StatelessWidget {
             flex: 2,
             child: LinearProgressIndicator(
               value: score / 100,
-              backgroundColor: Colors.grey.withOpacity(0.2),
+              backgroundColor: Colors.grey.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation(
                 score >= 80 ? AppColors.success : AppColors.warning,
               ),

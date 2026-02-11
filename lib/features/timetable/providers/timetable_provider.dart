@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/timetable.dart';
 import '../../../data/repositories/timetable_repository.dart';
 
 final timetableRepositoryProvider = Provider<TimetableRepository>((ref) {
-  return TimetableRepository(Supabase.instance.client);
+  return TimetableRepository(ref.watch(supabaseProvider));
 });
 
 final timetableSlotsProvider = FutureProvider<List<TimetableSlot>>((ref) async {

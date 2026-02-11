@@ -287,7 +287,7 @@ class MessageRepository extends BaseRepository {
   }) {
     return subscribeToTable(
       'messages',
-      filter: 'thread_id=eq.$threadId',
+      filter: (column: 'thread_id', value: threadId),
       onInsert: onNewMessage,
     );
   }
@@ -297,7 +297,7 @@ class MessageRepository extends BaseRepository {
   }) {
     return subscribeToTable(
       'announcements',
-      filter: 'tenant_id=eq.$tenantId',
+      filter: (column: 'tenant_id', value: tenantId ?? ''),
       onInsert: onNewAnnouncement,
     );
   }

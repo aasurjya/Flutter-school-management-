@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/hostel.dart';
 import '../../../data/repositories/hostel_repository.dart';
 
 final hostelRepositoryProvider = Provider<HostelRepository>((ref) {
-  return HostelRepository(Supabase.instance.client);
+  return HostelRepository(ref.watch(supabaseProvider));
 });
 
 // Hostels providers
@@ -55,7 +55,7 @@ final allocationsProvider = FutureProvider.family<List<RoomAllocation>, Allocati
 
 final myHostelProvider = FutureProvider<RoomAllocation?>((ref) async {
   final repository = ref.watch(hostelRepositoryProvider);
-  final userId = Supabase.instance.client.auth.currentUser?.id;
+  final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
   if (userId == null) return null;
   return repository.getMyHostel(userId);
 });

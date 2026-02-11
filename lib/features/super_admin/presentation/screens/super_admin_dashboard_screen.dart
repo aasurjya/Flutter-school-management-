@@ -136,7 +136,7 @@ class SuperAdminDashboardScreen extends ConsumerWidget {
                 gridData: FlGridData(
                   show: true,
                   horizontalInterval: 25,
-                  getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey.withOpacity(0.2), strokeWidth: 1),
+                  getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey.withValues(alpha: 0.2), strokeWidth: 1),
                   drawVerticalLine: false,
                 ),
                 titlesData: FlTitlesData(
@@ -175,7 +175,7 @@ class SuperAdminDashboardScreen extends ConsumerWidget {
                     color: AppColors.primary,
                     barWidth: 3,
                     dotData: const FlDotData(show: true),
-                    belowBarData: BarAreaData(show: true, color: AppColors.primary.withOpacity(0.1)),
+                    belowBarData: BarAreaData(show: true, color: AppColors.primary.withValues(alpha: 0.1)),
                   ),
                 ],
               ),
@@ -209,7 +209,7 @@ class SuperAdminDashboardScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.info.withOpacity(0.1),
+                      color: AppColors.info.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(Icons.history, size: 16, color: AppColors.info),
@@ -258,7 +258,7 @@ class _StatCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
+                  color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(trend, style: const TextStyle(fontSize: 10, color: AppColors.success)),
@@ -319,7 +319,7 @@ class _TenantListItem extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: AppColors.primary.withOpacity(0.1),
+            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             child: Text(
               tenant['name'].toString().substring(0, 1),
               style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
@@ -338,7 +338,7 @@ class _TenantListItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? AppColors.success.withOpacity(0.1) : (isTrial ? AppColors.warning.withOpacity(0.1) : Colors.grey.withOpacity(0.1)),
+              color: isActive ? AppColors.success.withValues(alpha: 0.1) : (isTrial ? AppColors.warning.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1)),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(

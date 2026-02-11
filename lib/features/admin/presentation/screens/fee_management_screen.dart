@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../data/models/invoice.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../fees/providers/fees_provider.dart';
@@ -168,7 +169,7 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.success.withOpacity(0.1),
+              color: AppColors.success.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.check_circle, color: AppColors.success, size: 20),
@@ -230,7 +231,7 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
+                            color: AppColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(fh.code!, style: const TextStyle(fontSize: 12, color: AppColors.primary)),
@@ -259,7 +260,7 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(label, style: TextStyle(fontSize: 11, color: color)),
@@ -322,7 +323,7 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: isOverdue ? AppColors.error.withOpacity(0.1) : AppColors.warning.withOpacity(0.1),
+                              color: isOverdue ? AppColors.error.withValues(alpha: 0.1) : AppColors.warning.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -431,9 +432,7 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Invoices generated'), backgroundColor: AppColors.success),
-              );
+              context.showSuccessSnackBar('Invoices generated');
             },
             child: const Text('Generate'),
           ),
@@ -506,7 +505,7 @@ class _ActionButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.primary.withOpacity(0.1),
+          color: AppColors.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -577,9 +576,7 @@ class _RecordPaymentSheetState extends State<_RecordPaymentSheet> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Payment recorded'), backgroundColor: AppColors.success),
-                  );
+                  context.showSuccessSnackBar('Payment recorded');
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.success, padding: const EdgeInsets.symmetric(vertical: 16)),
                 child: const Text('Record Payment'),

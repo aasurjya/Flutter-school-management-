@@ -221,10 +221,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                 height: 40,
                 decoration: BoxDecoration(
                   color: isPresent
-                      ? AppColors.success.withOpacity(0.1)
+                      ? AppColors.success.withValues(alpha: 0.1)
                       : isAbsent
-                          ? AppColors.error.withOpacity(0.1)
-                          : Colors.grey.withOpacity(0.1),
+                          ? AppColors.error.withValues(alpha: 0.1)
+                          : Colors.grey.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                   border: isToday
                       ? Border.all(color: AppColors.primary, width: 2)
@@ -378,7 +378,7 @@ class _ClassAttendanceCard extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.class_, color: AppColors.primary),
@@ -406,8 +406,8 @@ class _ClassAttendanceCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: isMarked
-                      ? AppColors.success.withOpacity(0.1)
-                      : AppColors.warning.withOpacity(0.1),
+                      ? AppColors.success.withValues(alpha: 0.1)
+                      : AppColors.warning.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -461,7 +461,7 @@ class _AttendanceStat extends StatelessWidget {
         ),
         Text(
           label,
-          style: TextStyle(fontSize: 12, color: color.withOpacity(0.8)),
+          style: TextStyle(fontSize: 12, color: color.withValues(alpha: 0.8)),
         ),
       ],
     );
@@ -490,7 +490,7 @@ class _AttendanceHistoryItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -586,7 +586,7 @@ class _ClassReportItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -610,8 +610,8 @@ class _ClassReportItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: percentage >= 90
-                  ? AppColors.success.withOpacity(0.1)
-                  : AppColors.warning.withOpacity(0.1),
+                  ? AppColors.success.withValues(alpha: 0.1)
+                  : AppColors.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(

@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/exam_statistics.dart';
 import '../../../data/repositories/exam_repository.dart';
 
 final examRepositoryProvider = Provider<ExamRepository>((ref) {
-  return ExamRepository(Supabase.instance.client);
+  return ExamRepository(ref.watch(supabaseProvider));
 });
 
 final examsProvider = FutureProvider.family<List<Exam>, ExamsFilter>(

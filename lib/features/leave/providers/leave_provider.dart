@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/leave.dart';
 import '../../../data/repositories/leave_repository.dart';
 
 final leaveRepositoryProvider = Provider<LeaveRepository>((ref) {
-  return LeaveRepository(Supabase.instance.client);
+  return LeaveRepository(ref.watch(supabaseProvider));
 });
 
 final leaveApplicationsProvider =

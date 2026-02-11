@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/report_card.dart';
 import '../../../data/repositories/report_card_repository.dart';
 
 final reportCardRepositoryProvider = Provider<ReportCardRepository>((ref) {
-  return ReportCardRepository(Supabase.instance.client);
+  return ReportCardRepository(ref.watch(supabaseProvider));
 });
 
 final reportCardsProvider =

@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/ptm.dart';
 import '../../../data/repositories/ptm_repository.dart';
 
 final ptmRepositoryProvider = Provider<PTMRepository>((ref) {
-  return PTMRepository(Supabase.instance.client);
+  return PTMRepository(ref.watch(supabaseProvider));
 });
 
 // ==================== PTM SCHEDULE PROVIDERS ====================

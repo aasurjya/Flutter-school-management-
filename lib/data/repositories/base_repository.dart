@@ -19,50 +19,46 @@ abstract class BaseRepository {
     required void Function(PostgresChangePayload payload) onInsert,
     void Function(PostgresChangePayload payload)? onUpdate,
     void Function(PostgresChangePayload payload)? onDelete,
-    String? filter,
+    ({String column, String value})? filter,
   }) {
     var channel = _client.channel('public:$table');
-    
+
+    final pgFilter = filter != null
+        ? PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: filter.column,
+            value: filter.value,
+          )
+        : null;
+
     channel = channel.onPostgresChanges(
       event: PostgresChangeEvent.insert,
       schema: 'public',
       table: table,
-      filter: filter != null ? PostgresChangeFilter(
-        type: PostgresChangeFilterType.eq,
-        column: filter.split('=').first,
-        value: filter.split('=').last,
-      ) : null,
+      filter: pgFilter,
       callback: onInsert,
     );
-    
+
     if (onUpdate != null) {
       channel = channel.onPostgresChanges(
         event: PostgresChangeEvent.update,
         schema: 'public',
         table: table,
-        filter: filter != null ? PostgresChangeFilter(
-          type: PostgresChangeFilterType.eq,
-          column: filter.split('=').first,
-          value: filter.split('=').last,
-        ) : null,
+        filter: pgFilter,
         callback: onUpdate,
       );
     }
-    
+
     if (onDelete != null) {
       channel = channel.onPostgresChanges(
         event: PostgresChangeEvent.delete,
         schema: 'public',
         table: table,
-        filter: filter != null ? PostgresChangeFilter(
-          type: PostgresChangeFilterType.eq,
-          column: filter.split('=').first,
-          value: filter.split('=').last,
-        ) : null,
+        filter: pgFilter,
         callback: onDelete,
       );
     }
-    
+
     channel.subscribe();
     return channel;
   }

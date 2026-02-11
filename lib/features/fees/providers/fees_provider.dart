@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/invoice.dart';
 import '../../../data/repositories/fee_repository.dart';
 
 final feeRepositoryProvider = Provider<FeeRepository>((ref) {
-  return FeeRepository(Supabase.instance.client);
+  return FeeRepository(ref.watch(supabaseProvider));
 });
 
 final feeHeadsProvider = FutureProvider<List<FeeHead>>((ref) async {

@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/academic.dart';
+import '../../../../data/models/student.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../academic/providers/academic_provider.dart';
 import '../../../students/providers/students_provider.dart';
@@ -60,7 +62,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            color: AppColors.primary.withOpacity(0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -92,7 +94,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 48, color: Colors.grey[400]),
+                    Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.outlineVariant),
                     const SizedBox(height: 16),
                     Text('Error: $e'),
                     const SizedBox(height: 16),
@@ -109,11 +111,11 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
+                        Icon(Icons.people_outline, size: 64, color: Theme.of(context).colorScheme.outlineVariant),
                         const SizedBox(height: 16),
                         Text(
                           'No students found',
-                          style: TextStyle(color: Colors.grey[600]),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
                         const SizedBox(height: 8),
                         TextButton.icon(
@@ -203,7 +205,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
     );
   }
 
-  void _showEditStudentDialog(dynamic student) {
+  void _showEditStudentDialog(Student student) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -212,7 +214,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
     );
   }
 
-  void _showStudentDetail(dynamic student) {
+  void _showStudentDetail(Student student) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -221,7 +223,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
     );
   }
 
-  void _showChangeSectionDialog(dynamic student) {
+  void _showChangeSectionDialog(Student student) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -246,7 +248,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
     );
   }
 
-  void _confirmDeactivate(dynamic student) {
+  void _confirmDeactivate(Student student) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -265,21 +267,11 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
               try {
                 await ref.read(studentsNotifierProvider.notifier).deactivateStudent(student.id);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Student deactivated'),
-                      backgroundColor: AppColors.success,
-                    ),
-                  );
+                  context.showSuccessSnackBar('Student deactivated');
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error: $e'),
-                      backgroundColor: AppColors.error,
-                    ),
-                  );
+                  context.showErrorSnackBar('Error: $e');
                 }
               }
             },
@@ -293,7 +285,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
 }
 
 class _StudentCard extends StatelessWidget {
-  final dynamic student;
+  final Student student;
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onChangeSection;
@@ -321,9 +313,9 @@ class _StudentCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: AppColors.primary.withOpacity(0.1),
+                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                 backgroundImage: student.photoUrl != null
-                    ? NetworkImage(student.photoUrl)
+                    ? NetworkImage(student.photoUrl!)
                     : null,
                 child: student.photoUrl == null
                     ? Text(
@@ -351,19 +343,19 @@ class _StudentCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.badge, size: 14, color: Colors.grey[500]),
+                        Icon(Icons.badge, size: 14, color: Theme.of(context).colorScheme.outline),
                         const SizedBox(width: 4),
                         Text(
                           student.admissionNumber,
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
                         const SizedBox(width: 12),
                         if (student.currentEnrollment != null) ...[
-                          Icon(Icons.class_, size: 14, color: Colors.grey[500]),
+                          Icon(Icons.class_, size: 14, color: Theme.of(context).colorScheme.outline),
                           const SizedBox(width: 4),
                           Text(
-                            '${student.currentEnrollment.className} - ${student.currentEnrollment.sectionName}',
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                            '${student.currentEnrollment!.className} - ${student.currentEnrollment!.sectionName}',
+                            style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                           ),
                         ],
                       ],
@@ -428,7 +420,7 @@ class _StudentCard extends StatelessWidget {
 }
 
 class _StudentDetailSheet extends StatelessWidget {
-  final dynamic student;
+  final Student student;
 
   const _StudentDetailSheet({required this.student});
 
@@ -454,7 +446,7 @@ class _StudentDetailSheet extends StatelessWidget {
                   radius: 35,
                   backgroundColor: Colors.white,
                   backgroundImage: student.photoUrl != null
-                      ? NetworkImage(student.photoUrl)
+                      ? NetworkImage(student.photoUrl!)
                       : null,
                   child: student.photoUrl == null
                       ? Text(
@@ -483,7 +475,7 @@ class _StudentDetailSheet extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         'Admission No: ${student.admissionNumber}',
-                        style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                       ),
                     ],
                   ),
@@ -515,13 +507,11 @@ class _StudentDetailSheet extends StatelessWidget {
                   _DetailRow(label: 'State', value: student.state ?? 'N/A'),
                   _DetailRow(label: 'Pincode', value: student.pincode ?? 'N/A'),
                   const Divider(height: 32),
-                  _DetailRow(label: 'Admission Date', value: student.admissionDate != null
-                      ? DateFormat('MMM d, yyyy').format(student.admissionDate)
-                      : 'N/A'),
+                  _DetailRow(label: 'Admission Date', value: DateFormat('MMM d, yyyy').format(student.admissionDate)),
                   _DetailRow(label: 'Previous School', value: student.previousSchool ?? 'N/A'),
                   if (student.medicalConditions != null) ...[
                     const Divider(height: 32),
-                    _DetailRow(label: 'Medical Conditions', value: student.medicalConditions),
+                    _DetailRow(label: 'Medical Conditions', value: student.medicalConditions!),
                   ],
                 ],
               ),
@@ -551,7 +541,7 @@ class _DetailRow extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                color: Colors.grey[600],
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 13,
               ),
             ),
@@ -861,7 +851,7 @@ class _AddStudentSheetState extends ConsumerState<_AddStudentSheet> {
                     if (_selectedClassId == null)
                       Text(
                         'Select a class to choose section & enroll the student',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12),
                       ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
@@ -916,7 +906,7 @@ class _AddStudentSheetState extends ConsumerState<_AddStudentSheet> {
                             ? 'Enrollment Academic Year: ${year.name}'
                             : 'No academic year configured – please add one.',
                         style: TextStyle(
-                          color: year != null ? Colors.grey[700] : AppColors.error,
+                          color: year != null ? Theme.of(context).colorScheme.onSurface : AppColors.error,
                           fontSize: 12,
                         ),
                       ),
@@ -1036,21 +1026,11 @@ class _AddStudentSheetState extends ConsumerState<_AddStudentSheet> {
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Student added and enrolled successfully!'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        context.showSuccessSnackBar('Student added and enrolled successfully!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        context.showErrorSnackBar('Error: $e');
       }
     } finally {
       if (mounted) {
@@ -1061,7 +1041,7 @@ class _AddStudentSheetState extends ConsumerState<_AddStudentSheet> {
 }
 
 class _EditStudentSheet extends ConsumerStatefulWidget {
-  final dynamic student;
+  final Student student;
 
   const _EditStudentSheet({required this.student});
 
@@ -1242,21 +1222,11 @@ class _EditStudentSheetState extends ConsumerState<_EditStudentSheet> {
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Student updated successfully!'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        context.showSuccessSnackBar('Student updated successfully!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        context.showErrorSnackBar('Error: $e');
       }
     } finally {
       if (mounted) {

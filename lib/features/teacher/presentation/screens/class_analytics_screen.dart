@@ -269,7 +269,7 @@ class _ExamPerformanceTab extends ConsumerWidget {
                       show: true,
                       horizontalInterval: 25,
                       getDrawingHorizontalLine: (value) {
-                        return FlLine(color: Colors.grey.withOpacity(0.2), strokeWidth: 1);
+                        return FlLine(color: Colors.grey.withValues(alpha: 0.2), strokeWidth: 1);
                       },
                       drawVerticalLine: false,
                     ),
@@ -313,8 +313,8 @@ class _ExamPerformanceTab extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
                         color: s.passPercentage >= 60
-                            ? AppColors.success.withOpacity(0.1)
-                            : AppColors.warning.withOpacity(0.1),
+                            ? AppColors.success.withValues(alpha: 0.1)
+                            : AppColors.warning.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -448,7 +448,7 @@ class _ExamPerformanceTab extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.error.withOpacity(0.1),
+                      color: AppColors.error.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -466,7 +466,7 @@ class _ExamPerformanceTab extends ConsumerWidget {
               ...weakStudents.take(5).map((student) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: CircleAvatar(
-                  backgroundColor: AppColors.error.withOpacity(0.1),
+                  backgroundColor: AppColors.error.withValues(alpha: 0.1),
                   child: Text(
                     student.studentName[0],
                     style: const TextStyle(color: AppColors.error),
@@ -569,7 +569,7 @@ class _AttendanceTab extends ConsumerWidget {
                               CircularProgressIndicator(
                                 value: (stats['attendance_percentage'] ?? 0) / 100,
                                 strokeWidth: 10,
-                                backgroundColor: Colors.grey.withOpacity(0.2),
+                                backgroundColor: Colors.grey.withValues(alpha: 0.2),
                                 valueColor: AlwaysStoppedAnimation(
                                   (stats['attendance_percentage'] ?? 0) >= 75
                                       ? AppColors.success
@@ -635,9 +635,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [

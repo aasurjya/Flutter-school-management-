@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/tenant.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/tenant_provider.dart';
 
@@ -126,7 +127,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
   Widget _buildFilters() {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: AppColors.primary.withOpacity(0.05),
+      color: AppColors.primary.withValues(alpha: 0.05),
       child: Column(
         children: [
           TextField(
@@ -223,9 +224,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
-                  );
+                  context.showErrorSnackBar('Error: $e');
                 }
               }
             },
@@ -241,15 +240,11 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
     try {
       await ref.read(tenantsNotifierProvider.notifier).activateTenant(tenant.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Tenant activated'), backgroundColor: AppColors.success),
-        );
+        context.showSuccessSnackBar('Tenant activated');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
-        );
+        context.showErrorSnackBar('Error: $e');
       }
     }
   }
@@ -268,15 +263,11 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
               try {
                 await ref.read(tenantsNotifierProvider.notifier).deleteTenant(tenant.id);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Tenant deleted'), backgroundColor: AppColors.error),
-                  );
+                  context.showErrorSnackBar('Tenant deleted');
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
-                  );
+                  context.showErrorSnackBar('Error: $e');
                 }
               }
             },
@@ -323,7 +314,7 @@ class _TenantCard extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 24,
-                    backgroundColor: _getStatusColor(status).withOpacity(0.1),
+                    backgroundColor: _getStatusColor(status).withValues(alpha: 0.1),
                     child: Text(
                       tenant.name.substring(0, 1),
                       style: TextStyle(color: _getStatusColor(status), fontWeight: FontWeight.bold, fontSize: 18),
@@ -359,7 +350,7 @@ class _TenantCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(status).withOpacity(0.1),
+                      color: _getStatusColor(status).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -393,7 +384,7 @@ class _TenantCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
+        color: Colors.grey.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

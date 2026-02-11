@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/attendance.dart';
 import '../../../data/repositories/attendance_repository.dart';
 
 final attendanceRepositoryProvider = Provider<AttendanceRepository>((ref) {
-  return AttendanceRepository(Supabase.instance.client);
+  return AttendanceRepository(ref.watch(supabaseProvider));
 });
 
 final sectionAttendanceProvider = FutureProvider.family<List<Attendance>, SectionDateFilter>(

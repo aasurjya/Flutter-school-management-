@@ -106,8 +106,8 @@ class _FeePaymentScreenState extends ConsumerState<FeePaymentScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(_pendingInvoice['invoiceNumber'], style: TextStyle(color: Colors.grey[600])),
-              Text(_pendingInvoice['termName'], style: TextStyle(color: Colors.grey[600])),
+              Text(_pendingInvoice['invoiceNumber'], style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              Text(_pendingInvoice['termName'], style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             ],
           ),
           const SizedBox(height: 16),
@@ -118,7 +118,7 @@ class _FeePaymentScreenState extends ConsumerState<FeePaymentScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(item['name'], style: TextStyle(color: Colors.grey[700])),
+                Text(item['name'], style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
                 Text('₹${(item['amount'] as double).toStringAsFixed(0)}'),
               ],
             ),
@@ -154,11 +154,11 @@ class _FeePaymentScreenState extends ConsumerState<FeePaymentScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.calendar_today, size: 14, color: isOverdue ? AppColors.error : Colors.grey[600]),
+              Icon(Icons.calendar_today, size: 14, color: isOverdue ? AppColors.error : Theme.of(context).colorScheme.onSurfaceVariant),
               const SizedBox(width: 6),
               Text(
                 'Due: ${DateFormat('MMM d, yyyy').format(dueDate)}',
-                style: TextStyle(color: isOverdue ? AppColors.error : Colors.grey[600]),
+                style: TextStyle(color: isOverdue ? AppColors.error : Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -242,7 +242,7 @@ class _FeePaymentScreenState extends ConsumerState<FeePaymentScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
+                  color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.check_circle, color: AppColors.success, size: 20),
@@ -255,11 +255,11 @@ class _FeePaymentScreenState extends ConsumerState<FeePaymentScreen> {
                     Text(payment['term'], style: const TextStyle(fontWeight: FontWeight.w500)),
                     Text(
                       '${payment['method']} • ${DateFormat('MMM d, yyyy').format(payment['date'])}',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                     Text(
                       'Txn: ${payment['transactionId']}',
-                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                      style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.outline),
                     ),
                   ],
                 ),
@@ -358,7 +358,7 @@ class _PaymentMethodTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, size: 20, color: isSelected ? AppColors.primary : Colors.grey),
@@ -368,7 +368,7 @@ class _PaymentMethodTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-                Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                Text(subtitle, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
               ],
             ),
           ],
@@ -418,7 +418,7 @@ class _PaymentProcessSheetState extends State<_PaymentProcessSheet> {
           style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: AppColors.primary),
         ),
         const SizedBox(height: 8),
-        Text('Via ${_getMethodName()}', style: TextStyle(color: Colors.grey[600])),
+        Text('Via ${_getMethodName()}', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         const Spacer(),
         if (widget.method == 'upi')
           const Text(
@@ -460,7 +460,7 @@ class _PaymentProcessSheetState extends State<_PaymentProcessSheet> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.success.withOpacity(0.1),
+            color: AppColors.success.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.check_circle, color: AppColors.success, size: 64),
@@ -473,12 +473,12 @@ class _PaymentProcessSheetState extends State<_PaymentProcessSheet> {
         const SizedBox(height: 8),
         Text(
           '₹${widget.amount.toStringAsFixed(0)} paid successfully',
-          style: TextStyle(color: Colors.grey[600]),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 8),
         Text(
           'Transaction ID: TXN${DateTime.now().millisecondsSinceEpoch}',
-          style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
         ),
         const Spacer(),
         SizedBox(

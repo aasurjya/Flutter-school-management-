@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/student_insights.dart';
 import '../../../data/repositories/insights_repository.dart';
 
 final insightsRepositoryProvider = Provider<InsightsRepository>((ref) {
-  return InsightsRepository(Supabase.instance.client);
+  return InsightsRepository(ref.watch(supabaseProvider));
 });
 
 /// Provider for student insights

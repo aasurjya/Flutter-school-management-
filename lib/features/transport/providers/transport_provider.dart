@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/transport.dart';
 import '../../../data/repositories/transport_repository.dart';
 
 final transportRepositoryProvider = Provider<TransportRepository>((ref) {
-  return TransportRepository(Supabase.instance.client);
+  return TransportRepository(ref.watch(supabaseProvider));
 });
 
 // Routes providers
@@ -47,7 +47,7 @@ final studentsByStopProvider = FutureProvider.family<List<StudentTransport>, Str
 
 final myTransportProvider = FutureProvider<StudentTransport?>((ref) async {
   final repository = ref.watch(transportRepositoryProvider);
-  final userId = Supabase.instance.client.auth.currentUser?.id;
+  final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
   if (userId == null) return null;
   return repository.getMyTransport(userId);
 });

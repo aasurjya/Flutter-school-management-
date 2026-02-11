@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 
 class StaffManagementScreen extends ConsumerStatefulWidget {
@@ -52,7 +53,7 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen>
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            color: AppColors.primary.withOpacity(0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -222,8 +223,8 @@ class _StaffCard extends StatelessWidget {
               CircleAvatar(
                 radius: 28,
                 backgroundColor: isActive 
-                    ? AppColors.primary.withOpacity(0.1)
-                    : Colors.grey.withOpacity(0.1),
+                    ? AppColors.primary.withValues(alpha: 0.1)
+                    : Colors.grey.withValues(alpha: 0.1),
                 child: Text(
                   staff['name'].split(' ').map((n) => n[0]).take(2).join(),
                   style: TextStyle(
@@ -252,7 +253,7 @@ class _StaffCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.1),
+                              color: Colors.grey.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Text(
@@ -274,7 +275,7 @@ class _StaffCard extends StatelessWidget {
                         children: subjects.take(3).map((s) => Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.info.withOpacity(0.1),
+                            color: AppColors.info.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -399,12 +400,7 @@ class _StaffCard extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Staff ${isActive ? 'deactivated' : 'activated'}'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
+              context.showSuccessSnackBar('Staff ${isActive ? 'deactivated' : 'activated'}');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: isActive ? AppColors.error : AppColors.success,
@@ -467,7 +463,7 @@ class _StaffDetailSheet extends StatelessWidget {
                       ),
                       Text(
                         '${staff['id']} • ${staff['department'] ?? staff['role'] ?? ''}',
-                        style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                       ),
                     ],
                   ),
@@ -509,7 +505,7 @@ class _StaffDetailSheet extends StatelessWidget {
                       runSpacing: 8,
                       children: (staff['subjects'] as List).map((s) => Chip(
                         label: Text(s),
-                        backgroundColor: AppColors.info.withOpacity(0.1),
+                        backgroundColor: AppColors.info.withValues(alpha: 0.1),
                       )).toList(),
                     ),
                   ],
@@ -525,7 +521,7 @@ class _StaffDetailSheet extends StatelessWidget {
                       runSpacing: 8,
                       children: (staff['classes'] as List).map((c) => Chip(
                         label: Text(c),
-                        backgroundColor: AppColors.secondary.withOpacity(0.1),
+                        backgroundColor: AppColors.secondary.withValues(alpha: 0.1),
                       )).toList(),
                     ),
                   ],
@@ -733,12 +729,7 @@ class _AddStaffSheetState extends ConsumerState<_AddStaffSheet> {
 
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Staff member added successfully'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+      context.showSuccessSnackBar('Staff member added successfully');
     }
   }
 }
@@ -878,12 +869,7 @@ class _EditStaffSheetState extends State<_EditStaffSheet> {
 
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Staff updated successfully'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+      context.showSuccessSnackBar('Staff updated successfully');
     }
   }
 }

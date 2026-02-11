@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/message.dart';
 import '../../../data/models/announcement.dart';
 import '../../../data/repositories/message_repository.dart';
 
 final messageRepositoryProvider = Provider<MessageRepository>((ref) {
-  return MessageRepository(Supabase.instance.client);
+  return MessageRepository(ref.watch(supabaseProvider));
 });
 
 final threadsProvider = FutureProvider<List<Thread>>((ref) async {

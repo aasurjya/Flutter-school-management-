@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/tenant_provider.dart';
 
@@ -382,9 +383,7 @@ class _CreateTenantScreenState extends ConsumerState<CreateTenantScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error creating tenant: $e'), backgroundColor: AppColors.error),
-        );
+        context.showErrorSnackBar('Error creating tenant: $e');
       }
     }
   }

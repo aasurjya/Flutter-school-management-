@@ -113,7 +113,7 @@ class _StudentAttendanceScreenState extends ConsumerState<StudentAttendanceScree
                     CircularProgressIndicator(
                       value: percentage / 100,
                       strokeWidth: 10,
-                      backgroundColor: Colors.grey.withOpacity(0.2),
+                      backgroundColor: Colors.grey.withValues(alpha: 0.2),
                       valueColor: AlwaysStoppedAnimation(
                         percentage >= 75 ? AppColors.success : AppColors.warning,
                       ),
@@ -165,9 +165,9 @@ class _StudentAttendanceScreenState extends ConsumerState<StudentAttendanceScree
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.1),
+              color: AppColors.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+              border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -329,13 +329,13 @@ class _StudentAttendanceScreenState extends ConsumerState<StudentAttendanceScree
               if (isFuture || isSunday) {
                 textColor = Colors.grey[400]!;
               } else if (status == 'present') {
-                bgColor = AppColors.success.withOpacity(0.2);
+                bgColor = AppColors.success.withValues(alpha: 0.2);
                 textColor = AppColors.success;
               } else if (status == 'absent') {
-                bgColor = AppColors.error.withOpacity(0.2);
+                bgColor = AppColors.error.withValues(alpha: 0.2);
                 textColor = AppColors.error;
               } else if (status == 'late') {
-                bgColor = AppColors.warning.withOpacity(0.2);
+                bgColor = AppColors.warning.withValues(alpha: 0.2);
                 textColor = AppColors.warning;
               }
 
@@ -382,7 +382,7 @@ class _StudentAttendanceScreenState extends ConsumerState<StudentAttendanceScree
           width: 12,
           height: 12,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
             shape: BoxShape.circle,
           ),
         ),
@@ -415,14 +415,14 @@ class _StudentAttendanceScreenState extends ConsumerState<StudentAttendanceScree
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+            border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(status).withOpacity(0.1),
+                  color: _getStatusColor(status).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
@@ -450,7 +450,7 @@ class _StudentAttendanceScreenState extends ConsumerState<StudentAttendanceScree
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(status).withOpacity(0.1),
+                  color: _getStatusColor(status).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(

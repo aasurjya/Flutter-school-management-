@@ -37,12 +37,12 @@ class GlassCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     final defaultBackgroundColor = isDark
-        ? Colors.white.withOpacity(0.1)
-        : Colors.white.withOpacity(0.7);
+        ? Colors.white.withValues(alpha: 0.1)
+        : Colors.white.withValues(alpha: 0.7);
     
     final defaultBorderColor = isDark
-        ? Colors.white.withOpacity(0.2)
-        : Colors.white.withOpacity(0.5);
+        ? Colors.white.withValues(alpha: 0.2)
+        : Colors.white.withValues(alpha: 0.5);
 
     Widget cardContent = ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
@@ -60,7 +60,7 @@ class GlassCard extends StatelessWidget {
             gradient: gradient,
             boxShadow: boxShadow ?? [
               BoxShadow(
-                color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -161,7 +161,7 @@ class GlassStatCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: (iconColor ?? AppColors.primary).withOpacity(0.1),
+                  color: (iconColor ?? AppColors.primary).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -186,7 +186,7 @@ class GlassStatCard extends StatelessWidget {
             title,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: gradient != null
-                  ? Colors.white.withOpacity(0.8)
+                  ? Colors.white.withValues(alpha: 0.8)
                   : isDark
                       ? AppColors.textSecondaryDark
                       : AppColors.textSecondaryLight,
@@ -198,7 +198,7 @@ class GlassStatCard extends StatelessWidget {
               subtitle!,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: gradient != null
-                    ? Colors.white.withOpacity(0.6)
+                    ? Colors.white.withValues(alpha: 0.6)
                     : AppColors.textTertiaryLight,
               ),
             ),

@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/emergency.dart';
 import '../../../data/repositories/emergency_repository.dart';
 
 final emergencyRepositoryProvider = Provider<EmergencyRepository>((ref) {
-  return EmergencyRepository(Supabase.instance.client);
+  return EmergencyRepository(ref.watch(supabaseProvider));
 });
 
 final alertsProvider = FutureProvider.family<List<EmergencyAlert>, AlertsFilter>(

@@ -69,7 +69,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen>
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),
@@ -162,7 +162,7 @@ class _StatColumn extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 12,
           ),
         ),
@@ -328,12 +328,12 @@ class _AchievementBadge extends StatelessWidget {
               shape: BoxShape.circle,
               color: isEarned
                   ? _getCategoryColor(achievement.category)
-                  : Colors.grey.withOpacity(0.3),
+                  : Colors.grey.withValues(alpha: 0.3),
               boxShadow: isEarned
                   ? [
                       BoxShadow(
                         color: _getCategoryColor(achievement.category)
-                            .withOpacity(0.4),
+                            .withValues(alpha: 0.4),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -384,7 +384,7 @@ class _AchievementBadge extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: isEarned
                     ? _getCategoryColor(achievement.category)
-                    : Colors.grey.withOpacity(0.3),
+                    : Colors.grey.withValues(alpha: 0.3),
               ),
               child: Icon(
                 _getCategoryIcon(achievement.category),

@@ -129,7 +129,7 @@ class StudentFeesScreen extends ConsumerWidget {
                   icon: Icons.account_balance_wallet,
                 ),
               ),
-              Container(width: 1, height: 60, color: Colors.grey.withOpacity(0.2)),
+              Container(width: 1, height: 60, color: Colors.grey.withValues(alpha: 0.2)),
               Expanded(
                 child: _SummaryItem(
                   label: 'Paid',
@@ -141,7 +141,7 @@ class StudentFeesScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Container(height: 1, color: Colors.grey.withOpacity(0.2)),
+          Container(height: 1, color: Colors.grey.withValues(alpha: 0.2)),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -153,7 +153,7 @@ class StudentFeesScreen extends ConsumerWidget {
                   icon: Icons.pending_actions,
                 ),
               ),
-              Container(width: 1, height: 60, color: Colors.grey.withOpacity(0.2)),
+              Container(width: 1, height: 60, color: Colors.grey.withValues(alpha: 0.2)),
               Expanded(
                 child: _SummaryItem(
                   label: 'Overdue',
@@ -169,7 +169,7 @@ class StudentFeesScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.1),
+                color: AppColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -264,7 +264,7 @@ class _InvoiceCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _getStatusColor(status, isOverdue).withOpacity(0.1),
+              color: _getStatusColor(status, isOverdue).withValues(alpha: 0.1),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
@@ -335,7 +335,7 @@ class _InvoiceCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.05),
+                color: Colors.grey.withValues(alpha: 0.05),
                 borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
               ),
               child: OutlinedButton.icon(
@@ -411,7 +411,7 @@ class _InvoiceCard extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.account_balance, color: AppColors.primary),
@@ -427,7 +427,7 @@ class _InvoiceCard extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.secondary.withOpacity(0.1),
+                  color: AppColors.secondary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.qr_code, color: AppColors.secondary),
@@ -443,7 +443,7 @@ class _InvoiceCard extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withOpacity(0.1),
+                  color: AppColors.accent.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.storefront, color: AppColors.accent),
@@ -512,7 +512,7 @@ class _InvoiceCardMap extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _getStatusColor(status, isOverdue).withOpacity(0.1),
+              color: _getStatusColor(status, isOverdue).withValues(alpha: 0.1),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(

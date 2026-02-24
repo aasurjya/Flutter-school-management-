@@ -11,6 +11,8 @@ class AssessmentRepository extends BaseRepository {
     String? sectionId,
     String? status,
     String? createdBy,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('quizzes')
@@ -20,7 +22,7 @@ class AssessmentRepository extends BaseRepository {
           section:sections(name, class:classes(name)),
           creator:users(full_name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (subjectId != null) {
       query = query.eq('subject_id', subjectId);
@@ -35,7 +37,7 @@ class AssessmentRepository extends BaseRepository {
       query = query.eq('created_by', createdBy);
     }
 
-    final response = await query.order('created_at', ascending: false);
+    final response = await query.order('created_at', ascending: false).range(offset, offset + limit - 1);
     return (response as List).map((json) => Quiz.fromJson(json)).toList();
   }
 
@@ -95,6 +97,21 @@ class AssessmentRepository extends BaseRepository {
     await client.from('quizzes').delete().eq('id', quizId);
   }
 
+  Future<List<Quiz>> getQuizzesByTopic(String topicId) async {
+    final response = await client
+        .from('quizzes')
+        .select('''
+          *,
+          subject:subjects(name),
+          section:sections(name, class:classes(name)),
+          creator:users(full_name)
+        ''')
+        .eq('topic_id', topicId)
+        .order('created_at', ascending: false);
+
+    return (response as List).map((json) => Quiz.fromJson(json)).toList();
+  }
+
   // ==================== QUESTION BANK ====================
 
   Future<List<QuestionBank>> getQuestionBank({
@@ -111,7 +128,7 @@ class AssessmentRepository extends BaseRepository {
           *,
           subject:subjects(name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (subjectId != null) {
       query = query.eq('subject_id', subjectId);
@@ -171,6 +188,19 @@ class AssessmentRepository extends BaseRepository {
 
   Future<void> deleteQuestion(String questionId) async {
     await client.from('question_bank').delete().eq('id', questionId);
+  }
+
+  Future<List<QuestionBank>> getQuestionsByTopic(String topicId) async {
+    final response = await client
+        .from('question_bank')
+        .select('''
+          *,
+          subject:subjects(name)
+        ''')
+        .eq('topic_id', topicId)
+        .order('created_at', ascending: false);
+
+    return (response as List).map((json) => QuestionBank.fromJson(json)).toList();
   }
 
   // ==================== QUIZ QUESTIONS ====================
@@ -285,6 +315,8 @@ class AssessmentRepository extends BaseRepository {
     String? quizId,
     String? studentId,
     String? status,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('quiz_attempts')
@@ -293,7 +325,7 @@ class AssessmentRepository extends BaseRepository {
           quiz:quizzes(title),
           student:students(first_name, last_name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (quizId != null) {
       query = query.eq('quiz_id', quizId);
@@ -305,7 +337,7 @@ class AssessmentRepository extends BaseRepository {
       query = query.eq('status', status);
     }
 
-    final response = await query.order('started_at', ascending: false);
+    final response = await query.order('started_at', ascending: false).range(offset, offset + limit - 1);
     return (response as List).map((json) => QuizAttempt.fromJson(json)).toList();
   }
 

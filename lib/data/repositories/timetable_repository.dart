@@ -9,7 +9,7 @@ class TimetableRepository extends BaseRepository {
     final response = await client
         .from('timetable_slots')
         .select('*')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .order('sequence_order');
 
     return (response as List)
@@ -84,7 +84,7 @@ class TimetableRepository extends BaseRepository {
           (t) => t.slotId == slot.id,
           orElse: () => Timetable(
             id: '',
-            tenantId: tenantId!,
+            tenantId: requireTenantId,
             sectionId: sectionId,
             slotId: slot.id,
             dayOfWeek: day,
@@ -143,7 +143,7 @@ class TimetableRepository extends BaseRepository {
         (t) => t.slotId == slot.id,
         orElse: () => Timetable(
           id: '',
-          tenantId: tenantId!,
+          tenantId: requireTenantId,
           sectionId: sectionId,
           slotId: slot.id,
           dayOfWeek: today,
@@ -263,7 +263,7 @@ class TimetableRepository extends BaseRepository {
           subjects(id, name, code)
         ''')
         .eq('teacher_id', teacherId)
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     // Group by section and subject to get unique class-subject combinations
     final Map<String, TeacherClassInfo> classMap = {};

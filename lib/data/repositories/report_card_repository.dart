@@ -11,6 +11,8 @@ class ReportCardRepository extends BaseRepository {
     String? sectionId,
     String? studentId,
     String? status,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('report_cards')
@@ -27,7 +29,7 @@ class ReportCardRepository extends BaseRepository {
           academic_year:academic_years(name),
           term:terms(name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (academicYearId != null) {
       query = query.eq('academic_year_id', academicYearId);
@@ -42,7 +44,7 @@ class ReportCardRepository extends BaseRepository {
       query = query.eq('status', status);
     }
 
-    final response = await query.order('created_at', ascending: false);
+    final response = await query.order('created_at', ascending: false).range(offset, offset + limit - 1);
 
     List<ReportCard> results = (response as List)
         .map((json) => ReportCard.fromJson(json))
@@ -159,14 +161,14 @@ class ReportCardRepository extends BaseRepository {
           )
         ''')
         .eq('student_id', studentId)
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     // Get attendance
     final attendanceResponse = await client
         .from('attendance')
         .select('status')
         .eq('student_id', studentId)
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     // Process grades by subject
     final subjectGrades = <String, SubjectGrade>{};
@@ -316,7 +318,7 @@ class ReportCardRepository extends BaseRepository {
         .from('students')
         .select('id')
         .eq('section_id', sectionId)
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     final reports = <ReportCard>[];
 
@@ -372,7 +374,7 @@ class ReportCardRepository extends BaseRepository {
     final response = await client
         .from('report_card_templates')
         .select()
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .order('created_at', ascending: false);
 
     return (response as List)
@@ -395,7 +397,7 @@ class ReportCardRepository extends BaseRepository {
     final response = await client
         .from('report_card_templates')
         .select()
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_default', true)
         .maybeSingle();
 
@@ -420,7 +422,7 @@ class ReportCardRepository extends BaseRepository {
       await client
           .from('report_card_templates')
           .update({'is_default': false})
-          .eq('tenant_id', tenantId!)
+          .eq('tenant_id', requireTenantId)
           .eq('is_default', true);
     }
 
@@ -459,7 +461,7 @@ class ReportCardRepository extends BaseRepository {
       await client
           .from('report_card_templates')
           .update({'is_default': false})
-          .eq('tenant_id', tenantId!)
+          .eq('tenant_id', requireTenantId)
           .eq('is_default', true);
     }
 

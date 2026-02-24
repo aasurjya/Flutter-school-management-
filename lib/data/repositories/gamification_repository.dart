@@ -10,11 +10,13 @@ class GamificationRepository extends BaseRepository {
   Future<List<Achievement>> getAchievements({
     String? category,
     bool activeOnly = true,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('achievements')
         .select()
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (activeOnly) {
       query = query.eq('is_active', true);
@@ -24,7 +26,7 @@ class GamificationRepository extends BaseRepository {
       query = query.eq('category', category);
     }
 
-    final response = await query.order('category').order('name');
+    final response = await query.order('category').order('name').range(offset, offset + limit - 1);
     return (response as List).map((json) => Achievement.fromJson(json)).toList();
   }
 
@@ -49,6 +51,16 @@ class GamificationRepository extends BaseRepository {
     return Achievement.fromJson(response);
   }
 
+  Future<void> updateAchievementIcon(
+    String achievementId,
+    String iconUrl,
+  ) async {
+    await client
+        .from('achievements')
+        .update({'icon_url': iconUrl})
+        .eq('id', achievementId);
+  }
+
   Future<Achievement> updateAchievement(
     String achievementId,
     Map<String, dynamic> data,
@@ -64,7 +76,10 @@ class GamificationRepository extends BaseRepository {
 
   // ==================== STUDENT ACHIEVEMENTS ====================
 
-  Future<List<StudentAchievement>> getStudentAchievements(String studentId) async {
+  Future<List<StudentAchievement>> getStudentAchievements(String studentId, {
+    int limit = 50,
+    int offset = 0,
+  }) async {
     final response = await client
         .from('student_achievements')
         .select('''
@@ -72,7 +87,7 @@ class GamificationRepository extends BaseRepository {
           achievements(*)
         ''')
         .eq('student_id', studentId)
-        .order('earned_at', ascending: false);
+        .order('earned_at', ascending: false).range(offset, offset + limit - 1);
 
     return (response as List)
         .map((json) => StudentAchievement.fromJson(json))
@@ -194,7 +209,7 @@ class GamificationRepository extends BaseRepository {
     var query = client
         .from('v_student_leaderboard')
         .select()
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (sectionId != null) {
       query = query.eq('section_id', sectionId);
@@ -227,20 +242,20 @@ class GamificationRepository extends BaseRepository {
     final achievementsResponse = await client
         .from('achievements')
         .select('id')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_active', true);
 
     // Total awarded achievements
     final awardedResponse = await client
         .from('student_achievements')
         .select('id')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     // Total points distributed
     final pointsResponse = await client
         .from('student_points')
         .select('points')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     final totalPoints = (pointsResponse as List)
         .fold<int>(0, (sum, p) => sum + (p['points'] as int));

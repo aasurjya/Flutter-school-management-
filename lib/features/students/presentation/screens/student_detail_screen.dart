@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../academic/providers/academic_provider.dart';
+import '../../../ai_insights/providers/risk_score_provider.dart';
+import '../../../ai_insights/presentation/widgets/risk_score_badge.dart';
 
 class StudentDetailScreen extends ConsumerWidget {
   final String studentId;
@@ -46,13 +50,20 @@ class StudentDetailScreen extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          student['name'] as String,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              student['name'] as String,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildRiskBadge(ref),
+                          ],
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -140,6 +151,8 @@ class StudentDetailScreen extends ConsumerWidget {
                     _InfoRow('Section', student['section'] as String),
                     _InfoRow('Roll Number', student['rollNo'] as String),
                     _InfoRow('Academic Year', '2024-25'),
+                    if (student['classTeacher'] != null)
+                      _InfoRow('Class Teacher', student['classTeacher'] as String),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -196,12 +209,59 @@ class StudentDetailScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => context.push('/student-id-card/$studentId'),
+                    icon: const Icon(Icons.badge),
+                    label: const Text('View ID Card'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 100),
               ]),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildRiskBadge(WidgetRef ref) {
+    final academicYear = ref.watch(currentAcademicYearProvider);
+
+    return academicYear.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (year) {
+        if (year == null) return const SizedBox.shrink();
+
+        final riskScore = ref.watch(
+          studentRiskScoreProvider(
+            StudentRiskFilter(
+              studentId: studentId,
+              academicYearId: year.id,
+            ),
+          ),
+        );
+
+        return riskScore.when(
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+          data: (score) {
+            if (score == null) return const SizedBox.shrink();
+            return RiskScoreBadge(riskScore: score);
+          },
+        );
+      },
     );
   }
 

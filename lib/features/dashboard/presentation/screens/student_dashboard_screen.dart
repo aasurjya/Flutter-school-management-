@@ -6,6 +6,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../syllabus/presentation/widgets/coverage_progress_bar.dart';
 
 class StudentDashboardScreen extends ConsumerWidget {
   const StudentDashboardScreen({super.key});
@@ -187,6 +188,16 @@ class StudentDashboardScreen extends ConsumerWidget {
                 _buildTodayClasses(context),
                 const SizedBox(height: 24),
 
+                // AI Study Tips Card
+                _buildStudyTipsCard(context),
+                const SizedBox(height: 24),
+
+                // Syllabus Coverage
+                _buildSectionHeader(context, 'Syllabus Coverage'),
+                const SizedBox(height: 12),
+                _buildSyllabusCoverage(context),
+                const SizedBox(height: 24),
+
                 // Performance Overview
                 _buildSectionHeader(context, 'Performance Overview'),
                 const SizedBox(height: 12),
@@ -202,6 +213,71 @@ class StudentDashboardScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStudyTipsCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push(AppRoutes.studyRecommendations),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.secondary.withValues(alpha: 0.1),
+              AppColors.primary.withValues(alpha: 0.05),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.secondary.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.lightbulb_outline,
+                color: AppColors.secondary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'AI Study Tips',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Personalized recommendations just for you',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: AppColors.secondary,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -330,6 +406,90 @@ class StudentDashboardScreen extends ConsumerWidget {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildSyllabusCoverage(BuildContext context) {
+    final subjects = [
+      {'name': 'Mathematics', 'completed': 18, 'total': 24, 'inProgress': 2},
+      {'name': 'Physics', 'completed': 14, 'total': 20, 'inProgress': 3},
+      {'name': 'Chemistry', 'completed': 12, 'total': 22, 'inProgress': 1},
+      {'name': 'English', 'completed': 20, 'total': 25, 'inProgress': 2},
+    ];
+
+    return GestureDetector(
+      onTap: () => context.push(AppRoutes.studentSyllabus),
+      child: GlassCard(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            ...subjects.map((subject) {
+              final completed = subject['completed'] as int;
+              final total = subject['total'] as int;
+              final inProgress = subject['inProgress'] as int;
+              final notStarted = total - completed - inProgress;
+              final percentage = total > 0 ? (completed / total * 100) : 0.0;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          subject['name'] as String,
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        Text(
+                          '${percentage.round()}%',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                            color: percentage >= 70
+                                ? AppColors.success
+                                : percentage >= 40
+                                    ? AppColors.warning
+                                    : AppColors.error,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    CoverageProgressBar(
+                      completed: completed,
+                      inProgress: inProgress,
+                      notStarted: notStarted,
+                      skipped: 0,
+                      height: 6,
+                    ),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'View Full Syllabus',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 12,
+                  color: AppColors.primary,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

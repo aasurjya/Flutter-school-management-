@@ -9,6 +9,8 @@ class PTMRepository extends BaseRepository {
   Future<List<PTMSchedule>> getPTMSchedules({
     String? status,
     bool upcomingOnly = false,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('ptm_schedules')
@@ -16,7 +18,7 @@ class PTMRepository extends BaseRepository {
           *,
           academic_year:academic_years(name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (status != null) {
       query = query.eq('status', status);
@@ -27,7 +29,7 @@ class PTMRepository extends BaseRepository {
       query = query.gte('date', today);
     }
 
-    final response = await query.order('date', ascending: false);
+    final response = await query.order('date', ascending: false).range(offset, offset + limit - 1);
     return (response as List).map((json) => PTMSchedule.fromJson(json)).toList();
   }
 
@@ -180,6 +182,8 @@ class PTMRepository extends BaseRepository {
     String? parentId,
     String? studentId,
     String? status,
+    int limit = 100,
+    int offset = 0,
   }) async {
     var query = client
         .from('ptm_appointments')
@@ -192,7 +196,7 @@ class PTMRepository extends BaseRepository {
           parent:parents(first_name, last_name),
           student:students(first_name, last_name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (scheduleId != null) {
       query = query.eq('ptm_schedule_id', scheduleId);
@@ -210,7 +214,7 @@ class PTMRepository extends BaseRepository {
       query = query.eq('status', status);
     }
 
-    final response = await query.order('time_slot');
+    final response = await query.order('time_slot').range(offset, offset + limit - 1);
     return (response as List)
         .map((json) => PTMAppointment.fromJson(json))
         .toList();

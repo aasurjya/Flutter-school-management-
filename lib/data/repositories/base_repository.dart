@@ -13,6 +13,28 @@ abstract class BaseRepository {
     final claims = _client.auth.currentUser?.appMetadata;
     return claims?['tenant_id'] as String?;
   }
+
+  String get requireTenantId {
+    final id = tenantId;
+    if (id == null) {
+      throw StateError(
+        'tenantId is null — user has no tenant_id in JWT claims. '
+        'Ensure the user is logged in and assigned to a tenant.',
+      );
+    }
+    return id;
+  }
+
+  String get requireUserId {
+    final id = currentUserId;
+    if (id == null) {
+      throw StateError(
+        'currentUserId is null — no authenticated user found. '
+        'Ensure the user is logged in before calling this method.',
+      );
+    }
+    return id;
+  }
   
   RealtimeChannel subscribeToTable(
     String table, {

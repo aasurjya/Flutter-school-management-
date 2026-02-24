@@ -14,6 +14,7 @@ class StudyResource {
   final String? subjectId;
   final String? classId;
   final String? chapterId;
+  final String? topicId;
   final List<String> tags;
   final String uploadedBy;
   final bool isPublic;
@@ -26,6 +27,7 @@ class StudyResource {
   final String? subjectName;
   final String? className;
   final String? chapterName;
+  final String? topicTitle;
   final String? uploaderName;
 
   const StudyResource({
@@ -42,6 +44,7 @@ class StudyResource {
     this.subjectId,
     this.classId,
     this.chapterId,
+    this.topicId,
     this.tags = const [],
     required this.uploadedBy,
     this.isPublic = true,
@@ -52,6 +55,7 @@ class StudyResource {
     this.subjectName,
     this.className,
     this.chapterName,
+    this.topicTitle,
     this.uploaderName,
   });
 
@@ -70,6 +74,7 @@ class StudyResource {
       subjectId: json['subject_id'],
       classId: json['class_id'],
       chapterId: json['chapter_id'],
+      topicId: json['topic_id'],
       tags: List<String>.from(json['tags'] ?? []),
       uploadedBy: json['uploaded_by'],
       isPublic: json['is_public'] ?? true,
@@ -82,6 +87,7 @@ class StudyResource {
       subjectName: json['subject']?['name'] ?? json['subject_name'],
       className: json['class']?['name'] ?? json['class_name'],
       chapterName: json['chapter']?['name'] ?? json['chapter_name'],
+      topicTitle: json['syllabus_topics']?['title'] ?? json['topic_title'],
       uploaderName: json['uploader']?['full_name'] ?? json['uploader_name'],
     );
   }
@@ -100,6 +106,7 @@ class StudyResource {
       'subject_id': subjectId,
       'class_id': classId,
       'chapter_id': chapterId,
+      'topic_id': topicId,
       'tags': tags,
       'uploaded_by': uploadedBy,
       'is_public': isPublic,

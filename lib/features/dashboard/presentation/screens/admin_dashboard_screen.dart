@@ -6,6 +6,9 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../academic/providers/academic_provider.dart';
+import '../../../ai_insights/providers/risk_score_provider.dart';
+import '../../../ai_insights/providers/early_warning_provider.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
@@ -77,7 +80,6 @@ class AdminDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(currentUserProvider);
-    final size = MediaQuery.of(context).size;
 
     return Scaffold(
       body: CustomScrollView(
@@ -140,20 +142,32 @@ class AdminDashboardScreen extends ConsumerWidget {
               delegate: SliverChildListDelegate([
                 // Stats Grid
                 _buildStatsGrid(context),
+                const SizedBox(height: 12),
+
+                // At-Risk Students Card
+                _buildAtRiskCard(context, ref),
+                const SizedBox(height: 12),
+
+                // Early Warning Alerts Card
+                _buildEarlyWarningCard(context, ref),
+                const SizedBox(height: 12),
+
+                // Syllabus Coverage Card
+                _buildSyllabusCoverageCard(context),
                 const SizedBox(height: 24),
-                
+
                 // Quick Actions
                 _buildSectionHeader(context, 'Quick Actions'),
                 const SizedBox(height: 12),
                 _buildQuickActions(context),
                 const SizedBox(height: 24),
-                
+
                 // Today's Summary
                 _buildSectionHeader(context, "Today's Summary"),
                 const SizedBox(height: 12),
                 _buildTodaySummary(context),
                 const SizedBox(height: 24),
-                
+
                 // Recent Activity
                 _buildSectionHeader(context, 'Recent Activity'),
                 const SizedBox(height: 12),
@@ -163,6 +177,260 @@ class AdminDashboardScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAtRiskCard(BuildContext context, WidgetRef ref) {
+    final academicYear = ref.watch(currentAcademicYearProvider);
+
+    return academicYear.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (year) {
+        if (year == null) return const SizedBox.shrink();
+
+        final distribution = ref.watch(
+          riskDistributionProvider(
+            RiskDistributionFilter(academicYearId: year.id),
+          ),
+        );
+
+        return distribution.when(
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+          data: (dist) {
+            final highCount = (dist['high'] ?? 0) + (dist['critical'] ?? 0);
+            if (highCount == 0) return const SizedBox.shrink();
+
+            return GestureDetector(
+              onTap: () => context.push(AppRoutes.riskDashboard),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.error.withValues(alpha: 0.1),
+                      AppColors.warning.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppColors.error.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.warning_amber_rounded,
+                        color: AppColors.error,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$highCount At-Risk Students',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Requires immediate attention',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: AppColors.error,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildEarlyWarningCard(BuildContext context, WidgetRef ref) {
+    final countAsync = ref.watch(unresolvedAlertCountProvider);
+
+    return countAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (count) {
+        if (count == 0) return const SizedBox.shrink();
+
+        return GestureDetector(
+          onTap: () => context.push(AppRoutes.earlyWarningAlerts),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.warning.withValues(alpha: 0.1),
+                  AppColors.info.withValues(alpha: 0.05),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.warning.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(
+                        Icons.notification_important_rounded,
+                        color: AppColors.warning,
+                        size: 24,
+                      ),
+                      Positioned(
+                        right: -6,
+                        top: -6,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: AppColors.error,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            count > 99 ? '99+' : '$count',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$count Early Warning Alert${count == 1 ? '' : 's'}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Unresolved alerts need review',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: AppColors.warning,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSyllabusCoverageCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push(AppRoutes.coverageDashboard),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.success.withValues(alpha: 0.1),
+              AppColors.primary.withValues(alpha: 0.05),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.success.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.menu_book,
+                color: AppColors.success,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Syllabus Coverage',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Track topic coverage across classes',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: AppColors.success,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -257,6 +525,20 @@ class AdminDashboardScreen extends ConsumerWidget {
             label: 'Announcement',
             color: AppColors.info,
             onTap: () {},
+          ),
+          const SizedBox(width: 12),
+          _QuickActionCard(
+            icon: Icons.trending_up,
+            label: 'Trends',
+            color: AppColors.warning,
+            onTap: () => context.push(AppRoutes.trendDashboard),
+          ),
+          const SizedBox(width: 12),
+          _QuickActionCard(
+            icon: Icons.swap_horiz,
+            label: 'Substitution',
+            color: Colors.teal,
+            onTap: () => context.push(AppRoutes.substitutionDashboard),
           ),
         ],
       ),

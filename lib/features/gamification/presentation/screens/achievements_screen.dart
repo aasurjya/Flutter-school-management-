@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -321,31 +323,7 @@ class _AchievementBadge extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Column(
         children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isEarned
-                  ? _getCategoryColor(achievement.category)
-                  : Colors.grey.withValues(alpha: 0.3),
-              boxShadow: isEarned
-                  ? [
-                      BoxShadow(
-                        color: _getCategoryColor(achievement.category)
-                            .withValues(alpha: 0.4),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Icon(
-              _getCategoryIcon(achievement.category),
-              color: isEarned ? Colors.white : Colors.grey,
-              size: 28,
-            ),
-          ),
+          _buildBadgeCircle(60, 28),
           const SizedBox(height: 8),
           Text(
             achievement.name,
@@ -377,21 +355,7 @@ class _AchievementBadge extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isEarned
-                    ? _getCategoryColor(achievement.category)
-                    : Colors.grey.withValues(alpha: 0.3),
-              ),
-              child: Icon(
-                _getCategoryIcon(achievement.category),
-                color: isEarned ? Colors.white : Colors.grey,
-                size: 40,
-              ),
-            ),
+            _buildBadgeCircle(80, 40),
             const SizedBox(height: 16),
             Text(
               achievement.name,
@@ -430,6 +394,68 @@ class _AchievementBadge extends StatelessWidget {
             const SizedBox(height: 24),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBadgeCircle(double size, double iconSize) {
+    final iconUrl = achievement.iconUrl;
+    if (iconUrl != null && iconUrl.isNotEmpty) {
+      // AI-generated or uploaded badge image
+      Widget imageWidget;
+      if (iconUrl.startsWith('data:image')) {
+        // Base64 data URL
+        final base64Data = iconUrl.split(',').last;
+        imageWidget = Image.memory(
+          base64Decode(base64Data),
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildFallbackCircle(size, iconSize),
+        );
+      } else {
+        // Network URL
+        imageWidget = Image.network(
+          iconUrl,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildFallbackCircle(size, iconSize),
+        );
+      }
+
+      return ClipOval(
+        child: ColorFiltered(
+          colorFilter: isEarned
+              ? const ColorFilter.mode(Colors.transparent, BlendMode.multiply)
+              : const ColorFilter.matrix(<double>[
+                  0.2126, 0.7152, 0.0722, 0, 0,
+                  0.2126, 0.7152, 0.0722, 0, 0,
+                  0.2126, 0.7152, 0.0722, 0, 0,
+                  0, 0, 0, 0.5, 0,
+                ]),
+          child: imageWidget,
+        ),
+      );
+    }
+
+    return _buildFallbackCircle(size, iconSize);
+  }
+
+  Widget _buildFallbackCircle(double size, double iconSize) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isEarned
+            ? _getCategoryColor(achievement.category)
+            : Colors.grey.withValues(alpha: 0.3),
+      ),
+      child: Icon(
+        _getCategoryIcon(achievement.category),
+        color: isEarned ? Colors.white : Colors.grey,
+        size: iconSize,
       ),
     );
   }

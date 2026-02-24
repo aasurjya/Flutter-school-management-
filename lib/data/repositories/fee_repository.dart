@@ -1,5 +1,5 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/invoice.dart';
+import '../models/fee_default_prediction.dart';
 import 'base_repository.dart';
 
 class FeeRepository extends BaseRepository {
@@ -9,7 +9,7 @@ class FeeRepository extends BaseRepository {
     final response = await client
         .from('fee_heads')
         .select('*')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .order('name');
 
     return (response as List).map((json) => FeeHead.fromJson(json)).toList();
@@ -41,7 +41,7 @@ class FeeRepository extends BaseRepository {
           academic_years(id, name),
           terms(id, name)
         ''')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('academic_year_id', academicYearId);
 
     if (classId != null) {
@@ -73,6 +73,8 @@ class FeeRepository extends BaseRepository {
     String? studentId,
     String? status,
     String? academicYearId,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('invoices')
@@ -84,7 +86,7 @@ class FeeRepository extends BaseRepository {
           invoice_items(*, fee_heads(id, name)),
           payments(*)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (studentId != null) {
       query = query.eq('student_id', studentId);
@@ -96,7 +98,7 @@ class FeeRepository extends BaseRepository {
       query = query.eq('academic_year_id', academicYearId);
     }
 
-    final response = await query.order('created_at', ascending: false);
+    final response = await query.order('created_at', ascending: false).range(offset, offset + limit - 1);
     return (response as List).map((json) => Invoice.fromJson(json)).toList();
   }
 
@@ -171,29 +173,42 @@ class FeeRepository extends BaseRepository {
     required String paymentMethod,
     String? transactionId,
     String? remarks,
+    String? gatewayPaymentId,
+    String? gatewayOrderId,
+    String? gatewaySignature,
   }) async {
-    final invoice = await getInvoiceById(invoiceId);
     final paymentNumber = 'PAY-${DateTime.now().millisecondsSinceEpoch}';
 
-    final response = await client.from('payments').insert({
+    final data = <String, dynamic>{
       'tenant_id': tenantId,
       'invoice_id': invoiceId,
       'payment_number': paymentNumber,
       'amount': amount,
       'payment_method': paymentMethod,
       'status': 'completed',
-      'transaction_id': transactionId,
+      'transaction_id': transactionId ?? gatewayPaymentId,
       'paid_at': DateTime.now().toIso8601String(),
       'received_by': currentUserId,
       'remarks': remarks,
-    }).select().single();
+    };
 
+    if (gatewayPaymentId != null || gatewayOrderId != null) {
+      data['gateway_response'] = {
+        if (gatewayPaymentId != null) 'payment_id': gatewayPaymentId,
+        if (gatewayOrderId != null) 'order_id': gatewayOrderId,
+        if (gatewaySignature != null) 'signature': gatewaySignature,
+      };
+    }
+
+    final response = await client.from('payments').insert(data).select().single();
     return Payment.fromJson(response);
   }
 
   Future<List<Payment>> getPayments({
     String? invoiceId,
     String? studentId,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('payments')
@@ -202,13 +217,13 @@ class FeeRepository extends BaseRepository {
           users!received_by(id, full_name),
           invoices(id, invoice_number, students(id, first_name, last_name))
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (invoiceId != null) {
       query = query.eq('invoice_id', invoiceId);
     }
 
-    final response = await query.order('created_at', ascending: false);
+    final response = await query.order('created_at', ascending: false).range(offset, offset + limit - 1);
     return (response as List).map((json) => Payment.fromJson(json)).toList();
   }
 
@@ -216,11 +231,13 @@ class FeeRepository extends BaseRepository {
     String? sectionId,
     String? classId,
     String? academicYearId,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('v_fee_summary')
         .select('*')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (sectionId != null) {
       query = query.eq('section_id', sectionId);
@@ -229,7 +246,7 @@ class FeeRepository extends BaseRepository {
       query = query.eq('academic_year_id', academicYearId);
     }
 
-    final response = await query;
+    final response = await query.range(offset, offset + limit - 1);
     return (response as List).map((json) => FeeSummary.fromJson(json)).toList();
   }
 
@@ -274,18 +291,51 @@ class FeeRepository extends BaseRepository {
     };
   }
 
-  Future<List<Invoice>> getOverdueInvoices() async {
+  Future<List<Invoice>> getOverdueInvoices({int limit = 50, int offset = 0}) async {
     final response = await client
         .from('invoices')
         .select('''
           *,
           students(id, first_name, last_name, admission_number)
         ''')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .inFilter('status', ['pending', 'partial'])
         .lt('due_date', DateTime.now().toIso8601String().split('T')[0])
-        .order('due_date');
+        .order('due_date')
+        .range(offset, offset + limit - 1);
 
     return (response as List).map((json) => Invoice.fromJson(json)).toList();
+  }
+
+  // ==================== PREDICTIVE FEE COLLECTION ====================
+
+  /// Calls the predict_fee_defaults() RPC and returns ranked risk predictions.
+  Future<List<FeeDefaultPrediction>> getFeeDefaultPredictions() async {
+    final tid = requireTenantId;
+    final response =
+        await client.rpc('predict_fee_defaults', params: {'p_tenant_id': tid});
+
+    return (response as List)
+        .map((json) => FeeDefaultPrediction.fromJson(json))
+        .toList();
+  }
+
+  /// Logs that a reminder was sent for an invoice.
+  Future<void> logReminderSent({
+    required String invoiceId,
+    required String studentId,
+    required String messageText,
+    required int riskScore,
+    String channel = 'app',
+  }) async {
+    await client.from('fee_reminder_log').insert({
+      'tenant_id': requireTenantId,
+      'invoice_id': invoiceId,
+      'student_id': studentId,
+      'sent_by': client.auth.currentUser?.id,
+      'channel': channel,
+      'message_text': messageText,
+      'risk_score': riskScore,
+    });
   }
 }

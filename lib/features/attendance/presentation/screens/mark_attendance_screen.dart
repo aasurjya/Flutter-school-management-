@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/providers/connectivity_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../data/models/attendance.dart';
@@ -115,6 +117,42 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
       ),
       body: Column(
         children: [
+          // Offline Banner
+          Consumer(
+            builder: (context, ref, _) {
+              final isOnline = ref.watch(isOnlineProvider);
+              final pendingCount = ref.watch(pendingSyncCountProvider);
+              final online = isOnline.valueOrNull ?? true;
+              final pending = pendingCount.valueOrNull ?? 0;
+
+              if (online && pending == 0) return const SizedBox.shrink();
+
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                color: online ? AppColors.info : Colors.orange[700],
+                child: Row(
+                  children: [
+                    Icon(
+                      online ? Icons.sync : Icons.cloud_off,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        online
+                            ? 'Syncing $pending pending record${pending == 1 ? '' : 's'}...'
+                            : 'Offline — changes will sync when connected',
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+
           // Summary Bar
           Container(
             padding: const EdgeInsets.all(16),
@@ -205,6 +243,13 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primary,
+        onPressed: () => context.push(
+          '/qr-scanner?mode=attendance&sectionId=${widget.sectionId}',
+        ),
+        child: const Icon(Icons.qr_code_scanner, color: Colors.white),
+      ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -264,7 +309,7 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
     try {
       final attendanceRepo = ref.read(attendanceRepositoryProvider);
 
-      await attendanceRepo.markBulkAttendance(
+      final savedOnline = await attendanceRepo.markBulkAttendance(
         sectionId: widget.sectionId,
         date: widget.date != null
             ? DateTime.parse(widget.date!)
@@ -279,7 +324,13 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
       );
 
       if (mounted) {
-        context.showSuccessSnackBar('Attendance submitted successfully');
+        if (savedOnline) {
+          context.showSuccessSnackBar('Attendance submitted successfully');
+        } else {
+          context.showSuccessSnackBar(
+            'Attendance saved offline — will sync when connected',
+          );
+        }
         Navigator.pop(context);
       }
     } catch (e) {

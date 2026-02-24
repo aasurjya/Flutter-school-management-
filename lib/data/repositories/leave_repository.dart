@@ -9,6 +9,8 @@ class LeaveRepository extends BaseRepository {
     String? applicantType,
     String? status,
     bool pendingOnly = false,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('leave_applications')
@@ -16,7 +18,7 @@ class LeaveRepository extends BaseRepository {
           *,
           approver:users!approved_by(full_name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (applicantId != null) {
       query = query.eq('applicant_id', applicantId);
@@ -31,7 +33,7 @@ class LeaveRepository extends BaseRepository {
       query = query.eq('status', 'pending');
     }
 
-    final response = await query.order('created_at', ascending: false);
+    final response = await query.order('created_at', ascending: false).range(offset, offset + limit - 1);
     return (response as List)
         .map((json) => LeaveApplication.fromJson(json))
         .toList();

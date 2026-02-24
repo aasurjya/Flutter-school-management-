@@ -7,20 +7,20 @@ class HostelRepository extends BaseRepository {
 
   // ==================== HOSTELS ====================
 
-  Future<List<Hostel>> getHostels({bool activeOnly = true}) async {
+  Future<List<Hostel>> getHostels({bool activeOnly = true, int limit = 50, int offset = 0}) async {
     var query = client
         .from('hostels')
         .select('''
           *,
           users(full_name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (activeOnly) {
       query = query.eq('is_active', true);
     }
 
-    final response = await query.order('name');
+    final response = await query.order('name').range(offset, offset + limit - 1);
     return (response as List).map((json) => Hostel.fromJson(json)).toList();
   }
 
@@ -65,7 +65,7 @@ class HostelRepository extends BaseRepository {
 
   // ==================== ROOMS ====================
 
-  Future<List<HostelRoom>> getRooms(String hostelId, {bool availableOnly = false}) async {
+  Future<List<HostelRoom>> getRooms(String hostelId, {bool availableOnly = false, int limit = 50, int offset = 0}) async {
     var query = client
         .from('hostel_rooms')
         .select('''
@@ -81,7 +81,7 @@ class HostelRepository extends BaseRepository {
       query = query.eq('is_available', true);
     }
 
-    final response = await query.order('room_number');
+    final response = await query.order('room_number').range(offset, offset + limit - 1);
     return (response as List).map((json) => HostelRoom.fromJson(json)).toList();
   }
 
@@ -202,6 +202,8 @@ class HostelRepository extends BaseRepository {
     String? roomId,
     String? studentId,
     bool activeOnly = true,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('room_allocations')
@@ -213,7 +215,7 @@ class HostelRepository extends BaseRepository {
             hostels(name)
           )
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (roomId != null) {
       query = query.eq('room_id', roomId);
@@ -227,7 +229,7 @@ class HostelRepository extends BaseRepository {
       query = query.eq('is_active', true);
     }
 
-    final response = await query.order('allocated_date', ascending: false);
+    final response = await query.order('allocated_date', ascending: false).range(offset, offset + limit - 1);
 
     var allocations = (response as List)
         .map((json) => RoomAllocation.fromJson(json))
@@ -249,7 +251,7 @@ class HostelRepository extends BaseRepository {
     final academicYearResponse = await client
         .from('academic_years')
         .select('id')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_current', true)
         .maybeSingle();
 
@@ -313,7 +315,7 @@ class HostelRepository extends BaseRepository {
     final hostelsResponse = await client
         .from('hostels')
         .select('total_capacity')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_active', true);
 
     final hostels = hostelsResponse as List;
@@ -323,7 +325,7 @@ class HostelRepository extends BaseRepository {
     final allocationsResponse = await client
         .from('room_allocations')
         .select('id')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_active', true);
 
     final totalOccupied = (allocationsResponse as List).length;

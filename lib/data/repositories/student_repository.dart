@@ -10,6 +10,8 @@ class StudentRepository extends BaseRepository {
     String? classId,
     String? searchQuery,
     bool activeOnly = true,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('students')
@@ -29,7 +31,7 @@ class StudentRepository extends BaseRepository {
             academic_years!inner(id, name, is_current)
           )
         ''')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('student_enrollments.academic_years.is_current', true);
 
     if (activeOnly) {
@@ -44,7 +46,7 @@ class StudentRepository extends BaseRepository {
       query = query.eq('student_enrollments.sections.class_id', classId);
     }
 
-    final response = await query.order('first_name');
+    final response = await query.order('first_name').range(offset, offset + limit - 1);
 
     return (response as List).map((json) => Student.fromJson(json)).toList();
   }
@@ -97,7 +99,7 @@ class StudentRepository extends BaseRepository {
     return Student.fromJson(response);
   }
 
-  Future<List<Student>> getStudentsBySection(String sectionId) async {
+  Future<List<Student>> getStudentsBySection(String sectionId, {int limit = 100, int offset = 0}) async {
     final response = await client
         .from('students')
         .select('''
@@ -110,12 +112,13 @@ class StudentRepository extends BaseRepository {
             academic_years!inner(is_current)
           )
         ''')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('student_enrollments.section_id', sectionId)
         .eq('student_enrollments.academic_years.is_current', true)
         .eq('student_enrollments.status', 'active')
         .eq('is_active', true)
-        .order('first_name');
+        .order('first_name')
+        .range(offset, offset + limit - 1);
 
     return (response as List).map((json) => Student.fromJson(json)).toList();
   }
@@ -223,12 +226,41 @@ class StudentRepository extends BaseRepository {
     return null;
   }
 
+  Future<Student?> getStudentByAdmissionNumber(String admissionNumber) async {
+    final response = await client
+        .from('students')
+        .select('''
+          *,
+          student_enrollments(
+            id,
+            section_id,
+            academic_year_id,
+            roll_number,
+            status,
+            sections(id, name, classes(id, name)),
+            academic_years(id, name, is_current)
+          ),
+          student_parents(
+            id,
+            is_primary,
+            parents(*)
+          )
+        ''')
+        .eq('tenant_id', requireTenantId)
+        .eq('admission_number', admissionNumber)
+        .eq('is_active', true)
+        .maybeSingle();
+
+    if (response == null) return null;
+    return Student.fromJson(response);
+  }
+
   Future<int> getStudentCount({String? sectionId, String? classId}) async {
     try {
       var query = client
           .from('students')
           .select('id')
-          .eq('tenant_id', tenantId!)
+          .eq('tenant_id', requireTenantId)
           .eq('is_active', true);
 
       final response = await query;

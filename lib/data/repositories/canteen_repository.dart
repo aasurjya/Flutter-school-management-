@@ -10,11 +10,13 @@ class CanteenRepository extends BaseRepository {
   Future<List<CanteenItem>> getMenuItems({
     String? category,
     bool availableOnly = true,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('canteen_menu')
         .select()
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (availableOnly) {
       query = query.eq('is_available', true);
@@ -24,7 +26,7 @@ class CanteenRepository extends BaseRepository {
       query = query.eq('category', category);
     }
 
-    final response = await query.order('category').order('name');
+    final response = await query.order('category').order('name').range(offset, offset + limit - 1);
     return (response as List).map((json) => CanteenItem.fromJson(json)).toList();
   }
 
@@ -32,7 +34,7 @@ class CanteenRepository extends BaseRepository {
     final response = await client
         .from('canteen_menu')
         .select('category')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_available', true)
         .order('category');
 
@@ -76,7 +78,7 @@ class CanteenRepository extends BaseRepository {
     var query = client
         .from('wallets')
         .select()
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (userId != null) {
       query = query.eq('user_id', userId);
@@ -251,7 +253,7 @@ class CanteenRepository extends BaseRepository {
             canteen_menu(*)
           )
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (walletId != null) {
       query = query.eq('wallet_id', walletId);
@@ -349,7 +351,7 @@ class CanteenRepository extends BaseRepository {
     final ordersResponse = await client
         .from('canteen_orders')
         .select('total_amount, status')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .gte('ordered_at', '$dateStr 00:00:00')
         .lte('ordered_at', '$dateStr 23:59:59');
 

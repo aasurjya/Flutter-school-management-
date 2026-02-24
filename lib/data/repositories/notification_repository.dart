@@ -14,7 +14,7 @@ class NotificationRepository extends BaseRepository {
     var query = client
         .from('notifications')
         .select()
-        .eq('user_id', currentUserId!);
+        .eq('user_id', requireUserId);
 
     if (unreadOnly) {
       query = query.eq('is_read', false);
@@ -37,7 +37,7 @@ class NotificationRepository extends BaseRepository {
     final response = await client
         .from('notifications')
         .select('id')
-        .eq('user_id', currentUserId!)
+        .eq('user_id', requireUserId)
         .eq('is_read', false);
 
     return (response as List).length;
@@ -65,7 +65,7 @@ class NotificationRepository extends BaseRepository {
     await client
         .from('notifications')
         .update({'is_read': true})
-        .eq('user_id', currentUserId!)
+        .eq('user_id', requireUserId)
         .eq('is_read', false);
   }
 
@@ -74,7 +74,7 @@ class NotificationRepository extends BaseRepository {
   }
 
   Future<void> clearAll() async {
-    await client.from('notifications').delete().eq('user_id', currentUserId!);
+    await client.from('notifications').delete().eq('user_id', requireUserId);
   }
 
   Future<AppNotification> createNotification({

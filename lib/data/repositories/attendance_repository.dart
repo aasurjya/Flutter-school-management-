@@ -1,9 +1,37 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/services/offline_sync_service.dart';
 import '../models/attendance.dart';
 import 'base_repository.dart';
 
 class AttendanceRepository extends BaseRepository {
-  AttendanceRepository(super.client);
+  final OfflineSyncService? _syncService;
+
+  AttendanceRepository(super.client, [this._syncService]) {
+    // Wire sync callback so queued records get upserted on reconnect
+    if (_syncService != null) {
+      _syncService.onSync = (records) => _syncRecords(records);
+    }
+  }
+
+  Future<void> _syncRecords(List<PendingAttendanceRecord> records) async {
+    final upsertRecords = records
+        .map((r) => {
+              'tenant_id': tenantId,
+              'student_id': r.studentId,
+              'section_id': r.sectionId,
+              'date': r.date,
+              'status': r.status,
+              'remarks': r.remarks,
+              'marked_by': r.markedBy,
+              'marked_at': r.markedAt,
+            })
+        .toList();
+
+    await client.from('attendance').upsert(
+      upsertRecords,
+      onConflict: 'student_id,date',
+    );
+  }
 
   Future<List<Attendance>> getAttendanceBySection({
     required String sectionId,
@@ -33,6 +61,8 @@ class AttendanceRepository extends BaseRepository {
     required String studentId,
     DateTime? startDate,
     DateTime? endDate,
+    int limit = 100,
+    int offset = 0,
   }) async {
     var query = client
         .from('attendance')
@@ -46,7 +76,7 @@ class AttendanceRepository extends BaseRepository {
       query = query.lte('date', endDate.toIso8601String().split('T')[0]);
     }
 
-    final response = await query.order('date', ascending: false);
+    final response = await query.order('date', ascending: false).range(offset, offset + limit - 1);
     return (response as List)
         .map((json) => Attendance.fromJson(json))
         .toList();
@@ -102,26 +132,48 @@ class AttendanceRepository extends BaseRepository {
     }, onConflict: 'student_id,date');
   }
 
-  Future<void> markBulkAttendance({
+  Future<bool> markBulkAttendance({
     required String sectionId,
     required DateTime date,
     required List<Map<String, dynamic>> attendanceRecords,
   }) async {
+    final dateStr = date.toIso8601String().split('T')[0];
+    final now = DateTime.now().toIso8601String();
+
+    // If offline and sync service available, queue for later
+    if (_syncService != null && !_syncService.isOnline) {
+      final pending = attendanceRecords
+          .map((record) => PendingAttendanceRecord(
+                studentId: record['student_id'],
+                sectionId: sectionId,
+                date: dateStr,
+                status: record['status'],
+                remarks: record['remarks'],
+                markedBy: currentUserId,
+                markedAt: now,
+              ))
+          .toList();
+      _syncService.enqueue(pending);
+      return false; // false = saved offline
+    }
+
+    // Online path — direct upsert
     final records = attendanceRecords.map((record) => {
       'tenant_id': tenantId,
       'student_id': record['student_id'],
       'section_id': sectionId,
-      'date': date.toIso8601String().split('T')[0],
+      'date': dateStr,
       'status': record['status'],
       'remarks': record['remarks'],
       'marked_by': currentUserId,
-      'marked_at': DateTime.now().toIso8601String(),
+      'marked_at': now,
     }).toList();
 
     await client.from('attendance').upsert(
       records,
       onConflict: 'student_id,date',
     );
+    return true; // true = saved online
   }
 
   Future<void> updateAttendance({
@@ -173,7 +225,7 @@ class AttendanceRepository extends BaseRepository {
     final response = await client
         .from('v_section_daily_attendance')
         .select('attendance_percentage')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('date', today);
 
     if (response.isEmpty) return 0;

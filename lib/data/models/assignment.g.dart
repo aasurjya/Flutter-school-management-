@@ -24,6 +24,7 @@ _$AssignmentImpl _$$AssignmentImplFromJson(Map<String, dynamic> json) =>
           const [],
       status: json['status'] as String? ?? 'draft',
       allowLateSubmission: json['allowLateSubmission'] as bool? ?? false,
+      topicId: json['topicId'] as String?,
       createdAt: json['createdAt'] == null
           ? null
           : DateTime.parse(json['createdAt'] as String),
@@ -31,6 +32,7 @@ _$AssignmentImpl _$$AssignmentImplFromJson(Map<String, dynamic> json) =>
           ? null
           : DateTime.parse(json['updatedAt'] as String),
       sectionName: json['sectionName'] as String?,
+      topicTitle: json['topicTitle'] as String?,
       className: json['className'] as String?,
       subjectName: json['subjectName'] as String?,
       subjectCode: json['subjectCode'] as String?,
@@ -56,9 +58,11 @@ Map<String, dynamic> _$$AssignmentImplToJson(_$AssignmentImpl instance) =>
       'attachments': instance.attachments,
       'status': instance.status,
       'allowLateSubmission': instance.allowLateSubmission,
+      'topicId': instance.topicId,
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
       'sectionName': instance.sectionName,
+      'topicTitle': instance.topicTitle,
       'className': instance.className,
       'subjectName': instance.subjectName,
       'subjectCode': instance.subjectCode,

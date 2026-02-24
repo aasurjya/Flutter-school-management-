@@ -27,3 +27,15 @@ final currentAcademicYearProvider = FutureProvider<AcademicYear?>((ref) async {
   final repository = ref.watch(academicRepositoryProvider);
   return repository.getCurrentAcademicYear();
 });
+
+final classTeacherSectionsProvider =
+    FutureProvider.family<List<Section>, String>((ref, teacherId) async {
+  final repository = ref.watch(academicRepositoryProvider);
+  return repository.getClassTeacherSections(teacherId);
+});
+
+final teachersListProvider =
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final repository = ref.watch(academicRepositoryProvider);
+  return repository.getTeachersList();
+});

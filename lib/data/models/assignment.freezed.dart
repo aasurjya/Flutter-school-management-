@@ -34,9 +34,11 @@ mixin _$Assignment {
       throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
   bool get allowLateSubmission => throw _privateConstructorUsedError;
+  String? get topicId => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError; // Joined data
   String? get sectionName => throw _privateConstructorUsedError;
+  String? get topicTitle => throw _privateConstructorUsedError;
   String? get className => throw _privateConstructorUsedError;
   String? get subjectName => throw _privateConstructorUsedError;
   String? get subjectCode => throw _privateConstructorUsedError;
@@ -72,9 +74,11 @@ abstract class $AssignmentCopyWith<$Res> {
       List<Map<String, dynamic>> attachments,
       String status,
       bool allowLateSubmission,
+      String? topicId,
       DateTime? createdAt,
       DateTime? updatedAt,
       String? sectionName,
+      String? topicTitle,
       String? className,
       String? subjectName,
       String? subjectCode,
@@ -111,9 +115,11 @@ class _$AssignmentCopyWithImpl<$Res, $Val extends Assignment>
     Object? attachments = null,
     Object? status = null,
     Object? allowLateSubmission = null,
+    Object? topicId = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
     Object? sectionName = freezed,
+    Object? topicTitle = freezed,
     Object? className = freezed,
     Object? subjectName = freezed,
     Object? subjectCode = freezed,
@@ -176,6 +182,10 @@ class _$AssignmentCopyWithImpl<$Res, $Val extends Assignment>
           ? _value.allowLateSubmission
           : allowLateSubmission // ignore: cast_nullable_to_non_nullable
               as bool,
+      topicId: freezed == topicId
+          ? _value.topicId
+          : topicId // ignore: cast_nullable_to_non_nullable
+              as String?,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -187,6 +197,10 @@ class _$AssignmentCopyWithImpl<$Res, $Val extends Assignment>
       sectionName: freezed == sectionName
           ? _value.sectionName
           : sectionName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      topicTitle: freezed == topicTitle
+          ? _value.topicTitle
+          : topicTitle // ignore: cast_nullable_to_non_nullable
               as String?,
       className: freezed == className
           ? _value.className
@@ -246,9 +260,11 @@ abstract class _$$AssignmentImplCopyWith<$Res>
       List<Map<String, dynamic>> attachments,
       String status,
       bool allowLateSubmission,
+      String? topicId,
       DateTime? createdAt,
       DateTime? updatedAt,
       String? sectionName,
+      String? topicTitle,
       String? className,
       String? subjectName,
       String? subjectCode,
@@ -283,9 +299,11 @@ class __$$AssignmentImplCopyWithImpl<$Res>
     Object? attachments = null,
     Object? status = null,
     Object? allowLateSubmission = null,
+    Object? topicId = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
     Object? sectionName = freezed,
+    Object? topicTitle = freezed,
     Object? className = freezed,
     Object? subjectName = freezed,
     Object? subjectCode = freezed,
@@ -348,6 +366,10 @@ class __$$AssignmentImplCopyWithImpl<$Res>
           ? _value.allowLateSubmission
           : allowLateSubmission // ignore: cast_nullable_to_non_nullable
               as bool,
+      topicId: freezed == topicId
+          ? _value.topicId
+          : topicId // ignore: cast_nullable_to_non_nullable
+              as String?,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -359,6 +381,10 @@ class __$$AssignmentImplCopyWithImpl<$Res>
       sectionName: freezed == sectionName
           ? _value.sectionName
           : sectionName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      topicTitle: freezed == topicTitle
+          ? _value.topicTitle
+          : topicTitle // ignore: cast_nullable_to_non_nullable
               as String?,
       className: freezed == className
           ? _value.className
@@ -413,9 +439,11 @@ class _$AssignmentImpl implements _Assignment {
       final List<Map<String, dynamic>> attachments = const [],
       this.status = 'draft',
       this.allowLateSubmission = false,
+      this.topicId,
       this.createdAt,
       this.updatedAt,
       this.sectionName,
+      this.topicTitle,
       this.className,
       this.subjectName,
       this.subjectCode,
@@ -465,12 +493,16 @@ class _$AssignmentImpl implements _Assignment {
   @JsonKey()
   final bool allowLateSubmission;
   @override
+  final String? topicId;
+  @override
   final DateTime? createdAt;
   @override
   final DateTime? updatedAt;
 // Joined data
   @override
   final String? sectionName;
+  @override
+  final String? topicTitle;
   @override
   final String? className;
   @override
@@ -491,7 +523,7 @@ class _$AssignmentImpl implements _Assignment {
 
   @override
   String toString() {
-    return 'Assignment(id: $id, tenantId: $tenantId, sectionId: $sectionId, subjectId: $subjectId, teacherId: $teacherId, title: $title, description: $description, instructions: $instructions, dueDate: $dueDate, maxMarks: $maxMarks, attachments: $attachments, status: $status, allowLateSubmission: $allowLateSubmission, createdAt: $createdAt, updatedAt: $updatedAt, sectionName: $sectionName, className: $className, subjectName: $subjectName, subjectCode: $subjectCode, teacherName: $teacherName, totalStudents: $totalStudents, submittedCount: $submittedCount, gradedCount: $gradedCount, lateCount: $lateCount)';
+    return 'Assignment(id: $id, tenantId: $tenantId, sectionId: $sectionId, subjectId: $subjectId, teacherId: $teacherId, title: $title, description: $description, instructions: $instructions, dueDate: $dueDate, maxMarks: $maxMarks, attachments: $attachments, status: $status, allowLateSubmission: $allowLateSubmission, topicId: $topicId, createdAt: $createdAt, updatedAt: $updatedAt, sectionName: $sectionName, topicTitle: $topicTitle, className: $className, subjectName: $subjectName, subjectCode: $subjectCode, teacherName: $teacherName, totalStudents: $totalStudents, submittedCount: $submittedCount, gradedCount: $gradedCount, lateCount: $lateCount)';
   }
 
   @override
@@ -521,12 +553,15 @@ class _$AssignmentImpl implements _Assignment {
             (identical(other.status, status) || other.status == status) &&
             (identical(other.allowLateSubmission, allowLateSubmission) ||
                 other.allowLateSubmission == allowLateSubmission) &&
+            (identical(other.topicId, topicId) || other.topicId == topicId) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
             (identical(other.sectionName, sectionName) ||
                 other.sectionName == sectionName) &&
+            (identical(other.topicTitle, topicTitle) ||
+                other.topicTitle == topicTitle) &&
             (identical(other.className, className) ||
                 other.className == className) &&
             (identical(other.subjectName, subjectName) ||
@@ -562,9 +597,11 @@ class _$AssignmentImpl implements _Assignment {
         const DeepCollectionEquality().hash(_attachments),
         status,
         allowLateSubmission,
+        topicId,
         createdAt,
         updatedAt,
         sectionName,
+        topicTitle,
         className,
         subjectName,
         subjectCode,
@@ -604,9 +641,11 @@ abstract class _Assignment implements Assignment {
       final List<Map<String, dynamic>> attachments,
       final String status,
       final bool allowLateSubmission,
+      final String? topicId,
       final DateTime? createdAt,
       final DateTime? updatedAt,
       final String? sectionName,
+      final String? topicTitle,
       final String? className,
       final String? subjectName,
       final String? subjectCode,
@@ -646,11 +685,15 @@ abstract class _Assignment implements Assignment {
   @override
   bool get allowLateSubmission;
   @override
+  String? get topicId;
+  @override
   DateTime? get createdAt;
   @override
   DateTime? get updatedAt;
   @override // Joined data
   String? get sectionName;
+  @override
+  String? get topicTitle;
   @override
   String? get className;
   @override

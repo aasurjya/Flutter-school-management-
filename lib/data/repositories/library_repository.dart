@@ -11,11 +11,13 @@ class LibraryRepository extends BaseRepository {
     String? category,
     String? searchQuery,
     bool availableOnly = false,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('library_books')
         .select()
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (availableOnly) {
       query = query.gt('available_copies', 0);
@@ -25,7 +27,7 @@ class LibraryRepository extends BaseRepository {
       query = query.eq('category', category);
     }
 
-    final response = await query.order('title');
+    final response = await query.order('title').range(offset, offset + limit - 1);
 
     var books = (response as List).map((json) => LibraryBook.fromJson(json)).toList();
 
@@ -56,7 +58,7 @@ class LibraryRepository extends BaseRepository {
     final response = await client
         .from('library_books')
         .select('category')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .order('category');
 
     final categories = <String>{};
@@ -193,6 +195,8 @@ class LibraryRepository extends BaseRepository {
     String? bookId,
     String? status,
     bool activeOnly = false,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('book_issues')
@@ -202,7 +206,7 @@ class LibraryRepository extends BaseRepository {
           students(first_name, last_name),
           staff(first_name, last_name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (studentId != null) {
       query = query.eq('student_id', studentId);
@@ -224,7 +228,7 @@ class LibraryRepository extends BaseRepository {
       query = query.neq('status', 'returned');
     }
 
-    final response = await query.order('issue_date', ascending: false);
+    final response = await query.order('issue_date', ascending: false).range(offset, offset + limit - 1);
 
     return (response as List).map((json) => BookIssue.fromJson(json)).toList();
   }
@@ -266,7 +270,7 @@ class LibraryRepository extends BaseRepository {
           students(first_name, last_name),
           staff(first_name, last_name)
         ''')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .neq('status', 'returned')
         .lt('due_date', today)
         .order('due_date');
@@ -280,7 +284,7 @@ class LibraryRepository extends BaseRepository {
     final booksResponse = await client
         .from('library_books')
         .select('total_copies, available_copies')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     final books = booksResponse as List;
     final totalBooks = books.fold<int>(0, (sum, b) => sum + (b['total_copies'] as int));
@@ -293,7 +297,7 @@ class LibraryRepository extends BaseRepository {
     final issuesTodayResponse = await client
         .from('book_issues')
         .select('id')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('issue_date', today);
 
     return {

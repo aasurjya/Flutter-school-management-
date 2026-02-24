@@ -14,8 +14,8 @@ class ResourceRepository extends BaseRepository {
     List<String>? tags,
     String? uploadedBy,
     bool myUploadsOnly = false,
-    int? limit,
-    int? offset,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('study_resources')
@@ -25,7 +25,7 @@ class ResourceRepository extends BaseRepository {
           class:classes(name),
           uploader:users!uploaded_by(full_name)
         ''')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_public', true);
 
     if (subjectId != null) {
@@ -47,25 +47,14 @@ class ResourceRepository extends BaseRepository {
       query = query.eq('uploaded_by', uploadedBy);
     }
     if (myUploadsOnly) {
-      query = query.eq('uploaded_by', currentUserId!);
+      query = query.eq('uploaded_by', requireUserId);
     }
 
-    final response = await query.order('created_at', ascending: false);
+    final response = await query
+        .order('created_at', ascending: false)
+        .range(offset, offset + limit - 1);
 
-    List<dynamic> results = response as List;
-
-    if (offset != null && limit != null) {
-      final end = offset + limit;
-      if (offset < results.length) {
-        results = results.sublist(offset, end > results.length ? results.length : end);
-      } else {
-        results = [];
-      }
-    } else if (limit != null) {
-      results = results.take(limit).toList();
-    }
-
-    return results
+    return (response as List)
         .map((json) => StudyResource.fromJson(json as Map<String, dynamic>))
         .toList();
   }
@@ -94,7 +83,7 @@ class ResourceRepository extends BaseRepository {
           name,
           study_resources(count)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     return (response as List).map((json) {
       final count = json['study_resources'] is List
@@ -106,6 +95,22 @@ class ResourceRepository extends BaseRepository {
         resourceCount: count,
       );
     }).toList();
+  }
+
+  Future<List<StudyResource>> getResourcesByTopic(String topicId) async {
+    final response = await client
+        .from('study_resources')
+        .select('''
+          *,
+          subject:subjects(name),
+          uploader:users!uploaded_by(full_name)
+        ''')
+        .eq('topic_id', topicId)
+        .order('created_at', ascending: false);
+
+    return (response as List)
+        .map((json) => StudyResource.fromJson(json))
+        .toList();
   }
 
   Future<StudyResource> createResource({
@@ -120,6 +125,7 @@ class ResourceRepository extends BaseRepository {
     String? subjectId,
     String? classId,
     String? chapterId,
+    String? topicId,
     List<String>? tags,
     bool isPublic = true,
   }) async {
@@ -138,6 +144,7 @@ class ResourceRepository extends BaseRepository {
           'subject_id': subjectId,
           'class_id': classId,
           'chapter_id': chapterId,
+          'topic_id': topicId,
           'tags': tags ?? [],
           'uploaded_by': currentUserId,
           'is_public': isPublic,
@@ -220,7 +227,7 @@ class ResourceRepository extends BaseRepository {
           subject:subjects(name),
           uploader:users!uploaded_by(full_name)
         ''')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_public', true)
         .order('created_at', ascending: false)
         .limit(limit);
@@ -238,7 +245,7 @@ class ResourceRepository extends BaseRepository {
           subject:subjects(name),
           uploader:users!uploaded_by(full_name)
         ''')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_public', true)
         .order('download_count', ascending: false)
         .limit(limit);
@@ -248,7 +255,10 @@ class ResourceRepository extends BaseRepository {
         .toList();
   }
 
-  Future<List<StudyResource>> getMyUploads() async {
+  Future<List<StudyResource>> getMyUploads({
+    int limit = 50,
+    int offset = 0,
+  }) async {
     final response = await client
         .from('study_resources')
         .select('''
@@ -256,9 +266,9 @@ class ResourceRepository extends BaseRepository {
           subject:subjects(name),
           class:classes(name)
         ''')
-        .eq('tenant_id', tenantId!)
-        .eq('uploaded_by', currentUserId!)
-        .order('created_at', ascending: false);
+        .eq('tenant_id', requireTenantId)
+        .eq('uploaded_by', requireUserId)
+        .order('created_at', ascending: false).range(offset, offset + limit - 1);
 
     return (response as List)
         .map((json) => StudyResource.fromJson(json))
@@ -274,7 +284,7 @@ class ResourceRepository extends BaseRepository {
           subject:subjects(name),
           class:classes(name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (parentId != null) {
       query = query.eq('parent_id', parentId);

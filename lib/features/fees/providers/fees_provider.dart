@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/invoice.dart';
+import '../../../data/models/fee_default_prediction.dart';
 import '../../../data/repositories/fee_repository.dart';
 
 final feeRepositoryProvider = Provider<FeeRepository>((ref) {
@@ -72,6 +73,13 @@ final feeCollectionStatsProvider = FutureProvider.family<Map<String, double>, St
 final overdueInvoicesProvider = FutureProvider<List<Invoice>>((ref) async {
   final repository = ref.watch(feeRepositoryProvider);
   return repository.getOverdueInvoices();
+});
+
+/// Predictive fee collection — calls predict_fee_defaults() RPC.
+final feeDefaultPredictionsProvider =
+    FutureProvider<List<FeeDefaultPrediction>>((ref) async {
+  final repository = ref.watch(feeRepositoryProvider);
+  return repository.getFeeDefaultPredictions();
 });
 
 final paymentsProvider = FutureProvider.family<List<Payment>, PaymentsFilter>(

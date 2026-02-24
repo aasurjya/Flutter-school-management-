@@ -19,6 +19,7 @@ class Quiz {
   final bool showResults;
   final bool allowReview;
   final int? maxAttempts;
+  final String? topicId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -27,6 +28,7 @@ class Quiz {
   final String? sectionName;
   final String? className;
   final String? creatorName;
+  final String? topicTitle;
   final int? questionCount;
   final int? attemptCount;
 
@@ -49,12 +51,14 @@ class Quiz {
     this.showResults = true,
     this.allowReview = false,
     this.maxAttempts,
+    this.topicId,
     required this.createdAt,
     required this.updatedAt,
     this.subjectName,
     this.sectionName,
     this.className,
     this.creatorName,
+    this.topicTitle,
     this.questionCount,
     this.attemptCount,
   });
@@ -82,9 +86,11 @@ class Quiz {
       showResults: json['show_results'] ?? true,
       allowReview: json['allow_review'] ?? false,
       maxAttempts: json['max_attempts'],
+      topicId: json['topic_id'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
       subjectName: json['subject']?['name'] ?? json['subject_name'],
+      topicTitle: json['syllabus_topics']?['title'] ?? json['topic_title'],
       sectionName: json['section']?['name'] ?? json['section_name'],
       className: json['section']?['class']?['name'] ?? json['class_name'],
       creatorName: json['creator']?['full_name'] ?? json['creator_name'],
@@ -113,6 +119,7 @@ class Quiz {
       'show_results': showResults,
       'allow_review': allowReview,
       'max_attempts': maxAttempts,
+      'topic_id': topicId,
     };
   }
 
@@ -148,6 +155,7 @@ class QuestionBank {
   final String subjectId;
   final String? chapter;
   final String? topic;
+  final String? topicId;
   final String questionType; // mcq, true_false, short_answer, long_answer
   final String questionText;
   final Map<String, dynamic>? options; // For MCQ: {A: 'text', B: 'text', ...}
@@ -161,6 +169,7 @@ class QuestionBank {
 
   // Joined data
   final String? subjectName;
+  final String? topicTitle;
 
   const QuestionBank({
     required this.id,
@@ -168,6 +177,7 @@ class QuestionBank {
     required this.subjectId,
     this.chapter,
     this.topic,
+    this.topicId,
     required this.questionType,
     required this.questionText,
     this.options,
@@ -179,6 +189,7 @@ class QuestionBank {
     required this.createdBy,
     required this.createdAt,
     this.subjectName,
+    this.topicTitle,
   });
 
   factory QuestionBank.fromJson(Map<String, dynamic> json) {
@@ -188,6 +199,7 @@ class QuestionBank {
       subjectId: json['subject_id'],
       chapter: json['chapter'],
       topic: json['topic'],
+      topicId: json['topic_id'],
       questionType: json['question_type'],
       questionText: json['question_text'],
       options: json['options'],
@@ -199,6 +211,7 @@ class QuestionBank {
       createdBy: json['created_by'],
       createdAt: DateTime.parse(json['created_at']),
       subjectName: json['subject']?['name'] ?? json['subject_name'],
+      topicTitle: json['syllabus_topics']?['title'] ?? json['topic_title'],
     );
   }
 
@@ -209,6 +222,7 @@ class QuestionBank {
       'subject_id': subjectId,
       'chapter': chapter,
       'topic': topic,
+      'topic_id': topicId,
       'question_type': questionType,
       'question_text': questionText,
       'options': options,

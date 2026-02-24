@@ -6,7 +6,7 @@ import 'base_repository.dart';
 class MessageRepository extends BaseRepository {
   MessageRepository(super.client);
 
-  Future<List<Thread>> getThreads() async {
+  Future<List<Thread>> getThreads({int limit = 50, int offset = 0}) async {
     final response = await client
         .from('threads')
         .select('''
@@ -18,10 +18,11 @@ class MessageRepository extends BaseRepository {
             users(id, full_name, avatar_url)
           )
         ''')
-        .eq('tenant_id', tenantId!)
-        .eq('thread_participants.user_id', currentUserId!)
+        .eq('tenant_id', requireTenantId)
+        .eq('thread_participants.user_id', requireUserId)
         .eq('is_active', true)
-        .order('last_message_at', ascending: false);
+        .order('last_message_at', ascending: false)
+        .range(offset, offset + limit - 1);
 
     return (response as List).map((json) => Thread.fromJson(json)).toList();
   }
@@ -60,7 +61,7 @@ class MessageRepository extends BaseRepository {
 
     final threadId = threadResponse['id'] as String;
 
-    final participants = [currentUserId!, ...participantIds].map((userId) => {
+    final participants = [requireUserId, ...participantIds].map((userId) => {
       'thread_id': threadId,
       'user_id': userId,
     }).toList();
@@ -77,9 +78,9 @@ class MessageRepository extends BaseRepository {
           *,
           thread_participants!inner(user_id)
         ''')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('thread_type', 'private')
-        .eq('thread_participants.user_id', currentUserId!);
+        .eq('thread_participants.user_id', requireUserId);
 
     for (final thread in existingThreads) {
       final participants = thread['thread_participants'] as List;
@@ -158,7 +159,7 @@ class MessageRepository extends BaseRepository {
           'updated_at': DateTime.now().toIso8601String(),
         })
         .eq('id', messageId)
-        .eq('sender_id', currentUserId!)
+        .eq('sender_id', requireUserId)
         .select()
         .single();
 
@@ -170,19 +171,19 @@ class MessageRepository extends BaseRepository {
         .from('messages')
         .delete()
         .eq('id', messageId)
-        .eq('sender_id', currentUserId!);
+        .eq('sender_id', requireUserId);
   }
 
   Future<void> markThreadAsRead(String threadId) async {
     await client.from('thread_participants').update({
       'last_read_at': DateTime.now().toIso8601String(),
-    }).eq('thread_id', threadId).eq('user_id', currentUserId!);
+    }).eq('thread_id', threadId).eq('user_id', requireUserId);
   }
 
   Future<void> muteThread(String threadId, bool muted) async {
     await client.from('thread_participants').update({
       'is_muted': muted,
-    }).eq('thread_id', threadId).eq('user_id', currentUserId!);
+    }).eq('thread_id', threadId).eq('user_id', requireUserId);
   }
 
   Future<int> getUnreadCount() async {
@@ -208,6 +209,8 @@ class MessageRepository extends BaseRepository {
 
   Future<List<Announcement>> getAnnouncements({
     bool activeOnly = true,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('announcements')
@@ -215,7 +218,7 @@ class MessageRepository extends BaseRepository {
           *,
           users!created_by(id, full_name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (activeOnly) {
       query = query
@@ -224,7 +227,7 @@ class MessageRepository extends BaseRepository {
           .or('expires_at.is.null,expires_at.gt.${DateTime.now().toIso8601String()}');
     }
 
-    final response = await query.order('publish_at', ascending: false);
+    final response = await query.order('publish_at', ascending: false).range(offset, offset + limit - 1);
     return (response as List)
         .map((json) => Announcement.fromJson(json))
         .toList();

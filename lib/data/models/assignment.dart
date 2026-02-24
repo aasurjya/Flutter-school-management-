@@ -19,10 +19,12 @@ class Assignment with _$Assignment {
     @Default([]) List<Map<String, dynamic>> attachments,
     @Default('draft') String status,
     @Default(false) bool allowLateSubmission,
+    String? topicId,
     DateTime? createdAt,
     DateTime? updatedAt,
     // Joined data
     String? sectionName,
+    String? topicTitle,
     String? className,
     String? subjectName,
     String? subjectCode,

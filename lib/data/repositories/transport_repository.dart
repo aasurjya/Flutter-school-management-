@@ -7,20 +7,20 @@ class TransportRepository extends BaseRepository {
 
   // ==================== ROUTES ====================
 
-  Future<List<TransportRoute>> getRoutes({bool activeOnly = true}) async {
+  Future<List<TransportRoute>> getRoutes({bool activeOnly = true, int limit = 50, int offset = 0}) async {
     var query = client
         .from('transport_routes')
         .select('''
           *,
           transport_stops(*)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (activeOnly) {
       query = query.eq('is_active', true);
     }
 
-    final response = await query.order('name');
+    final response = await query.order('name').range(offset, offset + limit - 1);
     return (response as List).map((json) => TransportRoute.fromJson(json)).toList();
   }
 
@@ -101,7 +101,7 @@ class TransportRepository extends BaseRepository {
 
   // ==================== STUDENT TRANSPORT ====================
 
-  Future<List<StudentTransport>> getStudentsByRoute(String routeId) async {
+  Future<List<StudentTransport>> getStudentsByRoute(String routeId, {int limit = 100, int offset = 0}) async {
     final response = await client
         .from('student_transport')
         .select('''
@@ -111,14 +111,15 @@ class TransportRepository extends BaseRepository {
           students(first_name, last_name)
         ''')
         .eq('route_id', routeId)
-        .order('created_at');
+        .order('created_at')
+        .range(offset, offset + limit - 1);
 
     return (response as List)
         .map((json) => StudentTransport.fromJson(json))
         .toList();
   }
 
-  Future<List<StudentTransport>> getStudentsByStop(String stopId) async {
+  Future<List<StudentTransport>> getStudentsByStop(String stopId, {int limit = 100, int offset = 0}) async {
     final response = await client
         .from('student_transport')
         .select('''
@@ -128,7 +129,8 @@ class TransportRepository extends BaseRepository {
           students(first_name, last_name)
         ''')
         .eq('stop_id', stopId)
-        .order('created_at');
+        .order('created_at')
+        .range(offset, offset + limit - 1);
 
     return (response as List)
         .map((json) => StudentTransport.fromJson(json))
@@ -140,7 +142,7 @@ class TransportRepository extends BaseRepository {
     final academicYearResponse = await client
         .from('academic_years')
         .select('id')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_current', true)
         .maybeSingle();
 
@@ -218,7 +220,7 @@ class TransportRepository extends BaseRepository {
     final routesResponse = await client
         .from('transport_routes')
         .select('id, capacity')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_active', true);
 
     final routes = routesResponse as List;
@@ -229,7 +231,7 @@ class TransportRepository extends BaseRepository {
     final academicYearResponse = await client
         .from('academic_years')
         .select('id')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_current', true)
         .maybeSingle();
 
@@ -238,7 +240,7 @@ class TransportRepository extends BaseRepository {
       final allocationsResponse = await client
           .from('student_transport')
           .select('id')
-          .eq('tenant_id', tenantId!)
+          .eq('tenant_id', requireTenantId)
           .eq('academic_year_id', academicYearResponse['id']);
 
       totalAllocations = (allocationsResponse as List).length;

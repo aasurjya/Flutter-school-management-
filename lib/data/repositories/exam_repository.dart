@@ -9,6 +9,8 @@ class ExamRepository extends BaseRepository {
     String? academicYearId,
     String? termId,
     bool publishedOnly = false,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('exams')
@@ -17,7 +19,7 @@ class ExamRepository extends BaseRepository {
           terms(id, name),
           academic_years(id, name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (academicYearId != null) {
       query = query.eq('academic_year_id', academicYearId);
@@ -29,7 +31,7 @@ class ExamRepository extends BaseRepository {
       query = query.eq('is_published', true);
     }
 
-    final response = await query.order('start_date', ascending: false);
+    final response = await query.order('start_date', ascending: false).range(offset, offset + limit - 1);
     return (response as List).map((json) => Exam.fromJson(json)).toList();
   }
 
@@ -111,6 +113,8 @@ class ExamRepository extends BaseRepository {
   Future<List<Mark>> getMarks({
     required String examSubjectId,
     String? studentId,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('marks')
@@ -125,7 +129,7 @@ class ExamRepository extends BaseRepository {
       query = query.eq('student_id', studentId);
     }
 
-    final response = await query;
+    final response = await query.range(offset, offset + limit - 1);
     return (response as List).map((json) => Mark.fromJson(json)).toList();
   }
 
@@ -166,6 +170,8 @@ class ExamRepository extends BaseRepository {
     required String studentId,
     String? examId,
     String? subjectId,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('mv_student_performance')
@@ -179,7 +185,7 @@ class ExamRepository extends BaseRepository {
       query = query.eq('subject_id', subjectId);
     }
 
-    final response = await query;
+    final response = await query.range(offset, offset + limit - 1);
     return (response as List)
         .map((json) => StudentPerformance.fromJson(json))
         .toList();
@@ -247,7 +253,7 @@ class ExamRepository extends BaseRepository {
           *,
           grade_scale_items(*)
         ''')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .order('name');
 
     return (response as List).map((json) => GradeScale.fromJson(json)).toList();

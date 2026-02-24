@@ -45,6 +45,9 @@ import '../../features/super_admin/presentation/screens/super_admin_dashboard_sc
 import '../../features/super_admin/presentation/screens/tenants_list_screen.dart';
 import '../../features/super_admin/presentation/screens/create_tenant_screen.dart';
 import '../../features/super_admin/presentation/screens/tenant_detail_screen.dart';
+import '../../features/qr_scan/presentation/screens/qr_scanner_screen.dart';
+import '../../features/qr_scan/presentation/screens/student_id_card_screen.dart';
+import '../../features/teacher/presentation/screens/class_teacher_dashboard_screen.dart';
 
 // New feature imports
 import '../../features/canteen/presentation/screens/canteen_menu_screen.dart';
@@ -75,6 +78,34 @@ import '../../features/leave/presentation/screens/leave_management_screen.dart';
 import '../../features/resources/presentation/screens/resource_library_screen.dart';
 import '../../features/reports/presentation/screens/report_cards_screen.dart';
 import '../../features/reports/presentation/screens/report_card_view_screen.dart';
+import '../../features/ai_insights/presentation/screens/risk_dashboard_screen.dart';
+import '../../features/ai_insights/presentation/screens/student_risk_detail_screen.dart';
+import '../../features/ai_insights/presentation/screens/attendance_insights_screen.dart';
+import '../../features/ai_insights/presentation/screens/trend_dashboard_screen.dart';
+import '../../features/ai_insights/presentation/screens/parent_digest_list_screen.dart';
+import '../../features/ai_insights/presentation/screens/parent_digest_detail_screen.dart';
+import '../../features/ai_insights/presentation/screens/early_warning_dashboard_screen.dart';
+import '../../features/ai_insights/presentation/screens/alert_detail_screen.dart';
+import '../../features/ai_insights/presentation/screens/alert_rules_config_screen.dart';
+import '../../features/ai_insights/presentation/screens/study_recommendations_screen.dart';
+import '../../features/ai_insights/presentation/screens/generate_remarks_screen.dart';
+import '../../features/ai_insights/presentation/screens/ai_message_composer_screen.dart';
+import '../../features/ai_insights/presentation/screens/class_intelligence_screen.dart';
+import '../../features/syllabus/presentation/screens/syllabus_list_screen.dart';
+import '../../features/syllabus/presentation/screens/syllabus_editor_screen.dart';
+import '../../features/syllabus/presentation/screens/topic_detail_screen.dart';
+import '../../features/syllabus/presentation/screens/topic_form_screen.dart';
+import '../../features/syllabus/presentation/screens/ai_syllabus_generator_screen.dart';
+import '../../features/syllabus/presentation/screens/coverage_dashboard_screen.dart';
+import '../../features/syllabus/presentation/screens/section_coverage_screen.dart';
+import '../../features/syllabus/presentation/screens/lesson_plan_screen.dart';
+import '../../features/syllabus/presentation/screens/lesson_plan_form_screen.dart';
+import '../../features/syllabus/presentation/screens/student_syllabus_screen.dart';
+import '../../features/question_paper/presentation/screens/question_paper_list_screen.dart';
+import '../../features/question_paper/presentation/screens/question_paper_generator_screen.dart';
+import '../../features/question_paper/presentation/screens/question_paper_detail_screen.dart';
+import '../../features/substitution/presentation/screens/substitution_dashboard_screen.dart';
+import '../../features/substitution/presentation/screens/report_absence_screen.dart';
 import '../shell/main_shell.dart';
 
 /// Route names
@@ -205,11 +236,56 @@ class AppRoutes {
   // Teacher routes (additional)
   static const String teacherTimetable = '/teacher/timetable';
 
+  // QR Scan & ID Card routes
+  static const String qrScanner = '/qr-scanner';
+  static const String studentIdCard = '/student-id-card/:studentId';
+  static const String classTeacherDashboard = '/class-teacher/:sectionId';
+
   // Super Admin routes
   static const String superAdminDashboard = '/super-admin';
   static const String tenantsList = '/super-admin/tenants';
   static const String createTenant = '/super-admin/tenants/create';
   static const String tenantDetail = '/super-admin/tenants/:tenantId';
+
+  // AI Insights routes
+  static const String riskDashboard = '/ai/risk-dashboard';
+  static const String studentRiskDetail = '/ai/risk-dashboard/:studentId';
+  static const String attendanceInsights = '/ai/attendance-insights/:sectionId';
+  static const String trendDashboard = '/ai/trends';
+  static const String parentDigests = '/ai/parent-digests';
+  static const String parentDigestDetail = '/ai/parent-digests/:digestId';
+
+  // Early Warning Alerts routes
+  static const String earlyWarningAlerts = '/ai/alerts';
+  static const String alertDetail = '/ai/alerts/:alertId';
+  static const String alertRulesConfig = '/ai/alert-rules';
+
+  // AI Features routes (additional)
+  static const String studyRecommendations = '/ai/study-tips';
+  static const String generateRemarks = '/ai/report-remarks';
+  static const String aiMessageComposer = '/ai/compose-message';
+  static const String classIntelligence = '/ai/class-intelligence/:sectionId';
+
+  // Syllabus & Topics routes
+  static const String syllabusList = '/syllabus';
+  static const String syllabusEditor = '/syllabus/editor';
+  static const String topicDetail = '/syllabus/topic/:topicId';
+  static const String topicForm = '/syllabus/topic-form';
+  static const String syllabusAIGenerator = '/syllabus/ai-generate';
+  static const String coverageDashboard = '/syllabus/coverage';
+  static const String sectionCoverage = '/syllabus/coverage/compare';
+  static const String lessonPlan = '/syllabus/lesson-plan/:planId';
+  static const String lessonPlanForm = '/syllabus/topic/:topicId/lesson-plan';
+  static const String studentSyllabus = '/student/syllabus';
+
+  // Question Paper routes
+  static const String questionPaperList = '/question-papers';
+  static const String questionPaperCreate = '/question-papers/create';
+  static const String questionPaperDetail = '/question-papers/:paperId';
+
+  // Substitution routes
+  static const String substitutionDashboard = '/substitutions';
+  static const String reportAbsence = '/substitutions/report-absence';
 }
 
 /// Router provider
@@ -667,6 +743,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const TeacherTimetableScreen(),
           ),
 
+          // ==================== QR SCAN & ID CARD ====================
+          GoRoute(
+            path: AppRoutes.qrScanner,
+            builder: (context, state) => QrScannerScreen(
+              mode: state.uri.queryParameters['mode'] ?? 'lookup',
+              sectionId: state.uri.queryParameters['sectionId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.studentIdCard,
+            builder: (context, state) => StudentIdCardScreen(
+              studentId: state.pathParameters['studentId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.classTeacherDashboard,
+            builder: (context, state) => ClassTeacherDashboardScreen(
+              sectionId: state.pathParameters['sectionId']!,
+              sectionName: state.uri.queryParameters['name'],
+            ),
+          ),
+
           // Super Admin Dashboard
           GoRoute(
             path: AppRoutes.superAdminDashboard,
@@ -691,6 +789,199 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => TenantDetailScreen(
               tenantId: state.pathParameters['tenantId']!,
             ),
+          ),
+
+          // ==================== AI INSIGHTS ====================
+          GoRoute(
+            path: AppRoutes.riskDashboard,
+            builder: (context, state) => RiskDashboardScreen(
+              academicYearId: state.uri.queryParameters['yearId'] ?? '',
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.studentRiskDetail,
+            builder: (context, state) => StudentRiskDetailScreen(
+              studentId: state.pathParameters['studentId']!,
+              academicYearId: state.uri.queryParameters['yearId'] ?? '',
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.attendanceInsights,
+            builder: (context, state) => AttendanceInsightsScreen(
+              sectionId: state.pathParameters['sectionId']!,
+              sectionName: state.uri.queryParameters['name'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.trendDashboard,
+            builder: (context, state) => TrendDashboardScreen(
+              sectionId: state.uri.queryParameters['sectionId'],
+              studentId: state.uri.queryParameters['studentId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.parentDigests,
+            builder: (context, state) => ParentDigestListScreen(
+              parentId: state.uri.queryParameters['parentId'] ?? '',
+              studentId: state.uri.queryParameters['studentId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.parentDigestDetail,
+            builder: (context, state) => ParentDigestDetailScreen(
+              digestId: state.pathParameters['digestId']!,
+            ),
+          ),
+
+          // ==================== EARLY WARNING ALERTS ====================
+          GoRoute(
+            path: AppRoutes.earlyWarningAlerts,
+            builder: (context, state) =>
+                const EarlyWarningDashboardScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.alertDetail,
+            builder: (context, state) => AlertDetailScreen(
+              alertId: state.pathParameters['alertId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.alertRulesConfig,
+            builder: (context, state) =>
+                const AlertRulesConfigScreen(),
+          ),
+
+          // ==================== AI FEATURES (ADDITIONAL) ====================
+          GoRoute(
+            path: AppRoutes.studyRecommendations,
+            builder: (context, state) =>
+                const StudyRecommendationsScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.generateRemarks,
+            builder: (context, state) =>
+                const GenerateRemarksScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.aiMessageComposer,
+            builder: (context, state) =>
+                const AIMessageComposerScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.classIntelligence,
+            builder: (context, state) => ClassIntelligenceScreen(
+              sectionId: state.pathParameters['sectionId']!,
+              sectionName: state.uri.queryParameters['name'],
+            ),
+          ),
+
+          // ==================== SYLLABUS & TOPICS ====================
+          GoRoute(
+            path: AppRoutes.syllabusList,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: SyllabusListScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.syllabusEditor,
+            builder: (context, state) => SyllabusEditorScreen(
+              subjectId: state.uri.queryParameters['subjectId']!,
+              classId: state.uri.queryParameters['classId']!,
+              academicYearId: state.uri.queryParameters['yearId']!,
+              sectionId: state.uri.queryParameters['sectionId'],
+              subjectName: state.uri.queryParameters['subjectName'],
+              className: state.uri.queryParameters['className'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.topicDetail,
+            builder: (context, state) => TopicDetailScreen(
+              topicId: state.pathParameters['topicId']!,
+              sectionId: state.uri.queryParameters['sectionId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.topicForm,
+            builder: (context, state) => TopicFormScreen(
+              subjectId: state.uri.queryParameters['subjectId']!,
+              classId: state.uri.queryParameters['classId']!,
+              academicYearId: state.uri.queryParameters['yearId']!,
+              parentTopicId: state.uri.queryParameters['parentId'],
+              topicId: state.uri.queryParameters['topicId'],
+              parentLevel: state.uri.queryParameters['parentLevel'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.syllabusAIGenerator,
+            builder: (context, state) => AISyllabusGeneratorScreen(
+              subjectId: state.uri.queryParameters['subjectId']!,
+              classId: state.uri.queryParameters['classId']!,
+              academicYearId: state.uri.queryParameters['yearId']!,
+              subjectName: state.uri.queryParameters['subjectName'],
+              className: state.uri.queryParameters['className'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.coverageDashboard,
+            builder: (context, state) => const CoverageDashboardScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.sectionCoverage,
+            builder: (context, state) => SectionCoverageScreen(
+              subjectId: state.uri.queryParameters['subjectId']!,
+              classId: state.uri.queryParameters['classId']!,
+              academicYearId: state.uri.queryParameters['yearId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.lessonPlan,
+            builder: (context, state) => LessonPlanScreen(
+              planId: state.pathParameters['planId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.lessonPlanForm,
+            builder: (context, state) => LessonPlanFormScreen(
+              topicId: state.pathParameters['topicId']!,
+              topicTitle: state.uri.queryParameters['topicTitle'],
+              sectionId: state.uri.queryParameters['sectionId'],
+              planId: state.uri.queryParameters['planId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.studentSyllabus,
+            builder: (context, state) => const StudentSyllabusScreen(),
+          ),
+
+          // ==================== QUESTION PAPER ====================
+          GoRoute(
+            path: AppRoutes.questionPaperList,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: QuestionPaperListScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.questionPaperCreate,
+            builder: (context, state) =>
+                const QuestionPaperGeneratorScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.questionPaperDetail,
+            builder: (context, state) => QuestionPaperDetailScreen(
+              paperId: state.pathParameters['paperId']!,
+            ),
+          ),
+
+          // ==================== SUBSTITUTION ====================
+          GoRoute(
+            path: AppRoutes.substitutionDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: SubstitutionDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.reportAbsence,
+            builder: (context, state) => const ReportAbsenceScreen(),
           ),
         ],
       ),

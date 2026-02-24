@@ -77,6 +77,24 @@ class AppEnvironment {
     return show.toLowerCase() == 'true';
   }
 
+  /// DeepSeek API key (optional — LLM enhancement, not required)
+  static String? get deepSeekApiKey {
+    final key = dotenv.env['Deepseek_API'];
+    return (key != null && key.isNotEmpty) ? key : null;
+  }
+
+  /// OpenRouter API key (optional — image generation, not required)
+  static String? get openRouterApiKey {
+    final key = dotenv.env['Riverflow_V2_Fast'];
+    return (key != null && key.isNotEmpty) ? key : null;
+  }
+
+  /// Razorpay key ID (optional — payment gateway)
+  static String? get razorpayKeyId {
+    final key = dotenv.env['RAZORPAY_KEY_ID'];
+    return (key != null && key.isNotEmpty) ? key : null;
+  }
+
   /// Environment name for display
   static String get environmentName {
     switch (environment) {

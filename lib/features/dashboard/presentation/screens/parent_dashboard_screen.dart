@@ -6,6 +6,8 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../ai_insights/providers/parent_digest_provider.dart';
+import '../../../syllabus/presentation/widgets/coverage_progress_bar.dart';
 
 class ParentDashboardScreen extends ConsumerWidget {
   const ParentDashboardScreen({super.key});
@@ -137,6 +139,9 @@ class ParentDashboardScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                // Weekly Digest Banner
+                _buildDigestBanner(context, ref),
+
                 // Children Selector
                 _buildChildrenSelector(context),
                 const SizedBox(height: 24),
@@ -155,6 +160,12 @@ class ParentDashboardScreen extends ConsumerWidget {
                 _buildAttendanceOverview(context),
                 const SizedBox(height: 24),
 
+                // Syllabus Progress
+                _buildSectionHeader(context, 'Syllabus Progress'),
+                const SizedBox(height: 12),
+                _buildSyllabusProgress(context),
+                const SizedBox(height: 24),
+
                 // Recent Performance
                 _buildSectionHeader(context, 'Recent Performance'),
                 const SizedBox(height: 12),
@@ -171,6 +182,98 @@ class ParentDashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDigestBanner(BuildContext context, WidgetRef ref) {
+    final currentUser = ref.watch(currentUserProvider);
+    final parentId = currentUser?.id;
+    if (parentId == null) return const SizedBox.shrink();
+
+    final unreadCount = ref.watch(unreadDigestCountProvider(parentId));
+
+    return unreadCount.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (count) {
+        if (count == 0) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: GestureDetector(
+            onTap: () => context.push(
+              '${AppRoutes.parentDigests}?parentId=$parentId',
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.summarize,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Weekly Digest',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '$count new digest${count > 1 ? 's' : ''} available',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: const TextStyle(
+                        color: Color(0xFF667eea),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -339,6 +442,85 @@ class ParentDashboardScreen extends ConsumerWidget {
             ],
           );
         }),
+      ),
+    );
+  }
+
+  Widget _buildSyllabusProgress(BuildContext context) {
+    final subjects = [
+      {'name': 'Mathematics', 'completed': 18, 'total': 24, 'inProgress': 2},
+      {'name': 'Physics', 'completed': 14, 'total': 20, 'inProgress': 3},
+      {'name': 'Chemistry', 'completed': 12, 'total': 22, 'inProgress': 1},
+    ];
+
+    return GestureDetector(
+      onTap: () => context.push(AppRoutes.studentSyllabus),
+      child: GlassCard(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            ...subjects.map((subject) {
+              final completed = subject['completed'] as int;
+              final total = subject['total'] as int;
+              final inProgress = subject['inProgress'] as int;
+              final notStarted = total - completed - inProgress;
+              final percentage = total > 0 ? (completed / total * 100) : 0.0;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          subject['name'] as String,
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        Text(
+                          '$completed/$total topics (${percentage.round()}%)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 11,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    CoverageProgressBar(
+                      completed: completed,
+                      inProgress: inProgress,
+                      notStarted: notStarted,
+                      skipped: 0,
+                      height: 6,
+                    ),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'View Full Syllabus',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 12,
+                  color: AppColors.primary,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

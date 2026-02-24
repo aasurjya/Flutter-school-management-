@@ -46,24 +46,32 @@ class HealthRepository extends BaseRepository {
     }
   }
 
-  Future<List<StudentHealthRecord>> getHealthRecordsWithAllergies() async {
+  Future<List<StudentHealthRecord>> getHealthRecordsWithAllergies({
+    int limit = 100,
+    int offset = 0,
+  }) async {
     final response = await client
         .from('student_health_records')
         .select()
-        .eq('tenant_id', tenantId!)
-        .not('allergies', 'eq', '{}');
+        .eq('tenant_id', requireTenantId)
+        .not('allergies', 'eq', '{}')
+        .range(offset, offset + limit - 1);
 
     return (response as List)
         .map((json) => StudentHealthRecord.fromJson(json))
         .toList();
   }
 
-  Future<List<StudentHealthRecord>> getHealthRecordsWithConditions() async {
+  Future<List<StudentHealthRecord>> getHealthRecordsWithConditions({
+    int limit = 100,
+    int offset = 0,
+  }) async {
     final response = await client
         .from('student_health_records')
         .select()
-        .eq('tenant_id', tenantId!)
-        .not('chronic_conditions', 'eq', '{}');
+        .eq('tenant_id', requireTenantId)
+        .not('chronic_conditions', 'eq', '{}')
+        .range(offset, offset + limit - 1);
 
     return (response as List)
         .map((json) => StudentHealthRecord.fromJson(json))
@@ -78,11 +86,13 @@ class HealthRepository extends BaseRepository {
     DateTime? fromDate,
     DateTime? toDate,
     bool pendingFollowUp = false,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('health_incidents')
         .select()
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (studentId != null) {
       query = query.eq('student_id', studentId);
@@ -106,7 +116,7 @@ class HealthRepository extends BaseRepository {
       query = query.lte('follow_up_date', today);
     }
 
-    final response = await query.order('incident_date', ascending: false);
+    final response = await query.order('incident_date', ascending: false).range(offset, offset + limit - 1);
 
     return (response as List)
         .map((json) => HealthIncident.fromJson(json))
@@ -178,14 +188,14 @@ class HealthRepository extends BaseRepository {
     final allergiesResponse = await client
         .from('student_health_records')
         .select('id')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .not('allergies', 'eq', '{}');
 
     // Get students with chronic conditions count
     final conditionsResponse = await client
         .from('student_health_records')
         .select('id')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .not('chronic_conditions', 'eq', '{}');
 
     // Get recent incidents (last 30 days)
@@ -194,7 +204,7 @@ class HealthRepository extends BaseRepository {
     final incidentsResponse = await client
         .from('health_incidents')
         .select('id, severity')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .gte('incident_date', thirtyDaysAgo);
 
     final incidents = incidentsResponse as List;
@@ -206,7 +216,7 @@ class HealthRepository extends BaseRepository {
     final followUpResponse = await client
         .from('health_incidents')
         .select('id')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('follow_up_required', true)
         .lte('follow_up_date', today);
 

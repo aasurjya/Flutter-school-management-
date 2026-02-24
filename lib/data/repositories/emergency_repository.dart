@@ -18,7 +18,7 @@ class EmergencyRepository extends BaseRepository {
           initiator:users!initiated_by(full_name),
           resolver:users!resolved_by(full_name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (status != null) {
       query = query.eq('status', status);
@@ -58,7 +58,7 @@ class EmergencyRepository extends BaseRepository {
           *,
           initiator:users!initiated_by(full_name)
         ''')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('status', 'active')
         .order('initiated_at', ascending: false)
         .limit(1)
@@ -105,7 +105,10 @@ class EmergencyRepository extends BaseRepository {
 
   // ==================== RESPONSES ====================
 
-  Future<List<EmergencyResponse>> getAlertResponses(String alertId) async {
+  Future<List<EmergencyResponse>> getAlertResponses(String alertId, {
+    int limit = 50,
+    int offset = 0,
+  }) async {
     final response = await client
         .from('emergency_responses')
         .select('''
@@ -113,7 +116,7 @@ class EmergencyRepository extends BaseRepository {
           responder:users(full_name)
         ''')
         .eq('alert_id', alertId)
-        .order('responded_at');
+        .order('responded_at').range(offset, offset + limit - 1);
 
     return (response as List)
         .map((json) => EmergencyResponse.fromJson(json))
@@ -125,7 +128,7 @@ class EmergencyRepository extends BaseRepository {
         .from('emergency_responses')
         .select()
         .eq('alert_id', alertId)
-        .eq('responder_id', currentUserId!)
+        .eq('responder_id', requireUserId)
         .maybeSingle();
 
     if (response == null) return null;
@@ -190,11 +193,13 @@ class EmergencyRepository extends BaseRepository {
   Future<List<EmergencyContact>> getEmergencyContacts({
     String? contactType,
     bool activeOnly = true,
+    int limit = 100,
+    int offset = 0,
   }) async {
     var query = client
         .from('emergency_contacts')
         .select()
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (activeOnly) {
       query = query.eq('is_active', true);
@@ -203,7 +208,7 @@ class EmergencyRepository extends BaseRepository {
       query = query.eq('contact_type', contactType);
     }
 
-    final response = await query.order('priority');
+    final response = await query.order('priority').range(offset, offset + limit - 1);
 
     return (response as List)
         .map((json) => EmergencyContact.fromJson(json))

@@ -18,7 +18,7 @@ class AnnouncementRepository extends BaseRepository {
           *,
           users!created_by(id, full_name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (targetRole != null) {
       query = query.contains('target_roles', [targetRole]);
@@ -54,7 +54,7 @@ class AnnouncementRepository extends BaseRepository {
           *,
           users!created_by(id, full_name)
         ''')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', requireTenantId)
         .eq('is_published', true)
         .or('expires_at.is.null,expires_at.gt.$now')
         .order('priority', ascending: false)

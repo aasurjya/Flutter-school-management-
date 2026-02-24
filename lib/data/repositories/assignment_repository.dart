@@ -11,6 +11,8 @@ class AssignmentRepository extends BaseRepository {
     String? teacherId,
     String? status,
     bool upcomingOnly = false,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('assignments')
@@ -20,7 +22,7 @@ class AssignmentRepository extends BaseRepository {
           subjects(id, name, code),
           users!teacher_id(id, full_name)
         ''')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (sectionId != null) {
       query = query.eq('section_id', sectionId);
@@ -38,13 +40,15 @@ class AssignmentRepository extends BaseRepository {
       query = query.gte('due_date', DateTime.now().toIso8601String());
     }
 
-    final response = await query.order('due_date', ascending: false);
+    final response = await query.order('due_date', ascending: false).range(offset, offset + limit - 1);
     return (response as List).map((json) => Assignment.fromJson(json)).toList();
   }
 
   Future<List<Assignment>> getStudentAssignments({
     required String sectionId,
     bool pendingOnly = false,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('assignments')
@@ -61,7 +65,7 @@ class AssignmentRepository extends BaseRepository {
       query = query.gte('due_date', DateTime.now().toIso8601String());
     }
 
-    final response = await query.order('due_date');
+    final response = await query.order('due_date').range(offset, offset + limit - 1);
     return (response as List).map((json) => Assignment.fromJson(json)).toList();
   }
 
@@ -136,6 +140,8 @@ class AssignmentRepository extends BaseRepository {
   Future<List<Submission>> getSubmissions({
     required String assignmentId,
     String? status,
+    int limit = 50,
+    int offset = 0,
   }) async {
     var query = client
         .from('submissions')
@@ -150,7 +156,7 @@ class AssignmentRepository extends BaseRepository {
       query = query.eq('status', status);
     }
 
-    final response = await query.order('submitted_at', ascending: false);
+    final response = await query.order('submitted_at', ascending: false).range(offset, offset + limit - 1);
     return (response as List).map((json) => Submission.fromJson(json)).toList();
   }
 
@@ -242,7 +248,7 @@ class AssignmentRepository extends BaseRepository {
     var query = client
         .from('v_assignment_summary')
         .select('*')
-        .eq('tenant_id', tenantId!);
+        .eq('tenant_id', requireTenantId);
 
     if (sectionId != null) {
       query = query.eq('section_id', sectionId);
@@ -255,6 +261,21 @@ class AssignmentRepository extends BaseRepository {
     return (response as List)
         .map((json) => AssignmentSummary.fromJson(json))
         .toList();
+  }
+
+  Future<List<Assignment>> getAssignmentsByTopic(String topicId) async {
+    final response = await client
+        .from('assignments')
+        .select('''
+          *,
+          sections(id, name, classes(id, name)),
+          subjects(id, name, code),
+          users!teacher_id(id, full_name)
+        ''')
+        .eq('topic_id', topicId)
+        .order('due_date', ascending: false);
+
+    return (response as List).map((json) => Assignment.fromJson(json)).toList();
   }
 
   RealtimeChannel subscribeToAssignments({

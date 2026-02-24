@@ -1,0 +1,117 @@
+name: CI — Test + DB Push
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Flutter Analyze + Unit + Widget + DB Push + Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      # -------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -------------------------------------------------------
+      - name: Set up Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      # -------------------------------------------------------
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # -------------------------------------------------------
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      # -------------------------------------------------------
+      - name: flutter analyze (zero errors gate)
+        # Only fail on actual errors; warnings/infos are allowed
+        run: |
+          flutter analyze --no-pub 2>&1 | tee /tmp/analyze.txt || true
+          if grep -qE "^   error " /tmp/analyze.txt; then
+            grep -E "^   error " /tmp/analyze.txt
+            exit 1
+          fi
+
+      # -------------------------------------------------------
+      - name: Unit + widget tests
+        run: flutter test test/ --reporter=github
+
+      # -------------------------------------------------------
+      - name: Link Supabase project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      # -------------------------------------------------------
+      - name: Push database migrations
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase db push
+
+      # -------------------------------------------------------
+      - name: Integration tests (against remote DB, headless Chrome)
+        run: |
+          flutter test integration_test/ \
+            -d chrome \
+            --dart-define=TEST_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+            --dart-define=TEST_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
+            --dart-define=TEST_ADMIN_EMAIL=${{ secrets.TEST_ADMIN_EMAIL }} \
+            --dart-define=TEST_ADMIN_PASSWORD=${{ secrets.TEST_ADMIN_PASSWORD }} \
+            --reporter=github
+
+  # -----------------------------------------------------------
+  # Deploy job — only runs on main branch after tests pass
+  # -----------------------------------------------------------
+  deploy:
+    name: Deploy Flutter Web to GitHub Pages
+    needs: test
+    runs-on: ubuntu-latest
+    # Only deploy on direct pushes to main (not PRs)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    concurrency:
+      group: pages
+      cancel-in-progress: true
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Build Flutter web
+        run: flutter build web --release --base-href /Flutter-school-management-/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

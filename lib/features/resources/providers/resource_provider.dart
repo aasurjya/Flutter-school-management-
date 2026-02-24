@@ -20,8 +20,8 @@ final resourcesProvider =
       tags: filter.tags,
       uploadedBy: filter.uploadedBy,
       myUploadsOnly: filter.myUploadsOnly,
-      limit: filter.limit,
-      offset: filter.offset,
+      limit: filter.limit ?? 50,
+      offset: filter.offset ?? 0,
     );
   },
 );

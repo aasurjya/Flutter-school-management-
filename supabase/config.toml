@@ -1,6 +1,8 @@
 # Supabase Local Development Configuration
 # Run `supabase start` to spin up local services
 
+project_id = "qykjmurexpydteuarzwm"
+
 [api]
 enabled = true
 port = 54321

@@ -4,6 +4,7 @@
 .env.development
 .env.staging
 .env.production
+.env.test
 *.env
 
 # Miscellaneous

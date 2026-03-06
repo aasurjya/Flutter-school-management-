@@ -7,7 +7,7 @@
 -- PAYMENT GATEWAY TRANSACTIONS
 -- =============================================
 
-CREATE TABLE payment_gateway_transactions (
+CREATE TABLE IF NOT EXISTS payment_gateway_transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
@@ -43,7 +43,7 @@ COMMENT ON TABLE payment_gateway_transactions IS 'Payment gateway transaction lo
 -- SMS LOGS
 -- =============================================
 
-CREATE TABLE sms_logs (
+CREATE TABLE IF NOT EXISTS sms_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     recipient_phone VARCHAR(20) NOT NULL,
@@ -69,7 +69,7 @@ COMMENT ON TABLE sms_logs IS 'SMS message delivery logs';
 -- EMAIL LOGS
 -- =============================================
 
-CREATE TABLE email_logs (
+CREATE TABLE IF NOT EXISTS email_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     recipient_email VARCHAR(255) NOT NULL,
@@ -103,7 +103,7 @@ COMMENT ON TABLE email_logs IS 'Email message delivery and engagement logs';
 -- PUSH NOTIFICATION LOGS
 -- =============================================
 
-CREATE TABLE push_notification_logs (
+CREATE TABLE IF NOT EXISTS push_notification_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     recipient_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -131,7 +131,7 @@ COMMENT ON TABLE push_notification_logs IS 'Push notification delivery logs';
 -- WEBHOOK LOGS
 -- =============================================
 
-CREATE TABLE webhook_logs (
+CREATE TABLE IF NOT EXISTS webhook_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     webhook_source VARCHAR(100) NOT NULL, -- 'razorpay', 'stripe', 'twilio', etc.
@@ -153,7 +153,7 @@ COMMENT ON TABLE webhook_logs IS 'Incoming webhook logs from third-party service
 -- API USAGE LOGS
 -- =============================================
 
-CREATE TABLE api_usage_logs (
+CREATE TABLE IF NOT EXISTS api_usage_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -177,38 +177,38 @@ COMMENT ON TABLE api_usage_logs IS 'API endpoint usage logs for monitoring and b
 -- =============================================
 
 -- Payment Gateway Transactions
-CREATE INDEX idx_payment_gateway_tenant ON payment_gateway_transactions(tenant_id, created_at DESC);
-CREATE INDEX idx_payment_gateway_payment ON payment_gateway_transactions(payment_id);
-CREATE INDEX idx_payment_gateway_status ON payment_gateway_transactions(status, created_at DESC);
-CREATE INDEX idx_payment_gateway_gateway_id ON payment_gateway_transactions(gateway_name, gateway_transaction_id);
+CREATE INDEX IF NOT EXISTS idx_payment_gateway_tenant ON payment_gateway_transactions(tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payment_gateway_payment ON payment_gateway_transactions(payment_id);
+CREATE INDEX IF NOT EXISTS idx_payment_gateway_status ON payment_gateway_transactions(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payment_gateway_gateway_id ON payment_gateway_transactions(gateway_name, gateway_transaction_id);
 
 -- SMS Logs
-CREATE INDEX idx_sms_logs_tenant ON sms_logs(tenant_id, created_at DESC);
-CREATE INDEX idx_sms_logs_recipient ON sms_logs(recipient_phone, created_at DESC);
-CREATE INDEX idx_sms_logs_status ON sms_logs(status, created_at DESC);
-CREATE INDEX idx_sms_logs_user ON sms_logs(recipient_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sms_logs_tenant ON sms_logs(tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sms_logs_recipient ON sms_logs(recipient_phone, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sms_logs_status ON sms_logs(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sms_logs_user ON sms_logs(recipient_user_id, created_at DESC);
 
 -- Email Logs
-CREATE INDEX idx_email_logs_tenant ON email_logs(tenant_id, created_at DESC);
-CREATE INDEX idx_email_logs_recipient ON email_logs(recipient_email, created_at DESC);
-CREATE INDEX idx_email_logs_status ON email_logs(status, created_at DESC);
-CREATE INDEX idx_email_logs_user ON email_logs(recipient_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_email_logs_tenant ON email_logs(tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON email_logs(recipient_email, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_email_logs_status ON email_logs(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_email_logs_user ON email_logs(recipient_user_id, created_at DESC);
 
 -- Push Notification Logs
-CREATE INDEX idx_push_logs_tenant ON push_notification_logs(tenant_id, created_at DESC);
-CREATE INDEX idx_push_logs_user ON push_notification_logs(recipient_user_id, created_at DESC);
-CREATE INDEX idx_push_logs_status ON push_notification_logs(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_push_logs_tenant ON push_notification_logs(tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_push_logs_user ON push_notification_logs(recipient_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_push_logs_status ON push_notification_logs(status, created_at DESC);
 
 -- Webhook Logs
-CREATE INDEX idx_webhook_logs_tenant ON webhook_logs(tenant_id, created_at DESC);
-CREATE INDEX idx_webhook_logs_source ON webhook_logs(webhook_source, event_type);
-CREATE INDEX idx_webhook_logs_processed ON webhook_logs(processed, created_at)
+CREATE INDEX IF NOT EXISTS idx_webhook_logs_tenant ON webhook_logs(tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_webhook_logs_source ON webhook_logs(webhook_source, event_type);
+CREATE INDEX IF NOT EXISTS idx_webhook_logs_processed ON webhook_logs(processed, created_at)
     WHERE processed = false;
 
 -- API Usage Logs
-CREATE INDEX idx_api_usage_tenant ON api_usage_logs(tenant_id, created_at DESC);
-CREATE INDEX idx_api_usage_user ON api_usage_logs(user_id, created_at DESC);
-CREATE INDEX idx_api_usage_endpoint ON api_usage_logs(endpoint, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_api_usage_tenant ON api_usage_logs(tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_api_usage_user ON api_usage_logs(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_api_usage_endpoint ON api_usage_logs(endpoint, created_at DESC);
 
 -- =============================================
 -- STORED PROCEDURES

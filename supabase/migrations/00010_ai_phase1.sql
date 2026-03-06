@@ -5,6 +5,15 @@
 -- =============================================
 
 -- =============================================
+-- 0. ENUM TYPES
+-- =============================================
+
+DO $$ BEGIN
+    CREATE TYPE risk_level AS ENUM ('low', 'medium', 'high', 'critical');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- =============================================
 -- 1. STUDENT RISK SCORES (cached computations)
 -- =============================================
 

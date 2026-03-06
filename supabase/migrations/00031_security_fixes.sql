@@ -198,11 +198,11 @@ USING (tenant_id = public.tenant_id() AND (public.is_admin() OR public.has_role(
 -- ----- quiz_questions -----
 CREATE POLICY "View quiz questions"
 ON quiz_questions FOR SELECT
-USING (tenant_id = public.tenant_id());
+USING (quiz_id IN (SELECT id FROM quizzes WHERE tenant_id = public.tenant_id()));
 
 CREATE POLICY "Teachers manage quiz questions"
 ON quiz_questions FOR ALL
-USING (tenant_id = public.tenant_id() AND (public.is_admin() OR public.has_role('teacher')));
+USING (quiz_id IN (SELECT id FROM quizzes WHERE tenant_id = public.tenant_id()) AND (public.is_admin() OR public.has_role('teacher')));
 
 -- ----- quiz_attempts -----
 CREATE POLICY "View own quiz attempts"
@@ -290,11 +290,11 @@ USING (tenant_id = public.tenant_id() AND public.is_admin());
 -- ----- emergency_responses -----
 CREATE POLICY "View emergency responses"
 ON emergency_responses FOR SELECT
-USING (tenant_id = public.tenant_id() AND (public.is_admin() OR responder_id = auth.uid()));
+USING (tenant_id = public.tenant_id() AND (public.is_admin() OR user_id = auth.uid()));
 
 CREATE POLICY "Create emergency responses"
 ON emergency_responses FOR INSERT
-WITH CHECK (tenant_id = public.tenant_id() AND responder_id = auth.uid());
+WITH CHECK (tenant_id = public.tenant_id() AND user_id = auth.uid());
 
 CREATE POLICY "Admins manage emergency responses"
 ON emergency_responses FOR ALL
@@ -303,31 +303,11 @@ USING (tenant_id = public.tenant_id() AND public.is_admin());
 -- ----- emergency_contacts -----
 CREATE POLICY "View emergency contacts"
 ON emergency_contacts FOR SELECT
-USING (
-  tenant_id = public.tenant_id() AND (
-    public.is_admin() OR
-    public.has_role('teacher') OR
-    student_id IN (SELECT id FROM students WHERE user_id = auth.uid()) OR
-    student_id IN (
-      SELECT sp.student_id FROM student_parents sp
-      JOIN parents p ON sp.parent_id = p.id
-      WHERE p.user_id = auth.uid()
-    )
-  )
-);
+USING (tenant_id = public.tenant_id());
 
-CREATE POLICY "Parents manage own emergency contacts"
+CREATE POLICY "Admins manage emergency contacts"
 ON emergency_contacts FOR ALL
-USING (
-  tenant_id = public.tenant_id() AND (
-    public.is_admin() OR
-    student_id IN (
-      SELECT sp.student_id FROM student_parents sp
-      JOIN parents p ON sp.parent_id = p.id
-      WHERE p.user_id = auth.uid()
-    )
-  )
-);
+USING (tenant_id = public.tenant_id() AND public.is_admin());
 
 -- ----- leave_applications -----
 CREATE POLICY "View leave applications"
@@ -335,7 +315,7 @@ ON leave_applications FOR SELECT
 USING (
   tenant_id = public.tenant_id() AND (
     public.is_admin() OR
-    applicant_id = auth.uid() OR
+    user_id = auth.uid() OR
     student_id IN (
       SELECT sp.student_id FROM student_parents sp
       JOIN parents p ON sp.parent_id = p.id
@@ -346,7 +326,7 @@ USING (
 
 CREATE POLICY "Create own leave applications"
 ON leave_applications FOR INSERT
-WITH CHECK (tenant_id = public.tenant_id() AND applicant_id = auth.uid());
+WITH CHECK (tenant_id = public.tenant_id() AND user_id = auth.uid());
 
 CREATE POLICY "Admins manage leave applications"
 ON leave_applications FOR ALL
@@ -373,12 +353,12 @@ USING (tenant_id = public.tenant_id() AND (public.is_admin() OR public.has_role(
 -- ----- resource_access -----
 CREATE POLICY "View resource access"
 ON resource_access FOR SELECT
-USING (tenant_id = public.tenant_id() AND (public.is_admin() OR public.has_role('teacher') OR user_id = auth.uid()));
+USING (user_id = auth.uid() OR public.is_admin() OR public.has_role('teacher'));
 
 CREATE POLICY "Log own resource access"
 ON resource_access FOR INSERT
-WITH CHECK (tenant_id = public.tenant_id() AND user_id = auth.uid());
+WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "Admins manage resource access"
 ON resource_access FOR ALL
-USING (tenant_id = public.tenant_id() AND public.is_admin());
+USING (public.is_admin());

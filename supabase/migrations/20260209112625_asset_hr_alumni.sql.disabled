@@ -7,35 +7,35 @@
 -- ENUMS
 -- =============================================
 
-CREATE TYPE asset_condition AS ENUM ('excellent', 'good', 'fair', 'poor', 'damaged', 'unusable');
+-- SKIP_DUP: CREATE TYPE asset_condition AS ENUM ('excellent', 'good', 'fair', 'poor', 'damaged', 'unusable');
 
-CREATE TYPE asset_status AS ENUM ('active', 'in_maintenance', 'retired', 'disposed', 'lost', 'stolen');
+-- SKIP_DUP: CREATE TYPE asset_status AS ENUM ('active', 'in_maintenance', 'retired', 'disposed', 'lost', 'stolen');
 
-CREATE TYPE maintenance_type AS ENUM ('routine', 'preventive', 'repair', 'upgrade', 'inspection');
+-- SKIP_DUP: CREATE TYPE maintenance_type AS ENUM ('routine', 'preventive', 'repair', 'upgrade', 'inspection');
 
-CREATE TYPE maintenance_status AS ENUM ('scheduled', 'in_progress', 'completed', 'cancelled', 'overdue');
+-- SKIP_DUP: CREATE TYPE maintenance_status AS ENUM ('scheduled', 'in_progress', 'completed', 'cancelled', 'overdue');
 
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'leave_type') THEN
-        CREATE TYPE leave_type AS ENUM ('sick', 'casual', 'earned', 'maternity', 'paternity', 'unpaid', 'compensatory');
+        -- SKIP_DUP: CREATE TYPE leave_type AS ENUM ('sick', 'casual', 'earned', 'maternity', 'paternity', 'unpaid', 'compensatory');
     END IF;
 END $$;
 
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'leave_status') THEN
-        CREATE TYPE leave_status AS ENUM ('pending', 'approved', 'rejected', 'cancelled');
+        -- SKIP_DUP: CREATE TYPE leave_status AS ENUM ('pending', 'approved', 'rejected', 'cancelled');
     END IF;
 END $$;
 
-CREATE TYPE payroll_status AS ENUM ('draft', 'approved', 'paid', 'on_hold');
+-- SKIP_DUP: CREATE TYPE payroll_status AS ENUM ('draft', 'approved', 'paid', 'on_hold');
 
 -- =============================================
 -- ASSET MANAGEMENT
 -- =============================================
 
-CREATE TABLE asset_categories (
+CREATE TABLE IF NOT EXISTS asset_categories (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     category_name VARCHAR(100) NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE asset_categories (
 
 COMMENT ON TABLE asset_categories IS 'Categories for school assets';
 
-CREATE TABLE assets (
+CREATE TABLE IF NOT EXISTS assets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     asset_category_id UUID NOT NULL REFERENCES asset_categories(id) ON DELETE CASCADE,
@@ -76,7 +76,7 @@ CREATE TABLE assets (
 
 COMMENT ON TABLE assets IS 'School assets and equipment inventory';
 
-CREATE TABLE asset_maintenance (
+CREATE TABLE IF NOT EXISTS asset_maintenance (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     asset_id UUID NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
     maintenance_type maintenance_type NOT NULL,
@@ -98,7 +98,7 @@ COMMENT ON TABLE asset_maintenance IS 'Asset maintenance records and schedules';
 -- STAFF HR MANAGEMENT
 -- =============================================
 
-CREATE TABLE staff_attendance (
+CREATE TABLE IF NOT EXISTS staff_attendance (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     staff_id UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
     attendance_date DATE NOT NULL,
@@ -122,7 +122,7 @@ CREATE TABLE staff_attendance (
 
 COMMENT ON TABLE staff_attendance IS 'Daily attendance records for staff members';
 
-CREATE TABLE staff_leave_applications (
+CREATE TABLE IF NOT EXISTS staff_leave_applications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     staff_id UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
     leave_type leave_type NOT NULL,
@@ -144,7 +144,7 @@ CREATE TABLE staff_leave_applications (
 
 COMMENT ON TABLE staff_leave_applications IS 'Staff leave applications and approvals';
 
-CREATE TABLE payroll (
+CREATE TABLE IF NOT EXISTS payroll (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     staff_id UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
@@ -168,7 +168,7 @@ CREATE TABLE payroll (
 
 COMMENT ON TABLE payroll IS 'Monthly payroll records for staff';
 
-CREATE TABLE performance_reviews (
+CREATE TABLE IF NOT EXISTS performance_reviews (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     staff_id UUID NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
     review_period_start DATE NOT NULL,
@@ -196,7 +196,7 @@ COMMENT ON TABLE performance_reviews IS 'Staff performance review records';
 -- ALUMNI MANAGEMENT
 -- =============================================
 
-CREATE TABLE alumni (
+CREATE TABLE IF NOT EXISTS alumni (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     student_id UUID REFERENCES students(id) ON DELETE SET NULL,
@@ -222,7 +222,7 @@ CREATE TABLE alumni (
 
 COMMENT ON TABLE alumni IS 'Alumni database for graduated students';
 
-CREATE TABLE alumni_events (
+CREATE TABLE IF NOT EXISTS alumni_events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     event_name VARCHAR(255) NOT NULL,
@@ -244,7 +244,7 @@ CREATE TABLE alumni_events (
 
 COMMENT ON TABLE alumni_events IS 'Alumni reunion and networking events';
 
-CREATE TABLE alumni_event_registrations (
+CREATE TABLE IF NOT EXISTS alumni_event_registrations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id UUID NOT NULL REFERENCES alumni_events(id) ON DELETE CASCADE,
     alumni_id UUID NOT NULL REFERENCES alumni(id) ON DELETE CASCADE,
@@ -261,7 +261,7 @@ CREATE TABLE alumni_event_registrations (
 
 COMMENT ON TABLE alumni_event_registrations IS 'Event registration records for alumni';
 
-CREATE TABLE alumni_donations (
+CREATE TABLE IF NOT EXISTS alumni_donations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     alumni_id UUID NOT NULL REFERENCES alumni(id) ON DELETE CASCADE,
@@ -289,31 +289,31 @@ COMMENT ON TABLE alumni_donations IS 'Alumni donation records';
 -- =============================================
 
 -- Assets
-CREATE INDEX idx_assets_tenant ON assets(tenant_id, status);
-CREATE INDEX idx_assets_category ON assets(asset_category_id);
-CREATE INDEX idx_assets_assigned ON assets(assigned_to) WHERE assigned_to IS NOT NULL;
-CREATE INDEX idx_assets_status ON assets(status, condition);
-CREATE INDEX idx_asset_maintenance_asset ON asset_maintenance(asset_id, scheduled_date DESC);
-CREATE INDEX idx_asset_maintenance_status ON asset_maintenance(status, scheduled_date);
+CREATE INDEX IF NOT EXISTS idx_assets_tenant ON assets(tenant_id, status);
+CREATE INDEX IF NOT EXISTS idx_assets_category ON assets(asset_category_id);
+CREATE INDEX IF NOT EXISTS idx_assets_assigned ON assets(assigned_to) WHERE assigned_to IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_assets_status ON assets(status, condition);
+CREATE INDEX IF NOT EXISTS idx_asset_maintenance_asset ON asset_maintenance(asset_id, scheduled_date DESC);
+CREATE INDEX IF NOT EXISTS idx_asset_maintenance_status ON asset_maintenance(status, scheduled_date);
 
 -- Staff HR
-CREATE INDEX idx_staff_attendance_staff ON staff_attendance(staff_id, attendance_date DESC);
-CREATE INDEX idx_staff_attendance_date ON staff_attendance(attendance_date);
-CREATE INDEX idx_staff_leave_staff ON staff_leave_applications(staff_id, status);
-CREATE INDEX idx_staff_leave_status ON staff_leave_applications(status, start_date);
-CREATE INDEX idx_payroll_staff ON payroll(staff_id, month DESC);
-CREATE INDEX idx_payroll_month ON payroll(month, status);
-CREATE INDEX idx_performance_reviews_staff ON performance_reviews(staff_id, review_date DESC);
+CREATE INDEX IF NOT EXISTS idx_staff_attendance_staff ON staff_attendance(staff_id, attendance_date DESC);
+CREATE INDEX IF NOT EXISTS idx_staff_attendance_date ON staff_attendance(attendance_date);
+CREATE INDEX IF NOT EXISTS idx_staff_leave_staff ON staff_leave_applications(staff_id, status);
+CREATE INDEX IF NOT EXISTS idx_staff_leave_status ON staff_leave_applications(status, start_date);
+CREATE INDEX IF NOT EXISTS idx_payroll_staff ON payroll(staff_id, month DESC);
+CREATE INDEX IF NOT EXISTS idx_payroll_month ON payroll(month, status);
+CREATE INDEX IF NOT EXISTS idx_performance_reviews_staff ON performance_reviews(staff_id, review_date DESC);
 
 -- Alumni
-CREATE INDEX idx_alumni_tenant ON alumni(tenant_id, is_active);
-CREATE INDEX idx_alumni_graduation_year ON alumni(graduation_year DESC);
-CREATE INDEX idx_alumni_willing_mentor ON alumni(willing_to_mentor) WHERE willing_to_mentor = true;
-CREATE INDEX idx_alumni_events_tenant ON alumni_events(tenant_id, event_date DESC);
-CREATE INDEX idx_alumni_events_published ON alumni_events(is_published, event_date) WHERE is_published = true;
-CREATE INDEX idx_alumni_registrations_event ON alumni_event_registrations(event_id);
-CREATE INDEX idx_alumni_donations_alumni ON alumni_donations(alumni_id, donation_date DESC);
-CREATE INDEX idx_alumni_donations_date ON alumni_donations(donation_date DESC);
+CREATE INDEX IF NOT EXISTS idx_alumni_tenant ON alumni(tenant_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_alumni_graduation_year ON alumni(graduation_year DESC);
+CREATE INDEX IF NOT EXISTS idx_alumni_willing_mentor ON alumni(willing_to_mentor) WHERE willing_to_mentor = true;
+CREATE INDEX IF NOT EXISTS idx_alumni_events_tenant ON alumni_events(tenant_id, event_date DESC);
+CREATE INDEX IF NOT EXISTS idx_alumni_events_published ON alumni_events(is_published, event_date) WHERE is_published = true;
+CREATE INDEX IF NOT EXISTS idx_alumni_registrations_event ON alumni_event_registrations(event_id);
+CREATE INDEX IF NOT EXISTS idx_alumni_donations_alumni ON alumni_donations(alumni_id, donation_date DESC);
+CREATE INDEX IF NOT EXISTS idx_alumni_donations_date ON alumni_donations(donation_date DESC);
 
 -- =============================================
 -- ENABLE ROW LEVEL SECURITY

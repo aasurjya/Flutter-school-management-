@@ -3,11 +3,13 @@
 -- Migration: 00024_visitor_management.sql
 -- ============================================
 
+CREATE EXTENSION IF NOT EXISTS moddatetime SCHEMA extensions;
+
 -- Enums
-CREATE TYPE visitor_id_type AS ENUM ('national_id', 'passport', 'drivers_license');
-CREATE TYPE visitor_log_purpose AS ENUM ('parent_visit', 'delivery', 'maintenance', 'meeting', 'interview', 'vendor', 'other');
-CREATE TYPE visitor_log_status AS ENUM ('pre_registered', 'checked_in', 'checked_out', 'denied');
-CREATE TYPE visitor_pre_reg_status AS ENUM ('pending', 'approved', 'denied', 'completed');
+DO $$ BEGIN CREATE TYPE visitor_id_type AS ENUM ('national_id', 'passport', 'drivers_license'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE visitor_log_purpose AS ENUM ('parent_visit', 'delivery', 'maintenance', 'meeting', 'interview', 'vendor', 'other'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE visitor_log_status AS ENUM ('pre_registered', 'checked_in', 'checked_out', 'denied'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE visitor_pre_reg_status AS ENUM ('pending', 'approved', 'denied', 'completed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ============================================
 -- visitors: recurring visitor profiles
@@ -66,7 +68,7 @@ CREATE INDEX idx_visitor_logs_visitor ON visitor_logs(visitor_id);
 CREATE INDEX idx_visitor_logs_checkin ON visitor_logs(tenant_id, check_in_time DESC);
 CREATE INDEX idx_visitor_logs_status ON visitor_logs(tenant_id, status);
 CREATE INDEX idx_visitor_logs_badge ON visitor_logs(tenant_id, badge_number) WHERE badge_number IS NOT NULL;
-CREATE INDEX idx_visitor_logs_date ON visitor_logs(tenant_id, (check_in_time::date));
+CREATE INDEX idx_visitor_logs_date ON visitor_logs(tenant_id, check_in_time);
 
 ALTER TABLE visitor_logs ENABLE ROW LEVEL SECURITY;
 
@@ -128,12 +130,12 @@ CREATE TRIGGER trg_update_visitor_count
 -- ============================================
 CREATE TRIGGER trg_visitors_updated_at
   BEFORE UPDATE ON visitors
-  FOR EACH ROW EXECUTE FUNCTION moddatetime(updated_at);
+  FOR EACH ROW EXECUTE FUNCTION extensions.moddatetime(updated_at);
 
 CREATE TRIGGER trg_visitor_logs_updated_at
   BEFORE UPDATE ON visitor_logs
-  FOR EACH ROW EXECUTE FUNCTION moddatetime(updated_at);
+  FOR EACH ROW EXECUTE FUNCTION extensions.moddatetime(updated_at);
 
 CREATE TRIGGER trg_visitor_prereg_updated_at
   BEFORE UPDATE ON visitor_pre_registrations
-  FOR EACH ROW EXECUTE FUNCTION moddatetime(updated_at);
+  FOR EACH ROW EXECUTE FUNCTION extensions.moddatetime(updated_at);

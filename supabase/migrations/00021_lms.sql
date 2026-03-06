@@ -7,10 +7,10 @@
 -- ENUMS
 -- ============================================
 
-CREATE TYPE lms_course_status AS ENUM ('draft', 'published', 'archived');
-CREATE TYPE lms_content_type AS ENUM ('video', 'document', 'presentation', 'link', 'text', 'quiz', 'assignment');
-CREATE TYPE lms_enrollment_status AS ENUM ('enrolled', 'in_progress', 'completed', 'dropped');
-CREATE TYPE lms_content_progress_status AS ENUM ('not_started', 'in_progress', 'completed');
+DO $$ BEGIN CREATE TYPE lms_course_status AS ENUM ('draft', 'published', 'archived'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE lms_content_type AS ENUM ('video', 'document', 'presentation', 'link', 'text', 'quiz', 'assignment'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE lms_enrollment_status AS ENUM ('enrolled', 'in_progress', 'completed', 'dropped'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE lms_content_progress_status AS ENUM ('not_started', 'in_progress', 'completed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ============================================
 -- TABLES

@@ -2,13 +2,22 @@
 -- School Calendar & Events Module
 -- ============================================
 
--- Event type enum
+-- Event type enum - add missing values to existing enum from 00001
 DO $$ BEGIN
   CREATE TYPE event_type AS ENUM (
     'academic', 'cultural', 'sports', 'holiday', 'exam',
     'pta_meeting', 'workshop', 'field_trip', 'competition', 'celebration'
   );
-EXCEPTION WHEN duplicate_object THEN NULL;
+EXCEPTION WHEN duplicate_object THEN
+  -- Enum exists from 00001 with fewer values; add missing ones
+  BEGIN ALTER TYPE event_type ADD VALUE IF NOT EXISTS 'academic'; EXCEPTION WHEN others THEN NULL; END;
+  BEGIN ALTER TYPE event_type ADD VALUE IF NOT EXISTS 'cultural'; EXCEPTION WHEN others THEN NULL; END;
+  BEGIN ALTER TYPE event_type ADD VALUE IF NOT EXISTS 'sports'; EXCEPTION WHEN others THEN NULL; END;
+  BEGIN ALTER TYPE event_type ADD VALUE IF NOT EXISTS 'pta_meeting'; EXCEPTION WHEN others THEN NULL; END;
+  BEGIN ALTER TYPE event_type ADD VALUE IF NOT EXISTS 'workshop'; EXCEPTION WHEN others THEN NULL; END;
+  BEGIN ALTER TYPE event_type ADD VALUE IF NOT EXISTS 'field_trip'; EXCEPTION WHEN others THEN NULL; END;
+  BEGIN ALTER TYPE event_type ADD VALUE IF NOT EXISTS 'competition'; EXCEPTION WHEN others THEN NULL; END;
+  BEGIN ALTER TYPE event_type ADD VALUE IF NOT EXISTS 'celebration'; EXCEPTION WHEN others THEN NULL; END;
 END $$;
 
 -- Event visibility enum
@@ -76,7 +85,7 @@ CREATE TABLE IF NOT EXISTS school_events (
   tenant_id     UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   title         TEXT NOT NULL,
   description   TEXT,
-  event_type    event_type NOT NULL DEFAULT 'academic',
+  event_type    TEXT NOT NULL DEFAULT 'academic',
   start_date    DATE NOT NULL,
   end_date      DATE NOT NULL,
   start_time    TIME,

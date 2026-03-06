@@ -3,24 +3,18 @@
 -- ============================================================
 
 -- ─── ENUMS ──────────────────────────────────────────────────
-CREATE TYPE behavior_category_type AS ENUM ('positive', 'negative');
+DO $$ BEGIN CREATE TYPE behavior_category_type AS ENUM ('positive', 'negative'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE incident_severity AS ENUM ('minor', 'moderate', 'major', 'critical');
+DO $$ BEGIN CREATE TYPE incident_severity AS ENUM ('minor', 'moderate', 'major', 'critical'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE incident_status AS ENUM ('reported', 'investigating', 'resolved', 'escalated');
+DO $$ BEGIN CREATE TYPE incident_status AS ENUM ('reported', 'investigating', 'resolved', 'escalated'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE behavior_action_type AS ENUM (
-  'verbal_warning',
-  'written_warning',
-  'detention',
-  'suspension',
-  'expulsion',
-  'counseling',
-  'parent_meeting',
-  'community_service'
-);
+DO $$ BEGIN CREATE TYPE behavior_action_type AS ENUM (
+  'verbal_warning', 'written_warning', 'detention', 'suspension',
+  'expulsion', 'counseling', 'parent_meeting', 'community_service'
+); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE behavior_plan_status AS ENUM ('active', 'completed', 'discontinued');
+DO $$ BEGIN CREATE TYPE behavior_plan_status AS ENUM ('active', 'completed', 'discontinued'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ─── BEHAVIOR CATEGORIES ────────────────────────────────────
 CREATE TABLE behavior_categories (

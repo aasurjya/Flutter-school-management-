@@ -253,35 +253,35 @@ COMMENT ON TABLE admission_campaigns IS 'Marketing campaigns for admission drive
 -- =============================================
 
 -- Inquiries
-CREATE INDEX idx_inquiries_tenant ON admission_inquiries(tenant_id, inquiry_date DESC);
-CREATE INDEX idx_inquiries_status ON admission_inquiries(status, inquiry_date DESC);
-CREATE INDEX idx_inquiries_assigned ON admission_inquiries(assigned_to, status)
+CREATE INDEX IF NOT EXISTS idx_inquiries_tenant ON admission_inquiries(tenant_id, inquiry_date DESC);
+CREATE INDEX IF NOT EXISTS idx_inquiries_status ON admission_inquiries(status, inquiry_date DESC);
+CREATE INDEX IF NOT EXISTS idx_inquiries_assigned ON admission_inquiries(assigned_to, status)
     WHERE status NOT IN ('converted', 'lost');
-CREATE INDEX idx_inquiries_followup ON admission_inquiries(next_followup_date)
+CREATE INDEX IF NOT EXISTS idx_inquiries_followup ON admission_inquiries(next_followup_date)
     WHERE next_followup_date IS NOT NULL;
-CREATE INDEX idx_inquiries_source ON admission_inquiries(inquiry_source, inquiry_date DESC);
+CREATE INDEX IF NOT EXISTS idx_inquiries_source ON admission_inquiries(inquiry_source, inquiry_date DESC);
 
 -- Applications
-CREATE INDEX idx_applications_tenant ON admission_applications(tenant_id, application_date DESC);
-CREATE INDEX idx_applications_status ON admission_applications(status, application_date DESC);
-CREATE INDEX idx_applications_class ON admission_applications(target_class_id, academic_year_id);
-CREATE INDEX idx_applications_inquiry ON admission_applications(inquiry_id);
-CREATE INDEX idx_applications_assigned ON admission_applications(assigned_to, status);
-CREATE INDEX idx_applications_decision ON admission_applications(decision, decision_date DESC);
+CREATE INDEX IF NOT EXISTS idx_applications_tenant ON admission_applications(tenant_id, application_date DESC);
+CREATE INDEX IF NOT EXISTS idx_applications_status ON admission_applications(status, application_date DESC);
+CREATE INDEX IF NOT EXISTS idx_applications_class ON admission_applications(target_class_id, academic_year_id);
+CREATE INDEX IF NOT EXISTS idx_applications_inquiry ON admission_applications(inquiry_id);
+CREATE INDEX IF NOT EXISTS idx_applications_assigned ON admission_applications(assigned_to, status);
+CREATE INDEX IF NOT EXISTS idx_applications_decision ON admission_applications(decision, decision_date DESC);
 
 -- Entrance Tests
-CREATE INDEX idx_entrance_tests_application ON admission_entrance_tests(application_id);
-CREATE INDEX idx_entrance_tests_date ON admission_entrance_tests(test_date, status);
-CREATE INDEX idx_entrance_tests_status ON admission_entrance_tests(status, test_date);
+CREATE INDEX IF NOT EXISTS idx_entrance_tests_application ON admission_entrance_tests(application_id);
+CREATE INDEX IF NOT EXISTS idx_entrance_tests_date ON admission_entrance_tests(test_date, status);
+CREATE INDEX IF NOT EXISTS idx_entrance_tests_status ON admission_entrance_tests(status, test_date);
 
 -- Interviews
-CREATE INDEX idx_interviews_application ON admission_interviews(application_id);
-CREATE INDEX idx_interviews_date ON admission_interviews(interview_date, status);
-CREATE INDEX idx_interviews_interviewer ON admission_interviews(interviewer_id, interview_date DESC);
+CREATE INDEX IF NOT EXISTS idx_interviews_application ON admission_interviews(application_id);
+CREATE INDEX IF NOT EXISTS idx_interviews_date ON admission_interviews(interview_date, status);
+CREATE INDEX IF NOT EXISTS idx_interviews_interviewer ON admission_interviews(interviewer_id, interview_date DESC);
 
 -- Campaigns
-CREATE INDEX idx_campaigns_tenant ON admission_campaigns(tenant_id, is_active);
-CREATE INDEX idx_campaigns_year ON admission_campaigns(academic_year_id);
+CREATE INDEX IF NOT EXISTS idx_campaigns_tenant ON admission_campaigns(tenant_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_campaigns_year ON admission_campaigns(academic_year_id);
 
 -- =============================================
 -- STORED PROCEDURES

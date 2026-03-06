@@ -5,24 +5,11 @@
 
 -- ==================== ENUMS ====================
 
-CREATE TYPE online_exam_type AS ENUM (
-  'class_test', 'unit_test', 'mid_term', 'final', 'competitive', 'practice'
-);
-
-CREATE TYPE online_exam_status AS ENUM (
-  'draft', 'scheduled', 'live', 'completed', 'cancelled'
-);
-
-CREATE TYPE exam_question_type AS ENUM (
-  'mcq', 'multi_select', 'true_false', 'fill_blank',
-  'short_answer', 'long_answer', 'match_pairs', 'ordering'
-);
-
-CREATE TYPE exam_difficulty AS ENUM ('easy', 'medium', 'hard');
-
-CREATE TYPE exam_attempt_status AS ENUM (
-  'in_progress', 'submitted', 'auto_submitted', 'under_review', 'graded'
-);
+DO $$ BEGIN CREATE TYPE online_exam_type AS ENUM ('class_test', 'unit_test', 'mid_term', 'final', 'competitive', 'practice'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE online_exam_status AS ENUM ('draft', 'scheduled', 'live', 'completed', 'cancelled'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE exam_question_type AS ENUM ('mcq', 'multi_select', 'true_false', 'fill_blank', 'short_answer', 'long_answer', 'match_pairs', 'ordering'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE exam_difficulty AS ENUM ('easy', 'medium', 'hard'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE exam_attempt_status AS ENUM ('in_progress', 'submitted', 'auto_submitted', 'under_review', 'graded'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ==================== TABLES ====================
 

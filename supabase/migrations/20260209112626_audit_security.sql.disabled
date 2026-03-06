@@ -7,7 +7,7 @@
 -- AUDIT LOGS
 -- =============================================
 
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -31,7 +31,7 @@ COMMENT ON COLUMN audit_logs.changed_fields IS 'Array of field names that were m
 -- DATA ACCESS LOGS
 -- =============================================
 
-CREATE TABLE data_access_logs (
+CREATE TABLE IF NOT EXISTS data_access_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -50,7 +50,7 @@ COMMENT ON TABLE data_access_logs IS 'Log of access to sensitive data for compli
 -- LOGIN AUDIT
 -- =============================================
 
-CREATE TABLE login_audit (
+CREATE TABLE IF NOT EXISTS login_audit (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
     email VARCHAR(255) NOT NULL,
@@ -70,7 +70,7 @@ COMMENT ON TABLE login_audit IS 'Audit trail of login attempts';
 -- DATA RETENTION POLICIES
 -- =============================================
 
-CREATE TABLE data_retention_policies (
+CREATE TABLE IF NOT EXISTS data_retention_policies (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     table_name VARCHAR(100) NOT NULL,
@@ -96,7 +96,7 @@ COMMENT ON TABLE data_retention_policies IS 'Data retention and archival policie
 -- SENSITIVE DATA ENCRYPTION KEYS
 -- =============================================
 
-CREATE TABLE encryption_keys (
+CREATE TABLE IF NOT EXISTS encryption_keys (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     key_name VARCHAR(100) NOT NULL,
@@ -116,7 +116,7 @@ COMMENT ON TABLE encryption_keys IS 'Encryption keys for sensitive data protecti
 -- GDPR/FERPA COMPLIANCE
 -- =============================================
 
-CREATE TABLE data_subject_requests (
+CREATE TABLE IF NOT EXISTS data_subject_requests (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     request_type VARCHAR(50) NOT NULL, -- 'access', 'rectification', 'erasure', 'portability', 'restriction'
@@ -142,34 +142,34 @@ COMMENT ON TABLE data_subject_requests IS 'GDPR/FERPA data subject access reques
 -- =============================================
 
 -- Audit Logs (Partitioned table - indexes on partitions)
-CREATE INDEX idx_audit_logs_tenant ON audit_logs(tenant_id, created_at DESC);
-CREATE INDEX idx_audit_logs_user ON audit_logs(user_id, created_at DESC);
-CREATE INDEX idx_audit_logs_table ON audit_logs(table_name, action, created_at DESC);
-CREATE INDEX idx_audit_logs_record ON audit_logs(table_name, record_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_tenant ON audit_logs(tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_table ON audit_logs(table_name, action, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_record ON audit_logs(table_name, record_id);
 
 -- Data Access Logs
-CREATE INDEX idx_data_access_tenant ON data_access_logs(tenant_id, accessed_at DESC);
-CREATE INDEX idx_data_access_user ON data_access_logs(user_id, accessed_at DESC);
-CREATE INDEX idx_data_access_table ON data_access_logs(accessed_table, accessed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_data_access_tenant ON data_access_logs(tenant_id, accessed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_data_access_user ON data_access_logs(user_id, accessed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_data_access_table ON data_access_logs(accessed_table, accessed_at DESC);
 
 -- Login Audit
-CREATE INDEX idx_login_audit_user ON login_audit(user_id, created_at DESC);
-CREATE INDEX idx_login_audit_email ON login_audit(email, created_at DESC);
-CREATE INDEX idx_login_audit_status ON login_audit(login_status, created_at DESC);
-CREATE INDEX idx_login_audit_ip ON login_audit(ip_address, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_login_audit_user ON login_audit(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_login_audit_email ON login_audit(email, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_login_audit_status ON login_audit(login_status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_login_audit_ip ON login_audit(ip_address, created_at DESC);
 
 -- Data Retention Policies
-CREATE INDEX idx_retention_policies_tenant ON data_retention_policies(tenant_id)
+CREATE INDEX IF NOT EXISTS idx_retention_policies_tenant ON data_retention_policies(tenant_id)
     WHERE is_active = true;
 
 -- Encryption Keys
-CREATE INDEX idx_encryption_keys_tenant ON encryption_keys(tenant_id)
+CREATE INDEX IF NOT EXISTS idx_encryption_keys_tenant ON encryption_keys(tenant_id)
     WHERE is_active = true;
 
 -- Data Subject Requests
-CREATE INDEX idx_data_subject_requests_tenant ON data_subject_requests(tenant_id, status);
-CREATE INDEX idx_data_subject_requests_status ON data_subject_requests(status, due_date);
-CREATE INDEX idx_data_subject_requests_assigned ON data_subject_requests(assigned_to, status);
+CREATE INDEX IF NOT EXISTS idx_data_subject_requests_tenant ON data_subject_requests(tenant_id, status);
+CREATE INDEX IF NOT EXISTS idx_data_subject_requests_status ON data_subject_requests(status, due_date);
+CREATE INDEX IF NOT EXISTS idx_data_subject_requests_assigned ON data_subject_requests(assigned_to, status);
 
 -- =============================================
 -- AUDIT TRIGGER FUNCTION

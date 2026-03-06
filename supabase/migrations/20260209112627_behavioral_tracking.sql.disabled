@@ -7,9 +7,9 @@
 -- ENUMS
 -- =============================================
 
-CREATE TYPE behavior_type AS ENUM ('positive', 'negative', 'neutral');
+-- SKIP_DUP: CREATE TYPE behavior_type AS ENUM ('positive', 'negative', 'neutral');
 
-CREATE TYPE behavior_category AS ENUM (
+-- SKIP_DUP: CREATE TYPE behavior_category AS ENUM (
     'attendance',
     'punctuality',
     'academic_honesty',
@@ -26,9 +26,9 @@ CREATE TYPE behavior_category AS ENUM (
     'helpfulness'
 );
 
-CREATE TYPE behavior_severity AS ENUM ('minor', 'moderate', 'major', 'severe');
+-- SKIP_DUP: CREATE TYPE behavior_severity AS ENUM ('minor', 'moderate', 'major', 'severe');
 
-CREATE TYPE disciplinary_action_type AS ENUM (
+-- SKIP_DUP: CREATE TYPE disciplinary_action_type AS ENUM (
     'verbal_warning',
     'written_warning',
     'detention',
@@ -40,9 +40,9 @@ CREATE TYPE disciplinary_action_type AS ENUM (
     'expulsion'
 );
 
-CREATE TYPE disciplinary_status AS ENUM ('pending', 'active', 'completed', 'appealed', 'overturned');
+-- SKIP_DUP: CREATE TYPE disciplinary_status AS ENUM ('pending', 'active', 'completed', 'appealed', 'overturned');
 
-CREATE TYPE counseling_type AS ENUM (
+-- SKIP_DUP: CREATE TYPE counseling_type AS ENUM (
     'behavioral',
     'academic',
     'personal',
@@ -53,13 +53,13 @@ CREATE TYPE counseling_type AS ENUM (
     'substance_abuse'
 );
 
-CREATE TYPE session_status AS ENUM ('scheduled', 'completed', 'cancelled', 'no_show', 'rescheduled');
+-- SKIP_DUP: CREATE TYPE session_status AS ENUM ('scheduled', 'completed', 'cancelled', 'no_show', 'rescheduled');
 
 -- =============================================
 -- BEHAVIOR INCIDENTS
 -- =============================================
 
-CREATE TABLE behavior_incidents (
+CREATE TABLE IF NOT EXISTS behavior_incidents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     incident_date DATE NOT NULL,
@@ -96,7 +96,7 @@ COMMENT ON COLUMN behavior_incidents.conduct_points_awarded IS 'Positive points 
 -- DISCIPLINARY ACTIONS
 -- =============================================
 
-CREATE TABLE disciplinary_actions (
+CREATE TABLE IF NOT EXISTS disciplinary_actions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     incident_id UUID REFERENCES behavior_incidents(id) ON DELETE SET NULL,
@@ -137,7 +137,7 @@ COMMENT ON COLUMN disciplinary_actions.conditions IS 'Conditions that must be me
 -- COUNSELING SESSIONS
 -- =============================================
 
-CREATE TABLE counseling_sessions (
+CREATE TABLE IF NOT EXISTS counseling_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     counselor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -173,7 +173,7 @@ COMMENT ON COLUMN counseling_sessions.shared_with IS 'Array of user IDs who have
 -- STUDENT CONDUCT GRADES
 -- =============================================
 
-CREATE TABLE student_conduct_grades (
+CREATE TABLE IF NOT EXISTS student_conduct_grades (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     academic_year_id UUID NOT NULL REFERENCES academic_years(id) ON DELETE CASCADE,
@@ -201,7 +201,7 @@ COMMENT ON COLUMN student_conduct_grades.conduct_points IS 'Points-based system:
 -- BEHAVIOR INTERVENTION PLANS
 -- =============================================
 
-CREATE TABLE behavior_intervention_plans (
+CREATE TABLE IF NOT EXISTS behavior_intervention_plans (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     academic_year_id UUID NOT NULL REFERENCES academic_years(id) ON DELETE CASCADE,
@@ -232,41 +232,41 @@ COMMENT ON COLUMN behavior_intervention_plans.progress_monitoring IS 'Array of p
 -- =============================================
 
 -- Behavior Incidents
-CREATE INDEX idx_behavior_incidents_student ON behavior_incidents(student_id, incident_date DESC);
-CREATE INDEX idx_behavior_incidents_date ON behavior_incidents(incident_date DESC);
-CREATE INDEX idx_behavior_incidents_reporter ON behavior_incidents(reported_by, created_at DESC);
-CREATE INDEX idx_behavior_incidents_category ON behavior_incidents(behavior_category, severity);
-CREATE INDEX idx_behavior_incidents_unresolved ON behavior_incidents(resolved, incident_date DESC)
+CREATE INDEX IF NOT EXISTS idx_behavior_incidents_student ON behavior_incidents(student_id, incident_date DESC);
+CREATE INDEX IF NOT EXISTS idx_behavior_incidents_date ON behavior_incidents(incident_date DESC);
+CREATE INDEX IF NOT EXISTS idx_behavior_incidents_reporter ON behavior_incidents(reported_by, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_behavior_incidents_category ON behavior_incidents(behavior_category, severity);
+CREATE INDEX IF NOT EXISTS idx_behavior_incidents_unresolved ON behavior_incidents(resolved, incident_date DESC)
     WHERE resolved = false;
-CREATE INDEX idx_behavior_incidents_type ON behavior_incidents(behavior_type, incident_date DESC);
+CREATE INDEX IF NOT EXISTS idx_behavior_incidents_type ON behavior_incidents(behavior_type, incident_date DESC);
 
 -- Disciplinary Actions
-CREATE INDEX idx_disciplinary_actions_student ON disciplinary_actions(student_id, start_date DESC);
-CREATE INDEX idx_disciplinary_actions_incident ON disciplinary_actions(incident_id);
-CREATE INDEX idx_disciplinary_actions_status ON disciplinary_actions(status, start_date DESC)
+CREATE INDEX IF NOT EXISTS idx_disciplinary_actions_student ON disciplinary_actions(student_id, start_date DESC);
+CREATE INDEX IF NOT EXISTS idx_disciplinary_actions_incident ON disciplinary_actions(incident_id);
+CREATE INDEX IF NOT EXISTS idx_disciplinary_actions_status ON disciplinary_actions(status, start_date DESC)
     WHERE status IN ('pending', 'active');
-CREATE INDEX idx_disciplinary_actions_type ON disciplinary_actions(action_type, start_date DESC);
-CREATE INDEX idx_disciplinary_actions_appeal ON disciplinary_actions(appeal_filed, appeal_filed_at)
+CREATE INDEX IF NOT EXISTS idx_disciplinary_actions_type ON disciplinary_actions(action_type, start_date DESC);
+CREATE INDEX IF NOT EXISTS idx_disciplinary_actions_appeal ON disciplinary_actions(appeal_filed, appeal_filed_at)
     WHERE appeal_filed = true;
 
 -- Counseling Sessions
-CREATE INDEX idx_counseling_sessions_student ON counseling_sessions(student_id, session_date DESC);
-CREATE INDEX idx_counseling_sessions_counselor ON counseling_sessions(counselor_id, session_date DESC);
-CREATE INDEX idx_counseling_sessions_status ON counseling_sessions(status, session_date)
+CREATE INDEX IF NOT EXISTS idx_counseling_sessions_student ON counseling_sessions(student_id, session_date DESC);
+CREATE INDEX IF NOT EXISTS idx_counseling_sessions_counselor ON counseling_sessions(counselor_id, session_date DESC);
+CREATE INDEX IF NOT EXISTS idx_counseling_sessions_status ON counseling_sessions(status, session_date)
     WHERE status IN ('scheduled', 'rescheduled');
-CREATE INDEX idx_counseling_sessions_type ON counseling_sessions(counseling_type, session_date DESC);
-CREATE INDEX idx_counseling_sessions_incident ON counseling_sessions(incident_id);
-CREATE INDEX idx_counseling_sessions_followup ON counseling_sessions(follow_up_required, follow_up_date)
+CREATE INDEX IF NOT EXISTS idx_counseling_sessions_type ON counseling_sessions(counseling_type, session_date DESC);
+CREATE INDEX IF NOT EXISTS idx_counseling_sessions_incident ON counseling_sessions(incident_id);
+CREATE INDEX IF NOT EXISTS idx_counseling_sessions_followup ON counseling_sessions(follow_up_required, follow_up_date)
     WHERE follow_up_required = true;
 
 -- Student Conduct Grades
-CREATE INDEX idx_conduct_grades_student ON student_conduct_grades(student_id, academic_year_id);
-CREATE INDEX idx_conduct_grades_term ON student_conduct_grades(term_id);
-CREATE INDEX idx_conduct_grades_year ON student_conduct_grades(academic_year_id);
+CREATE INDEX IF NOT EXISTS idx_conduct_grades_student ON student_conduct_grades(student_id, academic_year_id);
+CREATE INDEX IF NOT EXISTS idx_conduct_grades_term ON student_conduct_grades(term_id);
+CREATE INDEX IF NOT EXISTS idx_conduct_grades_year ON student_conduct_grades(academic_year_id);
 
 -- Behavior Intervention Plans
-CREATE INDEX idx_behavior_plans_student ON behavior_intervention_plans(student_id, academic_year_id);
-CREATE INDEX idx_behavior_plans_status ON behavior_intervention_plans(status, review_date)
+CREATE INDEX IF NOT EXISTS idx_behavior_plans_student ON behavior_intervention_plans(student_id, academic_year_id);
+CREATE INDEX IF NOT EXISTS idx_behavior_plans_status ON behavior_intervention_plans(status, review_date)
     WHERE status = 'active';
 
 -- =============================================

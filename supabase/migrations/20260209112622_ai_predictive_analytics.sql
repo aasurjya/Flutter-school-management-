@@ -7,48 +7,34 @@
 -- ENUMS
 -- =============================================
 
-CREATE TYPE ml_model_type AS ENUM (
-    'performance_prediction',
-    'dropout_risk',
-    'intervention_recommendation',
-    'fee_default_prediction',
-    'behavioral_analysis',
-    'learning_path_optimization'
-);
+DO $$ BEGIN CREATE TYPE ml_model_type AS ENUM (
+    'performance_prediction', 'dropout_risk', 'intervention_recommendation',
+    'fee_default_prediction', 'behavioral_analysis', 'learning_path_optimization'
+); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE ml_model_status AS ENUM ('training', 'active', 'deprecated', 'failed');
+DO $$ BEGIN CREATE TYPE ml_model_status AS ENUM ('training', 'active', 'deprecated', 'failed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE risk_level AS ENUM ('low', 'medium', 'high', 'critical');
+DO $$ BEGIN CREATE TYPE risk_level AS ENUM ('low', 'medium', 'high', 'critical'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE confidence_level AS ENUM ('low', 'medium', 'high');
+DO $$ BEGIN CREATE TYPE confidence_level AS ENUM ('low', 'medium', 'high'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE intervention_type AS ENUM (
-    'academic_support',
-    'counseling',
-    'parental_meeting',
-    'mentorship',
-    'peer_tutoring',
-    'remedial_classes',
-    'behavioral_support',
-    'financial_assistance'
-);
+DO $$ BEGIN CREATE TYPE intervention_type AS ENUM (
+    'academic_support', 'counseling', 'parental_meeting', 'mentorship',
+    'peer_tutoring', 'remedial_classes', 'behavioral_support', 'financial_assistance'
+); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE intervention_status AS ENUM ('planned', 'in_progress', 'completed', 'cancelled', 'ineffective');
+DO $$ BEGIN CREATE TYPE intervention_status AS ENUM ('planned', 'in_progress', 'completed', 'cancelled', 'ineffective'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE alert_category AS ENUM (
-    'academic_decline',
-    'attendance_issue',
-    'behavioral_concern',
-    'fee_default_risk',
-    'dropout_risk',
-    'health_concern'
-);
+DO $$ BEGIN CREATE TYPE alert_category AS ENUM (
+    'academic_decline', 'attendance_issue', 'behavioral_concern',
+    'fee_default_risk', 'dropout_risk', 'health_concern'
+); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE alert_severity AS ENUM ('info', 'warning', 'critical', 'emergency');
+DO $$ BEGIN CREATE TYPE alert_severity AS ENUM ('info', 'warning', 'critical', 'emergency'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE alert_status AS ENUM ('new', 'acknowledged', 'in_progress', 'resolved', 'false_positive');
+DO $$ BEGIN CREATE TYPE alert_status AS ENUM ('new', 'acknowledged', 'in_progress', 'resolved', 'false_positive'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TYPE grade_trend AS ENUM ('improving', 'stable', 'declining');
+DO $$ BEGIN CREATE TYPE grade_trend AS ENUM ('improving', 'stable', 'declining'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- =============================================
 -- ML MODEL REGISTRY

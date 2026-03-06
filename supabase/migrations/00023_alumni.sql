@@ -3,15 +3,15 @@
 -- ============================================
 
 -- Enums
-CREATE TYPE alumni_visibility AS ENUM ('public', 'alumni_only', 'private');
-CREATE TYPE alumni_event_type AS ENUM ('reunion', 'networking', 'career_talk', 'fundraiser', 'meetup');
-CREATE TYPE alumni_event_status AS ENUM ('upcoming', 'ongoing', 'completed', 'cancelled');
-CREATE TYPE alumni_registration_status AS ENUM ('registered', 'attended', 'cancelled');
-CREATE TYPE alumni_donation_purpose AS ENUM ('general', 'scholarship', 'infrastructure', 'sports', 'library');
-CREATE TYPE alumni_donation_status AS ENUM ('pending', 'completed', 'failed');
-CREATE TYPE mentorship_program_status AS ENUM ('open', 'in_progress', 'completed');
-CREATE TYPE mentorship_request_status AS ENUM ('pending', 'accepted', 'rejected', 'completed');
-CREATE TYPE alumni_story_status AS ENUM ('draft', 'published');
+DO $$ BEGIN CREATE TYPE alumni_visibility AS ENUM ('public', 'alumni_only', 'private'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE alumni_event_type AS ENUM ('reunion', 'networking', 'career_talk', 'fundraiser', 'meetup'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE alumni_event_status AS ENUM ('upcoming', 'ongoing', 'completed', 'cancelled'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE alumni_registration_status AS ENUM ('registered', 'attended', 'cancelled'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE alumni_donation_purpose AS ENUM ('general', 'scholarship', 'infrastructure', 'sports', 'library'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE alumni_donation_status AS ENUM ('pending', 'completed', 'failed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE mentorship_program_status AS ENUM ('open', 'in_progress', 'completed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE mentorship_request_status AS ENUM ('pending', 'accepted', 'rejected', 'completed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE alumni_story_status AS ENUM ('draft', 'published'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ============================================
 -- alumni_profiles

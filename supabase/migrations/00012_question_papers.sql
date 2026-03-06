@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS question_paper_items (
   section_id       UUID REFERENCES question_paper_sections(id) ON DELETE CASCADE,
   question_bank_id UUID REFERENCES question_bank(id),  -- optional link
   question_text    TEXT NOT NULL,
-  question_type    question_type NOT NULL DEFAULT 'mcq',
+  question_type    question_type NOT NULL DEFAULT 'multiple_choice',
   marks            NUMERIC(5,2) NOT NULL DEFAULT 1,
   difficulty       difficulty_level NOT NULL DEFAULT 'medium',
   options          JSONB,   -- array of strings for MCQ/true-false
@@ -106,6 +106,25 @@ DROP TRIGGER IF EXISTS trg_question_papers_updated_at ON question_papers;
 CREATE TRIGGER trg_question_papers_updated_at
   BEFORE UPDATE ON question_papers
   FOR EACH ROW EXECUTE FUNCTION update_question_papers_updated_at();
+
+-- ============================================================
+-- has_role 2-arg overload (needed for policies below)
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.has_role(p_user_id uuid, p_role text)
+RETURNS boolean AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM user_roles
+    WHERE user_id = p_user_id AND role = p_role::user_role
+  );
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.has_role(p_user_id uuid, p_tenant_id uuid, p_role text)
+RETURNS boolean AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM user_roles
+    WHERE user_id = p_user_id AND role = p_role::user_role
+  );
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
 
 -- ============================================================
 -- RLS

@@ -4,11 +4,11 @@
 -- ============================================
 
 -- Enums
-CREATE TYPE certificate_type AS ENUM (
+DO $$ BEGIN CREATE TYPE certificate_type AS ENUM (
   'transfer', 'bonafide', 'character', 'migration',
   'achievement', 'participation', 'merit', 'custom'
-);
-CREATE TYPE certificate_status AS ENUM ('draft', 'issued', 'revoked');
+); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE certificate_status AS ENUM ('draft', 'issued', 'revoked'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ============================================
 -- certificate_templates: reusable templates

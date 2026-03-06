@@ -161,6 +161,7 @@ import '../../features/calendar/presentation/screens/academic_calendar_screen.da
 import '../../features/calendar/presentation/screens/holiday_list_screen.dart';
 import '../../features/calendar/presentation/screens/event_attendees_screen.dart';
 import '../../data/models/school_event.dart';
+import '../../data/models/communication.dart';
 
 import '../../features/alumni/presentation/screens/alumni_dashboard_screen.dart';
 import '../../features/alumni/presentation/screens/alumni_directory_screen.dart';
@@ -202,6 +203,37 @@ import '../../features/bus_tracking/presentation/screens/geofence_list_screen.da
 import '../../features/bus_tracking/presentation/screens/geofence_alerts_screen.dart';
 import '../../features/bus_tracking/presentation/screens/driver_panel_screen.dart';
 import '../../features/bus_tracking/presentation/screens/trip_history_screen.dart';
+// Communication Hub
+import '../../features/communication/presentation/screens/communication_dashboard_screen.dart';
+import '../../features/communication/presentation/screens/template_list_screen.dart' as comm;
+import '../../features/communication/presentation/screens/template_editor_screen.dart' as comm_editor;
+import '../../features/communication/presentation/screens/campaign_create_screen.dart';
+import '../../features/communication/presentation/screens/campaign_list_screen.dart';
+import '../../features/communication/presentation/screens/campaign_detail_screen.dart';
+import '../../features/communication/presentation/screens/auto_rules_screen.dart';
+import '../../features/communication/presentation/screens/sms_settings_screen.dart';
+import '../../features/communication/presentation/screens/email_settings_screen.dart';
+import '../../features/communication/presentation/screens/communication_log_screen.dart';
+// Inventory & Assets
+import '../../features/inventory/presentation/screens/inventory_dashboard_screen.dart';
+import '../../features/inventory/presentation/screens/asset_list_screen.dart';
+import '../../features/inventory/presentation/screens/asset_detail_screen.dart';
+import '../../features/inventory/presentation/screens/asset_form_screen.dart';
+import '../../features/inventory/presentation/screens/asset_scan_screen.dart';
+import '../../features/inventory/presentation/screens/asset_assignment_screen.dart';
+import '../../features/inventory/presentation/screens/inventory_list_screen.dart';
+import '../../features/inventory/presentation/screens/inventory_transaction_screen.dart';
+import '../../features/inventory/presentation/screens/purchase_request_screen.dart';
+import '../../features/inventory/presentation/screens/maintenance_screen.dart';
+import '../../features/inventory/presentation/screens/audit_screen.dart';
+import '../../features/inventory/presentation/screens/category_management_screen.dart';
+// Homework Tracker
+import '../../features/homework/presentation/screens/homework_dashboard_screen.dart';
+import '../../features/homework/presentation/screens/homework_create_screen.dart';
+import '../../features/homework/presentation/screens/homework_detail_screen.dart';
+import '../../features/homework/presentation/screens/homework_submit_screen.dart';
+import '../../features/homework/presentation/screens/homework_submissions_screen.dart';
+import '../../features/homework/presentation/screens/homework_calendar_screen.dart';
 import '../shell/main_shell.dart';
 
 /// Route names
@@ -496,6 +528,40 @@ class AppRoutes {
   static const String busTrackingAlerts = '/bus-tracking/alerts';
   static const String busTrackingDriverPanel = '/bus-tracking/driver';
   static const String busTrackingTrips = '/bus-tracking/trips';
+
+  // Communication Hub routes
+  static const String communicationDashboard = '/communication';
+  static const String communicationTemplates = '/communication/templates';
+  static const String communicationTemplateEditor = '/communication/templates/editor';
+  static const String communicationCampaignCreate = '/communication/campaigns/create';
+  static const String communicationCampaigns = '/communication/campaigns';
+  static const String communicationCampaignDetail = '/communication/campaigns/:campaignId';
+  static const String communicationAutoRules = '/communication/auto-rules';
+  static const String communicationSmsSettings = '/communication/sms-settings';
+  static const String communicationEmailSettings = '/communication/email-settings';
+  static const String communicationLog = '/communication/log';
+
+  // Inventory & Assets routes
+  static const String inventoryDashboard = '/inventory';
+  static const String inventoryAssets = '/inventory/assets';
+  static const String inventoryAssetDetail = '/inventory/assets/:assetId';
+  static const String inventoryAssetForm = '/inventory/assets/form';
+  static const String inventoryAssetScan = '/inventory/scan';
+  static const String inventoryAssetAssign = '/inventory/assets/:assetId/assign';
+  static const String inventoryStock = '/inventory/stock';
+  static const String inventoryTransactions = '/inventory/transactions';
+  static const String inventoryPurchaseRequests = '/inventory/purchase-requests';
+  static const String inventoryMaintenance = '/inventory/maintenance';
+  static const String inventoryAudit = '/inventory/audit';
+  static const String inventoryCategories = '/inventory/categories';
+
+  // Homework Tracker routes
+  static const String homeworkDashboard = '/homework';
+  static const String homeworkCreate = '/homework/create';
+  static const String homeworkDetail = '/homework/:homeworkId';
+  static const String homeworkSubmit = '/homework/:homeworkId/submit';
+  static const String homeworkSubmissions = '/homework/:homeworkId/submissions';
+  static const String homeworkCalendar = '/homework/calendar';
 }
 
 /// Router provider
@@ -1723,6 +1789,138 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.busTrackingTrips,
         builder: (context, state) => const TripHistoryScreen(),
+      ),
+
+      // ==================== COMMUNICATION HUB ====================
+      GoRoute(
+        path: AppRoutes.communicationDashboard,
+        builder: (context, state) => const CommunicationDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.communicationTemplates,
+        builder: (context, state) => const comm.TemplateListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.communicationTemplateEditor,
+        builder: (context, state) => comm_editor.TemplateEditorScreen(
+          template: state.extra as CommunicationTemplate?,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.communicationCampaignCreate,
+        builder: (context, state) => const CampaignCreateScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.communicationCampaigns,
+        builder: (context, state) => const CampaignListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.communicationCampaignDetail,
+        builder: (context, state) => CampaignDetailScreen(
+          campaignId: state.pathParameters['campaignId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.communicationAutoRules,
+        builder: (context, state) => const AutoRulesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.communicationSmsSettings,
+        builder: (context, state) => const SmsSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.communicationEmailSettings,
+        builder: (context, state) => const EmailSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.communicationLog,
+        builder: (context, state) => const CommunicationLogScreen(),
+      ),
+
+      // ==================== INVENTORY & ASSETS ====================
+      GoRoute(
+        path: AppRoutes.inventoryDashboard,
+        builder: (context, state) => const InventoryDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.inventoryAssets,
+        builder: (context, state) => const AssetListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.inventoryAssetDetail,
+        builder: (context, state) => AssetDetailScreen(
+          assetId: state.pathParameters['assetId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.inventoryAssetForm,
+        builder: (context, state) => const AssetFormScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.inventoryAssetScan,
+        builder: (context, state) => const AssetScanScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.inventoryAssetAssign,
+        builder: (context, state) => AssetAssignmentScreen(
+          preselectedAssetId: state.pathParameters['assetId'],
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.inventoryStock,
+        builder: (context, state) => const InventoryListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.inventoryTransactions,
+        builder: (context, state) => const InventoryTransactionScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.inventoryPurchaseRequests,
+        builder: (context, state) => const PurchaseRequestScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.inventoryMaintenance,
+        builder: (context, state) => const MaintenanceScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.inventoryAudit,
+        builder: (context, state) => const AuditScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.inventoryCategories,
+        builder: (context, state) => const CategoryManagementScreen(),
+      ),
+
+      // ==================== HOMEWORK TRACKER ====================
+      GoRoute(
+        path: AppRoutes.homeworkDashboard,
+        builder: (context, state) => const HomeworkDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.homeworkCreate,
+        builder: (context, state) => const HomeworkCreateScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.homeworkDetail,
+        builder: (context, state) => HomeworkDetailScreen(
+          homeworkId: state.pathParameters['homeworkId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.homeworkSubmit,
+        builder: (context, state) => HomeworkSubmitScreen(
+          homeworkId: state.pathParameters['homeworkId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.homeworkSubmissions,
+        builder: (context, state) => HomeworkSubmissionsScreen(
+          homeworkId: state.pathParameters['homeworkId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.homeworkCalendar,
+        builder: (context, state) => const HomeworkCalendarScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

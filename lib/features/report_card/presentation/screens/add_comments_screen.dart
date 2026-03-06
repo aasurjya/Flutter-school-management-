@@ -60,7 +60,6 @@ class _AddCommentsScreenState extends ConsumerState<AddCommentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final reportAsync = ref.watch(rcByIdProvider(widget.reportId));
 
     return Scaffold(

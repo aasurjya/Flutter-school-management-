@@ -1,4 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/health_record.dart';
 import 'base_repository.dart';
 

@@ -274,7 +274,7 @@ class _InvoiceCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        invoice.invoiceNumber ?? 'Invoice',
+                        invoice.invoiceNumber,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -493,100 +493,3 @@ class _InvoiceCard extends StatelessWidget {
   }
 }
 
-class _InvoiceCardMap extends StatelessWidget {
-  final Map<String, dynamic> invoice;
-
-  const _InvoiceCardMap({required this.invoice});
-
-  @override
-  Widget build(BuildContext context) {
-    final status = (invoice['status'] as String?) ?? 'pending';
-    final dueDate = invoice['dueDate'] as DateTime?;
-    final isOverdue = status == 'pending' && dueDate != null && dueDate.isBefore(DateTime.now());
-
-    return GlassCard(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.zero,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: _getStatusColor(status, isOverdue).withValues(alpha: 0.1),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        (invoice['invoiceNumber'] as String?) ?? 'Invoice',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        (invoice['termName'] as String?) ?? 'Term',
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: _getStatusColor(status, isOverdue),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    isOverdue ? 'OVERDUE' : status.toUpperCase(),
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _buildDetailRow('Total Amount', '₹${((invoice['totalAmount'] as num?) ?? 0).toStringAsFixed(0)}'),
-                const SizedBox(height: 8),
-                _buildDetailRow('Paid Amount', '₹${((invoice['paidAmount'] as num?) ?? 0).toStringAsFixed(0)}', color: AppColors.success),
-                const SizedBox(height: 8),
-                _buildDetailRow('Due Amount', '₹${((invoice['dueAmount'] as num?) ?? 0).toStringAsFixed(0)}',
-                    color: ((invoice['dueAmount'] as num?) ?? 0) > 0 ? AppColors.warning : null),
-                if (dueDate != null) ...[
-                  const SizedBox(height: 8),
-                  _buildDetailRow('Due Date', DateFormat('MMM d, yyyy').format(dueDate),
-                      color: isOverdue ? AppColors.error : null),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value, {Color? color}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: TextStyle(color: Colors.grey[600])),
-        Text(value, style: TextStyle(fontWeight: FontWeight.w500, color: color)),
-      ],
-    );
-  }
-
-  Color _getStatusColor(String status, bool isOverdue) {
-    if (isOverdue) return AppColors.error;
-    switch (status) {
-      case 'paid': return AppColors.success;
-      case 'partial': return AppColors.warning;
-      case 'pending': return AppColors.info;
-      default: return Colors.grey;
-    }
-  }
-}

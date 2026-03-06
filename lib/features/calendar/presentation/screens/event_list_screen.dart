@@ -6,7 +6,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/school_event.dart';
 import '../../providers/calendar_provider.dart';
 import '../widgets/event_card.dart';
-import '../widgets/event_type_badge.dart';
 
 /// Screen showing upcoming events list with type filters
 class EventListScreen extends ConsumerStatefulWidget {

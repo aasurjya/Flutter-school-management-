@@ -18,6 +18,15 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
 
   final _classes = ['All', 'Class 10-A', 'Class 10-B', 'Class 9-A', 'Class 9-B'];
 
+  List<Map<String, dynamic>> get _filteredStudents {
+    return _mockStudents.where((s) {
+      final matchesClass = _selectedClass == 'All' || s['class'] == _selectedClass;
+      final matchesSearch = _searchQuery.isEmpty ||
+          (s['name'] as String).toLowerCase().contains(_searchQuery.toLowerCase());
+      return matchesClass && matchesSearch;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,9 +101,9 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _mockStudents.length,
+              itemCount: _filteredStudents.length,
               itemBuilder: (context, index) {
-                final student = _mockStudents[index];
+                final student = _filteredStudents[index];
                 return _StudentCard(
                   student: student,
                   onTap: () => context.push('/students/${student['id']}'),

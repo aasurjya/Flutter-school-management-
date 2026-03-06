@@ -1,4 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/exam_statistics.dart';
 import 'base_repository.dart';
 

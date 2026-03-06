@@ -12,7 +12,6 @@ class ExamDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final examAsync = ref.watch(onlineExamByIdProvider(examId));
 
     return examAsync.when(
@@ -238,8 +237,6 @@ class _ExamInfoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(

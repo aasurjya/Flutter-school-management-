@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
-import '../../providers/report_card_provider.dart';
 
 class ReportCardDashboardScreen extends ConsumerStatefulWidget {
   const ReportCardDashboardScreen({super.key});

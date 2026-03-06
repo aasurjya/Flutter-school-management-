@@ -229,13 +229,6 @@ class _AcademicCalendarScreenState
             i.itemType == AcademicItemType.termStart ||
             i.itemType == AcademicItemType.termEnd)
         .length;
-    final deadlines = items
-        .where((i) =>
-            i.itemType == AcademicItemType.feeDeadline ||
-            i.itemType == AcademicItemType.admissionStart ||
-            i.itemType == AcademicItemType.admissionEnd)
-        .length;
-
     return Row(
       children: [
         _SummaryChip(

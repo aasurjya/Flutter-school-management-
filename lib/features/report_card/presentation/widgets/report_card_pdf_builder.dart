@@ -17,7 +17,6 @@ class ReportCardPdfBuilder {
   static const _successColor = PdfColor.fromInt(0xFF22C55E);
   static const _errorColor = PdfColor.fromInt(0xFFEF4444);
   static const _warningColor = PdfColor.fromInt(0xFFF59E0B);
-  static const _infoColor = PdfColor.fromInt(0xFF3B82F6);
   static const _textColor = PdfColor.fromInt(0xFF0F172A);
   static const _textSecondary = PdfColor.fromInt(0xFF64748B);
   static const _borderColor = PdfColor.fromInt(0xFFE2E8F0);

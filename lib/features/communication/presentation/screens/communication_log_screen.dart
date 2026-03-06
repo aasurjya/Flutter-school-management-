@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/communication.dart';
 import '../../providers/communication_provider.dart';
 import '../widgets/channel_selector.dart';

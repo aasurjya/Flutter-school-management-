@@ -67,9 +67,8 @@ class TenantsFilter {
 /// Tenants state notifier for CRUD operations
 class TenantsNotifier extends StateNotifier<AsyncValue<List<Tenant>>> {
   final TenantRepository _repository;
-  final Ref _ref;
 
-  TenantsNotifier(this._repository, this._ref) : super(const AsyncValue.loading());
+  TenantsNotifier(this._repository, Ref ref) : super(const AsyncValue.loading());
 
   Future<void> loadTenants({String? status, String? searchQuery}) async {
     state = const AsyncValue.loading();

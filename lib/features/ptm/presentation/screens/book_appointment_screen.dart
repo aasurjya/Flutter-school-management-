@@ -34,7 +34,6 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(bookingProvider);
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(

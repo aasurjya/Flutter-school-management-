@@ -154,7 +154,6 @@ class _ExamInterface extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final question = session.currentQuestion;
-    final currentQuestions = session.currentSectionQuestionList;
 
     return Scaffold(
       appBar: AppBar(

@@ -50,7 +50,6 @@ class _ExamBuilderScreenState extends ConsumerState<ExamBuilderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final builderState = ref.watch(examBuilderProvider);
 
     // Populate form when editing
@@ -282,8 +281,6 @@ class _ExamBuilderScreenState extends ConsumerState<ExamBuilderScreen> {
 
   Widget _buildSummary(
       BuildContext context, ExamBuilderState builderState) {
-    final theme = Theme.of(context);
-
     return Card(
       color: AppColors.infoLight,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

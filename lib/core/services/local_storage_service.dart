@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Local storage service
 /// Note: Isar is disabled on web as it doesn't support the platform.

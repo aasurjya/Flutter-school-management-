@@ -116,8 +116,8 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
           );
         }
 
-        final totalObtained = performance.fold<double>(0, (sum, p) => sum + (p.marksObtained ?? 0));
-        final totalMax = performance.fold<double>(0, (sum, p) => sum + (p.maxMarks ?? 0));
+        final totalObtained = performance.fold<double>(0, (sum, p) => sum + p.marksObtained);
+        final totalMax = performance.fold<double>(0, (sum, p) => sum + p.maxMarks);
         final percentage = totalMax > 0 ? (totalObtained / totalMax) * 100 : 0.0;
         final grade = _calculateGrade(percentage);
 
@@ -239,7 +239,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
 
             return Column(
               children: performance.map((p) {
-                final percentage = p.percentage ?? 0.0;
+                final percentage = p.percentage;
                 final grade = _calculateGrade(percentage);
                 final isPassed = percentage >= 33;
 
@@ -271,7 +271,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              p.subjectName ?? 'Subject',
+                              p.subjectName,
                               style: const TextStyle(fontWeight: FontWeight.w600),
                             ),
                             const SizedBox(height: 4),
@@ -308,14 +308,14 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '${p.marksObtained?.toInt() ?? 0}',
+                            '${p.marksObtained.toInt()}',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
-                            '/ ${p.maxMarks?.toInt() ?? 0}',
+                            '/ ${p.maxMarks.toInt()}',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -373,7 +373,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
                             if (value.toInt() >= performance.length) {
                               return const SizedBox.shrink();
                             }
-                            final subject = performance[value.toInt()].subjectName ?? '';
+                            final subject = performance[value.toInt()].subjectName;
                             return Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: Text(

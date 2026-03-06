@@ -73,7 +73,6 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
 
   Widget _buildContent(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final holidaysAsync =
         ref.watch(holidaysProvider(_academicYearId!));
 
@@ -198,7 +197,6 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
 
   Widget _buildHolidayCard(BuildContext context, Holiday holiday) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final isPast = holiday.date.isBefore(DateTime.now());
     final typeColor = _holidayTypeColor(holiday.type);
 

@@ -79,8 +79,6 @@ class _EventAttendeesScreenState
 
   Widget _buildContent(
       BuildContext context, List<EventAttendee> attendees) {
-    final theme = Theme.of(context);
-
     final all = attendees;
     final attending = attendees
         .where((a) => a.rsvpStatus == RsvpStatus.attending)
@@ -180,8 +178,6 @@ class _EventAttendeesScreenState
   Widget _buildAttendeeCard(
       BuildContext context, EventAttendee attendee) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     Color statusColor;
     IconData statusIcon;
     switch (attendee.rsvpStatus) {

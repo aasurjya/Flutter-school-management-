@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -45,8 +46,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    developer.log('LoginScreen: Starting login for email: $email',
-        name: 'LoginScreen');
+    if (kDebugMode) {
+      developer.log('LoginScreen: Starting login for email: $email',
+          name: 'LoginScreen');
+    }
 
     try {
       await ref.read(authNotifierProvider.notifier).signIn(
@@ -54,13 +57,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             password: password,
           );
 
-      developer.log('LoginScreen: Login successful', name: 'LoginScreen');
+      if (kDebugMode) {
+        developer.log('LoginScreen: Login successful', name: 'LoginScreen');
+      }
 
       if (mounted) {
         final currentUser = ref.read(currentUserProvider);
-        developer.log(
-            'LoginScreen: User loaded - role: ${currentUser?.primaryRole}',
-            name: 'LoginScreen');
+        if (kDebugMode) {
+          developer.log(
+              'LoginScreen: User loaded - role: ${currentUser?.primaryRole}',
+              name: 'LoginScreen');
+        }
 
         if (currentUser != null) {
           _navigateToDashboard();
@@ -71,16 +78,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         }
       }
     } on AuthException catch (e) {
-      developer.log('LoginScreen: Auth error - ${e.message}',
-          name: 'LoginScreen', level: 900);
+      if (kDebugMode) {
+        developer.log('LoginScreen: Auth error - ${e.message}',
+            name: 'LoginScreen', level: 900);
+      }
       if (mounted) {
         setState(() {
           _errorMessage = _getAuthErrorMessage(e);
         });
       }
     } catch (e) {
-      developer.log('LoginScreen: Unexpected error - $e',
-          name: 'LoginScreen', level: 1000);
+      if (kDebugMode) {
+        developer.log('LoginScreen: Unexpected error - $e',
+            name: 'LoginScreen', level: 1000);
+      }
       if (mounted) {
         setState(() {
           _errorMessage = _getErrorMessage(e);
@@ -126,8 +137,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final currentUser = ref.read(currentUserProvider);
     final primaryRole = currentUser?.primaryRole;
 
-    developer.log('Navigating to dashboard for role: $primaryRole',
-        name: 'LoginScreen');
+    if (kDebugMode) {
+      developer.log('Navigating to dashboard for role: $primaryRole',
+          name: 'LoginScreen');
+    }
 
     switch (primaryRole) {
       case 'super_admin':
@@ -147,10 +160,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         context.go(AppRoutes.parentDashboard);
         break;
       default:
-        // Default to admin dashboard if role is not recognized
-        developer.log('Unknown role: $primaryRole, defaulting to admin',
-            name: 'LoginScreen', level: 800);
-        context.go(AppRoutes.adminDashboard);
+        // Unknown role — redirect to login for safety
+        if (kDebugMode) {
+          developer.log('Unknown role: $primaryRole, redirecting to login',
+              name: 'LoginScreen', level: 800);
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unknown role. Please contact administrator.'),
+            ),
+          );
+        }
+        context.go(AppRoutes.login);
     }
   }
 
@@ -189,8 +211,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Logo and Title
                 _buildHeader(),
                 SizedBox(height: size.height * 0.06),
-                // Quick login shortcuts
-                _buildQuickLoginButtons(),
+                // Quick login shortcuts (only in non-production)
+                if (AppEnvironment.showDemoCredentials) _buildQuickLoginButtons(),
                 const SizedBox(height: 16),
                 // Error message
                 if (_errorMessage != null) _buildErrorBanner(),
@@ -427,8 +449,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your password';
                 }
-                if (value.length < 6) {
-                  return 'Password must be at least 6 characters';
+                if (value.length < 8) {
+                  return 'Password must be at least 8 characters';
+                }
+                if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                  return 'Password must contain an uppercase letter';
+                }
+                if (!RegExp(r'[a-z]').hasMatch(value)) {
+                  return 'Password must contain a lowercase letter';
+                }
+                if (!RegExp(r'[0-9]').hasMatch(value)) {
+                  return 'Password must contain a digit';
                 }
                 return null;
               },

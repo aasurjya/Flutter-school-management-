@@ -400,263 +400,8 @@ class _AnnouncementCardReal extends StatelessWidget {
   }
 }
 
-class _AnnouncementCard extends StatelessWidget {
-  final Map<String, dynamic> announcement;
-  final VoidCallback onTap;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-  final VoidCallback? onPublish;
-
-  const _AnnouncementCard({
-    required this.announcement,
-    required this.onTap,
-    required this.onEdit,
-    required this.onDelete,
-    this.onPublish,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final category = announcement['category'] as String;
-    final isPinned = announcement['isPinned'] as bool;
-    final createdAt = announcement['createdAt'] as DateTime;
-
-    return GlassCard(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (isPinned)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.warning.withValues(alpha: 0.1),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.push_pin, size: 14, color: AppColors.warning),
-                    SizedBox(width: 6),
-                    Text('Pinned', style: TextStyle(fontSize: 12, color: AppColors.warning, fontWeight: FontWeight.w500)),
-                  ],
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _getCategoryColor(category).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          _getCategoryLabel(category),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: _getCategoryColor(category),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      PopupMenuButton<String>(
-                        onSelected: (value) {
-                          switch (value) {
-                            case 'edit': onEdit(); break;
-                            case 'delete': onDelete(); break;
-                            case 'publish': onPublish?.call(); break;
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit, size: 18), SizedBox(width: 8), Text('Edit')])),
-                          if (onPublish != null)
-                            const PopupMenuItem(value: 'publish', child: Row(children: [Icon(Icons.publish, size: 18), SizedBox(width: 8), Text('Publish')])),
-                          const PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete, size: 18, color: AppColors.error), SizedBox(width: 8), Text('Delete', style: TextStyle(color: AppColors.error))])),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    announcement['title'],
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    announcement['content'],
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.access_time, size: 14, color: Theme.of(context).colorScheme.outline),
-                      const SizedBox(width: 4),
-                      Text(
-                        _formatDateTime(createdAt),
-                        style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
-                      ),
-                      const SizedBox(width: 12),
-                      Icon(Icons.person, size: 14, color: Theme.of(context).colorScheme.outline),
-                      const SizedBox(width: 4),
-                      Text(
-                        announcement['createdBy'],
-                        style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Color _getCategoryColor(String category) {
-    switch (category) {
-      case 'holiday': return AppColors.success;
-      case 'event': return AppColors.info;
-      case 'fee': return AppColors.warning;
-      case 'meeting': return AppColors.secondary;
-      case 'exam': return AppColors.error;
-      default: return AppColors.primary;
-    }
-  }
-
-  String _getCategoryLabel(String category) {
-    switch (category) {
-      case 'holiday': return 'Holiday';
-      case 'event': return 'Event';
-      case 'fee': return 'Fee';
-      case 'meeting': return 'Meeting';
-      case 'exam': return 'Exam';
-      default: return category;
-    }
-  }
-
-  String _formatDateTime(DateTime dt) {
-    final now = DateTime.now();
-    final diff = now.difference(dt);
-    if (diff.inHours < 1) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return DateFormat('MMM d').format(dt);
-  }
-}
-
-class _AnnouncementDetailSheet extends StatelessWidget {
-  final Map<String, dynamic> announcement;
-
-  const _AnnouncementDetailSheet({required this.announcement});
-
-  @override
-  Widget build(BuildContext context) {
-    final targetAudience = announcement['targetAudience'] as List;
-
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.6,
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    announcement['title'],
-                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    announcement['content'],
-                    style: const TextStyle(fontSize: 15, height: 1.5),
-                  ),
-                  const SizedBox(height: 20),
-                  const Divider(),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Icon(Icons.access_time, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                      const SizedBox(width: 8),
-                      Text(
-                        DateFormat('MMM d, yyyy h:mm a').format(announcement['createdAt'] as DateTime),
-                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.person, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                      const SizedBox(width: 8),
-                      Text('Posted by ${announcement['createdBy']}', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.people, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Wrap(
-                          spacing: 6,
-                          children: targetAudience.map((a) => Chip(
-                            label: Text(a.toString().toUpperCase(), style: const TextStyle(fontSize: 10)),
-                            padding: EdgeInsets.zero,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          )).toList(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CreateAnnouncementSheet extends StatefulWidget {
-  final Map<String, dynamic>? announcement;
-
-  const _CreateAnnouncementSheet({this.announcement});
+  const _CreateAnnouncementSheet();
 
   @override
   State<_CreateAnnouncementSheet> createState() => _CreateAnnouncementSheetState();
@@ -673,13 +418,8 @@ class _CreateAnnouncementSheetState extends State<_CreateAnnouncementSheet> {
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.announcement?['title']);
-    _contentController = TextEditingController(text: widget.announcement?['content']);
-    if (widget.announcement != null) {
-      _category = widget.announcement!['category'];
-      _targetAudience = Set<String>.from(widget.announcement!['targetAudience']);
-      _isPinned = widget.announcement!['isPinned'];
-    }
+    _titleController = TextEditingController();
+    _contentController = TextEditingController();
   }
 
   @override
@@ -691,8 +431,6 @@ class _CreateAnnouncementSheetState extends State<_CreateAnnouncementSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.announcement != null;
-
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: BoxDecoration(
@@ -710,7 +448,7 @@ class _CreateAnnouncementSheetState extends State<_CreateAnnouncementSheet> {
             child: Row(
               children: [
                 Text(
-                  isEditing ? 'Edit Announcement' : 'New Announcement',
+                  'New Announcement',
                   style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),

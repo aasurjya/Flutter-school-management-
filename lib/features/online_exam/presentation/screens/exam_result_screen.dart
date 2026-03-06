@@ -13,7 +13,6 @@ class ExamResultScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final attemptAsync = ref.watch(examAttemptByIdProvider(attemptId));
 
     return attemptAsync.when(
@@ -204,8 +203,6 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Row(
       children: [
         Expanded(

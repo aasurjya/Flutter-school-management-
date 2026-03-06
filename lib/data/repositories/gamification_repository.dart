@@ -1,4 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/achievement.dart';
 import 'base_repository.dart';
 

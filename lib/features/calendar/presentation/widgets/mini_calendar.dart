@@ -117,9 +117,6 @@ class _MiniCalendarState extends State<MiniCalendar> {
   }
 
   List<Widget> _buildWeeks(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     // First day of the month
     final firstDay = _currentMonth;
     // Day of week (1=Mon...7=Sun)

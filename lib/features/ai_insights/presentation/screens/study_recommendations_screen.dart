@@ -98,9 +98,6 @@ class StudyRecommendationsScreen extends ConsumerWidget {
 
   Widget _buildHeaderCard(
       BuildContext context, StudyRecommendation recommendation) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return GradientGlassCard(
       gradient: AppColors.primaryGradient,
       padding: const EdgeInsets.all(20),

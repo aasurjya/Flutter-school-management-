@@ -146,7 +146,7 @@ class _AssignmentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dueDate = assignment.dueDate;
-    final isPastDue = dueDate != null && dueDate.isBefore(DateTime.now());
+    final isPastDue = dueDate.isBefore(DateTime.now());
     final submittedCount = assignment.submittedCount ?? 0;
     final totalStudents = assignment.totalStudents ?? 0;
     final gradedCount = assignment.gradedCount ?? 0;
@@ -169,7 +169,7 @@ class _AssignmentCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          assignment.title ?? 'Untitled',
+                          assignment.title,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -195,7 +195,7 @@ class _AssignmentCard extends StatelessWidget {
                     child: Text(
                       isPastDue && assignment.status == 'published' 
                           ? 'OVERDUE' 
-                          : (assignment.status ?? '').toUpperCase(),
+                          : assignment.status.toUpperCase(),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -208,8 +208,8 @@ class _AssignmentCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  _buildInfoChip(Icons.calendar_today, 
-                      dueDate != null ? DateFormat('MMM d').format(dueDate) : 'No due date',
+                  _buildInfoChip(Icons.calendar_today,
+                      DateFormat('MMM d').format(dueDate),
                       isPastDue ? AppColors.error : null),
                   const SizedBox(width: 12),
                   _buildInfoChip(Icons.people, '$submittedCount / $totalStudents submitted'),
@@ -301,7 +301,7 @@ class _AssignmentDetailSheet extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        assignment.title ?? 'Assignment',
+                        assignment.title,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -323,9 +323,8 @@ class _AssignmentDetailSheet extends ConsumerWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    if (assignment.dueDate != null)
-                      _buildHeaderChip(Icons.calendar_today, 
-                          'Due: ${DateFormat('MMM d, yyyy').format(assignment.dueDate)}'),
+                    _buildHeaderChip(Icons.calendar_today,
+                        'Due: ${DateFormat('MMM d, yyyy').format(assignment.dueDate)}'),
                     const SizedBox(width: 12),
                     if (assignment.maxMarks != null)
                       _buildHeaderChip(Icons.grade, 'Max: ${assignment.maxMarks} marks'),
@@ -623,8 +622,6 @@ class _CreateAssignmentSheetState extends ConsumerState<_CreateAssignmentSheet> 
   final _descriptionController = TextEditingController();
   final _maxMarksController = TextEditingController(text: '100');
   DateTime? _dueDate;
-  String? _selectedSubjectId;
-  String? _selectedSectionId;
   bool _isSubmitting = false;
 
   @override

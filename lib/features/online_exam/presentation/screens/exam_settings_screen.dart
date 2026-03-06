@@ -23,7 +23,6 @@ class _ExamSettingsScreenState extends ConsumerState<ExamSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final examAsync = ref.watch(onlineExamByIdProvider(widget.examId));
 
     return Scaffold(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/report_card.dart';
 import '../../providers/report_card_provider.dart';
 import '../widgets/report_card_pdf_builder.dart';

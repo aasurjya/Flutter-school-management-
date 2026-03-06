@@ -117,7 +117,7 @@ class CartScreen extends ConsumerWidget {
                                   width: double.infinity,
                                   child: FilledButton(
                                     onPressed: hasBalance
-                                        ? () => _placeOrder(context, ref, wallet!.id)
+                                        ? () => _placeOrder(context, ref, wallet.id)
                                         : null,
                                     child: Text(
                                       hasBalance ? 'Place Order' : 'Insufficient Balance',

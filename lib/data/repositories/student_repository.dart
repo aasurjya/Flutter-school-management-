@@ -1,4 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/student.dart';
 import 'base_repository.dart';
 
@@ -160,7 +159,7 @@ class StudentRepository extends BaseRepository {
         .order('roll_number', ascending: false)
         .limit(1);
 
-    if (response is List && response.isNotEmpty) {
+    if (response.isNotEmpty) {
       final latest = response.first['roll_number'];
       final latestInt = latest is int
           ? latest

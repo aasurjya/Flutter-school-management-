@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -40,7 +41,9 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    developer.log('AuthRepository signInWithEmail(email: $email)', name: 'AuthRepository');
+    if (kDebugMode) {
+      developer.log('AuthRepository signInWithEmail(email: $email)', name: 'AuthRepository');
+    }
     return await _client.auth.signInWithPassword(
       email: email,
       password: password,
@@ -53,7 +56,9 @@ class AuthRepository {
     required String password,
     String? fullName,
   }) async {
-    developer.log('AuthRepository signUpWithEmail(email: $email)', name: 'AuthRepository');
+    if (kDebugMode) {
+      developer.log('AuthRepository signUpWithEmail(email: $email)', name: 'AuthRepository');
+    }
     return await _client.auth.signUp(
       email: email,
       password: password,
@@ -65,7 +70,9 @@ class AuthRepository {
 
   /// Sign out
   Future<void> signOut() async {
-    developer.log('AuthRepository signOut()', name: 'AuthRepository');
+    if (kDebugMode) {
+      developer.log('AuthRepository signOut()', name: 'AuthRepository');
+    }
     await _client.auth.signOut();
   }
 
@@ -83,7 +90,9 @@ class AuthRepository {
 
   /// Get user profile from database
   Future<AppUser?> getUserProfile(String userId) async {
-    developer.log('AuthRepository getUserProfile(userId: $userId)', name: 'AuthRepository');
+    if (kDebugMode) {
+      developer.log('AuthRepository getUserProfile(userId: $userId)', name: 'AuthRepository');
+    }
     final response = await _client
         .from('users')
         .select('''
@@ -171,21 +180,29 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
 
   Future<void> _loadUserProfile(String userId) async {
     try {
-      developer.log('_loadUserProfile: START - fetching profile for userId=$userId', name: 'AuthNotifier');
+      if (kDebugMode) {
+        developer.log('_loadUserProfile: START - fetching profile for userId=$userId', name: 'AuthNotifier');
+      }
       final profile = await _repository.getUserProfile(userId);
-      developer.log('_loadUserProfile: Raw profile response = $profile', name: 'AuthNotifier');
+      if (kDebugMode) {
+        developer.log('_loadUserProfile: Raw profile response = $profile', name: 'AuthNotifier');
+      }
 
       if (profile == null) {
-        developer.log('_loadUserProfile: ERROR - profile is NULL for userId=$userId', name: 'AuthNotifier', level: 900);
+        if (kDebugMode) {
+          developer.log('_loadUserProfile: ERROR - profile is NULL for userId=$userId', name: 'AuthNotifier', level: 900);
+        }
         state = AsyncValue.error('User profile not found', StackTrace.current);
         return;
       }
 
-      developer.log('_loadUserProfile: profile.id = ${profile.id}', name: 'AuthNotifier');
-      developer.log('_loadUserProfile: profile.email = ${profile.email}', name: 'AuthNotifier');
-      developer.log('_loadUserProfile: profile.tenantId = ${profile.tenantId}', name: 'AuthNotifier');
-      developer.log('_loadUserProfile: profile.primaryRole = ${profile.primaryRole}', name: 'AuthNotifier');
-      developer.log('_loadUserProfile: profile.roles = ${profile.roles}', name: 'AuthNotifier');
+      if (kDebugMode) {
+        developer.log('_loadUserProfile: profile.id = ${profile.id}', name: 'AuthNotifier');
+        developer.log('_loadUserProfile: profile.email = ${profile.email}', name: 'AuthNotifier');
+        developer.log('_loadUserProfile: profile.tenantId = ${profile.tenantId}', name: 'AuthNotifier');
+        developer.log('_loadUserProfile: profile.primaryRole = ${profile.primaryRole}', name: 'AuthNotifier');
+        developer.log('_loadUserProfile: profile.roles = ${profile.roles}', name: 'AuthNotifier');
+      }
 
       state = AsyncValue.data(profile);
       _ref.read(currentUserProvider.notifier).state = profile;
@@ -194,9 +211,13 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
         _ref.read(currentTenantIdProvider.notifier).state = profile.tenantId;
       }
 
-      developer.log('_loadUserProfile: SUCCESS - profile loaded and set', name: 'AuthNotifier');
+      if (kDebugMode) {
+        developer.log('_loadUserProfile: SUCCESS - profile loaded and set', name: 'AuthNotifier');
+      }
     } catch (e, st) {
-      developer.log('_loadUserProfile: ERROR - $e', name: 'AuthNotifier', error: e, stackTrace: st);
+      if (kDebugMode) {
+        developer.log('_loadUserProfile: ERROR - $e', name: 'AuthNotifier', error: e, stackTrace: st);
+      }
       state = AsyncValue.error(e, st);
     }
   }

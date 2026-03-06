@@ -12,7 +12,6 @@ class ExamAnalyticsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final analyticsAsync = ref.watch(examAnalyticsProvider(examId));
     final distributionAsync =
         ref.watch(examScoreDistributionProvider(examId));

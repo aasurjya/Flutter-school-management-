@@ -342,12 +342,6 @@ class _AnnouncementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final priorityColor = priority == 'high'
-        ? AppColors.error
-        : priority == 'normal'
-            ? AppColors.info
-            : Colors.grey;
-
     return GlassCard(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),

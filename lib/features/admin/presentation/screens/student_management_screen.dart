@@ -493,9 +493,7 @@ class _StudentDetailSheet extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _DetailRow(label: 'Date of Birth', value: student.dateOfBirth != null
-                      ? DateFormat('MMM d, yyyy').format(student.dateOfBirth)
-                      : 'N/A'),
+                  _DetailRow(label: 'Date of Birth', value: DateFormat('MMM d, yyyy').format(student.dateOfBirth)),
                   _DetailRow(label: 'Gender', value: student.gender ?? 'N/A'),
                   _DetailRow(label: 'Blood Group', value: student.bloodGroup ?? 'N/A'),
                   _DetailRow(label: 'Nationality', value: student.nationality ?? 'Indian'),

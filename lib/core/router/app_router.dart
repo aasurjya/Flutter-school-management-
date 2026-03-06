@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
@@ -196,6 +194,14 @@ import '../../features/online_exam/presentation/screens/exam_result_screen.dart'
 import '../../features/online_exam/presentation/screens/exam_analytics_screen.dart';
 import '../../features/online_exam/presentation/screens/grade_exam_screen.dart';
 import '../../features/online_exam/presentation/screens/exam_settings_screen.dart';
+import '../../features/bus_tracking/presentation/screens/bus_tracking_dashboard_screen.dart';
+import '../../features/bus_tracking/presentation/screens/live_map_screen.dart';
+import '../../features/bus_tracking/presentation/screens/vehicle_detail_screen.dart';
+import '../../features/bus_tracking/presentation/screens/vehicle_form_screen.dart';
+import '../../features/bus_tracking/presentation/screens/geofence_list_screen.dart';
+import '../../features/bus_tracking/presentation/screens/geofence_alerts_screen.dart';
+import '../../features/bus_tracking/presentation/screens/driver_panel_screen.dart';
+import '../../features/bus_tracking/presentation/screens/trip_history_screen.dart';
 import '../shell/main_shell.dart';
 
 /// Route names
@@ -480,6 +486,16 @@ class AppRoutes {
   static const String onlineExamAnalytics = '/online-exams/analytics/:examId';
   static const String onlineExamGrade = '/online-exams/grade/:attemptId';
   static const String onlineExamSettings = '/online-exams/settings/:examId';
+
+  // Bus GPS Tracking routes
+  static const String busTrackingDashboard = '/bus-tracking';
+  static const String busTrackingLiveMap = '/bus-tracking/live-map';
+  static const String busTrackingVehicleDetail = '/bus-tracking/vehicle/:vehicleId';
+  static const String busTrackingVehicleForm = '/bus-tracking/vehicle-form';
+  static const String busTrackingGeofences = '/bus-tracking/geofences';
+  static const String busTrackingAlerts = '/bus-tracking/alerts';
+  static const String busTrackingDriverPanel = '/bus-tracking/driver';
+  static const String busTrackingTrips = '/bus-tracking/trips';
 }
 
 /// Router provider
@@ -518,6 +534,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // If logged in and on login page, redirect to dashboard
       if (isLoggedIn && isLoggingIn) {
         return _getDashboardRoute(ref);
+      }
+
+      // Role-based route guards for authenticated users
+      if (isLoggedIn && currentUser != null) {
+        final role = currentUser.primaryRole ?? '';
+        final location = state.matchedLocation;
+
+        // Super-admin routes require super_admin role
+        if (location.startsWith('/super-admin') && role != 'super_admin') {
+          return _getDashboardRoute(ref);
+        }
+
+        // Admin routes require super_admin, tenant_admin, or principal
+        if (location.startsWith('/admin') &&
+            !const ['super_admin', 'tenant_admin', 'principal'].contains(role)) {
+          return _getDashboardRoute(ref);
+        }
+
+        // Teacher routes require teacher role
+        if (location.startsWith('/teacher') && role != 'teacher') {
+          return _getDashboardRoute(ref);
+        }
       }
 
       return null;
@@ -1649,6 +1687,42 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.alumniRegistration,
         builder: (context, state) => const AlumniRegistrationScreen(),
+      ),
+
+      // ==================== BUS GPS TRACKING ====================
+      GoRoute(
+        path: AppRoutes.busTrackingDashboard,
+        builder: (context, state) => const BusTrackingDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.busTrackingLiveMap,
+        builder: (context, state) => const LiveMapScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.busTrackingVehicleDetail,
+        builder: (context, state) => VehicleDetailScreen(
+          vehicleId: state.pathParameters['vehicleId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.busTrackingVehicleForm,
+        builder: (context, state) => const VehicleFormScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.busTrackingGeofences,
+        builder: (context, state) => const GeofenceListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.busTrackingAlerts,
+        builder: (context, state) => const GeofenceAlertsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.busTrackingDriverPanel,
+        builder: (context, state) => const DriverPanelScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.busTrackingTrips,
+        builder: (context, state) => const TripHistoryScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

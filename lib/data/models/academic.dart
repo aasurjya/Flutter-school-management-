@@ -122,14 +122,14 @@ class SchoolClass {
           .toList();
     }
 
-    int? _parseInt(dynamic value) {
+    int? parseInt(dynamic value) {
       if (value == null) return null;
       if (value is int) return value;
       if (value is double) return value.toInt();
       return int.tryParse(value.toString());
     }
 
-    DateTime _parseDate(dynamic value) {
+    DateTime parseDate(dynamic value) {
       if (value == null) return DateTime.now();
       if (value is DateTime) return value;
       return DateTime.tryParse(value.toString()) ?? DateTime.now();
@@ -139,10 +139,10 @@ class SchoolClass {
       id: json['id'],
       tenantId: json['tenant_id'],
       name: json['name'],
-      numericName: _parseInt(json['numeric_name']),
+      numericName: parseInt(json['numeric_name']),
       description: json['description'],
-      sequenceOrder: _parseInt(json['sequence_order']) ?? 0,
-      createdAt: _parseDate(json['created_at']),
+      sequenceOrder: parseInt(json['sequence_order']) ?? 0,
+      createdAt: parseDate(json['created_at']),
       sections: sections,
     );
   }
@@ -192,14 +192,14 @@ class Section {
   });
 
   factory Section.fromJson(Map<String, dynamic> json) {
-    int? _parseInt(dynamic value) {
+    int? parseInt(dynamic value) {
       if (value == null) return null;
       if (value is int) return value;
       if (value is double) return value.toInt();
       return int.tryParse(value.toString());
     }
 
-    DateTime _parseDate(dynamic value) {
+    DateTime parseDate(dynamic value) {
       if (value == null) return DateTime.now();
       if (value is DateTime) return value;
       return DateTime.tryParse(value.toString()) ?? DateTime.now();
@@ -211,13 +211,13 @@ class Section {
       classId: json['class_id'],
       academicYearId: json['academic_year_id'],
       name: json['name'],
-      capacity: _parseInt(json['capacity']) ?? 40,
+      capacity: parseInt(json['capacity']) ?? 40,
       classTeacherId: json['class_teacher_id'],
       roomNumber: json['room_number'],
-      createdAt: _parseDate(json['created_at']),
+      createdAt: parseDate(json['created_at']),
       className: json['class']?['name'],
       classTeacherName: json['class_teacher']?['full_name'],
-      studentCount: _parseInt(json['student_count']),
+      studentCount: parseInt(json['student_count']),
     );
   }
 

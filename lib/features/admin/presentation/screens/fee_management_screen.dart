@@ -293,7 +293,7 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
           itemBuilder: (context, index) {
             final invoice = invoices[index];
             final dueDate = invoice.dueDate;
-            final isOverdue = dueDate != null && dueDate.isBefore(DateTime.now());
+            final isOverdue = dueDate.isBefore(DateTime.now());
             final pendingAmount = invoice.totalAmount - invoice.paidAmount;
 
             return GlassCard(
@@ -327,11 +327,9 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              isOverdue 
-                                  ? 'Overdue' 
-                                  : dueDate != null 
-                                      ? 'Due ${DateFormat('MMM d').format(dueDate)}'
-                                      : 'Pending',
+                              isOverdue
+                                  ? 'Overdue'
+                                  : 'Due ${DateFormat('MMM d').format(dueDate)}',
                               style: TextStyle(
                                 fontSize: 10,
                                 color: isOverdue ? AppColors.error : AppColors.warning,

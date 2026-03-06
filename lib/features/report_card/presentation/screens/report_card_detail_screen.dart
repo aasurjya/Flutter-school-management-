@@ -21,7 +21,6 @@ class ReportCardDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final reportAsync = ref.watch(rcByIdProvider(reportId));
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(

@@ -1,4 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/tenant.dart';
 import 'base_repository.dart';
 

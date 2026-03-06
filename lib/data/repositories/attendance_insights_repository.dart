@@ -120,7 +120,7 @@ class AttendanceInsightsRepository extends BaseRepository {
       void saveStreak() {
         if (currentStudentId != null && streakCount >= 3) {
           streaks.add(StudentStreak(
-            studentId: currentStudentId!,
+            studentId: currentStudentId,
             studentName: studentName,
             streakType: currentStatus ?? 'present',
             streakLength: streakCount,

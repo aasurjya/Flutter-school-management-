@@ -167,7 +167,6 @@ class _ExamPerformanceTab extends ConsumerWidget {
         }
 
         // Aggregate stats across all subjects
-        final totalStudents = stats.fold<int>(0, (sum, s) => sum + s.totalStudents);
         final avgPercentage = stats.fold<double>(0, (sum, s) => sum + s.classAverage) / stats.length;
         final passedTotal = stats.fold<int>(0, (sum, s) => sum + s.passedCount);
         final failedTotal = stats.fold<int>(0, (sum, s) => sum + s.failedCount);

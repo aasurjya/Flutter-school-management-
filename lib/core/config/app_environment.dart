@@ -83,6 +83,12 @@ class AppEnvironment {
     return (key != null && key.isNotEmpty) ? key : null;
   }
 
+  /// Claude API key (optional — AI Tutor vision, not required)
+  static String? get claudeApiKey {
+    final key = dotenv.env['CLAUDE_API_KEY'];
+    return (key != null && key.isNotEmpty) ? key : null;
+  }
+
   /// OpenRouter API key (optional — image generation, not required)
   static String? get openRouterApiKey {
     final key = dotenv.env['Riverflow_V2_Fast'];

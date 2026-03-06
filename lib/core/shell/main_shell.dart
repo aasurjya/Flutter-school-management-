@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/ai_tutor/presentation/widgets/tutor_chat_overlay.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../router/app_router.dart';
+import '../services/screen_capture_service.dart';
 import '../theme/app_colors.dart';
 
 /// Main shell with bottom navigation
@@ -23,7 +25,11 @@ class _MainShellState extends ConsumerState<MainShell> {
     final primaryRole = currentUser?.primaryRole ?? 'student';
 
     return Scaffold(
-      body: widget.child,
+      body: RepaintBoundary(
+        key: ScreenCaptureService.repaintKey,
+        child: widget.child,
+      ),
+      floatingActionButton: _AiTutorFab(),
       bottomNavigationBar: _buildBottomNav(context, primaryRole),
     );
   }
@@ -193,6 +199,36 @@ class _NavItemData {
     required this.activeIcon,
     required this.label,
   });
+}
+
+/// Floating AI Tutor button — opens the screen-aware chat overlay.
+class _AiTutorFab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      heroTag: 'ai_tutor_fab',
+      onPressed: () {
+        showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => DraggableScrollableSheet(
+            initialChildSize: 0.75,
+            minChildSize: 0.4,
+            maxChildSize: 0.95,
+            expand: false,
+            builder: (_, scrollController) => const TutorChatOverlay(),
+          ),
+        );
+      },
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+      mini: true,
+      tooltip: 'AI Tutor',
+      child: const Icon(Icons.auto_awesome, size: 20),
+    );
+  }
 }
 
 // Shared navigation items

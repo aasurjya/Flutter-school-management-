@@ -78,6 +78,18 @@ import '../../features/leave/presentation/screens/leave_management_screen.dart';
 import '../../features/resources/presentation/screens/resource_library_screen.dart';
 import '../../features/reports/presentation/screens/report_cards_screen.dart';
 import '../../features/reports/presentation/screens/report_card_view_screen.dart';
+
+// Report Card Generator (full module)
+import '../../features/report_card/presentation/screens/report_card_dashboard_screen.dart';
+import '../../features/report_card/presentation/screens/template_list_screen.dart';
+import '../../features/report_card/presentation/screens/template_editor_screen.dart';
+import '../../features/report_card/presentation/screens/grading_scale_screen.dart';
+import '../../features/report_card/presentation/screens/generate_report_cards_screen.dart';
+import '../../features/report_card/presentation/screens/report_card_list_screen.dart';
+import '../../features/report_card/presentation/screens/report_card_detail_screen.dart';
+import '../../features/report_card/presentation/screens/report_card_preview_screen.dart';
+import '../../features/report_card/presentation/screens/add_comments_screen.dart';
+import '../../features/report_card/presentation/screens/skills_rating_screen.dart';
 import '../../features/ai_insights/presentation/screens/risk_dashboard_screen.dart';
 import '../../features/ai_insights/presentation/screens/student_risk_detail_screen.dart';
 import '../../features/ai_insights/presentation/screens/attendance_insights_screen.dart';
@@ -106,6 +118,84 @@ import '../../features/question_paper/presentation/screens/question_paper_genera
 import '../../features/question_paper/presentation/screens/question_paper_detail_screen.dart';
 import '../../features/substitution/presentation/screens/substitution_dashboard_screen.dart';
 import '../../features/substitution/presentation/screens/report_absence_screen.dart';
+import '../../features/admission/presentation/screens/admission_dashboard_screen.dart';
+import '../../features/admission/presentation/screens/inquiry_list_screen.dart';
+import '../../features/admission/presentation/screens/inquiry_form_screen.dart';
+import '../../features/admission/presentation/screens/application_list_screen.dart';
+import '../../features/admission/presentation/screens/application_detail_screen.dart';
+import '../../features/admission/presentation/screens/application_form_screen.dart';
+import '../../features/admission/presentation/screens/interview_schedule_screen.dart';
+import '../../features/admission/presentation/screens/admission_settings_screen.dart';
+import '../../features/discipline/presentation/screens/discipline_dashboard_screen.dart';
+import '../../features/discipline/presentation/screens/incident_list_screen.dart';
+import '../../features/discipline/presentation/screens/report_incident_screen.dart';
+import '../../features/discipline/presentation/screens/incident_detail_screen.dart';
+import '../../features/discipline/presentation/screens/behavior_plan_screen.dart';
+import '../../features/discipline/presentation/screens/positive_recognition_screen.dart';
+import '../../features/discipline/presentation/screens/student_behavior_profile_screen.dart';
+import '../../features/discipline/presentation/screens/detention_management_screen.dart';
+import '../../features/discipline/presentation/screens/behavior_settings_screen.dart';
+import '../../features/hr/presentation/screens/hr_dashboard_screen.dart';
+import '../../features/hr/presentation/screens/department_list_screen.dart';
+import '../../features/hr/presentation/screens/department_detail_screen.dart';
+import '../../features/hr/presentation/screens/staff_directory_screen.dart';
+import '../../features/hr/presentation/screens/staff_profile_screen.dart';
+import '../../features/hr/presentation/screens/contract_management_screen.dart';
+import '../../features/hr/presentation/screens/payroll_dashboard_screen.dart';
+import '../../features/hr/presentation/screens/payroll_run_screen.dart';
+import '../../features/hr/presentation/screens/salary_slip_screen.dart';
+import '../../features/hr/presentation/screens/staff_attendance_screen.dart';
+import '../../features/hr/presentation/screens/tax_declaration_screen.dart';
+import '../../features/lms/presentation/screens/lms_dashboard_screen.dart';
+import '../../features/lms/presentation/screens/course_catalog_screen.dart';
+import '../../features/lms/presentation/screens/course_detail_screen.dart';
+import '../../features/lms/presentation/screens/course_builder_screen.dart';
+import '../../features/lms/presentation/screens/module_content_screen.dart';
+import '../../features/lms/presentation/screens/course_progress_screen.dart';
+import '../../features/lms/presentation/screens/discussion_forum_screen.dart';
+import '../../features/lms/presentation/screens/certificate_screen.dart';
+// Calendar & Events
+import '../../features/calendar/presentation/screens/calendar_screen.dart';
+import '../../features/calendar/presentation/screens/event_list_screen.dart';
+import '../../features/calendar/presentation/screens/event_detail_screen.dart' as cal;
+import '../../features/calendar/presentation/screens/create_event_screen.dart';
+import '../../features/calendar/presentation/screens/academic_calendar_screen.dart';
+import '../../features/calendar/presentation/screens/holiday_list_screen.dart';
+import '../../features/calendar/presentation/screens/event_attendees_screen.dart';
+import '../../data/models/school_event.dart';
+
+import '../../features/alumni/presentation/screens/alumni_dashboard_screen.dart';
+import '../../features/alumni/presentation/screens/alumni_directory_screen.dart';
+import '../../features/alumni/presentation/screens/alumni_profile_screen.dart';
+import '../../features/alumni/presentation/screens/alumni_events_screen.dart';
+import '../../features/alumni/presentation/screens/event_detail_screen.dart';
+import '../../features/alumni/presentation/screens/donations_screen.dart';
+import '../../features/alumni/presentation/screens/mentorship_screen.dart';
+import '../../features/alumni/presentation/screens/success_stories_screen.dart';
+import '../../features/alumni/presentation/screens/alumni_registration_screen.dart';
+// Visitor Management
+import '../../features/visitor/presentation/screens/visitor_dashboard_screen.dart';
+import '../../features/visitor/presentation/screens/visitor_check_in_screen.dart';
+import '../../features/visitor/presentation/screens/visitor_check_out_screen.dart';
+import '../../features/visitor/presentation/screens/visitor_log_screen.dart';
+import '../../features/visitor/presentation/screens/pre_registration_screen.dart';
+import '../../features/visitor/presentation/screens/visitor_detail_screen.dart';
+// Certificate Generator
+import '../../features/certificate/presentation/screens/certificate_dashboard_screen.dart';
+import '../../features/certificate/presentation/screens/certificate_template_screen.dart';
+import '../../features/certificate/presentation/screens/issue_certificate_screen.dart';
+import '../../features/certificate/presentation/screens/certificate_list_screen.dart';
+import '../../features/certificate/presentation/screens/certificate_preview_screen.dart';
+import '../../features/certificate/presentation/screens/verify_certificate_screen.dart';
+// Online Exam
+import '../../features/online_exam/presentation/screens/exam_dashboard_screen.dart';
+import '../../features/online_exam/presentation/screens/exam_builder_screen.dart';
+import '../../features/online_exam/presentation/screens/exam_detail_screen.dart';
+import '../../features/online_exam/presentation/screens/take_exam_screen.dart';
+import '../../features/online_exam/presentation/screens/exam_result_screen.dart';
+import '../../features/online_exam/presentation/screens/exam_analytics_screen.dart';
+import '../../features/online_exam/presentation/screens/grade_exam_screen.dart';
+import '../../features/online_exam/presentation/screens/exam_settings_screen.dart';
 import '../shell/main_shell.dart';
 
 /// Route names
@@ -134,6 +224,12 @@ class AppRoutes {
   static const String assignments = '/assignments';
   static const String timetable = '/timetable';
   static const String calendar = '/calendar';
+  static const String calendarEvents = '/calendar/events';
+  static const String calendarEventDetail = '/calendar/event/:eventId';
+  static const String calendarCreateEvent = '/calendar/create';
+  static const String calendarAcademic = '/calendar/academic';
+  static const String calendarHolidays = '/calendar/holidays';
+  static const String calendarEventAttendees = '/calendar/event/:eventId/attendees';
   static const String settings = '/settings';
   static const String profile = '/profile';
 
@@ -196,9 +292,22 @@ class AppRoutes {
   static const String resources = '/resources';
   static const String resourceDetail = '/resources/:resourceId';
 
-  // Report Card routes
+  // Report Card routes (legacy)
   static const String reports = '/reports';
   static const String reportDetail = '/reports/:reportId';
+
+  // Report Card Generator (full module)
+  static const String reportCardDashboard = '/report-cards';
+  static const String reportCardTemplates = '/report-cards/templates';
+  static const String reportCardTemplateNew = '/report-cards/templates/new';
+  static const String reportCardTemplateEdit = '/report-cards/templates/:templateId';
+  static const String reportCardGradingScales = '/report-cards/grading-scales';
+  static const String reportCardGenerate = '/report-cards/generate';
+  static const String reportCardList = '/report-cards/list';
+  static const String reportCardDetail = '/report-cards/detail/:id';
+  static const String reportCardPreview = '/report-cards/preview/:id';
+  static const String reportCardComments = '/report-cards/comments/:id';
+  static const String reportCardSkills = '/report-cards/skills/:id';
 
   // Student portal routes
   static const String studentResults = '/student/results';
@@ -286,6 +395,91 @@ class AppRoutes {
   // Substitution routes
   static const String substitutionDashboard = '/substitutions';
   static const String reportAbsence = '/substitutions/report-absence';
+
+  // Admission routes
+  static const String admissionDashboard = '/admissions';
+  static const String admissionInquiries = '/admissions/inquiries';
+  static const String admissionInquiryForm = '/admissions/inquiries/form';
+  static const String admissionApplications = '/admissions/applications';
+  static const String admissionApplicationDetail = '/admissions/applications/:applicationId';
+  static const String admissionApplicationForm = '/admissions/applications/form';
+  static const String admissionInterviews = '/admissions/interviews';
+  static const String admissionSettings = '/admissions/settings';
+
+  // Discipline / Behavior Management routes
+  static const String disciplineDashboard = '/discipline';
+  static const String disciplineIncidents = '/discipline/incidents';
+  static const String disciplineReportIncident = '/discipline/report';
+  static const String disciplineIncidentDetail = '/discipline/incidents/:incidentId';
+  static const String disciplinePlans = '/discipline/plans';
+  static const String disciplineRecognitions = '/discipline/recognitions';
+  static const String disciplineStudentProfile = '/discipline/student/:studentId';
+  static const String disciplineDetention = '/discipline/detention';
+  static const String disciplineSettings = '/discipline/settings';
+
+  // LMS routes
+  static const String lmsDashboard = '/lms';
+  static const String lmsCatalog = '/lms/catalog';
+  static const String lmsCourseDetail = '/lms/course/:courseId';
+  static const String lmsCourseBuilder = '/lms/course-builder';
+  static const String lmsCourseBuilderEdit = '/lms/course-builder/:courseId';
+  static const String lmsCourseProgress = '/lms/progress/:enrollmentId';
+  static const String lmsModuleContent = '/lms/progress/:enrollmentId/module/:moduleId/content/:contentId';
+  static const String lmsDiscussionForum = '/lms/course/:courseId/discussions';
+  static const String lmsCertificate = '/lms/certificate/:enrollmentId';
+  static const String lmsMyCourses = '/lms/my-courses';
+
+  // HR & Payroll routes
+  static const String hrDashboard = '/hr';
+  static const String hrDepartments = '/hr/departments';
+  static const String hrDepartmentDetail = '/hr/departments/:departmentId';
+  static const String hrStaffDirectory = '/hr/staff-directory';
+  static const String hrStaffProfile = '/hr/staff-profile/:staffId';
+  static const String hrContracts = '/hr/contracts';
+  static const String hrPayroll = '/hr/payroll';
+  static const String hrPayrollRun = '/hr/payroll/run';
+  static const String hrPayrollRunDetail = '/hr/payroll/run/:runId';
+  static const String hrSalarySlips = '/hr/salary-slips';
+  static const String hrStaffAttendance = '/hr/staff-attendance';
+  static const String hrTaxDeclarations = '/hr/tax-declarations';
+
+  // Alumni routes
+  static const String alumniDashboard = '/alumni';
+  static const String alumniDirectory = '/alumni/directory';
+  static const String alumniProfile = '/alumni/profile/:alumniId';
+  static const String alumniEvents = '/alumni/events';
+  static const String alumniEventDetail = '/alumni/events/:eventId';
+  static const String alumniDonations = '/alumni/donations';
+  static const String alumniMentorship = '/alumni/mentorship';
+  static const String alumniStories = '/alumni/stories';
+  static const String alumniRegistration = '/alumni/register';
+
+  // Visitor Management routes
+  static const String visitorDashboard = '/visitors';
+  static const String visitorCheckIn = '/visitors/check-in';
+  static const String visitorCheckOut = '/visitors/check-out';
+  static const String visitorLog = '/visitors/log';
+  static const String visitorPreRegister = '/visitors/pre-register';
+  static const String visitorDetail = '/visitors/:visitorId';
+
+  // Certificate Generator routes
+  static const String certificateDashboard = '/certificates';
+  static const String certificateTemplates = '/certificates/templates';
+  static const String issueCertificate = '/certificates/issue';
+  static const String certificateList = '/certificates/list';
+  static const String certificatePreview = '/certificates/preview/:certId';
+  static const String verifyCertificate = '/certificates/verify';
+
+  // Online Exam routes
+  static const String onlineExams = '/online-exams';
+  static const String onlineExamCreate = '/online-exams/create';
+  static const String onlineExamBuilder = '/online-exams/builder/:examId';
+  static const String onlineExamDetail = '/online-exams/:examId';
+  static const String takeOnlineExam = '/online-exams/take/:examId';
+  static const String onlineExamResult = '/online-exams/result/:attemptId';
+  static const String onlineExamAnalytics = '/online-exams/analytics/:examId';
+  static const String onlineExamGrade = '/online-exams/grade/:attemptId';
+  static const String onlineExamSettings = '/online-exams/settings/:examId';
 }
 
 /// Router provider
@@ -603,7 +797,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
 
-          // ==================== REPORT CARDS ====================
+          // ==================== REPORT CARDS (LEGACY) ====================
           GoRoute(
             path: AppRoutes.reports,
             pageBuilder: (context, state) => const NoTransitionPage(
@@ -614,6 +808,64 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.reportDetail,
             builder: (context, state) => ReportCardViewScreen(
               reportId: state.pathParameters['reportId']!,
+            ),
+          ),
+
+          // ==================== REPORT CARD GENERATOR (FULL MODULE) ====================
+          GoRoute(
+            path: AppRoutes.reportCardDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ReportCardDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.reportCardTemplates,
+            builder: (context, state) => const TemplateListScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.reportCardTemplateNew,
+            builder: (context, state) => const TemplateEditorScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.reportCardTemplateEdit,
+            builder: (context, state) => TemplateEditorScreen(
+              templateId: state.pathParameters['templateId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.reportCardGradingScales,
+            builder: (context, state) => const GradingScaleScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.reportCardGenerate,
+            builder: (context, state) => const GenerateReportCardsScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.reportCardList,
+            builder: (context, state) => const ReportCardListScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.reportCardDetail,
+            builder: (context, state) => ReportCardDetailScreen(
+              reportId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.reportCardPreview,
+            builder: (context, state) => ReportCardPreviewScreen(
+              reportId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.reportCardComments,
+            builder: (context, state) => AddCommentsScreen(
+              reportId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.reportCardSkills,
+            builder: (context, state) => SkillsRatingScreen(
+              reportId: state.pathParameters['id']!,
             ),
           ),
 
@@ -983,7 +1235,420 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.reportAbsence,
             builder: (context, state) => const ReportAbsenceScreen(),
           ),
+
+          // ==================== ADMISSIONS ====================
+          GoRoute(
+            path: AppRoutes.admissionDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: AdmissionDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.admissionInquiries,
+            builder: (context, state) => const InquiryListScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.admissionInquiryForm,
+            builder: (context, state) => InquiryFormScreen(
+              inquiry: state.extra as dynamic,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.admissionApplications,
+            builder: (context, state) => const ApplicationListScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.admissionApplicationDetail,
+            builder: (context, state) => ApplicationDetailScreen(
+              applicationId: state.pathParameters['applicationId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.admissionApplicationForm,
+            builder: (context, state) => ApplicationFormScreen(
+              inquiryId: state.uri.queryParameters['inquiryId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.admissionInterviews,
+            builder: (context, state) => InterviewScheduleScreen(
+              applicationId: state.uri.queryParameters['applicationId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.admissionSettings,
+            builder: (context, state) => const AdmissionSettingsScreen(),
+          ),
+
+          // ==================== DISCIPLINE ====================
+          GoRoute(
+            path: AppRoutes.disciplineDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: DisciplineDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.disciplineIncidents,
+            builder: (context, state) => const IncidentListScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.disciplineReportIncident,
+            builder: (context, state) => ReportIncidentScreen(
+              preselectedStudentId: state.uri.queryParameters['studentId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.disciplineIncidentDetail,
+            builder: (context, state) => IncidentDetailScreen(
+              incidentId: state.pathParameters['incidentId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.disciplinePlans,
+            builder: (context, state) => BehaviorPlanScreen(
+              studentId: state.uri.queryParameters['studentId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.disciplineRecognitions,
+            builder: (context, state) =>
+                const PositiveRecognitionScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.disciplineStudentProfile,
+            builder: (context, state) =>
+                StudentBehaviorProfileScreen(
+              studentId: state.pathParameters['studentId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.disciplineDetention,
+            builder: (context, state) =>
+                const DetentionManagementScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.disciplineSettings,
+            builder: (context, state) =>
+                const BehaviorSettingsScreen(),
+          ),
+
+          // ==================== LMS ====================
+          GoRoute(
+            path: AppRoutes.lmsDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: LmsDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.lmsCatalog,
+            builder: (context, state) => const CourseCatalogScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.lmsMyCourses,
+            builder: (context, state) => const LmsDashboardScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.lmsCourseDetail,
+            builder: (context, state) => CourseDetailScreen(
+              courseId: state.pathParameters['courseId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.lmsCourseBuilder,
+            builder: (context, state) => const CourseBuilderScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.lmsCourseBuilderEdit,
+            builder: (context, state) => CourseBuilderScreen(
+              courseId: state.pathParameters['courseId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.lmsCourseProgress,
+            builder: (context, state) => CourseProgressScreen(
+              enrollmentId: state.pathParameters['enrollmentId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.lmsModuleContent,
+            builder: (context, state) => ModuleContentScreen(
+              enrollmentId: state.pathParameters['enrollmentId']!,
+              moduleId: state.pathParameters['moduleId']!,
+              contentId: state.pathParameters['contentId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.lmsDiscussionForum,
+            builder: (context, state) => DiscussionForumScreen(
+              courseId: state.pathParameters['courseId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.lmsCertificate,
+            builder: (context, state) => CertificateScreen(
+              enrollmentId: state.pathParameters['enrollmentId']!,
+            ),
+          ),
+
+          // ==================== VISITOR MANAGEMENT ====================
+          GoRoute(
+            path: AppRoutes.visitorDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: VisitorDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.visitorCheckIn,
+            builder: (context, state) => VisitorCheckInScreen(
+              preRegQrData: state.uri.queryParameters['qrData'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.visitorCheckOut,
+            builder: (context, state) => const VisitorCheckOutScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.visitorLog,
+            builder: (context, state) => const VisitorLogScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.visitorPreRegister,
+            builder: (context, state) => const PreRegistrationScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.visitorDetail,
+            builder: (context, state) => VisitorDetailScreen(
+              visitorId: state.pathParameters['visitorId']!,
+            ),
+          ),
+
+          // ==================== CERTIFICATE GENERATOR ====================
+          GoRoute(
+            path: AppRoutes.certificateDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: CertificateDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.certificateTemplates,
+            builder: (context, state) => const CertificateTemplateScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.issueCertificate,
+            builder: (context, state) => const IssueCertificateScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.certificateList,
+            builder: (context, state) => const CertificateListScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.certificatePreview,
+            builder: (context, state) => CertificatePreviewScreen(
+              certId: state.pathParameters['certId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.verifyCertificate,
+            builder: (context, state) => const VerifyCertificateScreen(),
+          ),
+
+          // ==================== ONLINE EXAMS ====================
+          GoRoute(
+            path: AppRoutes.onlineExams,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ExamDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.onlineExamCreate,
+            builder: (context, state) => const ExamBuilderScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.onlineExamBuilder,
+            builder: (context, state) => ExamBuilderScreen(
+              examId: state.pathParameters['examId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.onlineExamDetail,
+            builder: (context, state) => ExamDetailScreen(
+              examId: state.pathParameters['examId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.takeOnlineExam,
+            builder: (context, state) => TakeExamScreen(
+              examId: state.pathParameters['examId']!,
+              studentId: state.uri.queryParameters['studentId'] ?? '',
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.onlineExamResult,
+            builder: (context, state) => ExamResultScreen(
+              attemptId: state.pathParameters['attemptId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.onlineExamAnalytics,
+            builder: (context, state) => ExamAnalyticsScreen(
+              examId: state.pathParameters['examId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.onlineExamGrade,
+            builder: (context, state) => GradeExamScreen(
+              attemptId: state.pathParameters['attemptId']!,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.onlineExamSettings,
+            builder: (context, state) => ExamSettingsScreen(
+              examId: state.pathParameters['examId']!,
+            ),
+          ),
         ],
+      ),
+
+      // HR & Payroll routes
+      GoRoute(
+        path: AppRoutes.hrDashboard,
+        builder: (context, state) => const HRDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.hrDepartments,
+        builder: (context, state) => const DepartmentListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.hrDepartmentDetail,
+        builder: (context, state) => DepartmentDetailScreen(
+          departmentId: state.pathParameters['departmentId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.hrStaffDirectory,
+        builder: (context, state) => const StaffDirectoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.hrStaffProfile,
+        builder: (context, state) => StaffProfileScreen(
+          staffId: state.pathParameters['staffId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.hrContracts,
+        builder: (context, state) => const ContractManagementScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.hrPayroll,
+        builder: (context, state) => const PayrollDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.hrPayrollRun,
+        builder: (context, state) => const PayrollRunScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.hrPayrollRunDetail,
+        builder: (context, state) => PayrollRunScreen(
+          payrollRunId: state.pathParameters['runId'],
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.hrSalarySlips,
+        builder: (context, state) => SalarySlipScreen(
+          staffId: state.uri.queryParameters['staffId'],
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.hrStaffAttendance,
+        builder: (context, state) => const StaffAttendanceScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.hrTaxDeclarations,
+        builder: (context, state) => const TaxDeclarationScreen(),
+      ),
+
+      // ==================== CALENDAR & EVENTS ====================
+      GoRoute(
+        path: AppRoutes.calendar,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: CalendarScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.calendarEvents,
+        builder: (context, state) => const EventListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.calendarEventDetail,
+        builder: (context, state) => cal.EventDetailScreen(
+          eventId: state.pathParameters['eventId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.calendarCreateEvent,
+        builder: (context, state) => CreateEventScreen(
+          existingEvent: state.extra as SchoolEvent?,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.calendarAcademic,
+        builder: (context, state) => AcademicCalendarScreen(
+          academicYearId: state.uri.queryParameters['yearId'],
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.calendarHolidays,
+        builder: (context, state) => HolidayListScreen(
+          academicYearId: state.uri.queryParameters['yearId'],
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.calendarEventAttendees,
+        builder: (context, state) => EventAttendeesScreen(
+          eventId: state.pathParameters['eventId']!,
+        ),
+      ),
+
+      // ==================== ALUMNI ====================
+      GoRoute(
+        path: AppRoutes.alumniDashboard,
+        builder: (context, state) => const AlumniDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.alumniDirectory,
+        builder: (context, state) => const AlumniDirectoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.alumniProfile,
+        builder: (context, state) => AlumniProfileScreen(
+          alumniId: state.pathParameters['alumniId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.alumniEvents,
+        builder: (context, state) => const AlumniEventsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.alumniEventDetail,
+        builder: (context, state) => EventDetailScreen(
+          eventId: state.pathParameters['eventId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.alumniDonations,
+        builder: (context, state) => const DonationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.alumniMentorship,
+        builder: (context, state) => const MentorshipScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.alumniStories,
+        builder: (context, state) => const SuccessStoriesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.alumniRegistration,
+        builder: (context, state) => const AlumniRegistrationScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

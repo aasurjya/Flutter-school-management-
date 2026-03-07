@@ -11,14 +11,11 @@ import '../../../homework/providers/homework_provider.dart';
 import '../../../../data/models/homework.dart';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
-const _bg = Color(0xFFF2F4F6);         // near-white cool tint
-const _strip = Color(0xFFE8EEF2);      // icy blue-gray (showcase strip)
-const _neu = Color(0xFFECF0F3);        // neumorphic card bg
-const _ink = Color(0xFF0D0D0D);        // near-black text
-const _border = Color(0xFF1A1A1A);     // chip/border dark
-const _muted = Color(0xFF7A8490);      // muted labels
-const _neuLight = Colors.white;
-const _neuDark = Color(0xFFCDD4DA);    // neumorphic dark shadow
+const _bg   = AppColors.background;
+const _surf = Color(0xFFF8F9FA);
+const _ink  = AppColors.grey900;
+const _muted = AppColors.grey500;
+const _border = AppColors.grey200;
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 class StudentDashboardScreen extends ConsumerWidget {
@@ -27,25 +24,33 @@ class StudentDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
-    final firstName = (user?.fullName ?? 'Student').split(' ').first.toUpperCase();
+    final firstName = (user?.fullName ?? 'Student').split(' ').first;
 
     return Scaffold(
       backgroundColor: _bg,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // ── Header ──────────────────────────────────────────────────────
+            // ── Greeting header ──────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
+                padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _Label('GOOD MORNING'),
+                          Text(
+                            _greeting(),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: _muted,
+                              letterSpacing: 0.1,
+                            ),
+                          ),
                           const SizedBox(height: 4),
                           Text(
                             firstName,
@@ -54,204 +59,127 @@ class StudentDashboardScreen extends ConsumerWidget {
                               fontWeight: FontWeight.w800,
                               color: _ink,
                               letterSpacing: -0.5,
+                              height: 1.1,
                             ),
                           ),
                         ],
                       ),
                     ),
+                    // Avatar circle — tap to open menu
                     GestureDetector(
                       onTap: () => _showMenu(context, ref),
-                      child: _NeuCircle(
-                        size: 44,
-                        child: Text(
-                          user?.initials ?? 'S',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: _ink,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
+                      child: _AvatarCircle(initials: user?.initials ?? 'S'),
                     ),
                   ],
                 ),
               ),
             ),
 
-            // ── Hero neumorphic card ─────────────────────────────────────────
+            // ── Hero attendance card ─────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-                child: _HeroCard(),
+                child: _HeroAttendanceCard(),
               ),
             ),
 
-            // ── Subject chip row ─────────────────────────────────────────────
+            // ── Stat pills row ───────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 28, 0, 0),
-                child: _ChipRow(),
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                child: _StatPillsRow(),
               ),
             ),
 
-            // ── Divider ──────────────────────────────────────────────────────
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 28),
-                child: Divider(color: Color(0xFFD8DFE6), thickness: 1, height: 1),
-              ),
-            ),
-
-            // ── Showcase strip ───────────────────────────────────────────────
-            SliverToBoxAdapter(child: _ShowcaseStrip()),
-
-            // ── Description ──────────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'YOUR ACADEMIC SYSTEM. A REAL-TIME VIEW OF\n'
-                      'PERFORMANCE, ATTENDANCE, AND PROGRESS.',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: _muted,
-                        letterSpacing: 0.8,
-                        height: 1.6,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    _Label('CLASS 10-A  •  ROLL NO 15'),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── Divider ──────────────────────────────────────────────────────
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 28),
-                child: Divider(color: Color(0xFFD8DFE6), thickness: 1, height: 1),
-              ),
-            ),
-
-            // ── Today's schedule ─────────────────────────────────────────────
+            // ── Section: Today's Classes ─────────────────────────────────────
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _Label("TODAY'S SCHEDULE"),
-                    const SizedBox(height: 20),
-                    _ScheduleList(),
-                  ],
-                ),
+                child: _SectionHeader(label: "Today"),
               ),
             ),
-
-            // ── Divider ──────────────────────────────────────────────────────
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 28),
-                child: Divider(color: Color(0xFFD8DFE6), thickness: 1, height: 1),
-              ),
-            ),
-
-            // ── Upcoming ─────────────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _Label('UPCOMING'),
-                    const SizedBox(height: 20),
-                    _UpcomingList(),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── Study tips entry ─────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: GestureDetector(
-                onTap: () => context.push(AppRoutes.studyRecommendations),
-                child: const Padding(
-                  padding: EdgeInsets.fromLTRB(24, 28, 24, 0),
-                  child: _StudyTipsStrip(),
-                ),
-              ),
-            ),
-
-            // ── Divider ──────────────────────────────────────────────────────
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 28),
-                child: Divider(color: Color(0xFFD8DFE6), thickness: 1, height: 1),
-              ),
-            ),
-
-            // ── Today's Homework ─────────────────────────────────────────────
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _Label("TODAY'S HOMEWORK"),
-                    const SizedBox(height: 20),
-                    _HomeworkWidget(),
-                  ],
-                ),
+                child: _TodayScheduleCard(),
               ),
             ),
 
-            // ── Divider ──────────────────────────────────────────────────────
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 28),
-                child: Divider(color: Color(0xFFD8DFE6), thickness: 1, height: 1),
-              ),
-            ),
-
-            // ── Upcoming Exam ─────────────────────────────────────────────────
+            // ── Section: Upcoming ────────────────────────────────────────────
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _Label('UPCOMING EXAM'),
-                    const SizedBox(height: 20),
-                    const _UpcomingExamCard(),
-                  ],
-                ),
+                child: _SectionHeader(label: "Upcoming"),
               ),
             ),
-
-            // ── Divider ──────────────────────────────────────────────────────
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 28),
-                child: Divider(color: Color(0xFFD8DFE6), thickness: 1, height: 1),
-              ),
-            ),
-
-            // ── Quick actions ─────────────────────────────────────────────────
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _Label('QUICK ACTIONS'),
-                    const SizedBox(height: 20),
-                    _QuickActionsRow(user: user),
-                  ],
+                child: _UpcomingCard(),
+              ),
+            ),
+
+            // ── Section: Homework ────────────────────────────────────────────
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _SectionHeader(label: "Homework"),
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _HomeworkWidget(),
+              ),
+            ),
+
+            // ── AI Study Tips entry ──────────────────────────────────────────
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: GestureDetector(
+                  onTap: () => context.push(AppRoutes.studyRecommendations),
+                  child: const _StudyTipsEntry(),
                 ),
+              ),
+            ),
+
+            // ── Section: Upcoming Exam ───────────────────────────────────────
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _SectionHeader(label: "Next Exam"),
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: const _UpcomingExamCard(),
+              ),
+            ),
+
+            // ── Quick Actions ────────────────────────────────────────────────
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _SectionHeader(label: "Quick Actions"),
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _QuickActionsRow(user: user),
               ),
             ),
 
@@ -262,206 +190,276 @@ class StudentDashboardScreen extends ConsumerWidget {
     );
   }
 
+  String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
   void _showMenu(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        decoration: const BoxDecoration(
-          color: _bg,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(width: 40, height: 4,
-              decoration: BoxDecoration(color: _neuDark, borderRadius: BorderRadius.circular(2))),
-            const SizedBox(height: 24),
-            _MenuTile(label: 'PROFILE', onTap: () => Navigator.pop(context)),
-            const SizedBox(height: 12),
-            _MenuTile(label: 'SETTINGS', onTap: () => Navigator.pop(context)),
-            const SizedBox(height: 12),
-            _MenuTile(
-              label: 'SIGN OUT',
-              onTap: () async {
-                Navigator.pop(context);
-                await ref.read(authNotifierProvider.notifier).signOut();
-                if (context.mounted) context.go(AppRoutes.login);
-              },
-            ),
-          ],
+      builder: (_) => _MenuSheet(ref: ref),
+    );
+  }
+}
+
+// ─── Avatar circle ─────────────────────────────────────────────────────────────
+class _AvatarCircle extends StatelessWidget {
+  final String initials;
+
+  const _AvatarCircle({required this.initials});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: AppColors.primaryLight,
+        shape: BoxShape.circle,
+        border: Border.all(color: AppColors.grey200, width: 1.5),
+      ),
+      child: Center(
+        child: Text(
+          initials,
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            color: AppColors.primary,
+            fontSize: 15,
+          ),
         ),
       ),
     );
   }
 }
 
-// ─── Hero neumorphic card ──────────────────────────────────────────────────────
-class _HeroCard extends StatelessWidget {
+// ─── Hero Attendance Card ──────────────────────────────────────────────────────
+class _HeroAttendanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: _neu,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: const [
-          BoxShadow(color: _neuLight, offset: Offset(-8, -8), blurRadius: 20),
-          BoxShadow(color: _neuDark, offset: Offset(8, 8), blurRadius: 20),
-        ],
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // Inset number (the "09°" equivalent)
           Expanded(
-            child: _InsetNumberBox(value: '94', unit: '%', label: 'ATTENDANCE'),
-          ),
-          const SizedBox(width: 16),
-          // Right column — score + rank stacked
-          Column(
-            children: [
-              _MiniInsetBox(value: '87%', label: 'AVG SCORE'),
-              const SizedBox(height: 12),
-              _MiniInsetBox(value: '#5', label: 'RANK'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InsetNumberBox extends StatelessWidget {
-  final String value;
-  final String unit;
-  final String label;
-
-  const _InsetNumberBox({
-    required this.value,
-    required this.unit,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      decoration: BoxDecoration(
-        color: _neu,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          // Inset effect — reversed shadows
-          BoxShadow(color: _neuDark, offset: Offset(4, 4), blurRadius: 10,
-              spreadRadius: 1),
-          BoxShadow(color: _neuLight, offset: Offset(-4, -4), blurRadius: 10,
-              spreadRadius: 1),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Blurred hero number
-          ImageFiltered(
-            imageFilter: ImageFilter.blur(sigmaX: 0.8, sigmaY: 0.8),
-            child: Stack(
-              alignment: Alignment.topRight,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 64,
-                    fontWeight: FontWeight.w900,
-                    color: _ink,
-                    height: 1,
-                    letterSpacing: -3,
+                const Text(
+                  'Attendance',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white70,
+                    letterSpacing: 0.4,
                   ),
                 ),
-                Positioned(
-                  top: 6,
-                  right: -2,
-                  child: Text(
-                    unit,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: _ink,
-                    ),
+                const SizedBox(height: 8),
+                const Text(
+                  '94%',
+                  style: TextStyle(
+                    fontSize: 56,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: -2,
+                    height: 1,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'days present this term',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 10),
-          _Label(label),
+          // Small decorative circle
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Icon(Icons.check_circle_outline,
+                  color: Colors.white, size: 32),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _MiniInsetBox extends StatelessWidget {
-  final String value;
-  final String label;
+// ─── Stat Pills Row ────────────────────────────────────────────────────────────
+class _StatPillsRow extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: const [
+        Expanded(
+          child: _StatPill(
+            icon: Icons.assignment_outlined,
+            label: 'Assignments',
+            value: '3',
+            color: AppColors.warning,
+          ),
+        ),
+        SizedBox(width: 8),
+        Expanded(
+          child: _StatPill(
+            icon: Icons.quiz_outlined,
+            label: 'Exams',
+            value: '2',
+            color: AppColors.info,
+          ),
+        ),
+        SizedBox(width: 8),
+        Expanded(
+          child: _StatPill(
+            icon: Icons.emoji_events_outlined,
+            label: 'Rank',
+            value: '#5',
+            color: AppColors.success,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-  const _MiniInsetBox({required this.value, required this.label});
+class _StatPill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+
+  const _StatPill({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 90,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: _neu,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(color: _neuDark, offset: Offset(3, 3), blurRadius: 8),
-          BoxShadow(color: _neuLight, offset: Offset(-3, -3), blurRadius: 8),
-        ],
+        color: _surf,
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: _ink,
-              letterSpacing: -0.5,
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: _ink,
+                    letterSpacing: -0.3,
+                    height: 1,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: _muted,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
-          _Label(label, size: 8),
         ],
       ),
     );
   }
 }
 
-// ─── Subject chip row ──────────────────────────────────────────────────────────
-class _ChipRow extends StatelessWidget {
-  static const _subjects = [
-    ('10-A', true),
-    ('MATHEMATICS', false),
-    ('PHYSICS', false),
-    ('CHEMISTRY', false),
-    ('ENGLISH', false),
+// ─── Section header ────────────────────────────────────────────────────────────
+class _SectionHeader extends StatelessWidget {
+  final String label;
+
+  const _SectionHeader({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+        color: _ink,
+        letterSpacing: -0.3,
+      ),
+    );
+  }
+}
+
+// ─── Today's schedule card ─────────────────────────────────────────────────────
+class _TodayScheduleCard extends StatelessWidget {
+  static const _classes = [
+    ('08:30', 'Mathematics', 'Mr. Kumar · Room 101', true),
+    ('09:30', 'Physics', 'Mrs. Sharma · Room 102', false),
+    ('10:30', 'Chemistry', 'Dr. Patel · Lab 1', false),
+    ('11:30', 'English', 'Ms. Wilson · Room 103', false),
+    ('12:30', 'History', 'Mr. Singh · Room 104', false),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: _subjects.map((s) {
-          final isCircle = s.$1.length <= 4 && !s.$1.contains(' ');
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: isCircle && s.$2
-                ? _CircleBadge(label: s.$1)
-                : _PillChip(label: s.$1),
+    return Container(
+      decoration: BoxDecoration(
+        color: _surf,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: _classes.asMap().entries.map((e) {
+          final i = e.key;
+          final c = e.value;
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 14),
+                child: _ClassRow(
+                  time: c.$1,
+                  subject: c.$2,
+                  detail: c.$3,
+                  isCurrent: c.$4,
+                ),
+              ),
+              if (i < _classes.length - 1)
+                const Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: _border,
+                    indent: 16,
+                    endIndent: 16),
+            ],
           );
         }).toList(),
       ),
@@ -469,226 +467,13 @@ class _ChipRow extends StatelessWidget {
   }
 }
 
-class _CircleBadge extends StatelessWidget {
-  final String label;
-
-  const _CircleBadge({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: _border, width: 1.5),
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            color: _ink,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PillChip extends StatelessWidget {
-  final String label;
-
-  const _PillChip({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        border: Border.all(color: _border, width: 1),
-        borderRadius: BorderRadius.circular(40),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: _ink,
-          letterSpacing: 0.8,
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Showcase strip ────────────────────────────────────────────────────────────
-class _ShowcaseStrip extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      decoration: BoxDecoration(
-        color: _strip,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFD0DBE5), width: 1),
-      ),
-      child: Stack(
-        children: [
-          // Dashed corner brackets (design-tool aesthetic)
-          const Positioned(top: 10, left: 10, child: _DashedCorner()),
-          const Positioned(
-            top: 10, right: 10,
-            child: _DashedCorner(flipH: true),
-          ),
-          // Metrics
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
-            child: Row(
-              children: const [
-                Expanded(
-                  child: _ShowcaseMetric(value: '94%', label: 'ATTENDANCE'),
-                ),
-                _VerticalDivider(),
-                Expanded(
-                  child: _ShowcaseMetric(value: '87%', label: 'AVG SCORE'),
-                ),
-                _VerticalDivider(),
-                Expanded(
-                  child: _ShowcaseMetric(value: '#5', label: 'CLASS RANK'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ShowcaseMetric extends StatelessWidget {
-  final String value;
-  final String label;
-
-  const _ShowcaseMetric({required this.value, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ImageFiltered(
-          imageFilter: ImageFilter.blur(sigmaX: 0.5, sigmaY: 0.5),
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w900,
-              color: _ink,
-              letterSpacing: -1,
-              height: 1,
-            ),
-          ),
-        ),
-        const SizedBox(height: 6),
-        _Label(label, size: 9),
-      ],
-    );
-  }
-}
-
-class _VerticalDivider extends StatelessWidget {
-  const _VerticalDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 48,
-      color: const Color(0xFFCDD4DA),
-    );
-  }
-}
-
-class _DashedCorner extends StatelessWidget {
-  final bool flipH;
-
-  const _DashedCorner({this.flipH = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Transform.scale(
-      scaleX: flipH ? -1 : 1,
-      child: SizedBox(
-        width: 14,
-        height: 14,
-        child: CustomPaint(painter: _CornerPainter()),
-      ),
-    );
-  }
-}
-
-class _CornerPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = _muted
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-
-    // Top-left corner bracket
-    canvas.drawLine(Offset(0, size.height), Offset(0, 0), paint);
-    canvas.drawLine(Offset(0, 0), Offset(size.width, 0), paint);
-  }
-
-  @override
-  bool shouldRepaint(_) => false;
-}
-
-// ─── Schedule list ─────────────────────────────────────────────────────────────
-class _ScheduleList extends StatelessWidget {
-  static const _classes = [
-    ('08:30', 'MATHEMATICS', 'Mr. Kumar · Room 101', true),
-    ('09:30', 'PHYSICS', 'Mrs. Sharma · Room 102', false),
-    ('10:30', 'CHEMISTRY', 'Dr. Patel · Lab 1', false),
-    ('11:30', 'ENGLISH', 'Ms. Wilson · Room 103', false),
-    ('12:30', 'HISTORY', 'Mr. Singh · Room 104', false),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: _classes.asMap().entries.map((e) {
-        final i = e.key;
-        final c = e.value;
-        return Column(
-          children: [
-            _ScheduleRow(
-              time: c.$1,
-              subject: c.$2,
-              detail: c.$3,
-              isCurrent: c.$4,
-            ),
-            if (i < _classes.length - 1)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
-                child: Divider(color: Color(0xFFDDE3E9), height: 1, thickness: 1),
-              ),
-          ],
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _ScheduleRow extends StatelessWidget {
+class _ClassRow extends StatelessWidget {
   final String time;
   final String subject;
   final String detail;
   final bool isCurrent;
 
-  const _ScheduleRow({
+  const _ClassRow({
     required this.time,
     required this.subject,
     required this.detail,
@@ -698,54 +483,54 @@ class _ScheduleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Time
+        // Time column
         SizedBox(
-          width: 52,
+          width: 56,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 time,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: isCurrent ? _ink : _muted,
-                  letterSpacing: 0.2,
                 ),
               ),
               if (isCurrent)
-                Padding(
-                  padding: const EdgeInsets.only(top: 3),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: _ink, width: 1),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    child: const Text(
-                      'NOW',
-                      style: TextStyle(
-                        fontSize: 8,
-                        fontWeight: FontWeight.w800,
-                        color: _ink,
-                        letterSpacing: 0.8,
-                      ),
+                Container(
+                  margin: const EdgeInsets.only(top: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    'NOW',
+                    style: TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: 0.6,
                     ),
                   ),
                 ),
             ],
           ),
         ),
-        // Line connector
+        // Left accent line
         Container(
-          width: 1,
+          width: 2,
           height: 36,
-          color: isCurrent ? _ink : const Color(0xFFDDE3E9),
-          margin: const EdgeInsets.symmetric(horizontal: 16),
+          margin: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: isCurrent ? AppColors.primary : _border,
+            borderRadius: BorderRadius.circular(1),
+          ),
         ),
-        // Subject + detail
+        // Subject info
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -753,20 +538,15 @@ class _ScheduleRow extends StatelessWidget {
               Text(
                 subject,
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w500,
+                  fontSize: 14,
+                  fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
                   color: _ink,
-                  letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 detail,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: _muted,
-                  letterSpacing: 0.2,
-                ),
+                style: const TextStyle(fontSize: 12, color: _muted),
               ),
             ],
           ),
@@ -776,197 +556,88 @@ class _ScheduleRow extends StatelessWidget {
   }
 }
 
-// ─── Upcoming list ─────────────────────────────────────────────────────────────
-class _UpcomingList extends StatelessWidget {
+// ─── Upcoming card ─────────────────────────────────────────────────────────────
+class _UpcomingCard extends StatelessWidget {
   static const _items = [
-    ('PHYSICS ASSIGNMENT DUE', 'Chapter 5 — Wave Optics', 'TOMORROW'),
-    ('CHEMISTRY QUIZ', 'Organic Chemistry', 'IN 3 DAYS'),
-    ('PARENT-TEACHER MEETING', 'Annual Review', 'NEXT WEEK'),
+    ('Physics Assignment Due', 'Chapter 5 — Wave Optics', 'Tomorrow'),
+    ('Chemistry Quiz', 'Organic Chemistry', 'In 3 days'),
+    ('Parent-Teacher Meeting', 'Annual Review', 'Next week'),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: _items.asMap().entries.map((e) {
-        final i = e.key;
-        final item = e.value;
-        return Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.$1,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: _ink,
-                          letterSpacing: 0.6,
-                        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: _surf,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: _items.asMap().entries.map((e) {
+          final i = e.key;
+          final item = e.value;
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.$1,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: _ink,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            item.$2,
+                            style: const TextStyle(
+                                fontSize: 12, color: _muted),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        item.$2,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.grey100,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        item.$3,
                         style: const TextStyle(
                           fontSize: 11,
+                          fontWeight: FontWeight.w600,
                           color: _muted,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFFCDD4DA), width: 1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    item.$3,
-                    style: const TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                      color: _muted,
-                      letterSpacing: 0.8,
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-            if (i < _items.length - 1)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Divider(color: Color(0xFFDDE3E9), height: 1, thickness: 1),
               ),
-          ],
-        );
-      }).toList(),
-    );
-  }
-}
-
-// ─── Study tips strip ──────────────────────────────────────────────────────────
-class _StudyTipsStrip extends StatelessWidget {
-  const _StudyTipsStrip();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        color: _strip,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFD0DBE5), width: 1),
-      ),
-      child: Row(
-        children: const [
-          Icon(Icons.auto_awesome_outlined, size: 16, color: _muted),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _Label('AI STUDY TIPS'),
-                SizedBox(height: 2),
-                Text(
-                  'Personalized recommendations just for you',
-                  style: TextStyle(fontSize: 11, color: _muted),
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.arrow_forward_ios, size: 11, color: _muted),
-        ],
+              if (i < _items.length - 1)
+                const Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: _border,
+                    indent: 16,
+                    endIndent: 16),
+            ],
+          );
+        }).toList(),
       ),
     );
   }
 }
 
-// ─── Shared widgets ────────────────────────────────────────────────────────────
-class _Label extends StatelessWidget {
-  final String text;
-  final double size;
-
-  const _Label(this.text, {this.size = 10});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: size,
-        fontWeight: FontWeight.w600,
-        color: _muted,
-        letterSpacing: 1.4,
-      ),
-    );
-  }
-}
-
-class _NeuCircle extends StatelessWidget {
-  final double size;
-  final Widget child;
-
-  const _NeuCircle({required this.size, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: const BoxDecoration(
-        color: _neu,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(color: _neuLight, offset: Offset(-3, -3), blurRadius: 8),
-          BoxShadow(color: _neuDark, offset: Offset(3, 3), blurRadius: 8),
-        ],
-      ),
-      child: Center(child: child),
-    );
-  }
-}
-
-class _MenuTile extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-
-  const _MenuTile({required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-        decoration: BoxDecoration(
-          color: _neu,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: const [
-            BoxShadow(color: _neuLight, offset: Offset(-3, -3), blurRadius: 8),
-            BoxShadow(color: _neuDark, offset: Offset(3, 3), blurRadius: 8),
-          ],
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: _ink,
-            letterSpacing: 1.2,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Today's Homework widget ───────────────────────────────────────────────────
+// ─── Homework widget ───────────────────────────────────────────────────────────
 class _HomeworkWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -979,25 +650,27 @@ class _HomeworkWidget extends ConsumerWidget {
     return homeworkAsync.when(
       loading: () => const SizedBox(
         height: 48,
-        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+        child: Center(
+            child: CircularProgressIndicator(
+                strokeWidth: 2, color: AppColors.primary)),
       ),
       error: (_, __) => const SizedBox.shrink(),
       data: (items) {
         if (items.isEmpty) {
           return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _strip,
+              color: _surf,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFD0DBE5)),
             ),
-            child: Row(
-              children: const [
-                Icon(Icons.check_circle_outline, size: 16, color: _muted),
+            child: const Row(
+              children: [
+                Icon(Icons.check_circle_outline,
+                    size: 18, color: AppColors.success),
                 SizedBox(width: 10),
                 Text(
-                  'No pending homework',
-                  style: TextStyle(fontSize: 12, color: _muted),
+                  'No pending homework — nice work!',
+                  style: TextStyle(fontSize: 13, color: _muted),
                 ),
               ],
             ),
@@ -1005,21 +678,33 @@ class _HomeworkWidget extends ConsumerWidget {
         }
 
         final pending = items.take(3).toList();
-        return Column(
-          children: pending.asMap().entries.map((entry) {
-            final i = entry.key;
-            final hw = entry.value;
-            return Column(
-              children: [
-                _HomeworkRow(homework: hw),
-                if (i < pending.length - 1)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Divider(color: Color(0xFFDDE3E9), height: 1),
+        return Container(
+          decoration: BoxDecoration(
+            color: _surf,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: pending.asMap().entries.map((entry) {
+              final i = entry.key;
+              final hw = entry.value;
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    child: _HomeworkRow(homework: hw),
                   ),
-              ],
-            );
-          }).toList(),
+                  if (i < pending.length - 1)
+                    const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: _border,
+                        indent: 16,
+                        endIndent: 16),
+                ],
+              );
+            }).toList(),
+          ),
         );
       },
     );
@@ -1034,17 +719,17 @@ class _HomeworkRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isHigh = homework.priority.name == 'high';
+    final dotColor = isHigh ? AppColors.error : AppColors.grey300;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 6,
-          height: 6,
-          margin: const EdgeInsets.only(top: 5, right: 10),
+          width: 8,
+          height: 8,
+          margin: const EdgeInsets.only(right: 12),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isHigh ? AppColors.error : _muted,
+            color: dotColor,
           ),
         ),
         Expanded(
@@ -1054,33 +739,31 @@ class _HomeworkRow extends StatelessWidget {
               Text(
                 homework.title,
                 style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                   color: _ink,
-                  letterSpacing: 0.4,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 homework.subjectName ?? 'Subject',
-                style: const TextStyle(fontSize: 11, color: _muted),
+                style: const TextStyle(fontSize: 12, color: _muted),
               ),
             ],
           ),
         ),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFCDD4DA)),
+            color: AppColors.grey100,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Text(
-            'DUE TOMORROW',
-            style: const TextStyle(
-              fontSize: 8,
-              fontWeight: FontWeight.w700,
+          child: const Text(
+            'Due tomorrow',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
               color: _muted,
-              letterSpacing: 0.6,
             ),
           ),
         ),
@@ -1089,73 +772,111 @@ class _HomeworkRow extends StatelessWidget {
   }
 }
 
-// ─── Upcoming Exam card ────────────────────────────────────────────────────────
+// ─── AI Study Tips entry ───────────────────────────────────────────────────────
+class _StudyTipsEntry extends StatelessWidget {
+  const _StudyTipsEntry();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.primaryLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.2), width: 1),
+      ),
+      child: Row(
+        children: const [
+          Icon(Icons.auto_awesome_outlined,
+              size: 18, color: AppColors.primary),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'AI Study Tips',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  'Personalized recommendations just for you',
+                  style: TextStyle(fontSize: 12, color: AppColors.primaryDark),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, size: 18, color: AppColors.primary),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Upcoming Exam Card ────────────────────────────────────────────────────────
 class _UpcomingExamCard extends StatelessWidget {
   const _UpcomingExamCard();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary.withValues(alpha: 0.08),
-            AppColors.primaryLight.withValues(alpha: 0.04),
-          ],
-        ),
+        color: _surf,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.15),
-        ),
+        border: Border.all(color: _border),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.primaryLight,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(Icons.quiz_outlined, color: AppColors.primary, size: 22),
+            child: const Icon(Icons.quiz_outlined,
+                color: AppColors.primary, size: 22),
           ),
           const SizedBox(width: 16),
-          Expanded(
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'MATHEMATICS — MID TERM',
+                Text(
+                  'Mathematics — Mid Term',
                   style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
                     color: _ink,
-                    letterSpacing: 0.6,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
-                  'Chapters 1–5  •  Marks: 80',
-                  style: const TextStyle(fontSize: 11, color: _muted),
+                  'Chapters 1–5  ·  80 marks',
+                  style: TextStyle(fontSize: 12, color: _muted),
                 ),
               ],
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.primary,
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Text(
-              'IN 5 DAYS',
+              'In 5 days',
               style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w800,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
                 color: Colors.white,
-                letterSpacing: 0.8,
               ),
             ),
           ),
@@ -1180,29 +901,29 @@ class _QuickActionsRow extends StatelessWidget {
         Expanded(
           child: _QuickActionTile(
             icon: Icons.collections_bookmark_outlined,
-            label: 'VIEW\nPORTFOLIO',
+            label: 'Portfolio',
             onTap: () => context.push(
               AppRoutes.studentPortfolio
                   .replaceFirst(':studentId', studentId),
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Expanded(
           child: _QuickActionTile(
             icon: Icons.badge_outlined,
-            label: 'VIEW\nID CARD',
+            label: 'ID Card',
             onTap: () => context.push(
               AppRoutes.digitalIdCard
                   .replaceFirst(':studentId', studentId),
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Expanded(
           child: _QuickActionTile(
             icon: Icons.fact_check_outlined,
-            label: 'MY\nATTENDANCE',
+            label: 'Attendance',
             onTap: () => context.push(AppRoutes.studentAttendance),
           ),
         ),
@@ -1224,36 +945,119 @@ class _QuickActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: _neu,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: const [
-            BoxShadow(color: _neuLight, offset: Offset(-3, -3), blurRadius: 8),
-            BoxShadow(color: _neuDark, offset: Offset(3, 3), blurRadius: 8),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 22, color: AppColors.primary),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                color: _ink,
-                letterSpacing: 0.8,
-                height: 1.4,
+    return Material(
+      color: _surf,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          child: Column(
+            children: [
+              Icon(icon, size: 22, color: AppColors.primary),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: _ink,
+                  letterSpacing: -0.1,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+// ─── Bottom menu sheet ─────────────────────────────────────────────────────────
+class _MenuSheet extends StatelessWidget {
+  final WidgetRef ref;
+
+  const _MenuSheet({required this.ref});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: _bg,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.grey200,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 24),
+          _MenuRow(
+            icon: Icons.person_outline,
+            label: 'Profile',
+            onTap: () => Navigator.pop(context),
+          ),
+          const Divider(height: 1, color: _border),
+          _MenuRow(
+            icon: Icons.settings_outlined,
+            label: 'Settings',
+            onTap: () => Navigator.pop(context),
+          ),
+          const Divider(height: 1, color: _border),
+          _MenuRow(
+            icon: Icons.logout,
+            label: 'Sign out',
+            color: AppColors.error,
+            onTap: () async {
+              Navigator.pop(context);
+              await ref.read(authNotifierProvider.notifier).signOut();
+              if (context.mounted) context.go(AppRoutes.login);
+            },
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+}
+
+class _MenuRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color color;
+
+  const _MenuRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color = AppColors.grey700,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      leading: Icon(icon, color: color, size: 20),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
   }
 }

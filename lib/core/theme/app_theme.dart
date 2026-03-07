@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -7,7 +8,7 @@ import 'app_colors.dart';
 /// Theme mode provider
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 
-/// Application theme configuration
+/// Application theme configuration — premium, Awwwards-quality design
 class AppTheme {
   AppTheme._();
 
@@ -24,10 +25,10 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         tertiary: AppColors.accent,
-        surface: AppColors.surfaceLight,
+        surface: AppColors.background,
         error: AppColors.error,
       ),
-      scaffoldBackgroundColor: AppColors.backgroundLight,
+      scaffoldBackgroundColor: AppColors.background,
       textTheme: _buildTextTheme(Brightness.light),
       appBarTheme: _buildAppBarTheme(Brightness.light),
       cardTheme: _buildCardTheme(Brightness.light),
@@ -41,6 +42,7 @@ class AppTheme {
       dividerTheme: const DividerThemeData(
         color: AppColors.dividerLight,
         thickness: 1,
+        space: 1,
       ),
       snackBarTheme: _buildSnackBarTheme(),
     );
@@ -76,13 +78,14 @@ class AppTheme {
       dividerTheme: const DividerThemeData(
         color: AppColors.dividerDark,
         thickness: 1,
+        space: 1,
       ),
       snackBarTheme: _buildSnackBarTheme(),
     );
   }
 
   // ============================================
-  // TEXT THEME
+  // TEXT THEME — tight headings, airy body
   // ============================================
   static TextTheme _buildTextTheme(Brightness brightness) {
     final color = brightness == Brightness.light
@@ -93,118 +96,161 @@ class AppTheme {
         : AppColors.textSecondaryDark;
 
     return GoogleFonts.poppinsTextTheme().copyWith(
+      // Display — massive hero numbers
       displayLarge: GoogleFonts.poppins(
         fontSize: 57,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w800,
         color: color,
+        letterSpacing: -1.5,
+        height: 1.1,
       ),
       displayMedium: GoogleFonts.poppins(
-        fontSize: 45,
-        fontWeight: FontWeight.w400,
+        fontSize: 48,
+        fontWeight: FontWeight.w800,
         color: color,
+        letterSpacing: -1.2,
+        height: 1.1,
       ),
       displaySmall: GoogleFonts.poppins(
         fontSize: 36,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w700,
         color: color,
+        letterSpacing: -0.8,
+        height: 1.15,
       ),
+      // Headlines — dominant section titles
       headlineLarge: GoogleFonts.poppins(
         fontSize: 32,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         color: color,
+        letterSpacing: -0.5,
+        height: 1.2,
       ),
       headlineMedium: GoogleFonts.poppins(
         fontSize: 28,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         color: color,
+        letterSpacing: -0.5,
+        height: 1.2,
       ),
       headlineSmall: GoogleFonts.poppins(
         fontSize: 24,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         color: color,
+        letterSpacing: -0.3,
+        height: 1.25,
       ),
+      // Titles — card headers, section labels
       titleLarge: GoogleFonts.poppins(
-        fontSize: 22,
-        fontWeight: FontWeight.w600,
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
         color: color,
+        letterSpacing: -0.3,
       ),
       titleMedium: GoogleFonts.poppins(
         fontSize: 16,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
         color: color,
+        letterSpacing: -0.2,
       ),
       titleSmall: GoogleFonts.poppins(
         fontSize: 14,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
         color: color,
+        letterSpacing: -0.1,
       ),
+      // Body — airy, readable
       bodyLarge: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w400,
         color: color,
+        letterSpacing: 0.1,
+        height: 1.6,
       ),
       bodyMedium: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w400,
         color: color,
+        letterSpacing: 0.1,
+        height: 1.6,
       ),
       bodySmall: GoogleFonts.poppins(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         color: secondaryColor,
+        letterSpacing: 0.1,
+        height: 1.5,
       ),
+      // Labels — buttons, chips, badges
       labelLarge: GoogleFonts.poppins(
         fontSize: 14,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
         color: color,
+        letterSpacing: 0.0,
       ),
       labelMedium: GoogleFonts.poppins(
         fontSize: 12,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
         color: color,
+        letterSpacing: 0.2,
       ),
       labelSmall: GoogleFonts.poppins(
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
         color: secondaryColor,
+        letterSpacing: 0.8,
       ),
     );
   }
 
   // ============================================
-  // COMPONENT THEMES
+  // APP BAR — transparent, zero elevation
   // ============================================
   static AppBarTheme _buildAppBarTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
     return AppBarTheme(
       elevation: 0,
+      scrolledUnderElevation: 0,
       centerTitle: false,
-      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-      foregroundColor: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+      backgroundColor: Colors.transparent,
+      foregroundColor:
+          isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+      systemOverlayStyle: isDark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
       titleTextStyle: GoogleFonts.poppins(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.3,
         color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
       ),
     );
   }
 
+  // ============================================
+  // CARD — flat, no shadow, subtle fill
+  // ============================================
   static CardThemeData _buildCardTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
     return CardThemeData(
       elevation: 0,
-      color: isDark ? AppColors.cardDark : AppColors.cardLight,
+      color: isDark ? AppColors.cardDark : const Color(0xFFF8F9FA),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      margin: EdgeInsets.zero,
     );
   }
 
+  // ============================================
+  // BUTTONS
+  // ============================================
   static ElevatedButtonThemeData _buildElevatedButtonTheme() {
     return ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         elevation: 0,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -212,6 +258,7 @@ class AppTheme {
         textStyle: GoogleFonts.poppins(
           fontSize: 14,
           fontWeight: FontWeight.w600,
+          letterSpacing: 0,
         ),
       ),
     );
@@ -220,6 +267,7 @@ class AppTheme {
   static OutlinedButtonThemeData _buildOutlinedButtonTheme() {
     return OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.primary,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -236,35 +284,43 @@ class AppTheme {
   static TextButtonThemeData _buildTextButtonTheme() {
     return TextButtonThemeData(
       style: TextButton.styleFrom(
+        foregroundColor: AppColors.primary,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         textStyle: GoogleFonts.poppins(
           fontSize: 14,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
 
-  static InputDecorationTheme _buildInputDecorationTheme(Brightness brightness) {
+  // ============================================
+  // INPUT — filled, no border at rest
+  // ============================================
+  static InputDecorationTheme _buildInputDecorationTheme(
+      Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    final fillColor = isDark ? AppColors.inputFillDark : AppColors.inputFillLight;
-    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final fillColor =
+        isDark ? AppColors.inputFillDark : AppColors.grey50;
 
     return InputDecorationTheme(
       filled: true,
       fillColor: fillColor,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      // No visible border at rest — depth from fill color only
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: borderColor),
+        borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: borderColor),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        borderSide:
+            const BorderSide(color: AppColors.primary, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -272,50 +328,93 @@ class AppTheme {
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.error, width: 2),
+        borderSide:
+            const BorderSide(color: AppColors.error, width: 2),
       ),
-      labelStyle: GoogleFonts.poppins(fontSize: 14),
-      hintStyle: GoogleFonts.poppins(fontSize: 14),
+      labelStyle: GoogleFonts.poppins(
+          fontSize: 14, color: AppColors.textSecondaryLight),
+      hintStyle: GoogleFonts.poppins(
+          fontSize: 14, color: AppColors.grey400),
+      floatingLabelStyle: GoogleFonts.poppins(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: AppColors.primary),
     );
   }
 
+  // ============================================
+  // CHIPS — pill-style
+  // ============================================
   static ChipThemeData _buildChipTheme(Brightness brightness) {
     return ChipThemeData(
+      labelPadding:
+          const EdgeInsets.symmetric(horizontal: 8),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(20),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      labelStyle: GoogleFonts.poppins(
+          fontSize: 12, fontWeight: FontWeight.w500),
+      side: BorderSide.none,
     );
   }
 
-  static BottomNavigationBarThemeData _buildBottomNavTheme(Brightness brightness) {
+  // ============================================
+  // BOTTOM NAV — no shadow, white bg
+  // ============================================
+  static BottomNavigationBarThemeData _buildBottomNavTheme(
+      Brightness brightness) {
     final isDark = brightness == Brightness.dark;
     return BottomNavigationBarThemeData(
       elevation: 0,
-      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+      backgroundColor:
+          isDark ? AppColors.surfaceDark : AppColors.background,
       selectedItemColor: AppColors.primary,
-      unselectedItemColor: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+      unselectedItemColor: AppColors.grey400,
       type: BottomNavigationBarType.fixed,
-      selectedLabelStyle: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500),
-      unselectedLabelStyle: GoogleFonts.poppins(fontSize: 12),
+      showUnselectedLabels: false,
+      showSelectedLabels: false,
+      selectedLabelStyle: GoogleFonts.poppins(
+          fontSize: 11, fontWeight: FontWeight.w600),
+      unselectedLabelStyle:
+          GoogleFonts.poppins(fontSize: 11),
     );
   }
 
+  // ============================================
+  // FAB
+  // ============================================
   static FloatingActionButtonThemeData _buildFabTheme() {
     return FloatingActionButtonThemeData(
-      elevation: 4,
+      elevation: 0,
+      focusElevation: 0,
+      hoverElevation: 0,
+      highlightElevation: 0,
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
     );
   }
 
+  // ============================================
+  // SNACKBAR — floating, rounded
+  // ============================================
   static SnackBarThemeData _buildSnackBarTheme() {
     return SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
+      backgroundColor: AppColors.grey900,
+      contentTextStyle: GoogleFonts.poppins(
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+        color: Colors.white,
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
+      elevation: 0,
     );
   }
 }

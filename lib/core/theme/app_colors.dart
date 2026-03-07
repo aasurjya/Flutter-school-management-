@@ -1,111 +1,127 @@
 import 'package:flutter/material.dart';
 
-/// Application color palette
+/// Application color palette — premium blue-based design system
 class AppColors {
   AppColors._();
 
   // ============================================
-  // PRIMARY COLORS
+  // PRIMARY — deep blue (professional, trustworthy)
   // ============================================
-  static const Color primary = Color(0xFF6366F1); // Indigo
-  static const Color primaryLight = Color(0xFF818CF8);
-  static const Color primaryDark = Color(0xFF4F46E5);
-  
-  static const Color secondary = Color(0xFF10B981); // Emerald
-  static const Color secondaryLight = Color(0xFF34D399);
+  static const Color primary = Color(0xFF2563EB);     // blue-600
+  static const Color primaryLight = Color(0xFFEFF6FF); // blue-50
+  static const Color primaryDark = Color(0xFF1D4ED8);  // blue-700
+
+  static const Color secondary = Color(0xFF10B981);    // emerald-500
+  static const Color secondaryLight = Color(0xFFD1FAE5);
   static const Color secondaryDark = Color(0xFF059669);
 
-  static const Color accent = Color(0xFFF59E0B); // Amber
-  static const Color accentLight = Color(0xFFFBBF24);
-  static const Color accentDark = Color(0xFFD97706);
+  static const Color accent = Color(0xFFD97706);       // amber-600
+  static const Color accentLight = Color(0xFFFEF3C7);
+  static const Color accentDark = Color(0xFFB45309);
 
   // ============================================
-  // SEMANTIC COLORS
+  // SEMANTIC — precise, calibrated
   // ============================================
-  static const Color success = Color(0xFF22C55E);
+  static const Color success = Color(0xFF16A34A);      // green-600
   static const Color successLight = Color(0xFFDCFCE7);
-  static const Color error = Color(0xFFEF4444);
+  static const Color error = Color(0xFFDC2626);        // red-600
   static const Color errorLight = Color(0xFFFEE2E2);
-  static const Color warning = Color(0xFFF59E0B);
+  static const Color warning = Color(0xFFD97706);      // amber-600
   static const Color warningLight = Color(0xFFFEF3C7);
-  static const Color info = Color(0xFF3B82F6);
-  static const Color infoLight = Color(0xFFDBEAFE);
+  static const Color info = Color(0xFF0284C7);         // sky-600
+  static const Color infoLight = Color(0xFFE0F2FE);
 
   // ============================================
-  // BACKGROUND COLORS
+  // NEUTRALS — Tailwind gray scale
   // ============================================
-  static const Color backgroundLight = Color(0xFFF8FAFC);
-  static const Color backgroundDark = Color(0xFF0F172A);
-  
-  static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceDark = Color(0xFF1E293B);
-
-  static const Color cardLight = Color(0xFFFFFFFF);
-  static const Color cardDark = Color(0xFF1E293B);
-
-  // ============================================
-  // TEXT COLORS
-  // ============================================
-  static const Color textPrimaryLight = Color(0xFF0F172A);
-  static const Color textSecondaryLight = Color(0xFF64748B);
-  static const Color textTertiaryLight = Color(0xFF94A3B8);
-
-  static const Color textPrimaryDark = Color(0xFFF8FAFC);
-  static const Color textSecondaryDark = Color(0xFF94A3B8);
-  static const Color textTertiaryDark = Color(0xFF64748B);
+  static const Color grey50  = Color(0xFFF9FAFB);
+  static const Color grey100 = Color(0xFFF3F4F6);
+  static const Color grey200 = Color(0xFFE5E7EB);
+  static const Color grey300 = Color(0xFFD1D5DB);
+  static const Color grey400 = Color(0xFF9CA3AF);
+  static const Color grey500 = Color(0xFF6B7280);
+  static const Color grey600 = Color(0xFF4B5563);
+  static const Color grey700 = Color(0xFF374151);
+  static const Color grey800 = Color(0xFF1F2937);
+  static const Color grey900 = Color(0xFF111827);
 
   // ============================================
-  // BORDER & DIVIDER COLORS
+  // BACKGROUND / SURFACE
   // ============================================
-  static const Color borderLight = Color(0xFFE2E8F0);
-  static const Color borderDark = Color(0xFF334155);
-  
-  static const Color dividerLight = Color(0xFFE2E8F0);
-  static const Color dividerDark = Color(0xFF334155);
+  static const Color background     = Color(0xFFFFFFFF);
+  static const Color surface        = Color(0xFFF9FAFB); // grey-50
+  static const Color surfaceElevated = Color(0xFFF3F4F6); // grey-100
+
+  // Legacy aliases kept for backwards compat
+  static const Color backgroundLight = surface;
+  static const Color backgroundDark  = Color(0xFF0F172A);
+  static const Color surfaceLight    = background;
+  static const Color surfaceDark     = Color(0xFF1E293B);
+  static const Color cardLight       = background;
+  static const Color cardDark        = Color(0xFF1E293B);
 
   // ============================================
-  // INPUT COLORS
+  // TEXT
   // ============================================
-  static const Color inputFillLight = Color(0xFFF1F5F9);
-  static const Color inputFillDark = Color(0xFF1E293B);
+  static const Color textPrimaryLight   = grey900;
+  static const Color textSecondaryLight = grey500;
+  static const Color textTertiaryLight  = grey400;
+
+  static const Color textPrimaryDark    = Color(0xFFF8FAFC);
+  static const Color textSecondaryDark  = Color(0xFF94A3B8);
+  static const Color textTertiaryDark   = Color(0xFF64748B);
 
   // ============================================
-  // ATTENDANCE STATUS COLORS
+  // BORDERS & DIVIDERS
   // ============================================
-  static const Color present = Color(0xFF22C55E);
-  static const Color absent = Color(0xFFEF4444);
-  static const Color late = Color(0xFFF59E0B);
-  static const Color excused = Color(0xFF3B82F6);
-  static const Color halfDay = Color(0xFF8B5CF6);
+  static const Color borderLight  = grey200;
+  static const Color borderDark   = Color(0xFF334155);
+  static const Color dividerLight = grey200;
+  static const Color dividerDark  = Color(0xFF334155);
+
+  // ============================================
+  // INPUTS
+  // ============================================
+  static const Color inputFillLight = grey50;
+  static const Color inputFillDark  = Color(0xFF1E293B);
+
+  // ============================================
+  // ATTENDANCE STATUS
+  // ============================================
+  static const Color present  = success;
+  static const Color absent   = error;
+  static const Color late     = warning;
+  static const Color excused  = info;
+  static const Color halfDay  = Color(0xFF8B5CF6);
 
   // ============================================
   // GRADE COLORS
   // ============================================
-  static const Color gradeA = Color(0xFF22C55E);
-  static const Color gradeB = Color(0xFF3B82F6);
-  static const Color gradeC = Color(0xFFF59E0B);
+  static const Color gradeA = success;
+  static const Color gradeB = primary;
+  static const Color gradeC = warning;
   static const Color gradeD = Color(0xFFF97316);
-  static const Color gradeF = Color(0xFFEF4444);
+  static const Color gradeF = error;
 
   // ============================================
   // ROLE COLORS
   // ============================================
-  static const Color adminColor = Color(0xFF8B5CF6);
-  static const Color teacherColor = Color(0xFF3B82F6);
-  static const Color studentColor = Color(0xFF22C55E);
-  static const Color parentColor = Color(0xFFF59E0B);
-  static const Color staffColor = Color(0xFF64748B);
+  static const Color adminColor   = Color(0xFF7C3AED); // violet-700
+  static const Color teacherColor = primary;
+  static const Color studentColor = success;
+  static const Color parentColor  = warning;
+  static const Color staffColor   = grey500;
 
   // ============================================
-  // GLASSMORPHISM COLORS
+  // GLASS (kept for legacy widgets)
   // ============================================
-  static const Color glassLight = Color(0x80FFFFFF);
-  static const Color glassDark = Color(0x40000000);
+  static const Color glassLight        = Color(0x80FFFFFF);
+  static const Color glassDark         = Color(0x40000000);
   static const Color glassOverlayLight = Color(0x1AFFFFFF);
-  static const Color glassOverlayDark = Color(0x1A000000);
+  static const Color glassOverlayDark  = Color(0x1A000000);
 
   // ============================================
-  // GRADIENT PRESETS
+  // GRADIENTS — only for CTAs / accent elements
   // ============================================
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,

@@ -5,7 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../homework/providers/homework_provider.dart';
+import '../../../../data/models/homework.dart';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const _bg = Color(0xFFF2F4F6);         // near-white cool tint
@@ -179,6 +182,75 @@ class StudentDashboardScreen extends ConsumerWidget {
                 child: const Padding(
                   padding: EdgeInsets.fromLTRB(24, 28, 24, 0),
                   child: _StudyTipsStrip(),
+                ),
+              ),
+            ),
+
+            // ── Divider ──────────────────────────────────────────────────────
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 28),
+                child: Divider(color: Color(0xFFD8DFE6), thickness: 1, height: 1),
+              ),
+            ),
+
+            // ── Today's Homework ─────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _Label("TODAY'S HOMEWORK"),
+                    const SizedBox(height: 20),
+                    _HomeworkWidget(),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Divider ──────────────────────────────────────────────────────
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 28),
+                child: Divider(color: Color(0xFFD8DFE6), thickness: 1, height: 1),
+              ),
+            ),
+
+            // ── Upcoming Exam ─────────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _Label('UPCOMING EXAM'),
+                    const SizedBox(height: 20),
+                    const _UpcomingExamCard(),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Divider ──────────────────────────────────────────────────────
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 28),
+                child: Divider(color: Color(0xFFD8DFE6), thickness: 1, height: 1),
+              ),
+            ),
+
+            // ── Quick actions ─────────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _Label('QUICK ACTIONS'),
+                    const SizedBox(height: 20),
+                    _QuickActionsRow(user: user),
+                  ],
                 ),
               ),
             ),
@@ -888,6 +960,298 @@ class _MenuTile extends StatelessWidget {
             color: _ink,
             letterSpacing: 1.2,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Today's Homework widget ───────────────────────────────────────────────────
+class _HomeworkWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final homeworkAsync = ref.watch(
+      homeworkListProvider(
+        const HomeworkListFilter(status: HomeworkStatus.published),
+      ),
+    );
+
+    return homeworkAsync.when(
+      loading: () => const SizedBox(
+        height: 48,
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (items) {
+        if (items.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: _strip,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFD0DBE5)),
+            ),
+            child: Row(
+              children: const [
+                Icon(Icons.check_circle_outline, size: 16, color: _muted),
+                SizedBox(width: 10),
+                Text(
+                  'No pending homework',
+                  style: TextStyle(fontSize: 12, color: _muted),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final pending = items.take(3).toList();
+        return Column(
+          children: pending.asMap().entries.map((entry) {
+            final i = entry.key;
+            final hw = entry.value;
+            return Column(
+              children: [
+                _HomeworkRow(homework: hw),
+                if (i < pending.length - 1)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(color: Color(0xFFDDE3E9), height: 1),
+                  ),
+              ],
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+}
+
+class _HomeworkRow extends StatelessWidget {
+  final dynamic homework;
+
+  const _HomeworkRow({required this.homework});
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isHigh = homework.priority.name == 'high';
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          margin: const EdgeInsets.only(top: 5, right: 10),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isHigh ? AppColors.error : _muted,
+          ),
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                homework.title,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: _ink,
+                  letterSpacing: 0.4,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                homework.subjectName ?? 'Subject',
+                style: const TextStyle(fontSize: 11, color: _muted),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color(0xFFCDD4DA)),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            'DUE TOMORROW',
+            style: const TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.w700,
+              color: _muted,
+              letterSpacing: 0.6,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Upcoming Exam card ────────────────────────────────────────────────────────
+class _UpcomingExamCard extends StatelessWidget {
+  const _UpcomingExamCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary.withValues(alpha: 0.08),
+            AppColors.primaryLight.withValues(alpha: 0.04),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.15),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.quiz_outlined, color: AppColors.primary, size: 22),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'MATHEMATICS — MID TERM',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: _ink,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Chapters 1–5  •  Marks: 80',
+                  style: const TextStyle(fontSize: 11, color: _muted),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Text(
+              'IN 5 DAYS',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Quick Actions row ─────────────────────────────────────────────────────────
+class _QuickActionsRow extends StatelessWidget {
+  final dynamic user;
+
+  const _QuickActionsRow({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final studentId = user?.id ?? 'me';
+
+    return Row(
+      children: [
+        Expanded(
+          child: _QuickActionTile(
+            icon: Icons.collections_bookmark_outlined,
+            label: 'VIEW\nPORTFOLIO',
+            onTap: () => context.push(
+              AppRoutes.studentPortfolio
+                  .replaceFirst(':studentId', studentId),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _QuickActionTile(
+            icon: Icons.badge_outlined,
+            label: 'VIEW\nID CARD',
+            onTap: () => context.push(
+              AppRoutes.digitalIdCard
+                  .replaceFirst(':studentId', studentId),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _QuickActionTile(
+            icon: Icons.fact_check_outlined,
+            label: 'MY\nATTENDANCE',
+            onTap: () => context.push(AppRoutes.studentAttendance),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuickActionTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _QuickActionTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: _neu,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: const [
+            BoxShadow(color: _neuLight, offset: Offset(-3, -3), blurRadius: 8),
+            BoxShadow(color: _neuDark, offset: Offset(3, 3), blurRadius: 8),
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 22, color: AppColors.primary),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                color: _ink,
+                letterSpacing: 0.8,
+                height: 1.4,
+              ),
+            ),
+          ],
         ),
       ),
     );

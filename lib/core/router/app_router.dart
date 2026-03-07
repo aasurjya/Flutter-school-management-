@@ -237,6 +237,7 @@ import '../../data/models/notice_board.dart' as notice;
 // Student Portfolio
 import '../../features/portfolio/presentation/screens/student_portfolio_screen.dart';
 import '../../features/portfolio/presentation/screens/portfolio_work_screen.dart';
+import '../../features/student_portfolio/presentation/screens/digital_id_screen.dart';
 import '../../features/homework/presentation/screens/homework_create_screen.dart';
 import '../../features/homework/presentation/screens/homework_detail_screen.dart';
 import '../../features/homework/presentation/screens/homework_submit_screen.dart';
@@ -580,6 +581,9 @@ class AppRoutes {
   // Student Portfolio routes
   static const String studentPortfolio = '/portfolio/:studentId';
   static const String portfolioWork = '/portfolio/:studentId/work';
+
+  // Digital ID Card
+  static const String digitalIdCard = '/student/:studentId/id-card';
 }
 
 /// Router provider
@@ -1975,6 +1979,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.portfolioWork,
         builder: (context, state) => PortfolioWorkScreen(
+          studentId: state.pathParameters['studentId']!,
+        ),
+      ),
+
+      // ==================== DIGITAL ID CARD ====================
+      GoRoute(
+        path: AppRoutes.digitalIdCard,
+        builder: (context, state) => DigitalIdScreen(
           studentId: state.pathParameters['studentId']!,
         ),
       ),

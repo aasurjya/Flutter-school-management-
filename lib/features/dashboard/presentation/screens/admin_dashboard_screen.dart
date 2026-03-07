@@ -9,6 +9,7 @@ import '../../../auth/providers/auth_provider.dart';
 import '../../../academic/providers/academic_provider.dart';
 import '../../../ai_insights/providers/risk_score_provider.dart';
 import '../../../ai_insights/providers/early_warning_provider.dart';
+import '../../../notice_board/providers/notice_board_provider.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
@@ -172,6 +173,12 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _buildSectionHeader(context, 'Recent Activity'),
                 const SizedBox(height: 12),
                 _buildRecentActivity(context),
+                const SizedBox(height: 24),
+
+                // Recent Notices
+                _buildNoticeSectionHeader(context),
+                const SizedBox(height: 12),
+                _buildRecentNotices(context, ref),
                 const SizedBox(height: 100),
               ]),
             ),
@@ -618,6 +625,132 @@ class AdminDashboardScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: activities.map((activity) => _buildActivityTile(activity)).toList(),
+      ),
+    );
+  }
+
+  Widget _buildNoticeSectionHeader(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Recent Notices',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        TextButton(
+          onPressed: () => context.push(AppRoutes.noticeBoard),
+          child: const Text('View All'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentNotices(BuildContext context, WidgetRef ref) {
+    final noticesAsync = ref.watch(pinnedNoticesProvider);
+
+    return noticesAsync.when(
+      loading: () => const SizedBox(
+        height: 60,
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (notices) {
+        if (notices.isEmpty) {
+          return GlassCard(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Icon(Icons.notifications_none,
+                    color: Colors.grey[400], size: 20),
+                const SizedBox(width: 12),
+                Text(
+                  'No pinned notices at the moment',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final displayed = notices.take(3).toList();
+        return GlassCard(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            children: displayed.asMap().entries.map((entry) {
+              final i = entry.key;
+              final notice = entry.value;
+              return Column(
+                children: [
+                  _buildNoticeTile(context, notice),
+                  if (i < displayed.length - 1)
+                    const Divider(indent: 56, endIndent: 16, height: 1),
+                ],
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildNoticeTile(BuildContext context, dynamic notice) {
+    Color categoryColor;
+    IconData categoryIcon;
+
+    switch (notice.category.name) {
+      case 'emergency':
+        categoryColor = AppColors.error;
+        categoryIcon = Icons.warning_amber_rounded;
+        break;
+      case 'examination':
+        categoryColor = AppColors.info;
+        categoryIcon = Icons.quiz_outlined;
+        break;
+      case 'fee':
+        categoryColor = AppColors.accent;
+        categoryIcon = Icons.currency_rupee;
+        break;
+      case 'holiday':
+        categoryColor = AppColors.success;
+        categoryIcon = Icons.beach_access_outlined;
+        break;
+      case 'academic':
+        categoryColor = AppColors.primary;
+        categoryIcon = Icons.school_outlined;
+        break;
+      default:
+        categoryColor = AppColors.secondary;
+        categoryIcon = Icons.campaign_outlined;
+    }
+
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: categoryColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(categoryIcon, color: categoryColor, size: 18),
+      ),
+      title: Text(
+        notice.title,
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        notice.body,
+        style: const TextStyle(fontSize: 11),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: notice.isPinned
+          ? Icon(Icons.push_pin, size: 14, color: categoryColor)
+          : null,
+      onTap: () => context.push(
+        AppRoutes.noticeBoardDetail.replaceFirst(':noticeId', notice.id),
       ),
     );
   }

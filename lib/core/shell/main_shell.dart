@@ -54,22 +54,25 @@ class _MainShellState extends ConsumerState<MainShell> {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: items.asMap().entries.map((entry) {
-              final index = entry.key;
-              final item = entry.value;
-              final isSelected = index == currentIndex;
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: items.asMap().entries.map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                final isSelected = index == currentIndex;
 
-              return _NavItem(
-                icon: item.icon,
-                activeIcon: item.activeIcon,
-                label: item.label,
-                isSelected: isSelected,
-                onTap: () => _onItemTapped(context, index, role),
-              );
-            }).toList(),
+                return _NavItem(
+                  icon: item.icon,
+                  activeIcon: item.activeIcon,
+                  label: item.label,
+                  isSelected: isSelected,
+                  onTap: () => _onItemTapped(context, index, role),
+                );
+              }).toList(),
+            ),
           ),
         ),
       ),
@@ -158,7 +161,7 @@ class _NavItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary.withValues(alpha: 0.1)

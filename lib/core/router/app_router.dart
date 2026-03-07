@@ -229,6 +229,14 @@ import '../../features/inventory/presentation/screens/audit_screen.dart';
 import '../../features/inventory/presentation/screens/category_management_screen.dart';
 // Homework Tracker
 import '../../features/homework/presentation/screens/homework_dashboard_screen.dart';
+// Notice Board
+import '../../features/notice_board/presentation/screens/notice_board_screen.dart';
+import '../../features/notice_board/presentation/screens/notice_detail_screen.dart';
+import '../../features/notice_board/presentation/screens/notice_form_screen.dart';
+import '../../data/models/notice_board.dart' as notice;
+// Student Portfolio
+import '../../features/portfolio/presentation/screens/student_portfolio_screen.dart';
+import '../../features/portfolio/presentation/screens/portfolio_work_screen.dart';
 import '../../features/homework/presentation/screens/homework_create_screen.dart';
 import '../../features/homework/presentation/screens/homework_detail_screen.dart';
 import '../../features/homework/presentation/screens/homework_submit_screen.dart';
@@ -562,6 +570,16 @@ class AppRoutes {
   static const String homeworkSubmit = '/homework/:homeworkId/submit';
   static const String homeworkSubmissions = '/homework/:homeworkId/submissions';
   static const String homeworkCalendar = '/homework/calendar';
+
+  // Notice Board routes
+  static const String noticeBoard = '/notice-board';
+  static const String noticeBoardDetail = '/notice-board/:noticeId';
+  static const String noticeBoardCreate = '/notice-board/create';
+  static const String noticeBoardEdit = '/notice-board/:noticeId/edit';
+
+  // Student Portfolio routes
+  static const String studentPortfolio = '/portfolio/:studentId';
+  static const String portfolioWork = '/portfolio/:studentId/work';
 }
 
 /// Router provider
@@ -1921,6 +1939,44 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.homeworkCalendar,
         builder: (context, state) => const HomeworkCalendarScreen(),
+      ),
+
+      // ==================== NOTICE BOARD ====================
+      GoRoute(
+        path: AppRoutes.noticeBoard,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: NoticeBoardScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.noticeBoardCreate,
+        builder: (context, state) => const NoticeFormScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.noticeBoardDetail,
+        builder: (context, state) => NoticeDetailScreen(
+          noticeId: state.pathParameters['noticeId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.noticeBoardEdit,
+        builder: (context, state) => NoticeFormScreen(
+          existingNotice: state.extra as notice.Notice?,
+        ),
+      ),
+
+      // ==================== STUDENT PORTFOLIO ====================
+      GoRoute(
+        path: AppRoutes.studentPortfolio,
+        builder: (context, state) => StudentPortfolioScreen(
+          studentId: state.pathParameters['studentId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.portfolioWork,
+        builder: (context, state) => PortfolioWorkScreen(
+          studentId: state.pathParameters['studentId']!,
+        ),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

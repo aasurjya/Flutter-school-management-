@@ -237,104 +237,77 @@ class _AvatarCircle extends StatelessWidget {
 }
 
 // ─── Hero Attendance Card ──────────────────────────────────────────────────────
+// ─── Hero: floating attendance number (no card, no color box) ─────────────────
+// Design principle: the NUMBER is the hero. White space IS the design.
+// Inspired by Stripe dashboard revenue number — confidence through scale.
 class _HeroAttendanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Attendance',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white70,
-                    letterSpacing: 0.4,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '94%',
-                  style: TextStyle(
-                    fontSize: 56,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: -2,
-                    height: 1,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'days present this term',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Small decorative circle
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Icon(Icons.check_circle_outline,
-                  color: Colors.white, size: 32),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Stat Pills Row ────────────────────────────────────────────────────────────
-class _StatPillsRow extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: const [
-        Expanded(
-          child: _StatPill(
-            icon: Icons.assignment_outlined,
-            label: 'Assignments',
-            value: '3',
-            color: AppColors.warning,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Thin progress bar — understated, not a big colored block
+        ClipRRect(
+          borderRadius: BorderRadius.circular(2),
+          child: LinearProgressIndicator(
+            value: 0.94,
+            backgroundColor: AppColors.grey100,
+            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+            minHeight: 3,
           ),
         ),
-        SizedBox(width: 8),
-        Expanded(
-          child: _StatPill(
-            icon: Icons.quiz_outlined,
-            label: 'Exams',
-            value: '2',
-            color: AppColors.info,
-          ),
+        const SizedBox(height: 24),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            const Text(
+              '94',
+              style: TextStyle(
+                fontSize: 72,
+                fontWeight: FontWeight.w800,
+                color: AppColors.grey900,
+                letterSpacing: -4,
+                height: 1,
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 10, left: 2),
+              child: Text(
+                '%',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.grey400,
+                  letterSpacing: -1,
+                ),
+              ),
+            ),
+            const Spacer(),
+            // Status pill — single accent, used once
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: AppColors.successLight,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                'On track',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.success,
+                ),
+              ),
+            ),
+          ],
         ),
-        SizedBox(width: 8),
-        Expanded(
-          child: _StatPill(
-            icon: Icons.emoji_events_outlined,
-            label: 'Rank',
-            value: '#5',
-            color: AppColors.success,
+        const SizedBox(height: 6),
+        const Text(
+          'attendance this term',
+          style: TextStyle(
+            fontSize: 14,
+            color: AppColors.grey500,
+            fontWeight: FontWeight.w400,
           ),
         ),
       ],
@@ -342,59 +315,68 @@ class _StatPillsRow extends StatelessWidget {
   }
 }
 
-class _StatPill extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
+// ─── Stat strip — numbers only, no containers, no icons
+// Design principle: let the data breathe. Stripe uses this exact pattern.
+class _StatPillsRow extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: const [
+        Expanded(child: _StatNum(value: '3', label: 'due')),
+        _StatDivider(),
+        Expanded(child: _StatNum(value: '2', label: 'exams')),
+        _StatDivider(),
+        Expanded(child: _StatNum(value: '#5', label: 'rank')),
+      ],
+    );
+  }
+}
 
-  const _StatPill({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
+class _StatNum extends StatelessWidget {
+  final String value;
+  final String label;
+
+  const _StatNum({required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: _ink,
+            letterSpacing: -0.8,
+            height: 1,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: _muted,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatDivider extends StatelessWidget {
+  const _StatDivider();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        color: _surf,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: _ink,
-                    letterSpacing: -0.3,
-                    height: 1,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: _muted,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      width: 1,
+      height: 32,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      color: AppColors.grey200,
     );
   }
 }

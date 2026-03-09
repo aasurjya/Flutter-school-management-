@@ -710,36 +710,30 @@ class _RowMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      decoration: BoxDecoration(
-        color: _surf,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: accentColor,
-              letterSpacing: -0.5,
-              height: 1,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: accentColor,
+            letterSpacing: -0.8,
+            height: 1,
           ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 10,
-              color: _muted,
-              fontWeight: FontWeight.w500,
-            ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 11,
+            color: _muted,
+            fontWeight: FontWeight.w400,
+            height: 1.3,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -805,44 +799,49 @@ class _QuickActionsScroll extends StatelessWidget {
       ),
       _QuickAction(
         icon: Icons.fact_check_outlined,
-        label: 'Attendance',
+        label: 'Mark Attendance',
         color: AppColors.secondary,
         onTap: () => context.push(AppRoutes.attendance),
       ),
       _QuickAction(
         icon: Icons.receipt_long_outlined,
-        label: 'Invoice',
+        label: 'Generate Invoice',
         color: AppColors.warning,
         onTap: () => context.push(AppRoutes.fees),
       ),
       _QuickAction(
         icon: Icons.campaign_outlined,
-        label: 'Announce',
+        label: 'Post Announcement',
         color: AppColors.info,
         onTap: () {},
       ),
       _QuickAction(
         icon: Icons.trending_up,
-        label: 'Trends',
+        label: 'View Analytics',
         color: AppColors.success,
         onTap: () => context.push(AppRoutes.trendDashboard),
       ),
-      _QuickAction(
-        icon: Icons.swap_horiz,
-        label: 'Substitution',
-        color: const Color(0xFF0D9488),
-        onTap: () => context.push(AppRoutes.substitutionDashboard),
-      ),
     ];
 
-    return SizedBox(
-      height: 100,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        itemCount: actions.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (_, i) => _QuickActionChip(data: actions[i]),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Container(
+        decoration: BoxDecoration(
+          color: _surf,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: actions.asMap().entries.map((e) {
+            final i = e.key;
+            return Column(
+              children: [
+                _QuickActionChip(data: e.value),
+                if (i < actions.length - 1)
+                  const Divider(height: 1, color: _border, indent: 24, endIndent: 24),
+              ],
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -862,6 +861,8 @@ class _QuickAction {
   });
 }
 
+// Design principle: iOS Settings style — text-first, no colored boxes.
+// Every icon box looks like every other icon box. Text differentiates.
 class _QuickActionChip extends StatelessWidget {
   final _QuickAction data;
 
@@ -870,28 +871,24 @@ class _QuickActionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: data.color.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(14),
+      color: Colors.transparent,
       child: InkWell(
         onTap: data.onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          width: 88,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          child: Row(
             children: [
-              Icon(data.icon, color: data.color, size: 24),
-              const SizedBox(height: 8),
               Text(
                 data.label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: data.color,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: _ink,
                 ),
               ),
+              const Spacer(),
+              const Icon(Icons.arrow_forward,
+                  size: 14, color: AppColors.grey400),
             ],
           ),
         ),
@@ -901,6 +898,8 @@ class _QuickActionChip extends StatelessWidget {
 }
 
 // ─── Summary item ──────────────────────────────────────────────────────────────
+// Design principle: numbers are the content, labels are context.
+// No icons competing with the data.
 class _SummaryItem extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -920,14 +919,12 @@ class _SummaryItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 18),
-          const SizedBox(width: 12),
           Expanded(
             child: Text(
               label,
               style: const TextStyle(
                 fontSize: 14,
-                color: _ink,
+                color: _muted,
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -937,7 +934,8 @@ class _SummaryItem extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.w700,
               color: color,
-              fontSize: 14,
+              fontSize: 15,
+              letterSpacing: -0.3,
             ),
           ),
         ],
@@ -963,6 +961,8 @@ class _ActivityData {
   });
 }
 
+// Design principle: Linear.app activity feed — dot category indicator,
+// text leads, timestamp trails. No icon boxes competing for attention.
 class _ActivityTile extends StatelessWidget {
   final _ActivityData data;
 
@@ -971,19 +971,22 @@ class _ActivityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: data.color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
+          // Category dot — 6px, sits at text baseline
+          Padding(
+            padding: const EdgeInsets.only(top: 5, right: 10),
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: data.color,
+              ),
             ),
-            child: Icon(data.icon, color: data.color, size: 18),
           ),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -991,24 +994,31 @@ class _ActivityTile extends StatelessWidget {
                 Text(
                   data.title,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
                     color: _ink,
+                    height: 1.3,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   data.subtitle,
-                  style: const TextStyle(fontSize: 12, color: _muted),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: _muted,
+                    height: 1.3,
+                  ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 12),
           Text(
             data.time,
             style: const TextStyle(
               color: _muted,
               fontSize: 11,
+              fontWeight: FontWeight.w400,
             ),
           ),
         ],

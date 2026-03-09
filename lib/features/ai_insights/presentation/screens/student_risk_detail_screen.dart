@@ -156,12 +156,12 @@ class StudentRiskDetailScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          const Row(
                             children: [
-                              const Icon(Icons.analytics_outlined,
+                              Icon(Icons.analytics_outlined,
                                   size: 20, color: AppColors.primary),
-                              const SizedBox(width: 8),
-                              const Text(
+                              SizedBox(width: 8),
+                              Text(
                                 'Risk Factor Breakdown',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
@@ -200,12 +200,12 @@ class StudentRiskDetailScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
+                            const Row(
                               children: [
-                                const Icon(Icons.auto_awesome,
+                                Icon(Icons.auto_awesome,
                                     size: 20, color: AppColors.accent),
-                                const SizedBox(width: 8),
-                                const Text(
+                                SizedBox(width: 8),
+                                Text(
                                   'AI Analysis',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
@@ -236,12 +236,12 @@ class StudentRiskDetailScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
+                            const Row(
                               children: [
-                                const Icon(Icons.flag_outlined,
+                                Icon(Icons.flag_outlined,
                                     size: 20, color: AppColors.warning),
-                                const SizedBox(width: 8),
-                                const Text(
+                                SizedBox(width: 8),
+                                Text(
                                   'Warning Flags',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
@@ -282,12 +282,12 @@ class StudentRiskDetailScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
+                            const Row(
                               children: [
-                                const Icon(Icons.lightbulb_outline,
+                                Icon(Icons.lightbulb_outline,
                                     size: 20, color: AppColors.success),
-                                const SizedBox(width: 8),
-                                const Text(
+                                SizedBox(width: 8),
+                                Text(
                                   'Recommended Actions',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,

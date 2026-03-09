@@ -230,7 +230,7 @@ class _DepartmentCard extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.chevron_right, color: AppColors.textTertiaryLight),
+          const Icon(Icons.chevron_right, color: AppColors.textTertiaryLight),
         ],
       ),
     );

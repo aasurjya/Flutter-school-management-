@@ -1,4 +1,5 @@
 /// Online Examination System models
+library;
 
 // ============================================
 // ENUMS

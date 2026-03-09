@@ -74,9 +74,9 @@ class AdminDashboardScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'School Dashboard',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                               color: _muted,
@@ -113,13 +113,13 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
 
           // ── Hero metric ────────────────────────────────────────────────────
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+              padding: EdgeInsets.fromLTRB(24, 32, 24, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     '2,456',
                     style: TextStyle(
                       fontSize: 56,
@@ -129,8 +129,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                       height: 1,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  const Text(
+                  SizedBox(height: 6),
+                  Text(
                     'students enrolled',
                     style: TextStyle(
                       fontSize: 16,
@@ -144,11 +144,11 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
 
           // ── Row metrics ────────────────────────────────────────────────────
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+              padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
               child: Row(
-                children: const [
+                children: [
                   Expanded(
                     child: _RowMetric(
                       value: '94.2%',
@@ -203,9 +203,9 @@ class AdminDashboardScreen extends ConsumerWidget {
 
           // ── Quick Actions ──────────────────────────────────────────────────
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: EdgeInsets.symmetric(horizontal: 24),
               child: _AdminSectionHeader(label: 'Quick Actions'),
             ),
           ),
@@ -216,9 +216,9 @@ class AdminDashboardScreen extends ConsumerWidget {
 
           // ── Today's Summary ────────────────────────────────────────────────
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: EdgeInsets.symmetric(horizontal: 24),
               child: _AdminSectionHeader(label: "Today's Summary"),
             ),
           ),
@@ -238,7 +238,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _AdminSectionHeader(label: 'Recent Activity'),
+                  const _AdminSectionHeader(label: 'Recent Activity'),
                   TextButton(
                     onPressed: () {},
                     child: const Text('View all',
@@ -268,7 +268,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _AdminSectionHeader(label: 'Notices'),
+                  const _AdminSectionHeader(label: 'Notices'),
                   TextButton(
                     onPressed: () => context.push(AppRoutes.noticeBoard),
                     child: const Text('View all',
@@ -372,8 +372,8 @@ class AdminDashboardScreen extends ConsumerWidget {
         color: _surf,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Column(
-        children: const [
+      child: const Column(
+        children: [
           _SummaryItem(
             icon: Icons.people_outline,
             label: 'Students present',
@@ -410,28 +410,28 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   Widget _buildRecentActivity(BuildContext context) {
     final activities = [
-      _ActivityData(
+      const _ActivityData(
         title: 'Fee Payment Received',
         subtitle: 'John Doe paid ₹25,000',
         time: '5 min ago',
         icon: Icons.payment,
         color: AppColors.success,
       ),
-      _ActivityData(
+      const _ActivityData(
         title: 'New Admission',
         subtitle: 'Sarah Smith enrolled in Class 10-A',
         time: '1 hr ago',
         icon: Icons.person_add,
         color: AppColors.primary,
       ),
-      _ActivityData(
+      const _ActivityData(
         title: 'Exam Results Published',
         subtitle: 'Mid-term results for Class 12',
         time: '2 hr ago',
         icon: Icons.assignment_turned_in,
         color: AppColors.info,
       ),
-      _ActivityData(
+      const _ActivityData(
         title: 'Leave Request',
         subtitle: 'Mr. Kumar requested leave for tomorrow',
         time: '3 hr ago',
@@ -486,11 +486,11 @@ class AdminDashboardScreen extends ConsumerWidget {
               color: _surf,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
+            child: const Row(
               children: [
                 Icon(Icons.notifications_none,
                     color: AppColors.grey400, size: 20),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Text(
                   'No pinned notices at the moment',
                   style: TextStyle(color: AppColors.grey500, fontSize: 13),

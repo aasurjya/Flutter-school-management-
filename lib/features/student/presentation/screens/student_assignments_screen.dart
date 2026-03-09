@@ -222,7 +222,7 @@ class _AssignmentCard extends StatelessWidget {
                     color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.assignment,
                     color: AppColors.primary,
                     size: 24,
@@ -338,9 +338,9 @@ class _AssignmentDetailSheetState extends ConsumerState<_AssignmentDetailSheet> 
         children: [
           Container(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.primary,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,14 +366,14 @@ class _AssignmentDetailSheetState extends ConsumerState<_AssignmentDetailSheet> 
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.book, size: 16, color: Colors.white70),
+                    const Icon(Icons.book, size: 16, color: Colors.white70),
                     const SizedBox(width: 4),
                     Text(
                       widget.assignment.subjectName ?? 'Unknown Subject',
                       style: const TextStyle(color: Colors.white70),
                     ),
                     const SizedBox(width: 16),
-                    Icon(Icons.calendar_today, size: 16, color: Colors.white70),
+                    const Icon(Icons.calendar_today, size: 16, color: Colors.white70),
                     const SizedBox(width: 4),
                     Text(
                       'Due: ${DateFormat('MMM d, yyyy').format(widget.assignment.dueDate)}',
@@ -449,7 +449,7 @@ class _AssignmentDetailSheetState extends ConsumerState<_AssignmentDetailSheet> 
                   color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.check_circle, color: AppColors.success),
+                child: const Icon(Icons.check_circle, color: AppColors.success),
               ),
               const SizedBox(width: 12),
               Column(
@@ -506,7 +506,7 @@ class _AssignmentDetailSheetState extends ConsumerState<_AssignmentDetailSheet> 
                   color: AppColors.info.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.hourglass_empty, color: AppColors.info),
+                child: const Icon(Icons.hourglass_empty, color: AppColors.info),
               ),
               const SizedBox(width: 12),
               Column(

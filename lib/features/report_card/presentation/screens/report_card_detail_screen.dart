@@ -546,7 +546,7 @@ class _CommentsSection extends StatelessWidget {
                   children: [
                     Text(
                       c.commentTypeDisplay,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
                         fontSize: 13,
@@ -590,8 +590,8 @@ class _CommentsSection extends StatelessWidget {
 class _SignaturesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GlassCard(
-      padding: const EdgeInsets.all(20),
+    return const GlassCard(
+      padding: EdgeInsets.all(20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [

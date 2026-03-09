@@ -39,13 +39,13 @@ class _UpcomingExamsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: [
+      children: const [
         // Current/Ongoing Exam
-        const Text(
+        Text(
           'Ongoing',
           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         _ExamCard(
           title: 'Final Term Examination',
           dateRange: 'Dec 10 - Dec 20, 2024',
@@ -53,14 +53,14 @@ class _UpcomingExamsTab extends StatelessWidget {
           subjects: ['Mathematics', 'Physics', 'Chemistry', 'English'],
           classInfo: 'Class 10',
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
 
         // Upcoming Exams
-        const Text(
+        Text(
           'Upcoming',
           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         _ExamCard(
           title: 'Unit Test 3',
           dateRange: 'Jan 15 - Jan 18, 2025',
@@ -85,7 +85,7 @@ class _ResultsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: [
+      children: const [
         // Recent Results
         _ResultCard(
           examName: 'Mid Term Examination',
@@ -101,7 +101,7 @@ class _ResultsTab extends StatelessWidget {
             {'name': 'Computer Science', 'marks': 95, 'total': 100},
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         _ResultCard(
           examName: 'Unit Test 2',
           date: 'September 2024',
@@ -129,16 +129,16 @@ class _AnalyticsTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Performance Trend
-          GlassCard(
-            padding: const EdgeInsets.all(16),
+          const GlassCard(
+            padding: EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Performance Trend',
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 SizedBox(
                   height: 200,
                   child: Center(
@@ -146,15 +146,15 @@ class _AnalyticsTab extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.trending_up, size: 48, color: AppColors.success),
-                        const SizedBox(height: 8),
-                        const Text(
+                        SizedBox(height: 8),
+                        Text(
                           '+5.2% improvement',
                           style: TextStyle(
                             color: AppColors.success,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const Text(
+                        Text(
                           'compared to last term',
                           style: TextStyle(color: Colors.grey, fontSize: 12),
                         ),
@@ -173,25 +173,25 @@ class _AnalyticsTab extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
           const SizedBox(height: 12),
-          _SubjectPerformanceCard(
+          const _SubjectPerformanceCard(
             subject: 'Mathematics',
             score: 92,
             trend: 'up',
             comparison: 'Class Avg: 78%',
           ),
-          _SubjectPerformanceCard(
+          const _SubjectPerformanceCard(
             subject: 'Physics',
             score: 88,
             trend: 'up',
             comparison: 'Class Avg: 75%',
           ),
-          _SubjectPerformanceCard(
+          const _SubjectPerformanceCard(
             subject: 'Chemistry',
             score: 85,
             trend: 'down',
             comparison: 'Class Avg: 72%',
           ),
-          _SubjectPerformanceCard(
+          const _SubjectPerformanceCard(
             subject: 'English',
             score: 90,
             trend: 'same',

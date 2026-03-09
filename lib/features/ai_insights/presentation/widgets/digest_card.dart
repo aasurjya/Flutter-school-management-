@@ -73,8 +73,8 @@ class DigestCard extends StatelessWidget {
                   ),
                 ),
               if (digest.hasUrgentItems)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
+                const Padding(
+                  padding: EdgeInsets.only(left: 8),
                   child: Icon(
                     Icons.priority_high,
                     size: 18,

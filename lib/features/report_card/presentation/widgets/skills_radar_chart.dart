@@ -80,7 +80,7 @@ class SkillsRadarChart extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
                 getTitle: (index, _) {
-                  if (index >= _skillOrder.length) return RadarChartTitle(text: '');
+                  if (index >= _skillOrder.length) return const RadarChartTitle(text: '');
                   final key = _skillOrder[index];
                   return RadarChartTitle(
                     text: _skillLabels[key] ?? key,

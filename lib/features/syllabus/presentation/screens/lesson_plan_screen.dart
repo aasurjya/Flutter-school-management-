@@ -266,9 +266,10 @@ class LessonPlanScreen extends ConsumerWidget {
           ),
         );
         if (confirm == true && context.mounted) {
+          final nav = GoRouter.of(context);
           await repository.deleteLessonPlan(plan.id);
           ref.invalidate(lessonPlansProvider);
-          context.pop();
+          nav.pop();
         }
         break;
     }

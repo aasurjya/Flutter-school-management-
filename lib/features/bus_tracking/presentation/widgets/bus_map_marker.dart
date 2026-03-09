@@ -83,7 +83,7 @@ class BusMapMarker extends StatelessWidget {
               width: 6,
               height: 6,
               margin: const EdgeInsets.only(top: 2),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.success,
                 shape: BoxShape.circle,
               ),

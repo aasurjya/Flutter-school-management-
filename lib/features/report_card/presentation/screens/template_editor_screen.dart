@@ -154,7 +154,7 @@ class _TemplateEditorScreenState extends ConsumerState<TemplateEditorScreen> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _layout,
+                          initialValue: _layout,
                           decoration: const InputDecoration(
                             labelText: 'Layout',
                             border: OutlineInputBorder(),
@@ -177,7 +177,7 @@ class _TemplateEditorScreenState extends ConsumerState<TemplateEditorScreen> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _pageSize,
+                          initialValue: _pageSize,
                           decoration: const InputDecoration(
                             labelText: 'Page Size',
                             border: OutlineInputBorder(),
@@ -196,7 +196,7 @@ class _TemplateEditorScreenState extends ConsumerState<TemplateEditorScreen> {
                   const SizedBox(height: 16),
                   gradingScalesAsync.when(
                     data: (scales) => DropdownButtonFormField<String>(
-                      value: _gradingScaleId,
+                      initialValue: _gradingScaleId,
                       decoration: const InputDecoration(
                         labelText: 'Grading Scale',
                         border: OutlineInputBorder(),

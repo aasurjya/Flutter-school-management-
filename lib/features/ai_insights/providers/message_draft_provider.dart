@@ -7,7 +7,7 @@ final messageDraftProvider =
     FutureProvider.family<MessageDraft, MessageDraftRequest>(
   (ref, request) async {
     final aiTextGenerator = ref.watch(aiTextGeneratorProvider);
-    final parentName =
+    const parentName =
         'Parent'; // In production, fetch from student's parent record
 
     // Generate subject line based on type

@@ -335,7 +335,7 @@ class _RuleCard extends StatelessWidget {
               Switch(
                 value: rule.isActive,
                 onChanged: onToggle,
-                activeColor: AppColors.primary,
+                activeThumbColor: AppColors.primary,
               ),
             ],
           ),
@@ -515,7 +515,7 @@ class _RuleEditorSheetState extends State<_RuleEditorSheet> {
                   ?.copyWith(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           DropdownButtonFormField<TriggerEvent>(
-            value: _triggerEvent,
+            initialValue: _triggerEvent,
             decoration: const InputDecoration(
               hintText: 'Select trigger...',
             ),
@@ -591,7 +591,7 @@ class _RuleEditorSheetState extends State<_RuleEditorSheet> {
             activeColor: AppColors.primary,
           ),
           Center(
-            child: Text('${_delayMinutes} minutes',
+            child: Text('$_delayMinutes minutes',
                 style: theme.textTheme.bodySmall),
           ),
           const SizedBox(height: 16),
@@ -602,7 +602,7 @@ class _RuleEditorSheetState extends State<_RuleEditorSheet> {
             subtitle: const Text('Enable or disable this rule'),
             value: _isActive,
             onChanged: (v) => setState(() => _isActive = v),
-            activeColor: AppColors.primary,
+            activeThumbColor: AppColors.primary,
           ),
           const SizedBox(height: 24),
 

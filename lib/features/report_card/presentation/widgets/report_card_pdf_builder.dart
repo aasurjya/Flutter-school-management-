@@ -288,7 +288,7 @@ class ReportCardPdfBuilder {
           pw.Container(
             width: 48,
             height: 48,
-            decoration: pw.BoxDecoration(
+            decoration: const pw.BoxDecoration(
               shape: pw.BoxShape.circle,
               color: _primaryColor,
             ),
@@ -420,7 +420,7 @@ class ReportCardPdfBuilder {
       context: null,
       border: pw.TableBorder.all(color: _borderColor, width: 0.5),
       cellAlignment: pw.Alignment.center,
-      headerDecoration: pw.BoxDecoration(
+      headerDecoration: const pw.BoxDecoration(
         color: _primaryLight,
       ),
       headerStyle: pw.TextStyle(
@@ -605,7 +605,7 @@ class ReportCardPdfBuilder {
       context: null,
       border: pw.TableBorder.all(color: _borderColor, width: 0.5),
       cellAlignment: pw.Alignment.center,
-      headerDecoration: pw.BoxDecoration(color: _primaryLight),
+      headerDecoration: const pw.BoxDecoration(color: _primaryLight),
       headerStyle: pw.TextStyle(
         fontSize: 9,
         fontWeight: pw.FontWeight.bold,
@@ -662,7 +662,7 @@ class ReportCardPdfBuilder {
       context: null,
       border: pw.TableBorder.all(color: _borderColor, width: 0.5),
       cellAlignment: pw.Alignment.center,
-      headerDecoration: pw.BoxDecoration(color: _primaryLight),
+      headerDecoration: const pw.BoxDecoration(color: _primaryLight),
       headerStyle: pw.TextStyle(
         fontSize: 9,
         fontWeight: pw.FontWeight.bold,

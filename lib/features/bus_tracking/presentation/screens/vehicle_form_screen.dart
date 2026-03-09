@@ -166,7 +166,7 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _vehicleType,
+              initialValue: _vehicleType,
               decoration: const InputDecoration(
                 labelText: 'Vehicle Type',
                 prefixIcon: Icon(Icons.category),

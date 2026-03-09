@@ -35,7 +35,7 @@ class _AdmissionSettingsScreenState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.settings,
+                  const Icon(Icons.settings,
                       size: 64, color: AppColors.textTertiaryLight),
                   const SizedBox(height: 16),
                   Text(

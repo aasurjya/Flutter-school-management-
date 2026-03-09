@@ -135,7 +135,7 @@ class BusStatusCard extends StatelessWidget {
                           : Colors.grey,
                     ),
                   ] else ...[
-                    _MetricChip(
+                    const _MetricChip(
                       icon: Icons.gps_off,
                       label: 'No GPS data',
                       color: Colors.grey,

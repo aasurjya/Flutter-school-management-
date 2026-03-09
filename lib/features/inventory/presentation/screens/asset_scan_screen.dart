@@ -128,7 +128,7 @@ class _AssetScanScreenState extends ConsumerState<AssetScanScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
             const SizedBox(height: 12),
             Text(
               _errorMessage!,
@@ -251,9 +251,7 @@ class _AssetScanScreenState extends ConsumerState<AssetScanScreen> {
       }
 
       // Try as plain asset code
-      if (asset == null) {
-        asset = await repo.getAssetByCode(code);
-      }
+      asset ??= await repo.getAssetByCode(code);
 
       if (mounted) {
         if (asset != null) {
@@ -568,7 +566,7 @@ class _AssetFoundPanel extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.location_on_outlined,
                                     size: 12,
                                     color: AppColors.textTertiaryLight,

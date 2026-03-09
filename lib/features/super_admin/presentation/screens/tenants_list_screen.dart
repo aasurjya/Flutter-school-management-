@@ -145,7 +145,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _statusFilter,
+                  initialValue: _statusFilter,
                   decoration: InputDecoration(
                     labelText: 'Status',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -165,7 +165,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _planFilter,
+                  initialValue: _planFilter,
                   decoration: InputDecoration(
                     labelText: 'Plan',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),

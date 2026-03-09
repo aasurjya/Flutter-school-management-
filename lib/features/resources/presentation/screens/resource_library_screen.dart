@@ -874,7 +874,7 @@ class _UploadResourceSheetState extends ConsumerState<_UploadResourceSheet> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: _resourceType,
+                    initialValue: _resourceType,
                     decoration: const InputDecoration(
                       labelText: 'Resource Type',
                       border: OutlineInputBorder(),
@@ -941,7 +941,7 @@ class _UploadResourceSheetState extends ConsumerState<_UploadResourceSheet> {
                     ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: _selectedSubject,
+                    initialValue: _selectedSubject,
                     decoration: const InputDecoration(
                       labelText: 'Subject (Optional)',
                       border: OutlineInputBorder(),
@@ -960,7 +960,7 @@ class _UploadResourceSheetState extends ConsumerState<_UploadResourceSheet> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: _selectedClass,
+                    initialValue: _selectedClass,
                     decoration: const InputDecoration(
                       labelText: 'Class (Optional)',
                       border: OutlineInputBorder(),

@@ -196,20 +196,20 @@ class _ActiveAlertBanner extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Request Help'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Please provide your location:'),
-            const SizedBox(height: 16),
-            const TextField(
+            Text('Please provide your location:'),
+            SizedBox(height: 16),
+            TextField(
               decoration: InputDecoration(
                 labelText: 'Location',
                 hintText: 'e.g., Room 203, Building B',
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 8),
-            const TextField(
+            SizedBox(height: 8),
+            TextField(
               maxLines: 2,
               decoration: InputDecoration(
                 labelText: 'Additional Notes',

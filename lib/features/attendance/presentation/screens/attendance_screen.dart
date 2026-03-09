@@ -138,17 +138,17 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Monthly Summary
-          GlassCard(
-            padding: const EdgeInsets.all(20),
+          const GlassCard(
+            padding: EdgeInsets.all(20),
             gradient: AppColors.primaryGradient,
             child: Column(
               children: [
-                const Text(
+                Text(
                   'This Month\'s Attendance',
                   style: TextStyle(color: Colors.white70, fontSize: 14),
                 ),
-                const SizedBox(height: 8),
-                const Text(
+                SizedBox(height: 8),
+                Text(
                   '94.5%',
                   style: TextStyle(
                     color: Colors.white,
@@ -156,7 +156,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -258,7 +258,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: 'This Month',
+                  initialValue: 'This Month',
                   decoration: const InputDecoration(
                     labelText: 'Period',
                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -272,7 +272,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: 'All Classes',
+                  initialValue: 'All Classes',
                   decoration: const InputDecoration(
                     labelText: 'Class',
                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -288,7 +288,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
           const SizedBox(height: 24),
 
           // Summary Cards
-          Row(
+          const Row(
             children: [
               Expanded(
                 child: _ReportCard(
@@ -298,7 +298,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                   color: AppColors.success,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: _ReportCard(
                   title: 'Absent Today',

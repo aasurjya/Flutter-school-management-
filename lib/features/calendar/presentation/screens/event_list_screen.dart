@@ -65,7 +65,7 @@ class _EventListScreenState extends ConsumerState<EventListScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.error_outline,
+                    const Icon(Icons.error_outline,
                         size: 48, color: AppColors.error),
                     const SizedBox(height: 12),
                     Text('Failed to load events: $error'),
@@ -78,7 +78,7 @@ class _EventListScreenState extends ConsumerState<EventListScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.event_available,
                           size: 64,
                           color: AppColors.textTertiaryLight,

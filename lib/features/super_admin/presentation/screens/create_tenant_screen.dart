@@ -172,7 +172,7 @@ class _CreateTenantScreenState extends ConsumerState<CreateTenantScreen> {
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          value: _selectedCountry,
+          initialValue: _selectedCountry,
           decoration: const InputDecoration(labelText: 'Country', border: OutlineInputBorder()),
           items: const [
             DropdownMenuItem(value: 'India', child: Text('India')),
@@ -424,11 +424,28 @@ class _PlanCard extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Radio<String>(
-                      value: plan,
-                      groupValue: isSelected ? plan : '',
-                      onChanged: (_) => onTap(),
-                      activeColor: AppColors.primary,
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isSelected ? AppColors.primary : Colors.grey,
+                          width: 2,
+                        ),
+                      ),
+                      child: isSelected
+                          ? Center(
+                              child: Container(
+                                width: 12,
+                                height: 12,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            )
+                          : null,
                     ),
                     Expanded(
                       child: Column(

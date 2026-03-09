@@ -7,6 +7,7 @@ import '../../features/auth/providers/auth_provider.dart';
 import '../router/app_router.dart';
 import '../services/screen_capture_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/offline_banner.dart';
 
 /// Main shell with premium pill-style bottom navigation.
 class MainShell extends ConsumerStatefulWidget {
@@ -27,7 +28,12 @@ class _MainShellState extends ConsumerState<MainShell> {
     return Scaffold(
       body: RepaintBoundary(
         key: ScreenCaptureService.repaintKey,
-        child: widget.child,
+        child: Column(
+          children: [
+            const OfflineBanner(),
+            Expanded(child: widget.child),
+          ],
+        ),
       ),
       floatingActionButton: const _AiTutorFab(),
       bottomNavigationBar: _PremiumBottomNav(role: primaryRole),

@@ -1,4 +1,5 @@
 /// Notice Board Models
+library;
 
 enum NoticeCategory {
   academic,

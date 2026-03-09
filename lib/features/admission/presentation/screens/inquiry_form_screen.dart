@@ -213,7 +213,7 @@ class _InquiryFormScreenState extends ConsumerState<InquiryFormScreen> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<InquirySource>(
-                    value: _source,
+                    initialValue: _source,
                     decoration: const InputDecoration(
                       labelText: 'Source',
                       prefixIcon: Icon(Icons.source),
@@ -231,7 +231,7 @@ class _InquiryFormScreenState extends ConsumerState<InquiryFormScreen> {
                   if (isEditing) ...[
                     const SizedBox(height: 12),
                     DropdownButtonFormField<InquiryStatus>(
-                      value: _status,
+                      initialValue: _status,
                       decoration: const InputDecoration(
                         labelText: 'Status',
                         prefixIcon: Icon(Icons.flag),

@@ -52,7 +52,7 @@ class AttendanceCalendarWidget extends StatelessWidget {
         const SizedBox(height: 12),
 
         // Legend
-        Wrap(
+        const Wrap(
           spacing: 16,
           runSpacing: 4,
           children: [
@@ -159,9 +159,9 @@ class _DayCell extends StatelessWidget {
         return AppColors.success;
       case StaffAttendanceStatus.absent:
         return AppColors.error;
-      case StaffAttendanceStatus.half_day:
+      case StaffAttendanceStatus.halfDay:
         return AppColors.warning;
-      case StaffAttendanceStatus.on_leave:
+      case StaffAttendanceStatus.onLeave:
         return AppColors.info;
       case StaffAttendanceStatus.holiday:
         return AppColors.textTertiaryLight;

@@ -166,7 +166,7 @@ class _CertificateListScreenState
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.description_outlined,
+                        const Icon(Icons.description_outlined,
                             size: 64,
                             color: AppColors.textTertiaryLight),
                         const SizedBox(height: 16),

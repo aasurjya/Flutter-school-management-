@@ -676,7 +676,7 @@ class _CourseBuilderScreenState extends ConsumerState<CourseBuilderScreen> {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<ContentType>(
-                  value: selectedType,
+                  initialValue: selectedType,
                   decoration:
                       const InputDecoration(labelText: 'Content Type'),
                   items: ContentType.values

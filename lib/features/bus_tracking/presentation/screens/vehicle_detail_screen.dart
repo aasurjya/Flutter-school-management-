@@ -67,12 +67,12 @@ class VehicleDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
 
                 // Recent trips
-                _SectionHeader(title: 'RECENT TRIPS'),
+                const _SectionHeader(title: 'RECENT TRIPS'),
                 const SizedBox(height: 8),
                 tripsAsync.when(
                   data: (trips) {
                     if (trips.isEmpty) {
-                      return _EmptySection(message: 'No trips recorded yet');
+                      return const _EmptySection(message: 'No trips recorded yet');
                     }
                     return Column(
                       children: trips.take(5).map((trip) {
@@ -88,12 +88,12 @@ class VehicleDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
 
                 // Location history summary
-                _SectionHeader(title: 'LOCATION HISTORY (2H)'),
+                const _SectionHeader(title: 'LOCATION HISTORY (2H)'),
                 const SizedBox(height: 8),
                 historyAsync.when(
                   data: (pings) {
                     if (pings.isEmpty) {
-                      return _EmptySection(message: 'No location data');
+                      return const _EmptySection(message: 'No location data');
                     }
                     return Card(
                       child: Padding(
@@ -269,7 +269,7 @@ class _LocationCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.location_on, size: 20, color: AppColors.error),
+                const Icon(Icons.location_on, size: 20, color: AppColors.error),
                 const SizedBox(width: 8),
                 Text(
                   'CURRENT LOCATION',

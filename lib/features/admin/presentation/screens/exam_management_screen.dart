@@ -476,7 +476,7 @@ class _CreateExamSheetState extends ConsumerState<_CreateExamSheet> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _examType,
+                      initialValue: _examType,
                       decoration: const InputDecoration(labelText: 'Exam Type', border: OutlineInputBorder()),
                       items: const [
                         DropdownMenuItem(value: 'unit_test', child: Text('Unit Test')),

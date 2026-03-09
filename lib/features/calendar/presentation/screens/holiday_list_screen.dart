@@ -50,7 +50,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.beach_access,
+                  const Icon(Icons.beach_access,
                       size: 64, color: AppColors.textTertiaryLight),
                   const SizedBox(height: 12),
                   Text(
@@ -91,7 +91,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.beach_access,
+                const Icon(Icons.beach_access,
                     size: 64, color: AppColors.textTertiaryLight),
                 const SizedBox(height: 12),
                 Text(
@@ -245,7 +245,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
                   if (holiday.totalDays > 1)
                     Text(
                       '${holiday.totalDays}d',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppColors.textSecondaryLight,
                         fontSize: 10,
                       ),
@@ -446,7 +446,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<HolidayType>(
-                      value: type,
+                      initialValue: type,
                       decoration: const InputDecoration(
                         labelText: 'Type',
                       ),
@@ -591,6 +591,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
 
   Future<void> _confirmDeleteHoliday(
       BuildContext context, Holiday holiday) async {
+    final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -618,13 +619,13 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
         await repo.deleteHoliday(holiday.id);
         ref.invalidate(holidaysProvider(_academicYearId!));
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          messenger.showSnackBar(
             const SnackBar(content: Text('Holiday deleted')),
           );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          messenger.showSnackBar(
             SnackBar(content: Text('Error: $e')),
           );
         }

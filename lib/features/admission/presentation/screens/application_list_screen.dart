@@ -77,7 +77,7 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.description,
+                      const Icon(Icons.description,
                           size: 64, color: AppColors.textTertiaryLight),
                       const SizedBox(height: 16),
                       Text(
@@ -221,7 +221,7 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen>
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.school,
+                const Icon(Icons.school,
                     size: 14, color: AppColors.textTertiaryLight),
                 const SizedBox(width: 4),
                 Expanded(

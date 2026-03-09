@@ -446,6 +446,7 @@ class _IncidentDetailScreenState extends ConsumerState<IncidentDetailScreen> {
     final notesController = TextEditingController();
     DateTime? startDate;
     DateTime? endDate;
+    final messenger = ScaffoldMessenger.of(context);
 
     showDialog(
       context: context,
@@ -459,7 +460,7 @@ class _IncidentDetailScreenState extends ConsumerState<IncidentDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DropdownButtonFormField<BehaviorActionType>(
-                    value: selectedType,
+                    initialValue: selectedType,
                     decoration: const InputDecoration(
                       labelText: 'Action Type',
                       border: OutlineInputBorder(),
@@ -564,11 +565,17 @@ class _IncidentDetailScreenState extends ConsumerState<IncidentDetailScreen> {
                       incidentDetailProvider(widget.incidentId),
                     );
                     if (mounted) {
-                      context.showSuccessSnackBar('Action added');
+                      messenger.showSnackBar(const SnackBar(
+                        content: Text('Action added'),
+                        backgroundColor: AppColors.success,
+                      ));
                     }
                   } catch (e) {
                     if (mounted) {
-                      context.showErrorSnackBar('Failed: $e');
+                      messenger.showSnackBar(SnackBar(
+                        content: Text('Failed: $e'),
+                        backgroundColor: AppColors.error,
+                      ));
                     }
                   }
                 },

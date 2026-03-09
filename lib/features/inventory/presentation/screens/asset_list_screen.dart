@@ -247,7 +247,7 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.inventory_2_outlined,
                           size: 64,
                           color: AppColors.textTertiaryLight,

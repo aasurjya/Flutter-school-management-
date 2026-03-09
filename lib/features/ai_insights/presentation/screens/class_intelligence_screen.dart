@@ -121,7 +121,7 @@ class _ClassIntelligenceScreenState
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.bar_chart,
+                            const Icon(Icons.bar_chart,
                                 color: AppColors.primary, size: 20),
                             const SizedBox(width: 8),
                             Text(
@@ -239,7 +239,7 @@ class _ClassIntelligenceScreenState
         children: [
           Row(
             children: [
-              Icon(Icons.shield_outlined, color: AppColors.error, size: 20),
+              const Icon(Icons.shield_outlined, color: AppColors.error, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Risk Distribution',

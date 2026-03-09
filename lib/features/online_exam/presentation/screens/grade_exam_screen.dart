@@ -168,7 +168,7 @@ class _StudentInfoCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${attempt.totalMarksObtained.toStringAsFixed(1)}',
+                  attempt.totalMarksObtained.toStringAsFixed(1),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

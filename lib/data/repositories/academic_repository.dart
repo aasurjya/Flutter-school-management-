@@ -1,10 +1,9 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/academic.dart';
 import 'base_repository.dart';
 
 class AcademicRepository extends BaseRepository {
-  AcademicRepository(SupabaseClient client) : super(client);
+  AcademicRepository(super.client);
 
   Future<List<SchoolClass>> getClasses() async {
     final response = await client

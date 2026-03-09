@@ -120,7 +120,7 @@ class _MiniCalendarState extends State<MiniCalendar> {
     // First day of the month
     final firstDay = _currentMonth;
     // Day of week (1=Mon...7=Sun)
-    int startWeekday = firstDay.weekday; // 1-7
+    final int startWeekday = firstDay.weekday; // 1-7
     // Last day of month
     final lastDay =
         DateTime(_currentMonth.year, _currentMonth.month + 1, 0);

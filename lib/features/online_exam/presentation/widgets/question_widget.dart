@@ -248,7 +248,7 @@ class _MCQInput extends StatelessWidget {
     final options = question.optionEntries;
 
     // Fallback if optionEntries is empty
-    List<MapEntry<String, String>> displayOptions = options;
+    final List<MapEntry<String, String>> displayOptions = options;
     if (displayOptions.isEmpty) {
       // Try raw options
       for (int i = 0; i < question.options.length; i++) {
@@ -762,7 +762,7 @@ class _MatchPairsInput extends StatelessWidget {
                           child: Text(matched ?? 'Not matched'),
                         )
                       : DropdownButtonFormField<String>(
-                          value: matched,
+                          initialValue: matched,
                           decoration: InputDecoration(
                             contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 8),

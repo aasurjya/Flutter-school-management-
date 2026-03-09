@@ -360,7 +360,7 @@ class _GradesSection extends StatelessWidget {
                   top: Radius.circular(8),
                 ),
               ),
-              children: [
+              children: const [
                 _TableHeader('Subject'),
                 _TableHeader('Marks'),
                 _TableHeader('Max'),
@@ -663,7 +663,7 @@ class _AttendanceCard extends StatelessWidget {
                 ),
                 TextSpan(
                   text: total,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     color: Colors.grey,
                   ),
@@ -754,7 +754,7 @@ class _ReportFooter extends StatelessWidget {
       children: [
         const Divider(),
         const SizedBox(height: 16),
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _SignatureBlock(label: 'Class Teacher'),

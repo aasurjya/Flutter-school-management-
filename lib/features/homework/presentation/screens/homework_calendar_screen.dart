@@ -243,7 +243,7 @@ class _HomeworkCalendarScreenState
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.event_available,
+                            const Icon(Icons.event_available,
                                 size: 48,
                                 color: AppColors.textSecondaryLight),
                             const SizedBox(height: 8),
@@ -307,7 +307,7 @@ class _HomeworkCalendarScreenState
                                       ],
                                     ),
                                   ),
-                                  Icon(
+                                  const Icon(
                                     Icons.chevron_right,
                                     color: AppColors.textSecondaryLight,
                                   ),

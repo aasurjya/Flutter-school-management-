@@ -122,7 +122,7 @@ class _SmsSettingsScreenState extends ConsumerState<SmsSettingsScreen> {
                 Switch(
                   value: _isActive,
                   onChanged: (v) => setState(() => _isActive = v),
-                  activeColor: AppColors.primary,
+                  activeThumbColor: AppColors.primary,
                 ),
               ],
             ),

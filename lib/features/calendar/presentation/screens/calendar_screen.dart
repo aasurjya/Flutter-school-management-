@@ -103,7 +103,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline,
+              const Icon(Icons.error_outline,
                   size: 48, color: AppColors.error),
               const SizedBox(height: 12),
               Text('Failed to load events',
@@ -162,7 +162,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         .read(selectedEventTypeFilterProvider.notifier)
                         .state = null;
                   },
-                  child: Icon(Icons.close, size: 18, color: AppColors.textSecondaryLight),
+                  child: const Icon(Icons.close, size: 18, color: AppColors.textSecondaryLight),
                 ),
               ],
             ),
@@ -207,7 +207,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               color: AppColors.primary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            todayTextStyle: TextStyle(
+            todayTextStyle: const TextStyle(
               color: AppColors.primary,
               fontWeight: FontWeight.w600,
             ),
@@ -236,7 +236,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            formatButtonTextStyle: TextStyle(
+            formatButtonTextStyle: const TextStyle(
               color: AppColors.primary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -339,7 +339,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.event_available,
                         size: 48,
                         color: AppColors.textTertiaryLight,

@@ -95,7 +95,7 @@ class _TeacherTimetableScreenState extends ConsumerState<TeacherTimetableScreen>
       color: AppColors.primary.withValues(alpha: 0.05),
       child: Row(
         children: [
-          Icon(Icons.calendar_today, color: AppColors.primary, size: 20),
+          const Icon(Icons.calendar_today, color: AppColors.primary, size: 20),
           const SizedBox(width: 12),
           Text(DateFormat('EEEE, MMMM d').format(DateTime.now()), style: const TextStyle(fontWeight: FontWeight.w500)),
           const Spacer(),

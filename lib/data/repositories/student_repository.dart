@@ -256,7 +256,7 @@ class StudentRepository extends BaseRepository {
 
   Future<int> getStudentCount({String? sectionId, String? classId}) async {
     try {
-      var query = client
+      final query = client
           .from('students')
           .select('id')
           .eq('tenant_id', requireTenantId)

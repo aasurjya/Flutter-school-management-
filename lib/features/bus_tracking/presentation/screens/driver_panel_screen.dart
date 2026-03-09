@@ -165,7 +165,7 @@ class _DriverPanelScreenState extends ConsumerState<DriverPanelScreen> {
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
-                        value: _selectedVehicleId,
+                        initialValue: _selectedVehicleId,
                         decoration: const InputDecoration(
                           prefixIcon: Icon(Icons.directions_bus),
                           hintText: 'Choose your bus',

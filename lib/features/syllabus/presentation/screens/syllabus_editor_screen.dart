@@ -281,7 +281,7 @@ class _SyllabusEditorScreenState extends ConsumerState<SyllabusEditorScreen> {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Icon(Icons.library_books, color: AppColors.primary, size: 28),
+          const Icon(Icons.library_books, color: AppColors.primary, size: 28),
           const SizedBox(width: 12),
           Text(
             '$totalTopics topics',
@@ -290,7 +290,7 @@ class _SyllabusEditorScreenState extends ConsumerState<SyllabusEditorScreen> {
             ),
           ),
           const SizedBox(width: 16),
-          Icon(Icons.schedule, color: AppColors.textSecondaryLight, size: 20),
+          const Icon(Icons.schedule, color: AppColors.textSecondaryLight, size: 20),
           const SizedBox(width: 4),
           Text(
             '$totalPeriods periods estimated',

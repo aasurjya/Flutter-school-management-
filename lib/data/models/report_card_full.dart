@@ -1,6 +1,7 @@
 /// Complete Report Card models for the Report Card Generator module.
 /// Named `report_card_full.dart` to avoid conflicts with existing
 /// `report_card.dart` which has simpler models used by the basic reports feature.
+library;
 
 // ---------------------------------------------------------------------------
 // Grading Scale

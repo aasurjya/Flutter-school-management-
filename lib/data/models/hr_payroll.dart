@@ -12,17 +12,17 @@ enum PayrollRunStatus { draft, processing, completed, approved }
 
 enum PayrollPaymentStatus { pending, paid, failed }
 
-enum StaffAttendanceStatus { present, absent, half_day, on_leave, holiday }
+enum StaffAttendanceStatus { present, absent, halfDay, onLeave, holiday }
 
 enum TaxDeclarationStatus { draft, submitted, verified }
 
 enum StaffDocumentType {
   resume,
-  id_proof,
-  address_proof,
+  idProof,
+  addressProof,
   qualification,
-  experience_letter,
-  offer_letter,
+  experienceLetter,
+  offerLetter,
   contract,
 }
 
@@ -858,9 +858,9 @@ class StaffAttendanceDaily {
         return 'Present';
       case StaffAttendanceStatus.absent:
         return 'Absent';
-      case StaffAttendanceStatus.half_day:
+      case StaffAttendanceStatus.halfDay:
         return 'Half Day';
-      case StaffAttendanceStatus.on_leave:
+      case StaffAttendanceStatus.onLeave:
         return 'On Leave';
       case StaffAttendanceStatus.holiday:
         return 'Holiday';
@@ -872,9 +872,9 @@ class StaffAttendanceDaily {
       case 'absent':
         return StaffAttendanceStatus.absent;
       case 'half_day':
-        return StaffAttendanceStatus.half_day;
+        return StaffAttendanceStatus.halfDay;
       case 'on_leave':
-        return StaffAttendanceStatus.on_leave;
+        return StaffAttendanceStatus.onLeave;
       case 'holiday':
         return StaffAttendanceStatus.holiday;
       default:
@@ -1080,15 +1080,15 @@ class StaffDocument {
     switch (documentType) {
       case StaffDocumentType.resume:
         return 'Resume';
-      case StaffDocumentType.id_proof:
+      case StaffDocumentType.idProof:
         return 'ID Proof';
-      case StaffDocumentType.address_proof:
+      case StaffDocumentType.addressProof:
         return 'Address Proof';
       case StaffDocumentType.qualification:
         return 'Qualification';
-      case StaffDocumentType.experience_letter:
+      case StaffDocumentType.experienceLetter:
         return 'Experience Letter';
-      case StaffDocumentType.offer_letter:
+      case StaffDocumentType.offerLetter:
         return 'Offer Letter';
       case StaffDocumentType.contract:
         return 'Contract';
@@ -1098,15 +1098,15 @@ class StaffDocument {
   static StaffDocumentType _parseDocumentType(String? value) {
     switch (value) {
       case 'id_proof':
-        return StaffDocumentType.id_proof;
+        return StaffDocumentType.idProof;
       case 'address_proof':
-        return StaffDocumentType.address_proof;
+        return StaffDocumentType.addressProof;
       case 'qualification':
         return StaffDocumentType.qualification;
       case 'experience_letter':
-        return StaffDocumentType.experience_letter;
+        return StaffDocumentType.experienceLetter;
       case 'offer_letter':
-        return StaffDocumentType.offer_letter;
+        return StaffDocumentType.offerLetter;
       case 'contract':
         return StaffDocumentType.contract;
       default:

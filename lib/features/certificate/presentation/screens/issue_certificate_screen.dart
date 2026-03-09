@@ -242,7 +242,7 @@ class _IssueCertificateScreenState
                   templatesAsync.when(
                     data: (templates) {
                       return DropdownButtonFormField<CertificateTemplate>(
-                        value: _selectedTemplate,
+                        initialValue: _selectedTemplate,
                         decoration: const InputDecoration(
                           labelText: 'Certificate Template *',
                           prefixIcon: Icon(Icons.design_services),

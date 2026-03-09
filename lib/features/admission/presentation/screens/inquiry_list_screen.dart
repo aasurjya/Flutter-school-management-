@@ -70,7 +70,7 @@ class _InquiryListScreenState extends ConsumerState<InquiryListScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.contact_mail,
+                        const Icon(Icons.contact_mail,
                             size: 64, color: AppColors.textTertiaryLight),
                         const SizedBox(height: 16),
                         Text(
@@ -217,14 +217,14 @@ class _InquiryListScreenState extends ConsumerState<InquiryListScreen> {
           const SizedBox(height: 10),
           Row(
             children: [
-              Icon(Icons.phone, size: 14, color: AppColors.textTertiaryLight),
+              const Icon(Icons.phone, size: 14, color: AppColors.textTertiaryLight),
               const SizedBox(width: 4),
               Text(
                 inquiry.phone,
                 style: theme.textTheme.bodySmall,
               ),
               const SizedBox(width: 16),
-              Icon(Icons.source, size: 14, color: AppColors.textTertiaryLight),
+              const Icon(Icons.source, size: 14, color: AppColors.textTertiaryLight),
               const SizedBox(width: 4),
               Text(
                 inquiry.source.label,

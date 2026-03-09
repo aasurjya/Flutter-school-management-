@@ -138,7 +138,7 @@ class LmsDashboardScreen extends ConsumerWidget {
                       child: Center(
                         child: Column(
                           children: [
-                            Icon(Icons.school_outlined,
+                            const Icon(Icons.school_outlined,
                                 size: 48,
                                 color: AppColors.textTertiaryLight),
                             const SizedBox(height: 12),

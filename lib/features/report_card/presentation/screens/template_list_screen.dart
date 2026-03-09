@@ -226,13 +226,13 @@ class _TemplateCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
                         Icon(Icons.delete_outline,
                             size: 18, color: AppColors.error),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Text('Delete',
                             style: TextStyle(color: AppColors.error)),
                       ],

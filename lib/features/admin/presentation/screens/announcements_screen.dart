@@ -201,6 +201,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
       builder: (context) => _EditAnnouncementSheet(
         announcement: announcement,
         onSave: (title, content, priority) async {
+          final messenger = ScaffoldMessenger.of(context);
           await ref.read(announcementsNotifierProvider.notifier).updateAnnouncement(
             announcement.id,
             {
@@ -210,7 +211,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
             },
           );
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            messenger.showSnackBar(
               const SnackBar(content: Text('Announcement updated')),
             );
           }
@@ -466,9 +467,9 @@ class _CreateAnnouncementSheetState extends State<_CreateAnnouncementSheet> {
             ),
             child: Row(
               children: [
-                Text(
+                const Text(
                   'New Announcement',
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: () => Navigator.pop(context)),
@@ -497,7 +498,7 @@ class _CreateAnnouncementSheetState extends State<_CreateAnnouncementSheet> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _category,
+                      initialValue: _category,
                       decoration: const InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
                       items: const [
                         DropdownMenuItem(value: 'general', child: Text('General')),
@@ -680,7 +681,7 @@ class _EditAnnouncementSheetState extends State<_EditAnnouncementSheet> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _priority,
+                      initialValue: _priority,
                       decoration: const InputDecoration(labelText: 'Priority', border: OutlineInputBorder()),
                       items: const [
                         DropdownMenuItem(value: 'low', child: Text('Low')),

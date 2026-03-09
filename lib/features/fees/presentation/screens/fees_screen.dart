@@ -81,7 +81,7 @@ class _AdminOverview extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Summary Cards
-          Row(
+          const Row(
             children: [
               Expanded(
                 child: GlassStatCard(
@@ -92,7 +92,7 @@ class _AdminOverview extends StatelessWidget {
                   subtitle: 'This month',
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: GlassStatCard(
                   title: 'Pending',
@@ -105,7 +105,7 @@ class _AdminOverview extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
+          const Row(
             children: [
               Expanded(
                 child: GlassStatCard(
@@ -116,7 +116,7 @@ class _AdminOverview extends StatelessWidget {
                   subtitle: '56 students',
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: GlassStatCard(
                   title: 'Today',
@@ -258,8 +258,8 @@ class _ParentOverview extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
           const SizedBox(height: 12),
-          GlassCard(
-            padding: const EdgeInsets.all(16),
+          const GlassCard(
+            padding: EdgeInsets.all(16),
             child: Column(
               children: [
                 _FeeBreakdownItem(
@@ -267,23 +267,23 @@ class _ParentOverview extends StatelessWidget {
                   amount: '₹20,000',
                   status: 'pending',
                 ),
-                const Divider(height: 24),
+                Divider(height: 24),
                 _FeeBreakdownItem(
                   label: 'Transport Fee',
                   amount: '₹3,000',
                   status: 'pending',
                 ),
-                const Divider(height: 24),
+                Divider(height: 24),
                 _FeeBreakdownItem(
                   label: 'Activity Fee',
                   amount: '₹2,000',
                   status: 'pending',
                 ),
-                const Divider(height: 24),
+                Divider(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Total',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -358,7 +358,7 @@ class _CollectionTab extends StatelessWidget {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: 'This Month',
+                  initialValue: 'This Month',
                   decoration: const InputDecoration(
                     labelText: 'Period',
                     contentPadding:
@@ -373,7 +373,7 @@ class _CollectionTab extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: 'All Classes',
+                  initialValue: 'All Classes',
                   decoration: const InputDecoration(
                     labelText: 'Class',
                     contentPadding:
@@ -408,25 +408,25 @@ class _CollectionTab extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _CollectionRow(
+                const _CollectionRow(
                   label: 'Total Expected',
                   amount: '₹62.5L',
                   color: AppColors.info,
                 ),
                 const SizedBox(height: 12),
-                _CollectionRow(
+                const _CollectionRow(
                   label: 'Collected',
                   amount: '₹45.2L',
                   color: AppColors.success,
                 ),
                 const SizedBox(height: 12),
-                _CollectionRow(
+                const _CollectionRow(
                   label: 'Pending',
                   amount: '₹12.8L',
                   color: AppColors.warning,
                 ),
                 const SizedBox(height: 12),
-                _CollectionRow(
+                const _CollectionRow(
                   label: 'Overdue',
                   amount: '₹4.5L',
                   color: AppColors.error,

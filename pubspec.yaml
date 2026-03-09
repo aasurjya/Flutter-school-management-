@@ -9,7 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+  flutter_localizations:
+    sdk: flutter
+
   # State Management
   flutter_riverpod: ^2.4.9
 
@@ -51,6 +53,7 @@ dependencies:
   qr_flutter: ^4.1.0
   mobile_scanner: ^4.0.0
   
+  freezed_annotation: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -64,9 +67,9 @@ dev_dependencies:
   riverpod_generator: ^2.3.9
   json_serializable: ^6.7.1
   freezed: ^2.4.6
-  freezed_annotation: ^2.4.1
 
 flutter:
+  generate: true
   uses-material-design: true
   
   assets:

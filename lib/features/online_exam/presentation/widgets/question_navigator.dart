@@ -65,14 +65,14 @@ class QuestionNavigator extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
-                    _LegendDot(
+                    const _LegendDot(
                         color: AppColors.success, label: 'Answered'),
                     const SizedBox(width: 12),
                     _LegendDot(
                         color: theme.colorScheme.primary,
                         label: 'Current'),
                     const SizedBox(width: 12),
-                    _LegendDot(
+                    const _LegendDot(
                         color: AppColors.warning, label: 'Flagged'),
                     const SizedBox(width: 12),
                     _LegendDot(

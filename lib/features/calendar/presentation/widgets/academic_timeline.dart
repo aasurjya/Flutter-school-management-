@@ -70,7 +70,7 @@ class AcademicTimeline extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              const Icon(
                 Icons.event_note,
                 size: 48,
                 color: AppColors.textTertiaryLight,
@@ -179,7 +179,7 @@ class AcademicTimeline extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.calendar_today,
                             size: 13,
                             color: AppColors.textSecondaryLight,

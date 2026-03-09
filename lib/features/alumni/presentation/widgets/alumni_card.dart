@@ -59,8 +59,8 @@ class AlumniCard extends StatelessWidget {
                       ),
                     ),
                     if (alumni.isVerified)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 4),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 4),
                         child: Icon(
                           Icons.verified,
                           size: 16,
@@ -100,7 +100,7 @@ class AlumniCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.school_outlined,
                       size: 14,
                       color: AppColors.textTertiaryLight,
@@ -114,7 +114,7 @@ class AlumniCard extends StatelessWidget {
                     ),
                     if (alumni.locationCity != null) ...[
                       const SizedBox(width: 12),
-                      Icon(
+                      const Icon(
                         Icons.location_on_outlined,
                         size: 14,
                         color: AppColors.textTertiaryLight,
@@ -137,7 +137,7 @@ class AlumniCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Icon(
+          const Icon(
             Icons.chevron_right,
             color: AppColors.textTertiaryLight,
           ),

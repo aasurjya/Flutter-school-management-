@@ -134,7 +134,7 @@ class _AlumniEventsScreenState extends ConsumerState<AlumniEventsScreen>
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<AlumniEventType>(
-                  value: selectedType,
+                  initialValue: selectedType,
                   decoration: const InputDecoration(
                     labelText: 'Event Type',
                     border: OutlineInputBorder(),
@@ -263,7 +263,7 @@ class _EventList extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.event_busy,
+                const Icon(Icons.event_busy,
                     size: 64, color: AppColors.textTertiaryLight),
                 const SizedBox(height: 16),
                 Text(

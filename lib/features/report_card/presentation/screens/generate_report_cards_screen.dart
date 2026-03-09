@@ -70,7 +70,7 @@ class _GenerateReportCardsScreenState
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.auto_awesome, color: AppColors.primary),
+                      const Icon(Icons.auto_awesome, color: AppColors.primary),
                       const SizedBox(width: 12),
                       Text(
                         'Generation Settings',
@@ -86,7 +86,7 @@ class _GenerateReportCardsScreenState
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedAcademicYear,
+                          initialValue: _selectedAcademicYear,
                           decoration: const InputDecoration(
                             labelText: 'Academic Year *',
                             border: OutlineInputBorder(),
@@ -104,7 +104,7 @@ class _GenerateReportCardsScreenState
                       const SizedBox(width: 16),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedTerm,
+                          initialValue: _selectedTerm,
                           decoration: const InputDecoration(
                             labelText: 'Term *',
                             border: OutlineInputBorder(),
@@ -130,7 +130,7 @@ class _GenerateReportCardsScreenState
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedClass,
+                          initialValue: _selectedClass,
                           decoration: const InputDecoration(
                             labelText: 'Class *',
                             border: OutlineInputBorder(),
@@ -153,7 +153,7 @@ class _GenerateReportCardsScreenState
                       const SizedBox(width: 16),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedSection,
+                          initialValue: _selectedSection,
                           decoration: const InputDecoration(
                             labelText: 'Section *',
                             border: OutlineInputBorder(),
@@ -177,7 +177,7 @@ class _GenerateReportCardsScreenState
                   // Template
                   templatesAsync.when(
                     data: (templates) => DropdownButtonFormField<String>(
-                      value: _selectedTemplate,
+                      initialValue: _selectedTemplate,
                       decoration: const InputDecoration(
                         labelText: 'Report Template *',
                         border: OutlineInputBorder(),

@@ -110,7 +110,7 @@ class _MaintenanceListTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.build_outlined,
+                const Icon(Icons.build_outlined,
                     size: 64, color: AppColors.textTertiaryLight),
                 const SizedBox(height: 16),
                 Text(
@@ -238,7 +238,7 @@ class _MaintenanceListTab extends ConsumerWidget {
                       ),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today,
+                        const Icon(Icons.calendar_today,
                             size: 14,
                             color: AppColors.textTertiaryLight),
                         const SizedBox(width: 4),
@@ -385,7 +385,7 @@ class _NewMaintenanceTabState
             // Asset selection
             assetsAsync.when(
               data: (assets) => DropdownButtonFormField<String>(
-                value: _selectedAssetId,
+                initialValue: _selectedAssetId,
                 decoration: const InputDecoration(
                   labelText: 'Select Asset *',
                   prefixIcon: Icon(Icons.inventory_2_outlined),
@@ -408,7 +408,7 @@ class _NewMaintenanceTabState
 
             // Type
             DropdownButtonFormField<MaintenanceType>(
-              value: _maintenanceType,
+              initialValue: _maintenanceType,
               decoration: const InputDecoration(
                 labelText: 'Maintenance Type *',
                 prefixIcon: Icon(Icons.build_outlined),

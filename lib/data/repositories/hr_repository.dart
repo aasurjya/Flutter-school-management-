@@ -674,10 +674,10 @@ class HRRepository extends BaseRepository {
         case StaffAttendanceStatus.absent:
           absent++;
           break;
-        case StaffAttendanceStatus.half_day:
+        case StaffAttendanceStatus.halfDay:
           halfDay++;
           break;
-        case StaffAttendanceStatus.on_leave:
+        case StaffAttendanceStatus.onLeave:
           onLeave++;
           break;
         case StaffAttendanceStatus.holiday:

@@ -87,20 +87,20 @@ class _EarlyWarningDashboardScreenState
         ],
         body: TabBarView(
           controller: _tabController,
-          children: [
+          children: const [
             // All alerts
-            _AlertsTab(filter: const AlertsFilter()),
+            _AlertsTab(filter: AlertsFilter()),
             // Critical only
             _AlertsTab(
-              filter: const AlertsFilter(severity: 'critical'),
+              filter: AlertsFilter(severity: 'critical'),
             ),
             // Warning only
             _AlertsTab(
-              filter: const AlertsFilter(severity: 'warning'),
+              filter: AlertsFilter(severity: 'warning'),
             ),
             // Info only
             _AlertsTab(
-              filter: const AlertsFilter(severity: 'info'),
+              filter: AlertsFilter(severity: 'info'),
             ),
           ],
         ),
@@ -153,7 +153,7 @@ class _AlertsTab extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.check_circle_outline,
                     size: 48,
                     color: AppColors.success,

@@ -190,7 +190,7 @@ class NoticeCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.schedule,
+                    const Icon(Icons.schedule,
                         size: 12, color: AppColors.warning),
                     const SizedBox(width: 4),
                     Text(

@@ -176,11 +176,11 @@ class _EmptyState extends StatelessWidget {
                 ?.copyWith(color: Colors.grey),
           ),
           const SizedBox(height: 24),
-          _SuggestionChip(label: 'Explain what I\'m looking at'),
+          const _SuggestionChip(label: 'Explain what I\'m looking at'),
           const SizedBox(height: 8),
-          _SuggestionChip(label: 'Help me understand this'),
+          const _SuggestionChip(label: 'Help me understand this'),
           const SizedBox(height: 8),
-          _SuggestionChip(label: 'What should I do next?'),
+          const _SuggestionChip(label: 'What should I do next?'),
         ],
       ),
     );
@@ -219,10 +219,10 @@ class _MessageBubble extends StatelessWidget {
             isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isUser) ...[
-            CircleAvatar(
+            const CircleAvatar(
               radius: 14,
               backgroundColor: AppColors.primary,
-              child: const Icon(Icons.auto_awesome,
+              child: Icon(Icons.auto_awesome,
                   size: 14, color: Colors.white),
             ),
             const SizedBox(width: 8),
@@ -280,10 +280,10 @@ class _TypingIndicator extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: Row(
         children: [
-          CircleAvatar(
+          const CircleAvatar(
             radius: 14,
             backgroundColor: AppColors.primary,
-            child: const Icon(Icons.auto_awesome,
+            child: Icon(Icons.auto_awesome,
                 size: 14, color: Colors.white),
           ),
           const SizedBox(width: 8),
@@ -299,13 +299,13 @@ class _TypingIndicator extends StatelessWidget {
                 bottomLeft: Radius.circular(4),
               ),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 _Dot(delay: 0),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 _Dot(delay: 150),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 _Dot(delay: 300),
               ],
             ),
@@ -357,7 +357,7 @@ class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
       child: Container(
         width: 7,
         height: 7,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.primary,
           shape: BoxShape.circle,
         ),
@@ -431,8 +431,8 @@ class _InputBar extends StatelessWidget {
                         color: AppColors.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
+                      child: const Padding(
+                        padding: EdgeInsets.all(10),
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           color: AppColors.primary,

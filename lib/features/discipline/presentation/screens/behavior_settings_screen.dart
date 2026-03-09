@@ -47,7 +47,7 @@ class _BehaviorSettingsScreenState
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
+        children: const [
           _CategoryList(type: BehaviorCategoryType.negative),
           _CategoryList(type: BehaviorCategoryType.positive),
         ],

@@ -82,7 +82,7 @@ class _HomeworkSubmissionsScreenState
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.inbox_outlined,
+                        const Icon(Icons.inbox_outlined,
                             size: 64, color: AppColors.textSecondaryLight),
                         const SizedBox(height: 16),
                         Text(

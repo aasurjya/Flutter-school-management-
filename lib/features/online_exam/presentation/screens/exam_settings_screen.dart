@@ -54,7 +54,7 @@ class _ExamSettingsScreenState extends ConsumerState<ExamSettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Schedule section
-                _SectionHeader(title: 'Schedule', icon: Icons.schedule),
+                const _SectionHeader(title: 'Schedule', icon: Icons.schedule),
                 Card(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16)),
@@ -81,7 +81,7 @@ class _ExamSettingsScreenState extends ConsumerState<ExamSettingsScreen> {
                 ),
                 const SizedBox(height: 20),
                 // Question settings
-                _SectionHeader(
+                const _SectionHeader(
                     title: 'Question Settings', icon: Icons.quiz_outlined),
                 Card(
                   shape: RoundedRectangleBorder(
@@ -112,7 +112,7 @@ class _ExamSettingsScreenState extends ConsumerState<ExamSettingsScreen> {
                 ),
                 const SizedBox(height: 20),
                 // Result settings
-                _SectionHeader(
+                const _SectionHeader(
                     title: 'Result Settings', icon: Icons.analytics_outlined),
                 Card(
                   shape: RoundedRectangleBorder(
@@ -143,7 +143,7 @@ class _ExamSettingsScreenState extends ConsumerState<ExamSettingsScreen> {
                 ),
                 const SizedBox(height: 20),
                 // Attempt settings
-                _SectionHeader(
+                const _SectionHeader(
                     title: 'Attempt Settings', icon: Icons.repeat),
                 Card(
                   shape: RoundedRectangleBorder(
@@ -159,7 +159,7 @@ class _ExamSettingsScreenState extends ConsumerState<ExamSettingsScreen> {
                             SizedBox(
                               width: 100,
                               child: DropdownButtonFormField<int>(
-                                value: _settings.maxAttempts,
+                                initialValue: _settings.maxAttempts,
                                 decoration: const InputDecoration(
                                   border: OutlineInputBorder(),
                                   isDense: true,
@@ -212,7 +212,7 @@ class _ExamSettingsScreenState extends ConsumerState<ExamSettingsScreen> {
                 ),
                 const SizedBox(height: 20),
                 // Proctoring settings
-                _SectionHeader(
+                const _SectionHeader(
                     title: 'Proctoring', icon: Icons.security_outlined),
                 Card(
                   shape: RoundedRectangleBorder(
@@ -248,7 +248,7 @@ class _ExamSettingsScreenState extends ConsumerState<ExamSettingsScreen> {
                               SizedBox(
                                 width: 100,
                                 child: DropdownButtonFormField<int>(
-                                  value: _settings.tabSwitchLimit,
+                                  initialValue: _settings.tabSwitchLimit,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
                                     isDense: true,

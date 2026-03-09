@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,10 +92,10 @@ class StudentDashboardScreen extends ConsumerWidget {
 
             // ── Section: Today's Classes ─────────────────────────────────────
             const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _SectionHeader(label: "Today"),
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: _SectionHeader(label: 'Today'),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -109,10 +108,10 @@ class StudentDashboardScreen extends ConsumerWidget {
 
             // ── Section: Upcoming ────────────────────────────────────────────
             const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _SectionHeader(label: "Upcoming"),
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: _SectionHeader(label: 'Upcoming'),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -125,10 +124,10 @@ class StudentDashboardScreen extends ConsumerWidget {
 
             // ── Section: Homework ────────────────────────────────────────────
             const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _SectionHeader(label: "Homework"),
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: _SectionHeader(label: 'Homework'),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -153,26 +152,26 @@ class StudentDashboardScreen extends ConsumerWidget {
 
             // ── Section: Upcoming Exam ───────────────────────────────────────
             const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _SectionHeader(label: "Next Exam"),
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: _SectionHeader(label: 'Next Exam'),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: const _UpcomingExamCard(),
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: _UpcomingExamCard(),
               ),
             ),
 
             // ── Quick Actions ────────────────────────────────────────────────
             const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _SectionHeader(label: "Quick Actions"),
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: _SectionHeader(label: 'Quick Actions'),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -249,10 +248,10 @@ class _HeroAttendanceCard extends StatelessWidget {
         // Thin progress bar — understated, not a big colored block
         ClipRRect(
           borderRadius: BorderRadius.circular(2),
-          child: LinearProgressIndicator(
+          child: const LinearProgressIndicator(
             value: 0.94,
             backgroundColor: AppColors.grey100,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
             minHeight: 3,
           ),
         ),
@@ -320,8 +319,8 @@ class _HeroAttendanceCard extends StatelessWidget {
 class _StatPillsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: const [
+    return const Row(
+      children: [
         Expanded(child: _StatNum(value: '3', label: 'due')),
         _StatDivider(),
         Expanded(child: _StatNum(value: '2', label: 'exams')),
@@ -768,8 +767,8 @@ class _StudyTipsEntry extends StatelessWidget {
         border: Border.all(
             color: AppColors.primary.withValues(alpha: 0.2), width: 1),
       ),
-      child: Row(
-        children: const [
+      child: const Row(
+        children: [
           Icon(Icons.auto_awesome_outlined,
               size: 18, color: AppColors.primary),
           SizedBox(width: 12),

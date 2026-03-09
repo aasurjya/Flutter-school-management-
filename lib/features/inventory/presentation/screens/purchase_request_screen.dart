@@ -96,7 +96,7 @@ class _RequestListTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.shopping_cart_outlined,
+                const Icon(Icons.shopping_cart_outlined,
                     size: 64, color: AppColors.textTertiaryLight),
                 const SizedBox(height: 16),
                 Text(
@@ -171,7 +171,7 @@ class _RequestListTab extends ConsumerWidget {
                     const Divider(height: 20),
                     Row(
                       children: [
-                        Icon(Icons.list,
+                        const Icon(Icons.list,
                             size: 16,
                             color: AppColors.textTertiaryLight),
                         const SizedBox(width: 4),
@@ -192,7 +192,7 @@ class _RequestListTab extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today,
+                        const Icon(Icons.calendar_today,
                             size: 14,
                             color: AppColors.textTertiaryLight),
                         const SizedBox(width: 4),
@@ -204,7 +204,7 @@ class _RequestListTab extends ConsumerWidget {
                         ),
                         if (pr.vendor != null) ...[
                           const Spacer(),
-                          Icon(Icons.store_outlined,
+                          const Icon(Icons.store_outlined,
                               size: 14,
                               color: AppColors.textTertiaryLight),
                           const SizedBox(width: 4),
@@ -263,7 +263,7 @@ class _RequestListTab extends ConsumerWidget {
       ref.invalidate(purchaseRequestsProvider);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Request ${status}')),
+          SnackBar(content: Text('Request $status')),
         );
       }
     } catch (e) {

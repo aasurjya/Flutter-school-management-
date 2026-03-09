@@ -133,7 +133,7 @@ class _ExamBuilderScreenState extends ConsumerState<ExamBuilderScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<OnlineExamType>(
-                value: _examType,
+                initialValue: _examType,
                 decoration: const InputDecoration(
                   labelText: 'Exam Type',
                   border: OutlineInputBorder(),
@@ -492,7 +492,7 @@ class _ExamBuilderScreenState extends ConsumerState<ExamBuilderScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DropdownButtonFormField<ExamQuestionType>(
-                    value: questionType,
+                    initialValue: questionType,
                     decoration: const InputDecoration(
                       labelText: 'Question Type',
                       border: OutlineInputBorder(),
@@ -542,7 +542,7 @@ class _ExamBuilderScreenState extends ConsumerState<ExamBuilderScreen> {
                   ],
                   if (questionType == ExamQuestionType.trueFalse)
                     DropdownButtonFormField<String>(
-                      value: correctAnswerCtrl.text.isEmpty
+                      initialValue: correctAnswerCtrl.text.isEmpty
                           ? null
                           : correctAnswerCtrl.text,
                       decoration: const InputDecoration(
@@ -582,7 +582,7 @@ class _ExamBuilderScreenState extends ConsumerState<ExamBuilderScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: DropdownButtonFormField<ExamDifficulty>(
-                          value: difficulty,
+                          initialValue: difficulty,
                           decoration: const InputDecoration(
                             labelText: 'Difficulty',
                             border: OutlineInputBorder(),
@@ -620,7 +620,7 @@ class _ExamBuilderScreenState extends ConsumerState<ExamBuilderScreen> {
                 if (textCtrl.text.trim().isEmpty) return;
                 Navigator.pop(ctx);
 
-                List<dynamic> options = [];
+                final List<dynamic> options = [];
                 dynamic correctAnswer;
 
                 if (questionType == ExamQuestionType.mcq ||

@@ -145,6 +145,14 @@ class MyClassesScreen extends ConsumerWidget {
                 context.push('/exams');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.assessment, color: AppColors.primary),
+              title: const Text('Gradebook'),
+              onTap: () {
+                Navigator.pop(ctx);
+                context.push('/teacher/gradebook');
+              },
+            ),
             const SizedBox(height: 10),
           ],
         ),

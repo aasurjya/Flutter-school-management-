@@ -149,7 +149,7 @@ class CertificateDashboardScreen extends ConsumerWidget {
                     child: Center(
                       child: Column(
                         children: [
-                          Icon(Icons.description_outlined,
+                          const Icon(Icons.description_outlined,
                               size: 48,
                               color: AppColors.textTertiaryLight),
                           const SizedBox(height: 8),
@@ -274,7 +274,7 @@ class _ActionCard extends StatelessWidget {
               ),
             ),
           ),
-          Icon(Icons.arrow_forward_ios,
+          const Icon(Icons.arrow_forward_ios,
               size: 14, color: AppColors.textTertiaryLight),
         ],
       ),

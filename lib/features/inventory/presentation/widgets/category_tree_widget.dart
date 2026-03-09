@@ -28,7 +28,7 @@ class CategoryTreeWidget extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              Icon(
+              const Icon(
                 Icons.category_outlined,
                 size: 48,
                 color: AppColors.textTertiaryLight,
@@ -176,7 +176,7 @@ class _CategoryNodeState extends State<_CategoryNode> {
                   ),
                   if (widget.onEdit != null || widget.onDelete != null)
                     PopupMenuButton<String>(
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.more_vert,
                         size: 18,
                         color: AppColors.textTertiaryLight,

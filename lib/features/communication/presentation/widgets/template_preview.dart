@@ -145,7 +145,7 @@ class TemplatePreview extends StatelessWidget {
                   ),
                   child: Text(
                     '{{$v}}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 11,
                       fontFamily: 'monospace',
                       color: AppColors.info,

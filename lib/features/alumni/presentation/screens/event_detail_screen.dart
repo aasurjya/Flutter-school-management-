@@ -85,7 +85,7 @@ class EventDetailScreen extends ConsumerWidget {
                           ),
                           if (event.isVirtual) ...[
                             const SizedBox(width: 8),
-                            _StatusChip(
+                            const _StatusChip(
                               label: 'Virtual',
                               color: AppColors.info,
                             ),

@@ -110,13 +110,13 @@ class _OverviewGrid extends StatelessWidget {
         _MetricCard(
           icon: Icons.arrow_upward,
           label: 'Highest',
-          value: '${analytics.highestScore.toStringAsFixed(1)}',
+          value: analytics.highestScore.toStringAsFixed(1),
           color: AppColors.success,
         ),
         _MetricCard(
           icon: Icons.arrow_downward,
           label: 'Lowest',
-          value: '${analytics.lowestScore.toStringAsFixed(1)}',
+          value: analytics.lowestScore.toStringAsFixed(1),
           color: AppColors.error,
         ),
         _MetricCard(

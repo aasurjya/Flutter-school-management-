@@ -82,12 +82,12 @@ class ParentDigestDetailScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
+                            const Row(
                               children: [
-                                const Icon(Icons.calendar_today,
+                                Icon(Icons.calendar_today,
                                     size: 18, color: AppColors.primary),
-                                const SizedBox(width: 8),
-                                const Text(
+                                SizedBox(width: 8),
+                                Text(
                                   'Attendance This Week',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
@@ -136,12 +136,12 @@ class ParentDigestDetailScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
+                            const Row(
                               children: [
-                                const Icon(Icons.star_outline,
+                                Icon(Icons.star_outline,
                                     size: 18, color: AppColors.accent),
-                                const SizedBox(width: 8),
-                                const Text(
+                                SizedBox(width: 8),
+                                Text(
                                   'Academic Highlights',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
@@ -184,12 +184,12 @@ class ParentDigestDetailScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
+                            const Row(
                               children: [
-                                const Icon(Icons.event,
+                                Icon(Icons.event,
                                     size: 18, color: AppColors.info),
-                                const SizedBox(width: 8),
-                                const Text(
+                                SizedBox(width: 8),
+                                Text(
                                   'Upcoming Events',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,

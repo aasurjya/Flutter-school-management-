@@ -1,4 +1,5 @@
 /// School Calendar & Events module models
+library;
 
 // ============================================
 // ENUMS

@@ -45,7 +45,7 @@ class DocumentChecklistWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.folder_open, size: 20, color: AppColors.primary),
+              const Icon(Icons.folder_open, size: 20, color: AppColors.primary),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -174,7 +174,7 @@ class DocumentChecklistWidget extends StatelessWidget {
               ),
             ),
           ] else ...[
-            Icon(
+            const Icon(
               Icons.remove_circle_outline,
               size: 18,
               color: AppColors.textTertiaryLight,

@@ -64,7 +64,7 @@ class _EventAttendeesScreenState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline,
+              const Icon(Icons.error_outline,
                   size: 48, color: AppColors.error),
               const SizedBox(height: 12),
               Text('Failed to load attendees: $error'),
@@ -146,7 +146,7 @@ class _EventAttendeesScreenState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.people_outline,
+            const Icon(Icons.people_outline,
                 size: 48, color: AppColors.textTertiaryLight),
             const SizedBox(height: 12),
             Text(

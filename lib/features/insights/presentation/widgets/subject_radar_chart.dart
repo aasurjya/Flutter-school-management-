@@ -84,7 +84,7 @@ class SubjectRadarChart extends ConsumerWidget {
                   label: 'Your Score',
                 ),
                 const SizedBox(width: 24),
-                _LegendItem(
+                const _LegendItem(
                   color: Colors.orange,
                   label: 'Class Average',
                 ),

@@ -78,7 +78,7 @@ class _ReportIncidentScreenState extends ConsumerState<ReportIncidentScreen> {
               // Category
               categoriesAsync.when(
                 data: (categories) => DropdownButtonFormField<String>(
-                  value: _categoryId,
+                  initialValue: _categoryId,
                   decoration: const InputDecoration(
                     labelText: 'Category',
                     prefixIcon: Icon(Icons.category_outlined),

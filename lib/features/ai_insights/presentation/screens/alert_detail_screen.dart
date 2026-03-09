@@ -134,12 +134,12 @@ class _AlertDetailScreenState extends ConsumerState<AlertDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.notification_important_outlined,
+              Icon(Icons.notification_important_outlined,
                   size: 20, color: AppColors.primary),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Alert Information',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
@@ -227,12 +227,12 @@ class _AlertDetailScreenState extends ConsumerState<AlertDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.person_outline,
+              Icon(Icons.person_outline,
                   size: 20, color: AppColors.info),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Student Information',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
@@ -298,12 +298,12 @@ class _AlertDetailScreenState extends ConsumerState<AlertDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.auto_awesome,
+              Icon(Icons.auto_awesome,
                   size: 20, color: AppColors.accent),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'AI Analysis',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
@@ -359,12 +359,12 @@ class _AlertDetailScreenState extends ConsumerState<AlertDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.rule_outlined,
+              Icon(Icons.rule_outlined,
                   size: 20, color: AppColors.warning),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Trigger Conditions',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
@@ -425,12 +425,12 @@ class _AlertDetailScreenState extends ConsumerState<AlertDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.playlist_add_check_outlined,
+              Icon(Icons.playlist_add_check_outlined,
                   size: 20, color: AppColors.primary),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Status & Actions',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),

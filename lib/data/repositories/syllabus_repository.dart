@@ -95,7 +95,7 @@ class SyllabusRepository extends BaseRepository {
           terms(name)
         ''';
 
-    var query = client
+    final query = client
         .from('syllabus_topics')
         .select(select)
         .eq('id', topicId);

@@ -90,7 +90,7 @@ class StockLevelIndicator extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.warning_amber_rounded,
                   size: 14,
                   color: AppColors.warning,

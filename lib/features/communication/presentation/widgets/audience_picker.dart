@@ -116,7 +116,7 @@ class _AudiencePickerState extends State<AudiencePicker> {
       ),
       child: Row(
         children: [
-          Icon(Icons.group_outlined, color: AppColors.primary),
+          const Icon(Icons.group_outlined, color: AppColors.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

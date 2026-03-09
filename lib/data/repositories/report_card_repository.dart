@@ -213,7 +213,7 @@ class ReportCardRepository extends BaseRepository {
 
     // Calculate attendance
     int present = 0;
-    int total = (attendanceResponse as List).length;
+    final int total = (attendanceResponse as List).length;
     for (final att in attendanceResponse) {
       if (att['status'] == 'present') present++;
     }

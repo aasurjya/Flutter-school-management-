@@ -189,7 +189,7 @@ class _PatternsTab extends ConsumerWidget {
                   padding: const EdgeInsets.all(14),
                   child: Row(
                     children: [
-                      Icon(Icons.warning_amber, color: AppColors.warning),
+                      const Icon(Icons.warning_amber, color: AppColors.warning),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -238,14 +238,14 @@ class _StudentsTab extends ConsumerWidget {
             error: (_, __) => const Text('Failed to load data'),
             data: (absentees) {
               if (absentees.isEmpty) {
-                return GlassCard(
-                  padding: const EdgeInsets.all(20),
+                return const GlassCard(
+                  padding: EdgeInsets.all(20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.check_circle, color: AppColors.success),
-                      const SizedBox(width: 8),
-                      const Text('No chronic absentees'),
+                      SizedBox(width: 8),
+                      Text('No chronic absentees'),
                     ],
                   ),
                 );
@@ -361,14 +361,14 @@ class _AnomaliesTab extends ConsumerWidget {
                 error: (_, __) => const SizedBox.shrink(),
                 data: (anomalies) {
                   if (anomalies.isEmpty) {
-                    return GlassCard(
-                      padding: const EdgeInsets.all(20),
+                    return const GlassCard(
+                      padding: EdgeInsets.all(20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.check_circle, color: AppColors.success),
-                          const SizedBox(width: 8),
-                          const Text('No anomalies detected'),
+                          SizedBox(width: 8),
+                          Text('No anomalies detected'),
                         ],
                       ),
                     );

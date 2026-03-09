@@ -107,7 +107,7 @@ class _PreRegListView extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.event_busy,
+                const Icon(Icons.event_busy,
                     size: 64, color: AppColors.textTertiaryLight),
                 const SizedBox(height: 16),
                 Text(
@@ -189,7 +189,7 @@ class _PreRegListView extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Icon(Icons.qr_code,
+                      const Icon(Icons.qr_code,
                           size: 20, color: AppColors.textTertiaryLight),
                     ],
                   ),
@@ -410,7 +410,7 @@ class _CreatePreRegFormState extends ConsumerState<_CreatePreRegForm> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<VisitorLogPurpose>(
-                value: _purpose,
+                initialValue: _purpose,
                 decoration: const InputDecoration(
                   labelText: 'Purpose',
                   prefixIcon: Icon(Icons.category),

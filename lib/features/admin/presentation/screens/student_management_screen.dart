@@ -164,12 +164,12 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Filter Students'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Class dropdown would go here
             // Section dropdown would go here
-            const Text('Filter options coming soon'),
+            Text('Filter options coming soon'),
           ],
         ),
         actions: [
@@ -263,15 +263,16 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
           ),
           ElevatedButton(
             onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
               Navigator.pop(context);
               try {
                 await ref.read(studentsNotifierProvider.notifier).deactivateStudent(student.id);
                 if (mounted) {
-                  context.showSuccessSnackBar('Student deactivated');
+                  messenger.showSnackBar(const SnackBar(content: Text('Student deactivated')));
                 }
               } catch (e) {
                 if (mounted) {
-                  context.showErrorSnackBar('Error: $e');
+                  messenger.showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error));
                 }
               }
             },
@@ -744,7 +745,7 @@ class _AddStudentSheetState extends ConsumerState<_AddStudentSheet> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _gender,
+                            initialValue: _gender,
                             decoration: const InputDecoration(
                               labelText: 'Gender',
                               border: OutlineInputBorder(),
@@ -797,7 +798,7 @@ class _AddStudentSheetState extends ConsumerState<_AddStudentSheet> {
                           return const Text('Please create classes first');
                         }
                         return DropdownButtonFormField<String>(
-                          value: _selectedClassId,
+                          initialValue: _selectedClassId,
                           decoration: const InputDecoration(
                             labelText: 'Class *',
                             border: OutlineInputBorder(),
@@ -828,7 +829,7 @@ class _AddStudentSheetState extends ConsumerState<_AddStudentSheet> {
                             return const Text('No sections found for this class');
                           }
                           return DropdownButtonFormField<String>(
-                            value: _selectedSectionId,
+                            initialValue: _selectedSectionId,
                             decoration: const InputDecoration(
                               labelText: 'Section *',
                               border: OutlineInputBorder(),
@@ -853,7 +854,7 @@ class _AddStudentSheetState extends ConsumerState<_AddStudentSheet> {
                       ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _paymentStatus,
+                      initialValue: _paymentStatus,
                       decoration: const InputDecoration(
                         labelText: 'Payment Status *',
                         border: OutlineInputBorder(),
@@ -1142,7 +1143,7 @@ class _EditStudentSheetState extends ConsumerState<_EditStudentSheet> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _gender,
+                      initialValue: _gender,
                       decoration: const InputDecoration(
                         labelText: 'Gender',
                         border: OutlineInputBorder(),

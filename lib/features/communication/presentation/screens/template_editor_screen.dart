@@ -233,7 +233,7 @@ class _TemplateEditorScreenState extends ConsumerState<TemplateEditorScreen> {
             subtitle: const Text('Inactive templates cannot be used in campaigns'),
             value: _isActive,
             onChanged: (v) => setState(() => _isActive = v),
-            activeColor: AppColors.primary,
+            activeThumbColor: AppColors.primary,
           ),
           const SizedBox(height: 80),
         ],

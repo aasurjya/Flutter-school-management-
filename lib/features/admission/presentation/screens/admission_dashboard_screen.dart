@@ -98,7 +98,7 @@ class AdmissionDashboardScreen extends ConsumerWidget {
                       child: Center(
                         child: Column(
                           children: [
-                            Icon(Icons.inbox,
+                            const Icon(Icons.inbox,
                                 size: 48, color: AppColors.textTertiaryLight),
                             const SizedBox(height: 12),
                             Text(

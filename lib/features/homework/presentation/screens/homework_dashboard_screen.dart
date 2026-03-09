@@ -123,7 +123,7 @@ class _HomeworkDashboardScreenState
                     padding: const EdgeInsets.all(32),
                     child: Column(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.assignment_outlined,
                           size: 48,
                           color: AppColors.textSecondaryLight,
@@ -329,7 +329,7 @@ class _HomeworkListTile extends StatelessWidget {
             Row(
               children: [
                 if (homework.subjectName != null) ...[
-                  Icon(Icons.book_outlined,
+                  const Icon(Icons.book_outlined,
                       size: 14, color: AppColors.textSecondaryLight),
                   const SizedBox(width: 4),
                   Text(
@@ -342,7 +342,7 @@ class _HomeworkListTile extends StatelessWidget {
                 ],
                 if (homework.className != null &&
                     homework.sectionName != null) ...[
-                  Icon(Icons.class_outlined,
+                  const Icon(Icons.class_outlined,
                       size: 14, color: AppColors.textSecondaryLight),
                   const SizedBox(width: 4),
                   Text(
@@ -357,7 +357,7 @@ class _HomeworkListTile extends StatelessWidget {
             const SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.calendar_today,
+                const Icon(Icons.calendar_today,
                     size: 14, color: AppColors.textSecondaryLight),
                 const SizedBox(width: 4),
                 Text(

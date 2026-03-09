@@ -25,7 +25,7 @@ class CategoryManagementScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.category_outlined,
+                  const Icon(Icons.category_outlined,
                       size: 64, color: AppColors.textTertiaryLight),
                   const SizedBox(height: 16),
                   Text(
@@ -122,7 +122,7 @@ class CategoryManagementScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: parentId,
+                  initialValue: parentId,
                   decoration: const InputDecoration(
                     labelText: 'Parent Category',
                   ),

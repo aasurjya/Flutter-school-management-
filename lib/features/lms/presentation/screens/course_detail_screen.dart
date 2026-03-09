@@ -239,7 +239,7 @@ class CourseDetailScreen extends ConsumerWidget {
                     ),
                     Text(
                       '${enrollment.progressPercentage.toStringAsFixed(0)}% completed',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondaryLight,
                       ),

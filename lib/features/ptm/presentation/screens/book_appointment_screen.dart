@@ -179,7 +179,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
     final currentStep = _getCurrentStep(state);
 
     if (currentStep == 1) {
-      notifier.selectTeacher(TeacherAvailability(
+      notifier.selectTeacher(const TeacherAvailability(
         id: '',
         ptmScheduleId: '',
         teacherId: '',

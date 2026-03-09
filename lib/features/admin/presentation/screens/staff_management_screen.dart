@@ -674,7 +674,7 @@ class _AddStaffSheetState extends ConsumerState<_AddStaffSheet> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _selectedRole,
+                      initialValue: _selectedRole,
                       decoration: const InputDecoration(
                         labelText: 'Role *',
                         border: OutlineInputBorder(),

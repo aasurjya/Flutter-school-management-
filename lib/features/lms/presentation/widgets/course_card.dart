@@ -122,7 +122,7 @@ class CourseCard extends StatelessWidget {
                 Row(
                   children: [
                     if (course.subjectName != null) ...[
-                      Icon(Icons.book_outlined,
+                      const Icon(Icons.book_outlined,
                           size: 14, color: AppColors.primary),
                       const SizedBox(width: 4),
                       Text(

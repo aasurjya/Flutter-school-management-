@@ -97,12 +97,12 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _InfoChip(
+                    const _InfoChip(
                       icon: Icons.assignment,
                       label: 'Max Marks: 100',
                     ),
                     const SizedBox(width: 12),
-                    _InfoChip(
+                    const _InfoChip(
                       icon: Icons.check_circle_outline,
                       label: 'Pass: 35',
                     ),
@@ -125,7 +125,7 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
                 bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
               ),
             ),
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _StatItem(label: 'Entered', value: '8', color: AppColors.success),

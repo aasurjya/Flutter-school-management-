@@ -1,4 +1,5 @@
 /// Admission module models
+library;
 
 // ============================================
 // ENUMS

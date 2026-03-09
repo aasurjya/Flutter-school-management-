@@ -363,7 +363,7 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _gender,
+                  initialValue: _gender,
                   decoration: const InputDecoration(
                     labelText: 'Gender *',
                     prefixIcon: Icon(Icons.wc),
@@ -558,11 +558,11 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                     color: AppColors.info.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Row(
+                  child: const Row(
                     children: [
-                      const Icon(Icons.info_outline,
+                      Icon(Icons.info_outline,
                           size: 18, color: AppColors.info),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Leave blank if the student is applying for the first time.',
@@ -700,11 +700,11 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
             color: AppColors.success.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Row(
+          child: const Row(
             children: [
-              const Icon(Icons.check_circle_outline,
+              Icon(Icons.check_circle_outline,
                   size: 20, color: AppColors.success),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Please review all the information before submitting. You can go back to any step to make changes.',

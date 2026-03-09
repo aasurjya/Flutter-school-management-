@@ -133,7 +133,7 @@ class _AssetFormScreenState extends ConsumerState<AssetFormScreen> {
               // Category dropdown
               categoriesAsync.when(
                 data: (categories) => DropdownButtonFormField<String>(
-                  value: _selectedCategoryId,
+                  initialValue: _selectedCategoryId,
                   decoration: const InputDecoration(
                     labelText: 'Category',
                     prefixIcon: Icon(Icons.category_outlined),
@@ -189,7 +189,7 @@ class _AssetFormScreenState extends ConsumerState<AssetFormScreen> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<AssetStatus>(
-                      value: _status,
+                      initialValue: _status,
                       decoration: const InputDecoration(
                         labelText: 'Status',
                       ),
@@ -209,7 +209,7 @@ class _AssetFormScreenState extends ConsumerState<AssetFormScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<AssetCondition>(
-                      value: _condition,
+                      initialValue: _condition,
                       decoration: const InputDecoration(
                         labelText: 'Condition',
                       ),

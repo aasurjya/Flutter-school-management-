@@ -270,49 +270,47 @@ class _FeePaymentScreenState extends ConsumerState<FeePaymentScreen> {
     final gatewayService = ref.read(paymentGatewayServiceProvider);
     final hasGateway = gatewayService != null;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Payment Method',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        if (hasGateway) ...[
-          _PaymentMethodTile(
-            icon: Icons.account_balance_wallet,
-            title: 'UPI Payment',
-            subtitle: 'Pay using any UPI app',
-            value: 'upi',
-            groupValue: _selectedPaymentMethod,
-            onChanged: (v) => setState(() => _selectedPaymentMethod = v!),
+    return RadioGroup<String>(
+      groupValue: _selectedPaymentMethod,
+      onChanged: (v) {
+        if (v != null) setState(() => _selectedPaymentMethod = v);
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Payment Method',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          _PaymentMethodTile(
-            icon: Icons.credit_card,
-            title: 'Card Payment',
-            subtitle: 'Credit/Debit Card',
-            value: 'card',
-            groupValue: _selectedPaymentMethod,
-            onChanged: (v) => setState(() => _selectedPaymentMethod = v!),
-          ),
-          _PaymentMethodTile(
-            icon: Icons.account_balance,
-            title: 'Net Banking',
-            subtitle: 'Pay through bank',
-            value: 'netbanking',
-            groupValue: _selectedPaymentMethod,
-            onChanged: (v) => setState(() => _selectedPaymentMethod = v!),
+          const SizedBox(height: 12),
+          if (hasGateway) ...[
+            const _PaymentMethodTile(
+              icon: Icons.account_balance_wallet,
+              title: 'UPI Payment',
+              subtitle: 'Pay using any UPI app',
+              value: 'upi',
+            ),
+            const _PaymentMethodTile(
+              icon: Icons.credit_card,
+              title: 'Card Payment',
+              subtitle: 'Credit/Debit Card',
+              value: 'card',
+            ),
+            const _PaymentMethodTile(
+              icon: Icons.account_balance,
+              title: 'Net Banking',
+              subtitle: 'Pay through bank',
+              value: 'netbanking',
+            ),
+          ],
+          const _PaymentMethodTile(
+            icon: Icons.store,
+            title: 'Pay at School',
+            subtitle: 'Visit the fee counter',
+            value: 'offline',
           ),
         ],
-        _PaymentMethodTile(
-          icon: Icons.store,
-          title: 'Pay at School',
-          subtitle: 'Visit the fee counter',
-          value: 'offline',
-          groupValue: _selectedPaymentMethod,
-          onChanged: (v) => setState(() => _selectedPaymentMethod = v!),
-        ),
-      ],
+      ),
     );
   }
 
@@ -525,29 +523,23 @@ class _PaymentMethodTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final String value;
-  final String groupValue;
-  final ValueChanged<String?> onChanged;
 
   const _PaymentMethodTile({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.value,
-    required this.groupValue,
-    required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
+    final groupValue = RadioGroup.maybeOf<String>(context)?.groupValue ?? '';
     final isSelected = value == groupValue;
     return GlassCard(
       margin: const EdgeInsets.only(bottom: 8),
       padding: EdgeInsets.zero,
       child: RadioListTile<String>(
         value: value,
-        groupValue: groupValue,
-        onChanged: onChanged,
-        activeColor: AppColors.primary,
         title: Row(
           children: [
             Container(

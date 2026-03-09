@@ -479,7 +479,7 @@ class _AmountItem extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 11,
             color: AppColors.textTertiaryLight,
           ),

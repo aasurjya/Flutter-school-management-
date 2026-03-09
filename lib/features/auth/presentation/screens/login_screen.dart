@@ -222,7 +222,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Forgot Password
                 TextButton(
                   onPressed: _handleForgotPassword,
-                  child: Text(
+                  child: const Text(
                     'Forgot Password?',
                     style: TextStyle(
                       color: AppColors.primary,
@@ -270,8 +270,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Icon(Icons.bolt, color: Colors.amber),
               SizedBox(width: 8),
               Text(
@@ -319,12 +319,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: AppColors.error, size: 20),
+          const Icon(Icons.error_outline, color: AppColors.error, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               _errorMessage!,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.error,
                 fontSize: 14,
               ),
@@ -494,11 +494,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.bug_report, size: 16, color: AppColors.warning),
+          const Icon(Icons.bug_report, size: 16, color: AppColors.warning),
           const SizedBox(width: 6),
           Text(
             AppEnvironment.environmentName,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.warning,
               fontSize: 12,
               fontWeight: FontWeight.w600,

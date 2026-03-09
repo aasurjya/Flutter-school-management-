@@ -73,7 +73,7 @@ class _AuditHistoryTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.fact_check_outlined,
+                const Icon(Icons.fact_check_outlined,
                     size: 64, color: AppColors.textTertiaryLight),
                 const SizedBox(height: 16),
                 Text(

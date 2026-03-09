@@ -83,11 +83,11 @@ class _TrendDashboardScreenState extends ConsumerState<TrendDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           children: [
-            const Icon(Icons.school, size: 20, color: AppColors.primary),
-            const SizedBox(width: 8),
-            const Text(
+            Icon(Icons.school, size: 20, color: AppColors.primary),
+            SizedBox(width: 8),
+            Text(
               'Exam Performance Trend',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
@@ -155,12 +155,12 @@ class _TrendDashboardScreenState extends ConsumerState<TrendDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           children: [
-            const Icon(Icons.calendar_today,
+            Icon(Icons.calendar_today,
                 size: 20, color: AppColors.secondary),
-            const SizedBox(width: 8),
-            const Text(
+            SizedBox(width: 8),
+            Text(
               'Attendance Trend',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
@@ -253,11 +253,11 @@ class _TrendDashboardScreenState extends ConsumerState<TrendDashboardScreen> {
   }
 
   Widget _buildLegend() {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _LegendItem(color: AppColors.primary, label: 'Historical'),
-        const SizedBox(width: 20),
+        SizedBox(width: 20),
         _LegendItem(
           color: AppColors.accent,
           label: 'Predicted',

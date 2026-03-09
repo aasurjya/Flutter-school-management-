@@ -191,7 +191,7 @@ class _ChildCard extends StatelessWidget {
             ),
             if (isSelected) ...[
               const SizedBox(width: 8),
-              Icon(
+              const Icon(
                 Icons.check_circle,
                 color: AppColors.primary,
                 size: 20,
@@ -266,7 +266,7 @@ class ChildSwitcherCompact extends ConsumerWidget {
                       child: child['photo_url'] == null
                           ? Text(
                               child['student_name']?[0] ?? '?',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.bold,
                               ),

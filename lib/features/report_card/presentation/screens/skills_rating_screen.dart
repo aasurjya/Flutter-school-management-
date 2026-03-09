@@ -123,8 +123,8 @@ class _SkillsRatingScreenState extends ConsumerState<SkillsRatingScreen> {
               const SizedBox(height: 16),
 
               // Rating Legend
-              GlassCard(
-                padding: const EdgeInsets.all(12),
+              const GlassCard(
+                padding: EdgeInsets.all(12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [

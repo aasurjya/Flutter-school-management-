@@ -180,7 +180,7 @@ class _QuestionPaperGeneratorScreenState
           ),
           const SizedBox(height: 20),
 
-          _SectionLabel('Subject & Class'),
+          const _SectionLabel('Subject & Class'),
           const SizedBox(height: 8),
           GlassCard(
             padding: const EdgeInsets.all(16),
@@ -213,7 +213,7 @@ class _QuestionPaperGeneratorScreenState
           ),
           const SizedBox(height: 20),
 
-          _SectionLabel('Exam Settings'),
+          const _SectionLabel('Exam Settings'),
           const SizedBox(height: 8),
           GlassCard(
             padding: const EdgeInsets.all(16),
@@ -222,7 +222,7 @@ class _QuestionPaperGeneratorScreenState
               children: [
                 // Exam type
                 DropdownButtonFormField<String>(
-                  value: _examType,
+                  initialValue: _examType,
                   decoration: const InputDecoration(
                     labelText: 'Exam Type',
                     border: OutlineInputBorder(),
@@ -334,7 +334,7 @@ class _QuestionPaperGeneratorScreenState
           ),
           const SizedBox(height: 20),
 
-          _SectionLabel('Topics (optional)'),
+          const _SectionLabel('Topics (optional)'),
           const SizedBox(height: 8),
           GlassCard(
             padding: const EdgeInsets.all(16),
@@ -349,7 +349,7 @@ class _QuestionPaperGeneratorScreenState
           ),
           const SizedBox(height: 20),
 
-          _SectionLabel('Special Instructions (optional)'),
+          const _SectionLabel('Special Instructions (optional)'),
           const SizedBox(height: 8),
           GlassCard(
             padding: const EdgeInsets.all(16),

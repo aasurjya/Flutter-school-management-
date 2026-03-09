@@ -201,7 +201,7 @@ class HRDashboardScreen extends ConsumerWidget {
                       child: Center(
                         child: Column(
                           children: [
-                            Icon(Icons.check_circle,
+                            const Icon(Icons.check_circle,
                                 size: 48, color: AppColors.success),
                             const SizedBox(height: 8),
                             Text(
@@ -297,37 +297,37 @@ class _QuickActionsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final actions = [
-      _QuickAction(
+      const _QuickAction(
         icon: Icons.people,
         label: 'Staff Directory',
         color: AppColors.primary,
         route: '/hr/staff-directory',
       ),
-      _QuickAction(
+      const _QuickAction(
         icon: Icons.business,
         label: 'Departments',
         color: AppColors.info,
         route: '/hr/departments',
       ),
-      _QuickAction(
+      const _QuickAction(
         icon: Icons.description,
         label: 'Contracts',
         color: Color(0xFF8B5CF6),
         route: '/hr/contracts',
       ),
-      _QuickAction(
+      const _QuickAction(
         icon: Icons.account_balance_wallet,
         label: 'Payroll',
         color: AppColors.secondary,
         route: '/hr/payroll',
       ),
-      _QuickAction(
+      const _QuickAction(
         icon: Icons.fact_check,
         label: 'Attendance',
         color: AppColors.warning,
         route: '/hr/staff-attendance',
       ),
-      _QuickAction(
+      const _QuickAction(
         icon: Icons.receipt,
         label: 'Tax',
         color: AppColors.error,

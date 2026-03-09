@@ -44,7 +44,7 @@ class _MentorshipScreenState extends ConsumerState<MentorshipScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
+        children: const [
           _ProgramList(status: 'open'),
           _ProgramList(status: 'in_progress'),
           _ProgramList(status: 'completed'),
@@ -76,7 +76,7 @@ class _MentorshipScreenState extends ConsumerState<MentorshipScreen>
     final descriptionController = TextEditingController();
     final skillController = TextEditingController();
     int menteeLimit = 5;
-    List<String> skills = [];
+    final List<String> skills = [];
 
     showDialog(
       context: context,
@@ -241,7 +241,7 @@ class _ProgramList extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.psychology_outlined,
+                const Icon(Icons.psychology_outlined,
                     size: 64, color: AppColors.textTertiaryLight),
                 const SizedBox(height: 16),
                 Text(

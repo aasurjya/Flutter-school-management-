@@ -152,7 +152,7 @@ class _EmailSettingsScreenState extends ConsumerState<EmailSettingsScreen> {
                 Switch(
                   value: _isActive,
                   onChanged: (v) => setState(() => _isActive = v),
-                  activeColor: AppColors.primary,
+                  activeThumbColor: AppColors.primary,
                 ),
               ],
             ),
@@ -367,7 +367,7 @@ class _EmailSettingsScreenState extends ConsumerState<EmailSettingsScreen> {
           subtitle: const Text('Enable TLS encryption (recommended)'),
           value: _smtpUseTls,
           onChanged: (v) => setState(() => _smtpUseTls = v),
-          activeColor: AppColors.primary,
+          activeThumbColor: AppColors.primary,
         ),
       ],
     );

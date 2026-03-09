@@ -71,7 +71,7 @@ class _ActiveAssignmentsTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.assignment_outlined,
+                const Icon(Icons.assignment_outlined,
                     size: 64, color: AppColors.textTertiaryLight),
                 const SizedBox(height: 16),
                 Text(
@@ -151,7 +151,7 @@ class _ActiveAssignmentsTab extends ConsumerWidget {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today,
+                        const Icon(Icons.calendar_today,
                             size: 14, color: AppColors.textTertiaryLight),
                         const SizedBox(width: 4),
                         Text(
@@ -206,7 +206,7 @@ class _ActiveAssignmentsTab extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<AssetCondition>(
-                value: returnCondition,
+                initialValue: returnCondition,
                 decoration: const InputDecoration(
                   labelText: 'Condition at Return',
                 ),
@@ -324,7 +324,7 @@ class _AssignNewTabState extends ConsumerState<_AssignNewTab> {
             // Asset selection
             availableAssetsAsync.when(
               data: (assets) => DropdownButtonFormField<String>(
-                value: _selectedAssetId,
+                initialValue: _selectedAssetId,
                 decoration: const InputDecoration(
                   labelText: 'Select Asset *',
                   prefixIcon: Icon(Icons.inventory_2_outlined),
@@ -392,7 +392,7 @@ class _AssignNewTabState extends ConsumerState<_AssignNewTab> {
 
             // Condition at assignment
             DropdownButtonFormField<AssetCondition>(
-              value: _condition,
+              initialValue: _condition,
               decoration: const InputDecoration(
                 labelText: 'Condition at Assignment',
                 prefixIcon: Icon(Icons.assessment_outlined),

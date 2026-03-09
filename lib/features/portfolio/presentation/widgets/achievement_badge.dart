@@ -32,7 +32,7 @@ class AchievementBadge extends StatelessWidget {
             Container(
               width: 36,
               height: 36,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: AppColors.accentGradient,
               ),
@@ -52,7 +52,7 @@ class AchievementBadge extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               '+${achievement.points}',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 10,
                 color: AppColors.accent,
                 fontWeight: FontWeight.bold,

@@ -68,13 +68,13 @@ class AttendanceChart extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             // Legend
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _LegendItem(color: Colors.green, label: 'Present'),
-                const SizedBox(width: 16),
+                SizedBox(width: 16),
                 _LegendItem(color: Colors.orange, label: 'Late'),
-                const SizedBox(width: 16),
+                SizedBox(width: 16),
                 _LegendItem(color: Colors.red, label: 'Absent'),
               ],
             ),
@@ -117,7 +117,7 @@ class _MonthBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final maxHeight = 150.0;
+    const maxHeight = 150.0;
 
     if (summary.totalDays == 0) {
       return Column(

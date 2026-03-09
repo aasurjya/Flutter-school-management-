@@ -33,7 +33,7 @@ class _AlumniRegistrationScreenState
 
   AlumniVisibility _visibility = AlumniVisibility.alumniOnly;
   bool _isMentor = false;
-  List<String> _skills = [];
+  final List<String> _skills = [];
   bool _isSubmitting = false;
   int _currentStep = 0;
 
@@ -338,7 +338,7 @@ class _AlumniRegistrationScreenState
                   ],
                   const SizedBox(height: 12),
                   DropdownButtonFormField<AlumniVisibility>(
-                    value: _visibility,
+                    initialValue: _visibility,
                     decoration: const InputDecoration(
                       labelText: 'Profile Visibility',
                       border: OutlineInputBorder(),

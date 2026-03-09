@@ -111,7 +111,7 @@ class _TransactionHistoryTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.receipt_long_outlined,
+                const Icon(Icons.receipt_long_outlined,
                     size: 64, color: AppColors.textTertiaryLight),
                 const SizedBox(height: 16),
                 Text(
@@ -248,7 +248,7 @@ class _NewTransactionTabState
             // Item selection
             itemsAsync.when(
               data: (items) => DropdownButtonFormField<String>(
-                value: _selectedItemId,
+                initialValue: _selectedItemId,
                 decoration: const InputDecoration(
                   labelText: 'Select Item *',
                   prefixIcon: Icon(Icons.inventory_outlined),
@@ -273,7 +273,7 @@ class _NewTransactionTabState
 
             // Transaction type
             DropdownButtonFormField<TransactionType>(
-              value: _transactionType,
+              initialValue: _transactionType,
               decoration: const InputDecoration(
                 labelText: 'Transaction Type *',
                 prefixIcon: Icon(Icons.swap_horiz),

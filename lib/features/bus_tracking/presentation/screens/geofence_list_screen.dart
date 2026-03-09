@@ -87,6 +87,7 @@ class _GeofenceListScreenState extends ConsumerState<GeofenceListScreen> {
     final lngController = TextEditingController();
     final radiusController = TextEditingController(text: '200');
     String zoneType = 'school';
+    final messenger = ScaffoldMessenger.of(context);
 
     final result = await showDialog<bool>(
       context: context,
@@ -106,7 +107,7 @@ class _GeofenceListScreenState extends ConsumerState<GeofenceListScreen> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: zoneType,
+                  initialValue: zoneType,
                   decoration: const InputDecoration(labelText: 'Zone Type'),
                   items: const [
                     DropdownMenuItem(value: 'school', child: Text('School')),
@@ -171,7 +172,7 @@ class _GeofenceListScreenState extends ConsumerState<GeofenceListScreen> {
       final radius = double.tryParse(radiusController.text.trim()) ?? 200;
 
       if (name.isEmpty || lat == null || lng == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(
             content: Text('Name, latitude, and longitude are required'),
             backgroundColor: AppColors.error,
@@ -192,7 +193,7 @@ class _GeofenceListScreenState extends ConsumerState<GeofenceListScreen> {
         ref.invalidate(busGeofencesProvider(false));
         ref.invalidate(busGeofencesProvider(true));
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          messenger.showSnackBar(
             const SnackBar(
               content: Text('Geofence zone created'),
               backgroundColor: AppColors.success,
@@ -201,7 +202,7 @@ class _GeofenceListScreenState extends ConsumerState<GeofenceListScreen> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          messenger.showSnackBar(
             SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
           );
         }
@@ -333,7 +334,7 @@ class _GeofenceCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.location_on, size: 14, color: Colors.grey),
+                const Icon(Icons.location_on, size: 14, color: Colors.grey),
                 const SizedBox(width: 4),
                 Text(
                   '${geofence.latitude.toStringAsFixed(4)}, ${geofence.longitude.toStringAsFixed(4)}',
@@ -344,10 +345,10 @@ class _GeofenceCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 if (geofence.notifyOnEnter)
-                  _AlertChip(label: 'Enter', color: AppColors.success),
+                  const _AlertChip(label: 'Enter', color: AppColors.success),
                 const SizedBox(width: 4),
                 if (geofence.notifyOnExit)
-                  _AlertChip(label: 'Exit', color: AppColors.warning),
+                  const _AlertChip(label: 'Exit', color: AppColors.warning),
                 const SizedBox(width: 8),
                 IconButton(
                   icon: const Icon(Icons.delete_outline, size: 20),

@@ -48,11 +48,11 @@ class _ContractManagementScreenState
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _ContractList(filter: const StaffContractFilter(status: 'active')),
+        children: const [
+          _ContractList(filter: StaffContractFilter(status: 'active')),
           _ContractList(
-              filter: const StaffContractFilter(expiringOnly: true)),
-          _ContractList(filter: const StaffContractFilter()),
+              filter: StaffContractFilter(expiringOnly: true)),
+          _ContractList(filter: StaffContractFilter()),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -97,7 +97,7 @@ class _ContractManagementScreenState
                   ),
                   const SizedBox(height: 24),
                   DropdownButtonFormField<String>(
-                    value: contractType,
+                    initialValue: contractType,
                     decoration: const InputDecoration(
                       labelText: 'Contract Type',
                       border: OutlineInputBorder(),

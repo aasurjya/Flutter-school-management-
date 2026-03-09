@@ -44,7 +44,7 @@ class _DiscussionForumScreenState
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.forum_outlined,
+                  const Icon(Icons.forum_outlined,
                       size: 64, color: AppColors.textTertiaryLight),
                   const SizedBox(height: 16),
                   Text(

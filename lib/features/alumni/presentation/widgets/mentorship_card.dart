@@ -129,7 +129,7 @@ class MentorshipCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(Icons.people_outline,
+              const Icon(Icons.people_outline,
                   size: 14, color: AppColors.textTertiaryLight),
               const SizedBox(width: 4),
               Text(

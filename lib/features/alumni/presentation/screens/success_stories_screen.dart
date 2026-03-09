@@ -47,7 +47,7 @@ class _SuccessStoriesScreenState extends ConsumerState<SuccessStoriesScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.auto_stories,
+                  const Icon(Icons.auto_stories,
                       size: 64, color: AppColors.textTertiaryLight),
                   const SizedBox(height: 16),
                   Text(
@@ -154,7 +154,7 @@ class _SuccessStoriesScreenState extends ConsumerState<SuccessStoriesScreen> {
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Row(
                       children: [
-                        Icon(Icons.star,
+                        const Icon(Icons.star,
                             size: 16, color: AppColors.accent),
                         const SizedBox(width: 4),
                         Text(

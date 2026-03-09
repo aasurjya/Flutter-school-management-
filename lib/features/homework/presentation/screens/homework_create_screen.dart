@@ -209,7 +209,7 @@ class _HomeworkCreateScreenState extends ConsumerState<HomeworkCreateScreen> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: _selectedSectionId,
+                    initialValue: _selectedSectionId,
                     decoration: const InputDecoration(
                       labelText: 'Class/Section *',
                       border: OutlineInputBorder(),
@@ -226,7 +226,7 @@ class _HomeworkCreateScreenState extends ConsumerState<HomeworkCreateScreen> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: _selectedSubjectId,
+                    initialValue: _selectedSubjectId,
                     decoration: const InputDecoration(
                       labelText: 'Subject *',
                       border: OutlineInputBorder(),
@@ -280,7 +280,7 @@ class _HomeworkCreateScreenState extends ConsumerState<HomeworkCreateScreen> {
                   ),
                   const Divider(),
                   DropdownButtonFormField<HomeworkPriority>(
-                    value: _priority,
+                    initialValue: _priority,
                     decoration: const InputDecoration(
                       labelText: 'Priority',
                       border: OutlineInputBorder(),

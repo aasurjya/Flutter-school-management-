@@ -91,7 +91,7 @@ class CanteenRepository extends BaseRepository {
   }
 
   Future<Wallet> getOrCreateWallet({String? userId, String? studentId}) async {
-    var wallet = await getWallet(userId: userId, studentId: studentId);
+    final wallet = await getWallet(userId: userId, studentId: studentId);
     if (wallet != null) return wallet;
 
     final data = {

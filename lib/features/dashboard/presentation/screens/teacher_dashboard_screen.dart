@@ -681,7 +681,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildQuickStats(BuildContext context) {
-    return Row(
+    return const Row(
       children: [
         Expanded(
           child: GlassStatCard(
@@ -691,7 +691,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
             iconColor: AppColors.success,
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         Expanded(
           child: GlassStatCard(
             title: 'Assignments',

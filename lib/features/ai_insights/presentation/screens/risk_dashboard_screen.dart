@@ -91,9 +91,9 @@ class _RiskDashboardScreenState extends ConsumerState<RiskDashboardScreen> {
                   ),
                   data: (students) {
                     if (students.isEmpty) {
-                      return Center(
+                      return const Center(
                         child: Padding(
-                          padding: const EdgeInsets.all(40),
+                          padding: EdgeInsets.all(40),
                           child: Column(
                             children: [
                               Icon(
@@ -101,8 +101,8 @@ class _RiskDashboardScreenState extends ConsumerState<RiskDashboardScreen> {
                                 size: 48,
                                 color: AppColors.success,
                               ),
-                              const SizedBox(height: 12),
-                              const Text(
+                              SizedBox(height: 12),
+                              Text(
                                 'No at-risk students found',
                                 style: TextStyle(
                                   fontSize: 16,

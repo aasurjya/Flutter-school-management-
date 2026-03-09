@@ -511,7 +511,7 @@ class _PlanCard extends StatelessWidget {
                     value: goalCount > 0 ? completedGoals / goalCount : 0,
                     backgroundColor: Colors.grey.withValues(alpha: 0.15),
                     valueColor:
-                        AlwaysStoppedAnimation(AppColors.success),
+                        const AlwaysStoppedAnimation(AppColors.success),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -549,7 +549,7 @@ class _PlanCard extends StatelessWidget {
               ],
               const Spacer(),
               if (plan.parentAcknowledged)
-                Row(
+                const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
@@ -557,7 +557,7 @@ class _PlanCard extends StatelessWidget {
                       size: 14,
                       color: AppColors.success,
                     ),
-                    const SizedBox(width: 3),
+                    SizedBox(width: 3),
                     Text(
                       'Parent Ack.',
                       style: TextStyle(

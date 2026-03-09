@@ -64,12 +64,12 @@ class _StaffAttendanceScreenState
                 ),
                 _SummaryChip(
                   label: 'Half Day',
-                  count: _countByStatus(StaffAttendanceStatus.half_day),
+                  count: _countByStatus(StaffAttendanceStatus.halfDay),
                   color: AppColors.warning,
                 ),
                 _SummaryChip(
                   label: 'On Leave',
-                  count: _countByStatus(StaffAttendanceStatus.on_leave),
+                  count: _countByStatus(StaffAttendanceStatus.onLeave),
                   color: AppColors.info,
                 ),
               ],
@@ -356,9 +356,9 @@ class _StaffAttendanceRow extends StatelessWidget {
                   icon: Icons.timelapse,
                   color: AppColors.warning,
                   selected:
-                      currentStatus == StaffAttendanceStatus.half_day,
+                      currentStatus == StaffAttendanceStatus.halfDay,
                   onTap: () =>
-                      onStatusChanged(StaffAttendanceStatus.half_day),
+                      onStatusChanged(StaffAttendanceStatus.halfDay),
                 ),
                 const SizedBox(width: 6),
                 _StatusButton(
@@ -366,9 +366,9 @@ class _StaffAttendanceRow extends StatelessWidget {
                   icon: Icons.event_busy,
                   color: AppColors.info,
                   selected:
-                      currentStatus == StaffAttendanceStatus.on_leave,
+                      currentStatus == StaffAttendanceStatus.onLeave,
                   onTap: () =>
-                      onStatusChanged(StaffAttendanceStatus.on_leave),
+                      onStatusChanged(StaffAttendanceStatus.onLeave),
                 ),
               ],
             ),

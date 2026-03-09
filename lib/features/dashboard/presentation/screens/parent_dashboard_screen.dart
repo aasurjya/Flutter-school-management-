@@ -293,13 +293,13 @@ class ParentDashboardScreen extends ConsumerWidget {
       height: 80,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        children: [
+        children: const [
           _ChildCard(
             name: 'Arjun',
             className: 'Class 10-A',
             isSelected: true,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           _ChildCard(
             name: 'Priya',
             className: 'Class 7-B',
@@ -356,7 +356,7 @@ class ParentDashboardScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
+                const Row(
                   children: [
                     _StatusBadge(
                       icon: Icons.check_circle,
@@ -374,7 +374,7 @@ class ParentDashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildQuickStats(BuildContext context) {
-    return Row(
+    return const Row(
       children: [
         Expanded(
           child: GlassStatCard(
@@ -385,7 +385,7 @@ class ParentDashboardScreen extends ConsumerWidget {
             subtitle: 'This month',
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         Expanded(
           child: GlassStatCard(
             title: 'Class Rank',
@@ -502,7 +502,7 @@ class ParentDashboardScreen extends ConsumerWidget {
               );
             }),
             const SizedBox(height: 4),
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
@@ -513,7 +513,7 @@ class ParentDashboardScreen extends ConsumerWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 12,
@@ -541,7 +541,7 @@ class ParentDashboardScreen extends ConsumerWidget {
               ),
               GestureDetector(
                 onTap: () => context.push(AppRoutes.studentResults),
-                child: Text(
+                child: const Text(
                   'View Details →',
                   style: TextStyle(
                     color: AppColors.primary,
@@ -552,19 +552,19 @@ class ParentDashboardScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          _ComparisonBar(
+          const _ComparisonBar(
             label: 'Your Child',
             value: 87,
             color: AppColors.primary,
           ),
           const SizedBox(height: 12),
-          _ComparisonBar(
+          const _ComparisonBar(
             label: 'Class Average',
             value: 72,
             color: AppColors.secondary,
           ),
           const SizedBox(height: 12),
-          _ComparisonBar(
+          const _ComparisonBar(
             label: 'Class Topper',
             value: 95,
             color: AppColors.accent,
@@ -576,15 +576,15 @@ class ParentDashboardScreen extends ConsumerWidget {
               color: AppColors.success.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
+            child: const Row(
               children: [
-                const Icon(Icons.trending_up, color: AppColors.success),
-                const SizedBox(width: 8),
-                const Text(
+                Icon(Icons.trending_up, color: AppColors.success),
+                SizedBox(width: 8),
+                Text(
                   'Your child scored ',
                   style: TextStyle(fontSize: 13),
                 ),
-                const Text(
+                Text(
                   '15% above',
                   style: TextStyle(
                     fontSize: 13,
@@ -592,7 +592,7 @@ class ParentDashboardScreen extends ConsumerWidget {
                     color: AppColors.success,
                   ),
                 ),
-                const Text(
+                Text(
                   ' class average',
                   style: TextStyle(fontSize: 13),
                 ),
@@ -612,15 +612,15 @@ class ParentDashboardScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
+              const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Pending Amount',
                     style: TextStyle(color: Colors.grey),
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
+                  SizedBox(height: 4),
+                  Text(
                     '₹25,000',
                     style: TextStyle(
                       fontSize: 28,
@@ -656,11 +656,11 @@ class ParentDashboardScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 16),
-          _FeeItem(label: 'Tuition Fee (Term 2)', amount: '₹20,000'),
+          const _FeeItem(label: 'Tuition Fee (Term 2)', amount: '₹20,000'),
           const SizedBox(height: 8),
-          _FeeItem(label: 'Transport Fee', amount: '₹3,000'),
+          const _FeeItem(label: 'Transport Fee', amount: '₹3,000'),
           const SizedBox(height: 8),
-          _FeeItem(label: 'Activity Fee', amount: '₹2,000'),
+          const _FeeItem(label: 'Activity Fee', amount: '₹2,000'),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,

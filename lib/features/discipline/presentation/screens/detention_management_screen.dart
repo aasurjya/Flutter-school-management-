@@ -254,6 +254,7 @@ class _DetentionManagementScreenState
     final studentIdController = TextEditingController();
     final notesController = TextEditingController();
     DateTime detentionDate = DateTime.now();
+    final messenger = ScaffoldMessenger.of(context);
 
     showModalBottomSheet(
       context: context,
@@ -347,13 +348,17 @@ class _DetentionManagementScreenState
                             detentionAssignmentsProvider(_selectedDate),
                           );
                           if (mounted) {
-                            context.showSuccessSnackBar(
-                              'Detention assigned',
-                            );
+                            messenger.showSnackBar(const SnackBar(
+                              content: Text('Detention assigned'),
+                              backgroundColor: AppColors.success,
+                            ));
                           }
                         } catch (e) {
                           if (mounted) {
-                            context.showErrorSnackBar('Failed: $e');
+                            messenger.showSnackBar(SnackBar(
+                              content: Text('Failed: $e'),
+                              backgroundColor: AppColors.error,
+                            ));
                           }
                         }
                       },
@@ -383,6 +388,7 @@ class _DetentionManagementScreenState
     TimeOfDay endTime = const TimeOfDay(hour: 16, minute: 0);
     final locationController = TextEditingController();
     final capacityController = TextEditingController(text: '30');
+    final messenger = ScaffoldMessenger.of(context);
 
     showModalBottomSheet(
       context: context,
@@ -422,7 +428,7 @@ class _DetentionManagementScreenState
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<int>(
-                    value: dayOfWeek,
+                    initialValue: dayOfWeek,
                     decoration: const InputDecoration(
                       labelText: 'Day of Week',
                       border: OutlineInputBorder(),
@@ -499,7 +505,7 @@ class _DetentionManagementScreenState
                         try {
                           final repo =
                               ref.read(disciplineRepositoryProvider);
-                          final timeToStr = (TimeOfDay t) =>
+                          String timeToStr(TimeOfDay t) =>
                               '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}:00';
                           final schedule = DetentionSchedule(
                             id: '',
@@ -516,13 +522,17 @@ class _DetentionManagementScreenState
                           await repo.createDetentionSchedule(schedule);
                           ref.invalidate(detentionSchedulesProvider);
                           if (mounted) {
-                            context.showSuccessSnackBar(
-                              'Schedule created',
-                            );
+                            messenger.showSnackBar(const SnackBar(
+                              content: Text('Schedule created'),
+                              backgroundColor: AppColors.success,
+                            ));
                           }
                         } catch (e) {
                           if (mounted) {
-                            context.showErrorSnackBar('Failed: $e');
+                            messenger.showSnackBar(SnackBar(
+                              content: Text('Failed: $e'),
+                              backgroundColor: AppColors.error,
+                            ));
                           }
                         }
                       },

@@ -167,7 +167,7 @@ class _VisitorLogScreenState extends ConsumerState<VisitorLogScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.inbox,
+                        const Icon(Icons.inbox,
                             size: 64, color: AppColors.textTertiaryLight),
                         const SizedBox(height: 16),
                         Text(

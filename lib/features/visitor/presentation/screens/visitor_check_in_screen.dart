@@ -340,7 +340,7 @@ class _VisitorCheckInScreenState
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<VisitorIdType>(
-                    value: _selectedIdType,
+                    initialValue: _selectedIdType,
                     decoration: const InputDecoration(
                       labelText: 'ID Type',
                       prefixIcon: Icon(Icons.badge),
@@ -383,7 +383,7 @@ class _VisitorCheckInScreenState
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<VisitorLogPurpose>(
-                    value: _selectedPurpose,
+                    initialValue: _selectedPurpose,
                     decoration: const InputDecoration(
                       labelText: 'Purpose *',
                       prefixIcon: Icon(Icons.category),

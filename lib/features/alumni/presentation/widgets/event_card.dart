@@ -127,7 +127,7 @@ class AlumniEventCard extends StatelessWidget {
           // Date and location row
           Row(
             children: [
-              Icon(Icons.calendar_today_outlined,
+              const Icon(Icons.calendar_today_outlined,
                   size: 14, color: AppColors.textTertiaryLight),
               const SizedBox(width: 4),
               Text(
@@ -160,7 +160,7 @@ class AlumniEventCard extends StatelessWidget {
                 ),
               ),
               if (event.maxAttendees != null) ...[
-                Icon(Icons.people_outline,
+                const Icon(Icons.people_outline,
                     size: 14, color: AppColors.textTertiaryLight),
                 const SizedBox(width: 4),
                 Text(

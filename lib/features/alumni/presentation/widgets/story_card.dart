@@ -61,7 +61,7 @@ class StoryCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.star,
+                          const Icon(Icons.star,
                               size: 14, color: AppColors.accent),
                           const SizedBox(width: 4),
                           Text(
@@ -140,7 +140,7 @@ class StoryCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Icon(
+                      const Icon(
                         Icons.arrow_forward_ios,
                         size: 14,
                         color: AppColors.textTertiaryLight,

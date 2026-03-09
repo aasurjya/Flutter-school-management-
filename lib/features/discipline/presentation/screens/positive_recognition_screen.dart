@@ -94,12 +94,12 @@ class _PositiveRecognitionScreenState
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       children: [
-                        const Icon(Icons.star_rounded,
+                        Icon(Icons.star_rounded,
                             color: AppColors.success, size: 28),
-                        const SizedBox(width: 8),
-                        const Text(
+                        SizedBox(width: 8),
+                        Text(
                           'Award Recognition',
                           style: TextStyle(
                             fontSize: 20,
@@ -123,7 +123,7 @@ class _PositiveRecognitionScreenState
                     // Category
                     categoriesAsync.when(
                       data: (cats) => DropdownButtonFormField<String>(
-                        value: categoryId,
+                        initialValue: categoryId,
                         decoration: const InputDecoration(
                           labelText: 'Category',
                           border: OutlineInputBorder(),
@@ -207,7 +207,7 @@ class _PositiveRecognitionScreenState
                         style: TextStyle(fontSize: 12),
                       ),
                       value: isPublic,
-                      activeColor: AppColors.success,
+                      activeThumbColor: AppColors.success,
                       onChanged: (v) => setSheetState(() => isPublic = v),
                       contentPadding: EdgeInsets.zero,
                     ),
@@ -218,7 +218,9 @@ class _PositiveRecognitionScreenState
                       child: ElevatedButton(
                         onPressed: () async {
                           if (studentIdController.text.trim().isEmpty ||
-                              descController.text.trim().isEmpty) return;
+                              descController.text.trim().isEmpty) {
+                            return;
+                          }
                           Navigator.pop(ctx);
                           await _awardRecognition(
                             studentId: studentIdController.text.trim(),

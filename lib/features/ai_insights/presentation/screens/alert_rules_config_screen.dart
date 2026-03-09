@@ -187,7 +187,7 @@ class _AlertRuleCard extends StatelessWidget {
               Switch.adaptive(
                 value: rule.isActive,
                 onChanged: onToggle,
-                activeColor: AppColors.success,
+                activeTrackColor: AppColors.success,
               ),
             ],
           ),
@@ -411,7 +411,7 @@ class _AddRuleSheetState extends State<_AddRuleSheet> {
 
               // Category dropdown
               DropdownButtonFormField<AlertCategory>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: InputDecoration(
                   labelText: 'Category',
                   border: OutlineInputBorder(
@@ -442,7 +442,7 @@ class _AddRuleSheetState extends State<_AddRuleSheet> {
 
               // Severity dropdown
               DropdownButtonFormField<AlertSeverity>(
-                value: _selectedSeverity,
+                initialValue: _selectedSeverity,
                 decoration: InputDecoration(
                   labelText: 'Severity',
                   border: OutlineInputBorder(
@@ -480,7 +480,7 @@ class _AddRuleSheetState extends State<_AddRuleSheet> {
 
               // Condition type dropdown
               DropdownButtonFormField<String>(
-                value: _conditionType,
+                initialValue: _conditionType,
                 decoration: InputDecoration(
                   labelText: 'Condition Type',
                   border: OutlineInputBorder(
@@ -509,7 +509,7 @@ class _AddRuleSheetState extends State<_AddRuleSheet> {
                   SizedBox(
                     width: 100,
                     child: DropdownButtonFormField<String>(
-                      value: _operator,
+                      initialValue: _operator,
                       decoration: InputDecoration(
                         labelText: 'Operator',
                         border: OutlineInputBorder(

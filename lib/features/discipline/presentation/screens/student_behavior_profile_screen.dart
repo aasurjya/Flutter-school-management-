@@ -154,7 +154,7 @@ class StudentBehaviorProfileScreen extends ConsumerWidget {
             historyAsync.when(
               data: (incidents) {
                 if (incidents.isEmpty) {
-                  return _EmptySection(
+                  return const _EmptySection(
                     icon: Icons.check_circle_outline,
                     text: 'No incidents recorded',
                   );
@@ -200,7 +200,7 @@ class StudentBehaviorProfileScreen extends ConsumerWidget {
             recognitionsAsync.when(
               data: (recs) {
                 if (recs.isEmpty) {
-                  return _EmptySection(
+                  return const _EmptySection(
                     icon: Icons.star_outline,
                     text: 'No recognitions yet',
                   );

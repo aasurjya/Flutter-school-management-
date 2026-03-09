@@ -91,9 +91,9 @@ class GeofenceAlertsScreen extends ConsumerWidget {
                       ),
                     ),
                     trailing: event.notified
-                        ? Icon(Icons.check_circle,
+                        ? const Icon(Icons.check_circle,
                             size: 20, color: AppColors.success)
-                        : Icon(Icons.circle_outlined,
+                        : const Icon(Icons.circle_outlined,
                             size: 20, color: Colors.grey),
                   ),
                 );

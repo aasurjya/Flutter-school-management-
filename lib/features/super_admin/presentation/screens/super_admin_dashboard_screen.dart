@@ -48,10 +48,10 @@ class SuperAdminDashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildPlatformStats() {
-    return Row(
+    return const Row(
       children: [
         Expanded(child: _StatCard(title: 'Total Tenants', value: '24', icon: Icons.business, color: AppColors.primary, trend: '+3 this month')),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         Expanded(child: _StatCard(title: 'Active Users', value: '12.5K', icon: Icons.people, color: AppColors.success, trend: '+8.2%')),
       ],
     );

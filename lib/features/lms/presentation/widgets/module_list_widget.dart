@@ -36,7 +36,7 @@ class ModuleListWidget extends StatelessWidget {
         child: Center(
           child: Column(
             children: [
-              Icon(Icons.view_module_outlined,
+              const Icon(Icons.view_module_outlined,
                   size: 48, color: AppColors.textTertiaryLight),
               const SizedBox(height: 12),
               Text(
@@ -135,7 +135,7 @@ class _ModuleExpansionTile extends StatelessWidget {
                       color: AppColors.success, size: 20)
                   : Text(
                       '${index + 1}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,

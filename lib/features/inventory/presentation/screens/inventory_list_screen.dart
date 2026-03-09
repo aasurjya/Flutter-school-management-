@@ -145,7 +145,7 @@ class _InventoryListScreenState
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.inventory_outlined,
+                        const Icon(Icons.inventory_outlined,
                             size: 64,
                             color: AppColors.textTertiaryLight),
                         const SizedBox(height: 16),
@@ -192,6 +192,7 @@ class _InventoryListScreenState
     final maxCtrl = TextEditingController(text: '100');
     final costCtrl = TextEditingController();
     InventoryUnit unit = InventoryUnit.pieces;
+    final messenger = ScaffoldMessenger.of(context);
 
     showModalBottomSheet(
       context: context,
@@ -249,7 +250,7 @@ class _InventoryListScreenState
                     const SizedBox(width: 12),
                     Expanded(
                       child: DropdownButtonFormField<InventoryUnit>(
-                        value: unit,
+                        initialValue: unit,
                         decoration: const InputDecoration(
                           labelText: 'Unit',
                         ),
@@ -329,14 +330,13 @@ class _InventoryListScreenState
                       });
                       ref.invalidate(inventoryItemsProvider);
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Item created')),
+                        messenger.showSnackBar(
+                          const SnackBar(content: Text('Item created')),
                         );
                       }
                     } catch (e) {
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        messenger.showSnackBar(
                           SnackBar(content: Text('Error: $e')),
                         );
                       }
@@ -421,7 +421,7 @@ class _InventoryItemCard extends StatelessWidget {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Icon(Icons.location_on_outlined,
+                  const Icon(Icons.location_on_outlined,
                       size: 14, color: AppColors.textTertiaryLight),
                   const SizedBox(width: 4),
                   Text(

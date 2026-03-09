@@ -77,7 +77,7 @@ class _InterviewScheduleScreenState
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.event_available,
+                        const Icon(Icons.event_available,
                             size: 64, color: AppColors.textTertiaryLight),
                         const SizedBox(height: 16),
                         Text(
@@ -262,7 +262,7 @@ class _InterviewScheduleScreenState
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.location_on,
+                const Icon(Icons.location_on,
                     size: 14, color: AppColors.textTertiaryLight),
                 const SizedBox(width: 4),
                 Text(

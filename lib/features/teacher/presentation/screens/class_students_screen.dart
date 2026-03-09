@@ -37,7 +37,7 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
   ];
 
   List<Map<String, dynamic>> get filteredStudents {
-    var students = _students.where((s) {
+    final students = _students.where((s) {
       if (_searchQuery.isEmpty) return true;
       return s['name'].toLowerCase().contains(_searchQuery.toLowerCase()) ||
           s['rollNo'].contains(_searchQuery);

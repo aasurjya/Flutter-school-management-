@@ -350,11 +350,11 @@ class _ExamPerformanceTab extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              const Row(
                 children: [
-                  const Icon(Icons.emoji_events, color: AppColors.accent, size: 20),
-                  const SizedBox(width: 8),
-                  const Text(
+                  Icon(Icons.emoji_events, color: AppColors.accent, size: 20),
+                  SizedBox(width: 8),
+                  Text(
                     'Top Performers',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
@@ -418,13 +418,13 @@ class _ExamPerformanceTab extends ConsumerWidget {
         final weakStudents = students.where((s) => s.overallPercentage < 40).toList();
         
         if (weakStudents.isEmpty) {
-          return GlassCard(
-            padding: const EdgeInsets.all(16),
+          return const GlassCard(
+            padding: EdgeInsets.all(16),
             child: Row(
               children: [
                 Icon(Icons.check_circle, color: AppColors.success),
-                const SizedBox(width: 12),
-                const Text('All students passed!'),
+                SizedBox(width: 12),
+                Text('All students passed!'),
               ],
             ),
           );

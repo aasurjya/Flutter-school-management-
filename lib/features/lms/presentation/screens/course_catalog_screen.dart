@@ -111,7 +111,7 @@ class _CourseCatalogScreenState extends ConsumerState<CourseCatalogScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.school_outlined,
+                        const Icon(Icons.school_outlined,
                             size: 64,
                             color: AppColors.textTertiaryLight),
                         const SizedBox(height: 16),

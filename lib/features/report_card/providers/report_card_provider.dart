@@ -278,7 +278,7 @@ class TemplateEditorState {
   }
 
   static TemplateEditorState defaultState() {
-    return TemplateEditorState(
+    return const TemplateEditorState(
       name: '',
       layout: 'standard',
       headerConfig: {
@@ -288,17 +288,17 @@ class TemplateEditorState {
         'affiliation_no': '',
       },
       sections: [
-        const TemplateSectionConfig(type: 'grades', enabled: true, order: 0),
-        const TemplateSectionConfig(
+        TemplateSectionConfig(type: 'grades', enabled: true, order: 0),
+        TemplateSectionConfig(
             type: 'attendance', enabled: true, order: 1),
-        const TemplateSectionConfig(
+        TemplateSectionConfig(
             type: 'teacher_comment', enabled: true, order: 2),
-        const TemplateSectionConfig(
+        TemplateSectionConfig(
             type: 'principal_comment', enabled: true, order: 3),
-        const TemplateSectionConfig(type: 'skills', enabled: false, order: 4),
-        const TemplateSectionConfig(
+        TemplateSectionConfig(type: 'skills', enabled: false, order: 4),
+        TemplateSectionConfig(
             type: 'activities', enabled: false, order: 5),
-        const TemplateSectionConfig(
+        TemplateSectionConfig(
             type: 'behavior', enabled: false, order: 6),
       ],
     );

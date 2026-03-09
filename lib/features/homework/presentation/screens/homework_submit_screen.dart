@@ -109,7 +109,7 @@ class _HomeworkSubmitScreenState extends ConsumerState<HomeworkSubmitScreen> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(Icons.book_outlined,
+                          const Icon(Icons.book_outlined,
                               size: 16, color: AppColors.textSecondaryLight),
                           const SizedBox(width: 4),
                           Text(

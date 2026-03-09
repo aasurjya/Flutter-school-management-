@@ -111,7 +111,7 @@ class CertificatePreviewScreen extends ConsumerWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.error_outline,
+                            const Icon(Icons.error_outline,
                                 size: 48,
                                 color: AppColors.textTertiaryLight),
                             const SizedBox(height: 8),

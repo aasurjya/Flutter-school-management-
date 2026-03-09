@@ -220,7 +220,7 @@ class _GradingScaleCard extends StatelessWidget {
               PopupMenuButton(
                 itemBuilder: (ctx) => [
                   const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'delete',
                     child: Text('Delete',
                         style: TextStyle(color: AppColors.error)),
@@ -387,7 +387,7 @@ class _GradingScaleEditorSheetState extends State<_GradingScaleEditorSheet> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _type,
+                      initialValue: _type,
                       decoration: const InputDecoration(
                         labelText: 'Type',
                         border: OutlineInputBorder(),
@@ -434,8 +434,8 @@ class _GradingScaleEditorSheetState extends State<_GradingScaleEditorSheet> {
               ),
               const SizedBox(height: 8),
               // Header
-              Row(
-                children: const [
+              const Row(
+                children: [
                   SizedBox(width: 70, child: Text('Grade', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
                   SizedBox(width: 8),
                   SizedBox(width: 60, child: Text('Min %', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
@@ -533,7 +533,7 @@ class _GradingScaleEditorSheetState extends State<_GradingScaleEditorSheet> {
                           SizedBox(
                             width: 40,
                             child: IconButton(
-                              icon: Icon(Icons.close,
+                              icon: const Icon(Icons.close,
                                   size: 18, color: AppColors.error),
                               onPressed: () =>
                                   setState(() => _grades.removeAt(index)),

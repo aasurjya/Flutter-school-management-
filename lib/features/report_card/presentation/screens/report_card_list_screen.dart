@@ -160,7 +160,7 @@ class _ReportCardListScreenState extends ConsumerState<ReportCardListScreen> {
                     fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
             DropdownButtonFormField<String>(
-              value: _filterSection,
+              initialValue: _filterSection,
               decoration: const InputDecoration(
                 labelText: 'Section',
                 border: OutlineInputBorder(),
@@ -283,7 +283,7 @@ class _ReportCardItem extends StatelessWidget {
               _StatusBadge(report.status),
               if (report.pdfUrl != null) ...[
                 const SizedBox(height: 8),
-                Icon(Icons.picture_as_pdf,
+                const Icon(Icons.picture_as_pdf,
                     color: AppColors.error, size: 20),
               ],
             ],

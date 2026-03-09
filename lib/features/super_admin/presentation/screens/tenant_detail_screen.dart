@@ -353,7 +353,7 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Monthly Subscription', style: const TextStyle(fontWeight: FontWeight.w500)),
+                      const Text('Monthly Subscription', style: TextStyle(fontWeight: FontWeight.w500)),
                       Text(DateFormat('MMM d, yyyy').format(DateTime.now().subtract(Duration(days: 30 * i))), style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                     ],
                   ),

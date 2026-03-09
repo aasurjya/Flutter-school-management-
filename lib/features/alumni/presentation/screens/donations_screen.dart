@@ -226,7 +226,7 @@ class _DonationsScreenState extends ConsumerState<DonationsScreen> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<AlumniDonationPurpose>(
-                  value: purpose,
+                  initialValue: purpose,
                   decoration: const InputDecoration(
                     labelText: 'Purpose',
                     border: OutlineInputBorder(),

@@ -518,7 +518,7 @@ class _ApplyLeaveFormState extends State<_ApplyLeaveForm> {
               ),
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
-                value: _leaveType,
+                initialValue: _leaveType,
                 decoration: const InputDecoration(
                   labelText: 'Leave Type',
                   border: OutlineInputBorder(),

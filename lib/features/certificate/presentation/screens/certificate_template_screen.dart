@@ -45,7 +45,7 @@ class _CertificateTemplateScreenState
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.design_services,
+                  const Icon(Icons.design_services,
                       size: 64, color: AppColors.textTertiaryLight),
                   const SizedBox(height: 16),
                   Text(
@@ -94,14 +94,17 @@ class _CertificateTemplateScreenState
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => _TemplateForm(
-        onSubmit: (data) async {
-          await ref
-              .read(templateNotifierProvider.notifier)
-              .createTemplate(data);
-          if (mounted) Navigator.pop(context);
-        },
-      ),
+      builder: (context) {
+        final nav = Navigator.of(context);
+        return _TemplateForm(
+          onSubmit: (data) async {
+            await ref
+                .read(templateNotifierProvider.notifier)
+                .createTemplate(data);
+            if (mounted) nav.pop();
+          },
+        );
+      },
     );
   }
 
@@ -113,15 +116,18 @@ class _CertificateTemplateScreenState
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => _TemplateForm(
-        template: template,
-        onSubmit: (data) async {
-          await ref
-              .read(templateNotifierProvider.notifier)
-              .updateTemplate(template.id, data);
-          if (mounted) Navigator.pop(context);
-        },
-      ),
+      builder: (context) {
+        final nav = Navigator.of(context);
+        return _TemplateForm(
+          template: template,
+          onSubmit: (data) async {
+            await ref
+                .read(templateNotifierProvider.notifier)
+                .updateTemplate(template.id, data);
+            if (mounted) nav.pop();
+          },
+        );
+      },
     );
   }
 
@@ -373,7 +379,7 @@ class _TemplateFormState extends State<_TemplateForm> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<CertificateType>(
-                value: _type,
+                initialValue: _type,
                 decoration: const InputDecoration(
                   labelText: 'Certificate Type',
                   prefixIcon: Icon(Icons.category),
@@ -405,6 +411,7 @@ class _TemplateFormState extends State<_TemplateForm> {
                       ? null
                       : () async {
                           if (!_formKey.currentState!.validate()) return;
+                          final messenger = ScaffoldMessenger.of(context);
                           setState(() => _isLoading = true);
                           try {
                             await widget.onSubmit({
@@ -427,7 +434,7 @@ class _TemplateFormState extends State<_TemplateForm> {
                             });
                           } catch (e) {
                             if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              messenger.showSnackBar(
                                 SnackBar(content: Text('Error: $e')),
                               );
                             }

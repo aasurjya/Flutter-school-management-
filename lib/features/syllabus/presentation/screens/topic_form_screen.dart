@@ -422,7 +422,7 @@ class _TopicFormScreenState extends ConsumerState<TopicFormScreen> {
     // that can be populated with term data. For now, the term ID can be set
     // manually or left null.
     return DropdownButtonFormField<String>(
-      value: _selectedTermId,
+      initialValue: _selectedTermId,
       decoration: InputDecoration(
         labelText: 'Term (optional)',
         border: OutlineInputBorder(
@@ -430,8 +430,8 @@ class _TopicFormScreenState extends ConsumerState<TopicFormScreen> {
         ),
         prefixIcon: const Icon(Icons.calendar_month),
       ),
-      items: [
-        const DropdownMenuItem<String>(
+      items: const [
+        DropdownMenuItem<String>(
           value: null,
           child: Text('No term selected'),
         ),

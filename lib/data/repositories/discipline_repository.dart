@@ -1,10 +1,9 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/discipline.dart';
 import 'base_repository.dart';
 
 class DisciplineRepository extends BaseRepository {
-  DisciplineRepository(SupabaseClient client) : super(client);
+  DisciplineRepository(super.client);
 
   // ─── BEHAVIOR CATEGORIES ──────────────────────────────────
 
@@ -449,7 +448,7 @@ class DisciplineRepository extends BaseRepository {
         .lte('created_at', end.toIso8601String());
 
     // Aggregate
-    int totalIncidents = incidents.length;
+    final int totalIncidents = incidents.length;
     int openIncidents = 0;
     int resolvedIncidents = 0;
     final Map<String, int> bySeverity = {};

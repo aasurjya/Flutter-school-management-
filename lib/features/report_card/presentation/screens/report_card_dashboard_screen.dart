@@ -53,7 +53,7 @@ class _ReportCardDashboardScreenState
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedAcademicYear,
+                    initialValue: _selectedAcademicYear,
                     decoration: const InputDecoration(
                       labelText: 'Academic Year',
                       border: OutlineInputBorder(),
@@ -72,7 +72,7 @@ class _ReportCardDashboardScreenState
                 const SizedBox(width: 12),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedTerm,
+                    initialValue: _selectedTerm,
                     decoration: const InputDecoration(
                       labelText: 'Term',
                       border: OutlineInputBorder(),
@@ -188,7 +188,7 @@ class _OverviewStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // In production, these would come from the dashboard summary provider
-    return Row(
+    return const Row(
       children: [
         Expanded(
           child: _StatTile(
@@ -198,7 +198,7 @@ class _OverviewStats extends StatelessWidget {
             color: AppColors.info,
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         Expanded(
           child: _StatTile(
             label: 'Pending Review',
@@ -207,7 +207,7 @@ class _OverviewStats extends StatelessWidget {
             color: AppColors.warning,
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         Expanded(
           child: _StatTile(
             label: 'Published',
@@ -216,7 +216,7 @@ class _OverviewStats extends StatelessWidget {
             color: AppColors.success,
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         Expanded(
           child: _StatTile(
             label: 'Sent to Parents',

@@ -463,15 +463,15 @@ class _DocumentsTab extends ConsumerWidget {
     switch (type) {
       case StaffDocumentType.resume:
         return Icons.description;
-      case StaffDocumentType.id_proof:
+      case StaffDocumentType.idProof:
         return Icons.badge;
-      case StaffDocumentType.address_proof:
+      case StaffDocumentType.addressProof:
         return Icons.home;
       case StaffDocumentType.qualification:
         return Icons.school;
-      case StaffDocumentType.experience_letter:
+      case StaffDocumentType.experienceLetter:
         return Icons.work_history;
-      case StaffDocumentType.offer_letter:
+      case StaffDocumentType.offerLetter:
         return Icons.mail;
       case StaffDocumentType.contract:
         return Icons.gavel;

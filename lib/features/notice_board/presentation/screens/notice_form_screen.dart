@@ -119,7 +119,7 @@ class _NoticeFormScreenState extends ConsumerState<NoticeFormScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<NoticeCategory>(
-              value: _category,
+              initialValue: _category,
               decoration: const InputDecoration(
                   labelText: 'Category', border: OutlineInputBorder()),
               items: NoticeCategory.values
@@ -129,7 +129,7 @@ class _NoticeFormScreenState extends ConsumerState<NoticeFormScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<NoticeAudience>(
-              value: _audience,
+              initialValue: _audience,
               decoration: const InputDecoration(
                   labelText: 'Audience', border: OutlineInputBorder()),
               items: NoticeAudience.values
@@ -141,7 +141,7 @@ class _NoticeFormScreenState extends ConsumerState<NoticeFormScreen> {
             SwitchListTile(
               title: const Text('Pin to top'),
               value: _isPinned,
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
               onChanged: (v) => setState(() => _isPinned = v),
             ),
           ],

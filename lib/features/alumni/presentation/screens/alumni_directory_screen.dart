@@ -188,7 +188,7 @@ class _AlumniDirectoryScreenState
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.people_outline,
                           size: 64,
                           color: AppColors.textTertiaryLight,

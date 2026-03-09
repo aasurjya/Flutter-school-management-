@@ -1,4 +1,5 @@
 /// Student Portfolio Models
+library;
 
 class PortfolioSummary {
   final String studentId;

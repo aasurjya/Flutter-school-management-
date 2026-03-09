@@ -167,7 +167,7 @@ class _VisitorDashboardScreenState
                     child: Center(
                       child: Column(
                         children: [
-                          Icon(Icons.people_outline,
+                          const Icon(Icons.people_outline,
                               size: 48,
                               color: AppColors.textTertiaryLight),
                           const SizedBox(height: 8),

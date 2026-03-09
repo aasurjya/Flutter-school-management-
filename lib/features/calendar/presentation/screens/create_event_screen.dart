@@ -356,7 +356,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _recurrenceFrequency,
+                            initialValue: _recurrenceFrequency,
                             decoration: const InputDecoration(
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(
@@ -414,7 +414,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                           ?.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<EventVisibility>(
-                    value: _visibility,
+                    initialValue: _visibility,
                     decoration: const InputDecoration(
                       labelText: 'Visibility',
                       prefixIcon: Icon(Icons.visibility),
@@ -430,7 +430,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                   const SizedBox(height: 12),
                   if (_isEditing) ...[
                     DropdownButtonFormField<EventStatus>(
-                      value: _status,
+                      initialValue: _status,
                       decoration: const InputDecoration(
                         labelText: 'Status',
                         prefixIcon: Icon(Icons.flag),

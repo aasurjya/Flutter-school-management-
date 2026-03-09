@@ -136,7 +136,7 @@ class AssetCard extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.location_on_outlined,
                                 size: 14,
                                 color: AppColors.textTertiaryLight,

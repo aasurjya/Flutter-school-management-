@@ -177,7 +177,7 @@ class _CampaignCreateScreenState extends ConsumerState<CampaignCreateScreen> {
               );
             }
             return DropdownButtonFormField<String>(
-              value: _selectedTemplate?.id,
+              initialValue: _selectedTemplate?.id,
               decoration: const InputDecoration(
                 hintText: 'Select a template...',
               ),
@@ -291,35 +291,34 @@ class _CampaignCreateScreenState extends ConsumerState<CampaignCreateScreen> {
         const SizedBox(height: 12),
         GlassCard(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              RadioListTile<bool>(
-                title: const Text('Send Now'),
-                subtitle: const Text('Campaign will be sent immediately'),
-                value: true,
-                groupValue: _sendNow,
-                onChanged: (v) => setState(() => _sendNow = v!),
-                activeColor: AppColors.primary,
-              ),
-              const Divider(),
-              RadioListTile<bool>(
-                title: const Text('Schedule for Later'),
-                subtitle: Text(
-                  _scheduledAt != null
-                      ? DateFormat('MMM d, yyyy - h:mm a')
-                          .format(_scheduledAt!)
-                      : 'Choose a date and time',
+          child: RadioGroup<bool>(
+            groupValue: _sendNow,
+            onChanged: (v) async {
+              if (v != null) {
+                setState(() => _sendNow = v);
+                if (!v) {
+                  await _pickScheduleDateTime();
+                }
+              }
+            },
+            child: Column(
+              children: [
+                const RadioListTile<bool>(
+                  title: Text('Send Now'),
+                  subtitle: Text('Campaign will be sent immediately'),
+                  value: true,
                 ),
-                value: false,
-                groupValue: _sendNow,
-                onChanged: (v) async {
-                  setState(() => _sendNow = v!);
-                  if (v == false) {
-                    await _pickScheduleDateTime();
-                  }
-                },
-                activeColor: AppColors.primary,
-              ),
+                const Divider(),
+                RadioListTile<bool>(
+                  title: const Text('Schedule for Later'),
+                  subtitle: Text(
+                    _scheduledAt != null
+                        ? DateFormat('MMM d, yyyy - h:mm a')
+                            .format(_scheduledAt!)
+                        : 'Choose a date and time',
+                  ),
+                  value: false,
+                ),
               if (!_sendNow) ...[
                 const SizedBox(height: 8),
                 SizedBox(
@@ -337,6 +336,7 @@ class _CampaignCreateScreenState extends ConsumerState<CampaignCreateScreen> {
                 ),
               ],
             ],
+          ),
           ),
         ),
       ],

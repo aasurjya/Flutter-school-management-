@@ -373,7 +373,7 @@ class _GenerateTabState extends ConsumerState<_GenerateTab> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedAcademicYear,
+                          initialValue: _selectedAcademicYear,
                           decoration: const InputDecoration(
                             labelText: 'Academic Year *',
                             border: OutlineInputBorder(),
@@ -392,7 +392,7 @@ class _GenerateTabState extends ConsumerState<_GenerateTab> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedTerm,
+                          initialValue: _selectedTerm,
                           decoration: const InputDecoration(
                             labelText: 'Term *',
                             border: OutlineInputBorder(),
@@ -417,7 +417,7 @@ class _GenerateTabState extends ConsumerState<_GenerateTab> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedClass,
+                          initialValue: _selectedClass,
                           decoration: const InputDecoration(
                             labelText: 'Class *',
                             border: OutlineInputBorder(),
@@ -441,7 +441,7 @@ class _GenerateTabState extends ConsumerState<_GenerateTab> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedSection,
+                          initialValue: _selectedSection,
                           decoration: const InputDecoration(
                             labelText: 'Section *',
                             border: OutlineInputBorder(),
@@ -460,7 +460,7 @@ class _GenerateTabState extends ConsumerState<_GenerateTab> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: _selectedTemplate,
+                    initialValue: _selectedTemplate,
                     decoration: const InputDecoration(
                       labelText: 'Report Template *',
                       border: OutlineInputBorder(),
@@ -788,11 +788,11 @@ class _TemplateCard extends StatelessWidget {
                 runSpacing: 4,
                 children: [
                   if (template.includesGrades)
-                    _FeatureChip(label: 'Grades', color: Colors.blue),
+                    const _FeatureChip(label: 'Grades', color: Colors.blue),
                   if (template.includesAttendance)
-                    _FeatureChip(label: 'Attendance', color: Colors.green),
+                    const _FeatureChip(label: 'Attendance', color: Colors.green),
                   if (template.includesRemarks)
-                    _FeatureChip(label: 'Remarks', color: Colors.orange),
+                    const _FeatureChip(label: 'Remarks', color: Colors.orange),
                 ],
               ),
             ],

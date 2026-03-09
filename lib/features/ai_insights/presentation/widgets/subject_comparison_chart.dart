@@ -148,7 +148,7 @@ class SubjectComparisonChart extends StatelessWidget {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(6),
                   ),
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [

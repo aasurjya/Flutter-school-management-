@@ -321,11 +321,11 @@ class ReportCardFullRepository extends BaseRepository {
       );
     }).toList();
 
-    double totalObtained =
+    final double totalObtained =
         grades.fold(0, (s, g) => s + (g.marksObtained ?? 0));
-    double totalMax = grades.fold(0, (s, g) => s + (g.maxMarks ?? 0));
-    double overallPct = totalMax > 0 ? (totalObtained / totalMax) * 100 : 0;
-    String overallGrade =
+    final double totalMax = grades.fold(0, (s, g) => s + (g.maxMarks ?? 0));
+    final double overallPct = totalMax > 0 ? (totalObtained / totalMax) * 100 : 0;
+    final String overallGrade =
         gradingScale?.gradeFor(overallPct) ?? _defaultGrade(overallPct);
 
     // 6. Pull attendance for the term period
@@ -355,7 +355,7 @@ class ReportCardFullRepository extends BaseRepository {
           .length;
     }
 
-    double attendancePct = totalDays > 0 ? (daysPresent / totalDays) * 100 : 0;
+    final double attendancePct = totalDays > 0 ? (daysPresent / totalDays) * 100 : 0;
 
     // 7. Calculate rank (by total percentage within the same section)
     int rank = 0;

@@ -300,25 +300,25 @@ class _CommunicationDashboardScreenState
 
   Widget _buildQuickActions(ThemeData theme) {
     final actions = [
-      _QuickAction(
+      const _QuickAction(
         icon: Icons.description_outlined,
         label: 'Templates',
         color: AppColors.primary,
         route: '/communication/templates',
       ),
-      _QuickAction(
+      const _QuickAction(
         icon: Icons.campaign_outlined,
         label: 'Campaigns',
         color: AppColors.secondary,
         route: '/communication/campaigns',
       ),
-      _QuickAction(
+      const _QuickAction(
         icon: Icons.auto_awesome_outlined,
         label: 'Auto Rules',
         color: AppColors.warning,
         route: '/communication/auto-rules',
       ),
-      _QuickAction(
+      const _QuickAction(
         icon: Icons.sms_outlined,
         label: 'SMS Settings',
         color: AppColors.info,

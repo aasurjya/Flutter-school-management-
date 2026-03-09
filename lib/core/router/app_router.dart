@@ -35,6 +35,9 @@ import '../../features/teacher/presentation/screens/assignments_management_scree
 import '../../features/teacher/presentation/screens/my_classes_screen.dart';
 import '../../features/teacher/presentation/screens/class_students_screen.dart';
 import '../../features/parent/presentation/screens/fee_payment_screen.dart';
+import '../../features/parent/presentation/screens/child_progress_screen.dart';
+import '../../features/parent/presentation/screens/homework_tracker_screen.dart';
+import '../../features/parent/presentation/screens/teacher_message_screen.dart';
 import '../../features/admin/presentation/screens/exam_management_screen.dart';
 import '../../features/admin/presentation/screens/fee_management_screen.dart';
 import '../../features/admin/presentation/screens/announcements_screen.dart';
@@ -214,6 +217,9 @@ import '../../features/communication/presentation/screens/auto_rules_screen.dart
 import '../../features/communication/presentation/screens/sms_settings_screen.dart';
 import '../../features/communication/presentation/screens/email_settings_screen.dart';
 import '../../features/communication/presentation/screens/communication_log_screen.dart';
+import '../../features/communication/presentation/screens/whatsapp_settings_screen.dart';
+import '../../features/communication/presentation/screens/notification_log_screen.dart';
+import '../../features/communication/presentation/screens/bulk_notify_screen.dart';
 // Inventory & Assets
 import '../../features/inventory/presentation/screens/inventory_dashboard_screen.dart';
 import '../../features/inventory/presentation/screens/asset_list_screen.dart';
@@ -243,7 +249,16 @@ import '../../features/homework/presentation/screens/homework_detail_screen.dart
 import '../../features/homework/presentation/screens/homework_submit_screen.dart';
 import '../../features/homework/presentation/screens/homework_submissions_screen.dart';
 import '../../features/homework/presentation/screens/homework_calendar_screen.dart';
+import '../../features/offline/presentation/screens/sync_status_screen.dart';
 import '../shell/main_shell.dart';
+import '../../features/academic/presentation/screens/gradebook_screen.dart';
+import '../../features/academic/presentation/screens/grade_entry_form_screen.dart';
+import '../../data/models/gradebook.dart';
+import '../../data/repositories/timetable_repository.dart';
+import '../../features/settings/presentation/screens/language_screen.dart';
+import '../../features/fees/presentation/screens/payment_gateway_screen.dart';
+import '../../features/fees/presentation/screens/payment_checkout_screen.dart';
+import '../../features/fees/presentation/screens/payment_history_screen.dart';
 
 /// Route names
 class AppRoutes {
@@ -278,6 +293,7 @@ class AppRoutes {
   static const String calendarHolidays = '/calendar/holidays';
   static const String calendarEventAttendees = '/calendar/event/:eventId/attendees';
   static const String settings = '/settings';
+  static const String languageSettings = '/settings/language';
   static const String profile = '/profile';
 
   // Canteen routes
@@ -549,6 +565,9 @@ class AppRoutes {
   static const String communicationSmsSettings = '/communication/sms-settings';
   static const String communicationEmailSettings = '/communication/email-settings';
   static const String communicationLog = '/communication/log';
+  static const String whatsappSettings = '/admin/whatsapp-settings';
+  static const String notificationLog = '/admin/notification-log';
+  static const String bulkNotify = '/admin/bulk-notify';
 
   // Inventory & Assets routes
   static const String inventoryDashboard = '/inventory';
@@ -578,12 +597,29 @@ class AppRoutes {
   static const String noticeBoardCreate = '/notice-board/create';
   static const String noticeBoardEdit = '/notice-board/:noticeId/edit';
 
+  // Gradebook routes
+  static const String gradebook = '/teacher/gradebook';
+  static const String gradeEntryForm = '/teacher/grade-entry';
+
   // Student Portfolio routes
   static const String studentPortfolio = '/portfolio/:studentId';
   static const String portfolioWork = '/portfolio/:studentId/work';
 
   // Digital ID Card
   static const String digitalIdCard = '/student/:studentId/id-card';
+
+  // Payment Gateways
+  static const String paymentGateway = '/admin/payment-gateways';
+  static const String paymentCheckout = '/fees/pay/:invoiceId';
+  static const String paymentHistory = '/fees/payment-history';
+
+  // Offline / Sync routes
+  static const String syncStatus = '/sync-status';
+
+  // Parent Engagement routes
+  static const String childProgress = '/parent/child-progress/:childId';
+  static const String homeworkTracker = '/parent/homework-tracker';
+  static const String teacherMessage = '/parent/teacher-message';
 }
 
 /// Router provider
@@ -1858,6 +1894,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.communicationLog,
         builder: (context, state) => const CommunicationLogScreen(),
       ),
+      GoRoute(
+        path: AppRoutes.whatsappSettings,
+        builder: (context, state) => const WhatsAppSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationLog,
+        builder: (context, state) => const NotificationLogScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.bulkNotify,
+        builder: (context, state) => const BulkNotifyScreen(),
+      ),
 
       // ==================== INVENTORY & ASSETS ====================
       GoRoute(
@@ -1989,6 +2037,77 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => DigitalIdScreen(
           studentId: state.pathParameters['studentId']!,
         ),
+      ),
+
+      // ==================== SETTINGS ====================
+      GoRoute(
+        path: AppRoutes.languageSettings,
+        builder: (context, state) => const LanguageScreen(),
+      ),
+
+      // ==================== PAYMENT GATEWAYS ====================
+      GoRoute(
+        path: AppRoutes.paymentGateway,
+        builder: (context, state) => const PaymentGatewayScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.paymentCheckout,
+        builder: (context, state) => PaymentCheckoutScreen(
+          invoiceId: state.pathParameters['invoiceId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.paymentHistory,
+        builder: (context, state) => const PaymentHistoryScreen(),
+      ),
+
+      // ==================== OFFLINE / SYNC STATUS ====================
+      GoRoute(
+        path: AppRoutes.syncStatus,
+        builder: (context, state) => const SyncStatusScreen(),
+      ),
+
+      // ==================== GRADEBOOK ====================
+      GoRoute(
+        path: AppRoutes.gradebook,
+        builder: (context, state) => const GradebookScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.gradeEntryForm,
+        builder: (context, state) {
+          final extra = state.extra;
+          GradeEntry? existingEntry;
+          TeacherClassInfo? classInfo;
+          if (extra is GradeEntry) {
+            existingEntry = extra;
+          } else if (extra is TeacherClassInfo) {
+            classInfo = extra;
+          } else if (extra is Map<String, dynamic>) {
+            existingEntry = extra['entry'] as GradeEntry?;
+            classInfo = extra['classInfo'] as TeacherClassInfo?;
+          }
+          return GradeEntryFormScreen(
+            existingEntry: existingEntry,
+            classInfo: classInfo,
+          );
+        },
+      ),
+
+      // ==================== PARENT ENGAGEMENT ====================
+      GoRoute(
+        path: AppRoutes.childProgress,
+        builder: (context, state) => ChildProgressScreen(
+          childId: state.pathParameters['childId']!,
+          childName: state.uri.queryParameters['name'],
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.homeworkTracker,
+        builder: (context, state) => const HomeworkTrackerScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.teacherMessage,
+        builder: (context, state) => const TeacherMessageScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

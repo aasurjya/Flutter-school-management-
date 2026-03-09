@@ -57,7 +57,7 @@ class DepreciationChart extends StatelessWidget {
                 drawVerticalLine: false,
                 horizontalInterval: maxValue / 4,
                 getDrawingHorizontalLine: (value) {
-                  return FlLine(
+                  return const FlLine(
                     color: AppColors.borderLight,
                     strokeWidth: 1,
                   );
@@ -165,14 +165,14 @@ class DepreciationChart extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         // Legend
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _LegendItem(
               color: AppColors.primary,
               label: 'Book Value',
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             _LegendItem(
               color: AppColors.warning,
               label: 'Current Year',

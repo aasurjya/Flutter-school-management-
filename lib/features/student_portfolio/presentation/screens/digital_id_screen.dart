@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -198,11 +197,11 @@ class _CardBody extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    _InfoRow(label: 'CLASS', value: '10-A'),
+                    const _InfoRow(label: 'CLASS', value: '10-A'),
                     const SizedBox(height: 5),
-                    _InfoRow(label: 'SECTION', value: 'A'),
+                    const _InfoRow(label: 'SECTION', value: 'A'),
                     const SizedBox(height: 5),
-                    _InfoRow(label: 'ROLL NO', value: '15'),
+                    const _InfoRow(label: 'ROLL NO', value: '15'),
                     const SizedBox(height: 5),
                     _InfoRow(
                       label: 'ID',
@@ -369,12 +368,12 @@ class _QrSection extends StatelessWidget {
                     color: AppColors.success.withValues(alpha: 0.3),
                   ),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.verified,
                         size: 12, color: AppColors.success),
-                    const SizedBox(width: 5),
+                    SizedBox(width: 5),
                     Text(
                       'ACTIVE',
                       style: TextStyle(
@@ -403,10 +402,10 @@ class _InfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'CARD INFORMATION',
           style: TextStyle(
             fontSize: 10,
@@ -415,20 +414,20 @@ class _InfoSection extends StatelessWidget {
             letterSpacing: 1.4,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         _InfoTile(
           icon: Icons.info_outline,
           title: 'Valid For',
           subtitle: 'Academic Year 2025–2026',
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         _InfoTile(
           icon: Icons.security,
           title: 'Security Note',
           subtitle: 'This ID card is the property of the school. '
               'If found, please return to the school office.',
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         _InfoTile(
           icon: Icons.phone_outlined,
           title: 'School Contact',

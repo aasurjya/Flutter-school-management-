@@ -63,7 +63,7 @@ class AdmissionPipelineChart extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.filter_alt, color: AppColors.primary, size: 20),
+              const Icon(Icons.filter_alt, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Admission Pipeline',

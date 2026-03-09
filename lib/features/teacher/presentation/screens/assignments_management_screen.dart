@@ -52,7 +52,7 @@ class _AssignmentsManagementScreenState extends ConsumerState<AssignmentsManagem
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
+        children: const [
           _AssignmentsList(filter: AssignmentsFilter(status: 'published')),
           _AssignmentsList(filter: AssignmentsFilter(status: 'draft')),
           _AssignmentsList(filter: AssignmentsFilter(status: 'closed')),

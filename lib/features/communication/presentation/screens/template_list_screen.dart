@@ -318,7 +318,7 @@ class _TemplateCard extends StatelessWidget {
               Switch(
                 value: template.isActive,
                 onChanged: onToggle,
-                activeColor: AppColors.primary,
+                activeThumbColor: AppColors.primary,
               ),
             ],
           ),

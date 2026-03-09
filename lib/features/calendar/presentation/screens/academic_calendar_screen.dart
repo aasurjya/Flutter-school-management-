@@ -84,7 +84,7 @@ class _AcademicCalendarScreenState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.calendar_month,
+          const Icon(Icons.calendar_month,
               size: 64, color: AppColors.textTertiaryLight),
           const SizedBox(height: 12),
           Text(
@@ -126,7 +126,7 @@ class _AcademicCalendarScreenState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline,
+            const Icon(Icons.error_outline,
                 size: 48, color: AppColors.error),
             const SizedBox(height: 12),
             Text('Failed to load: $error'),
@@ -266,7 +266,7 @@ class _AcademicCalendarScreenState
           ),
           const SizedBox(height: 10),
           DropdownButtonFormField<AcademicItemType>(
-            value: _newItemType,
+            initialValue: _newItemType,
             decoration: const InputDecoration(
               labelText: 'Item Type',
               isDense: true,

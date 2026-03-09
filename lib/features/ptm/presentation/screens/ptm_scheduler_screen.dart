@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/ptm.dart';
 import '../../providers/ptm_provider.dart';
 
@@ -309,16 +310,16 @@ class _StatusChip extends StatelessWidget {
     Color color;
     switch (status) {
       case 'draft':
-        color = Colors.grey;
+        color = AppColors.grey500;
         break;
       case 'open':
-        color = Colors.green;
+        color = AppColors.success;
         break;
       case 'closed':
-        color = Colors.red;
+        color = AppColors.error;
         break;
       default:
-        color = Colors.grey;
+        color = AppColors.grey500;
     }
 
     return Container(
@@ -339,13 +340,13 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-class _AppointmentCard extends StatelessWidget {
+class _AppointmentCard extends ConsumerWidget {
   final PTMAppointment appointment;
 
   const _AppointmentCard({required this.appointment});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Card(
@@ -423,9 +424,9 @@ class _AppointmentCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   OutlinedButton(
-                    onPressed: () => _cancelAppointment(context),
+                    onPressed: () => _cancelAppointment(context, ref),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
+                      foregroundColor: AppColors.error,
                     ),
                     child: const Text('Cancel'),
                   ),
@@ -441,15 +442,15 @@ class _AppointmentCard extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'pending':
-        return Colors.orange;
+        return AppColors.warning;
       case 'confirmed':
-        return Colors.green;
+        return AppColors.success;
       case 'cancelled':
-        return Colors.red;
+        return AppColors.error;
       case 'completed':
-        return Colors.blue;
+        return AppColors.primary;
       default:
-        return Colors.grey;
+        return AppColors.grey400;
     }
   }
 
@@ -468,23 +469,40 @@ class _AppointmentCard extends StatelessWidget {
     }
   }
 
-  void _cancelAppointment(BuildContext context) {
+  void _cancelAppointment(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Cancel Appointment?'),
         content: const Text(
           'Are you sure you want to cancel this appointment?',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('No'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Implement cancel
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              try {
+                await ref
+                    .read(ptmRepositoryProvider)
+                    .cancelAppointment(appointment.id);
+                ref.invalidate(ptmAppointmentsProvider);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Appointment cancelled')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to cancel: $e')),
+                  );
+                }
+              }
             },
             child: const Text('Yes, Cancel'),
           ),
@@ -504,19 +522,19 @@ class _AppointmentStatusChip extends StatelessWidget {
     Color color;
     switch (status) {
       case 'pending':
-        color = Colors.orange;
+        color = AppColors.warning;
         break;
       case 'confirmed':
-        color = Colors.green;
+        color = AppColors.success;
         break;
       case 'cancelled':
-        color = Colors.red;
+        color = AppColors.error;
         break;
       case 'completed':
-        color = Colors.blue;
+        color = AppColors.primary;
         break;
       default:
-        color = Colors.grey;
+        color = AppColors.grey400;
     }
 
     return Container(

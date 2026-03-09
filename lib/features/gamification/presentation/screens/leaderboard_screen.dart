@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/achievement.dart';
 import '../../providers/gamification_provider.dart';
 
@@ -102,7 +103,7 @@ class _TopThreePodium extends StatelessWidget {
               entry: entries[1],
               rank: 2,
               height: 140,
-              color: Colors.grey[400]!,
+              color: AppColors.grey400,
             ),
           ),
           // 1st place
@@ -111,7 +112,7 @@ class _TopThreePodium extends StatelessWidget {
               entry: entries[0],
               rank: 1,
               height: 180,
-              color: Colors.amber,
+              color: AppColors.warning,
             ),
           ),
           // 3rd place
@@ -120,7 +121,7 @@ class _TopThreePodium extends StatelessWidget {
               entry: entries[2],
               rank: 3,
               height: 110,
-              color: Colors.orange[300]!,
+              color: AppColors.warning,
             ),
           ),
         ],
@@ -163,7 +164,7 @@ class _PodiumItem extends StatelessWidget {
                         errorBuilder: (_, __, ___) => Text(
                           entry.initials,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.background,
                             fontWeight: FontWeight.bold,
                             fontSize: rank == 1 ? 20 : 16,
                           ),
@@ -173,7 +174,7 @@ class _PodiumItem extends StatelessWidget {
                   : Text(
                       entry.initials,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.background,
                         fontWeight: FontWeight.bold,
                         fontSize: rank == 1 ? 20 : 16,
                       ),
@@ -184,7 +185,7 @@ class _PodiumItem extends StatelessWidget {
                 top: -15,
                 child: Icon(
                   Icons.emoji_events,
-                  color: Colors.amber,
+                  color: AppColors.warning,
                   size: 28,
                 ),
               ),
@@ -220,7 +221,7 @@ class _PodiumItem extends StatelessWidget {
             child: Text(
               '#$rank',
               style: TextStyle(
-                color: Colors.white,
+                color: AppColors.background,
                 fontWeight: FontWeight.bold,
                 fontSize: rank == 1 ? 32 : 24,
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../data/models/transport.dart';
 import '../../providers/transport_provider.dart';
 
@@ -154,8 +155,20 @@ class _RouteCard extends StatelessWidget {
                     ),
                     if (route.driverPhone != null)
                       TextButton.icon(
-                        onPressed: () {
-                          // TODO: Launch phone dialer
+                        onPressed: () async {
+                          final uri = Uri(
+                            scheme: 'tel',
+                            path: route.driverPhone,
+                          );
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri);
+                          } else if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Phone: ${route.driverPhone}'),
+                              ),
+                            );
+                          }
                         },
                         icon: const Icon(Icons.phone, size: 16),
                         label: Text(route.driverPhone!),

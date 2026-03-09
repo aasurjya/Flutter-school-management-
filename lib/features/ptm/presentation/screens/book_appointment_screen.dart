@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/ptm.dart';
 import '../../providers/ptm_provider.dart';
 
@@ -48,7 +49,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
                     children: [
                       const Text('Failed to load PTM details'),
                       if (state.error != null)
-                        Text(state.error!, style: const TextStyle(color: Colors.red)),
+                        Text(state.error!, style: const TextStyle(color: AppColors.error)),
                       TextButton(
                         onPressed: () => ref
                             .read(bookingProvider.notifier)
@@ -165,7 +166,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Appointment booked successfully!'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
         context.pop();
@@ -235,7 +236,7 @@ class _TeacherSelectionStep extends ConsumerWidget {
                 title: Text(teacher.teacherName ?? 'Teacher'),
                 subtitle: Text('Room: ${teacher.roomNumber}'),
                 trailing: isSelected
-                    ? const Icon(Icons.check_circle, color: Colors.green)
+                    ? const Icon(Icons.check_circle, color: AppColors.success)
                     : null,
                 onTap: () =>
                     ref.read(bookingProvider.notifier).selectTeacher(teacher),
@@ -291,8 +292,8 @@ class _TimeSlotSelectionStep extends ConsumerWidget {
                         ref.read(bookingProvider.notifier).selectSlot(slotString);
                       }
                     },
-              backgroundColor: isBooked ? Colors.grey[200] : null,
-              disabledColor: Colors.grey[200],
+              backgroundColor: isBooked ? AppColors.grey200 : null,
+              disabledColor: AppColors.grey200,
             );
           }).toList(),
         );
@@ -333,7 +334,7 @@ class _ChildSelectionStep extends ConsumerWidget {
             title: Text(child['name']!),
             subtitle: Text(child['class']!),
             trailing: isSelected
-                ? const Icon(Icons.check_circle, color: Colors.green)
+                ? const Icon(Icons.check_circle, color: AppColors.success)
                 : null,
             onTap: () =>
                 ref.read(bookingProvider.notifier).selectStudent(child['id']!),
@@ -410,7 +411,7 @@ class _ConfirmationStep extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             state.error!,
-            style: const TextStyle(color: Colors.red),
+            style: const TextStyle(color: AppColors.error),
           ),
         ],
         if (state.isLoading) ...[

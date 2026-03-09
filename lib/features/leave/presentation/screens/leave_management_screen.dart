@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/leave.dart';
 import '../../providers/leave_provider.dart';
 
@@ -239,7 +240,7 @@ class _LeaveCard extends StatelessWidget {
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => _cancelLeave(context),
-                style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
                 child: const Text('Cancel'),
               ),
             ],
@@ -252,17 +253,17 @@ class _LeaveCard extends StatelessWidget {
   Color _getLeaveTypeColor(String type) {
     switch (type) {
       case 'sick':
-        return Colors.red;
+        return AppColors.error;
       case 'casual':
-        return Colors.blue;
+        return AppColors.primary;
       case 'personal':
-        return Colors.purple;
+        return AppColors.info;
       case 'medical':
-        return Colors.red;
+        return AppColors.error;
       case 'emergency':
-        return Colors.orange;
+        return AppColors.warning;
       default:
-        return Colors.grey;
+        return AppColors.grey400;
     }
   }
 
@@ -372,7 +373,7 @@ class _LeaveApprovalCard extends StatelessWidget {
               children: [
                 OutlinedButton(
                   onPressed: () => _rejectLeave(context),
-                  style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                  style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
                   child: const Text('Reject'),
                 ),
                 const SizedBox(width: 8),
@@ -392,7 +393,7 @@ class _LeaveApprovalCard extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Leave approved'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.success,
       ),
     );
   }
@@ -420,7 +421,7 @@ class _LeaveApprovalCard extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Leave rejected'),
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.error,
                 ),
               );
             },
@@ -442,19 +443,19 @@ class _StatusChip extends StatelessWidget {
     Color color;
     switch (status) {
       case 'pending':
-        color = Colors.orange;
+        color = AppColors.warning;
         break;
       case 'approved':
-        color = Colors.green;
+        color = AppColors.success;
         break;
       case 'rejected':
-        color = Colors.red;
+        color = AppColors.error;
         break;
       case 'cancelled':
-        color = Colors.grey;
+        color = AppColors.grey400;
         break;
       default:
-        color = Colors.grey;
+        color = AppColors.grey400;
     }
 
     return Container(
@@ -620,7 +621,7 @@ class _ApplyLeaveFormState extends State<_ApplyLeaveForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Leave application submitted'),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.success,
         ),
       );
     }

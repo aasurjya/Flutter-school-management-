@@ -194,9 +194,28 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
   }
 
   void _editAnnouncement(Announcement announcement) {
-    // TODO: Navigate to edit screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Edit coming soon')),
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _EditAnnouncementSheet(
+        announcement: announcement,
+        onSave: (title, content, priority) async {
+          await ref.read(announcementsNotifierProvider.notifier).updateAnnouncement(
+            announcement.id,
+            {
+              'title': title,
+              'content': content,
+              'priority': priority,
+            },
+          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Announcement updated')),
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -568,5 +587,158 @@ class _CreateAnnouncementSheetState extends State<_CreateAnnouncementSheet> {
     if (!_formKey.currentState!.validate()) return;
     Navigator.pop(context);
     context.showSuccessSnackBar(publish ? 'Announcement published' : 'Draft saved');
+  }
+}
+
+class _EditAnnouncementSheet extends StatefulWidget {
+  final Announcement announcement;
+  final Future<void> Function(String title, String content, String priority) onSave;
+
+  const _EditAnnouncementSheet({
+    required this.announcement,
+    required this.onSave,
+  });
+
+  @override
+  State<_EditAnnouncementSheet> createState() => _EditAnnouncementSheetState();
+}
+
+class _EditAnnouncementSheetState extends State<_EditAnnouncementSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _titleController;
+  late TextEditingController _contentController;
+  late String _priority;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.announcement.title);
+    _contentController = TextEditingController(text: widget.announcement.content);
+    _priority = widget.announcement.priority;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.75,
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Row(
+              children: [
+                const Text(
+                  'Edit Announcement',
+                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _titleController,
+                      decoration: const InputDecoration(labelText: 'Title *', border: OutlineInputBorder()),
+                      validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _contentController,
+                      decoration: const InputDecoration(
+                        labelText: 'Content *',
+                        border: OutlineInputBorder(),
+                        alignLabelWithHint: true,
+                      ),
+                      maxLines: 5,
+                      validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: _priority,
+                      decoration: const InputDecoration(labelText: 'Priority', border: OutlineInputBorder()),
+                      items: const [
+                        DropdownMenuItem(value: 'low', child: Text('Low')),
+                        DropdownMenuItem(value: 'normal', child: Text('Normal')),
+                        DropdownMenuItem(value: 'high', child: Text('High')),
+                        DropdownMenuItem(value: 'urgent', child: Text('Urgent')),
+                      ],
+                      onChanged: (v) => setState(() => _priority = v!),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _saving ? null : _submit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: _saving
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Text('Save Changes'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _saving = true);
+    try {
+      await widget.onSave(
+        _titleController.text.trim(),
+        _contentController.text.trim(),
+        _priority,
+      );
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 }

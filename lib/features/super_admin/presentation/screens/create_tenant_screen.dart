@@ -50,8 +50,6 @@ class _CreateTenantScreenState extends ConsumerState<CreateTenantScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create New Tenant'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
       ),
       body: Form(
         key: _formKey,
@@ -68,15 +66,13 @@ class _CreateTenantScreenState extends ConsumerState<CreateTenantScreen> {
                   if (_currentStep < 2)
                     ElevatedButton(
                       onPressed: details.onStepContinue,
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                       child: const Text('Continue'),
                     )
                   else
                     ElevatedButton(
                       onPressed: _isSubmitting ? null : _submitForm,
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
                       child: _isSubmitting
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                           : const Text('Create Tenant'),
                     ),
                   const SizedBox(width: 12),
@@ -196,7 +192,7 @@ class _CreateTenantScreenState extends ConsumerState<CreateTenantScreen> {
       children: [
         const Text(
           'The admin account will have full access to manage this school.',
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: AppColors.grey500),
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -238,7 +234,7 @@ class _CreateTenantScreenState extends ConsumerState<CreateTenantScreen> {
           label: '$_expectedStudents students',
           onChanged: (v) => setState(() => _expectedStudents = v.toInt()),
         ),
-        Text('$_expectedStudents students', style: TextStyle(color: Colors.grey[600])),
+        Text('$_expectedStudents students', style: const TextStyle(color: AppColors.grey600)),
         const SizedBox(height: 24),
         const Text('Select Plan', style: TextStyle(fontWeight: FontWeight.w500)),
         const SizedBox(height: 12),
@@ -364,7 +360,7 @@ class _CreateTenantScreenState extends ConsumerState<CreateTenantScreen> {
                 Text('School: ${tenant.name}'),
                 Text('URL: ${tenant.slug}.schoolsaas.com'),
                 const SizedBox(height: 12),
-                const Text('Note: Admin user creation requires Edge Function setup.', style: TextStyle(color: Colors.grey)),
+                const Text('Note: Admin user creation requires Edge Function setup.', style: TextStyle(color: AppColors.grey500)),
               ],
             ),
             actions: [
@@ -373,7 +369,6 @@ class _CreateTenantScreenState extends ConsumerState<CreateTenantScreen> {
                   Navigator.pop(ctx);
                   Navigator.pop(context);
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                 child: const Text('Done'),
               ),
             ],
@@ -443,13 +438,13 @@ class _PlanCard extends StatelessWidget {
                             children: [
                               Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                               const SizedBox(width: 8),
-                              Text('$price$duration', style: TextStyle(color: Colors.grey[600])),
+                              Text('$price$duration', style: const TextStyle(color: AppColors.grey600)),
                             ],
                           ),
                           const SizedBox(height: 4),
                           Wrap(
                             spacing: 8,
-                            children: features.take(3).map((f) => Text('• $f', style: TextStyle(fontSize: 11, color: Colors.grey[600]))).toList(),
+                            children: features.take(3).map((f) => Text('• $f', style: const TextStyle(fontSize: 11, color: AppColors.grey600))).toList(),
                           ),
                         ],
                       ),
@@ -470,7 +465,7 @@ class _PlanCard extends StatelessWidget {
                         bottomRight: Radius.circular(8),
                       ),
                     ),
-                    child: const Text('RECOMMENDED', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                    child: const Text('RECOMMENDED', style: TextStyle(color: AppColors.background, fontSize: 9, fontWeight: FontWeight.bold)),
                   ),
                 ),
             ],

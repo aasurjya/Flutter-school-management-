@@ -58,7 +58,7 @@ class ParentDashboardScreen extends ConsumerWidget {
               subtitle: const Text('View and edit your profile'),
               onTap: () {
                 Navigator.of(context).pop();
-                // TODO: Navigate to profile screen
+                context.push(AppRoutes.profile);
               },
             ),
             ListTile(
@@ -67,7 +67,7 @@ class ParentDashboardScreen extends ConsumerWidget {
               subtitle: const Text('App preferences'),
               onTap: () {
                 Navigator.of(context).pop();
-                // TODO: Navigate to settings screen
+                context.push(AppRoutes.settings);
               },
             ),
           ],
@@ -125,7 +125,9 @@ class ParentDashboardScreen extends ConsumerWidget {
             actions: [
               IconButton(
                 icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-                onPressed: () {},
+                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Notifications coming soon')),
+                ),
               ),
               IconButton(
                 icon: const Icon(Icons.settings_outlined, color: Colors.white),
@@ -537,11 +539,14 @@ class ParentDashboardScreen extends ConsumerWidget {
                 'Mid-Term Exam',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
-              Text(
-                'View Details →',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 12,
+              GestureDetector(
+                onTap: () => context.push(AppRoutes.studentResults),
+                child: Text(
+                  'View Details →',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],
@@ -660,7 +665,13 @@ class ParentDashboardScreen extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Online payment coming soon'),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 14),

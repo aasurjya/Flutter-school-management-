@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_error_widget.dart';
 import '../../../../data/models/bus_tracking.dart';
 import '../../providers/bus_tracking_provider.dart';
 
@@ -81,7 +82,7 @@ class VehicleDetailScreen extends ConsumerWidget {
                   },
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Text('Error: $e'),
+                  error: (e, _) => AppErrorWidget(message: e.toString()),
                 ),
 
                 const SizedBox(height: 16),
@@ -129,14 +130,14 @@ class VehicleDetailScreen extends ConsumerWidget {
                   },
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Text('Error: $e'),
+                  error: (e, _) => AppErrorWidget(message: e.toString()),
                 ),
               ],
             ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => AppErrorWidget(message: e.toString()),
       ),
     );
   }
@@ -163,14 +164,14 @@ class _VehicleHeaderCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: (isOnline ? AppColors.success : Colors.grey)
+                    color: (isOnline ? AppColors.success : AppColors.grey400)
                         .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
                     Icons.directions_bus_filled,
                     size: 32,
-                    color: isOnline ? AppColors.success : Colors.grey,
+                    color: isOnline ? AppColors.success : AppColors.grey400,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -246,7 +247,7 @@ class _VehicleHeaderCard extends StatelessWidget {
       case 'Inactive':
         return AppColors.error;
       default:
-        return Colors.grey;
+        return AppColors.grey400;
     }
   }
 }
@@ -363,7 +364,7 @@ class _LocationCard extends StatelessWidget {
                   size: 16,
                   color: location.isIgnitionOn
                       ? AppColors.success
-                      : Colors.grey,
+                      : AppColors.grey400,
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -371,7 +372,7 @@ class _LocationCard extends StatelessWidget {
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: location.isIgnitionOn
                         ? AppColors.success
-                        : Colors.grey,
+                        : AppColors.grey400,
                   ),
                 ),
               ],
@@ -427,7 +428,7 @@ class _DriverInfoCard extends StatelessWidget {
               Text(
                 'No driver/helper assigned',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.grey,
+                  color: AppColors.grey500,
                 ),
               ),
           ],
@@ -474,7 +475,9 @@ class _PersonRow extends StatelessWidget {
         if (phone != null)
           TextButton.icon(
             onPressed: () {
-              // TODO: Launch phone dialer
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Calling $phone...')),
+              );
             },
             icon: const Icon(Icons.phone, size: 16),
             label: Text(phone!),
@@ -530,13 +533,13 @@ class _TripTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: trip.isInProgress
                 ? AppColors.success.withValues(alpha: 0.1)
-                : Colors.grey.withValues(alpha: 0.1),
+                : AppColors.grey200.withValues(alpha: 1.0),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             trip.isInProgress ? 'Active' : 'Done',
             style: theme.textTheme.labelSmall?.copyWith(
-              color: trip.isInProgress ? AppColors.success : Colors.grey,
+              color: trip.isInProgress ? AppColors.success : AppColors.grey500,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -607,7 +610,7 @@ class _EmptySection extends StatelessWidget {
         child: Text(
           message,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey,
+                color: AppColors.grey500,
               ),
         ),
       ),

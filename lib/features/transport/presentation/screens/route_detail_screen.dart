@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/transport_provider.dart';
+import '../../../../core/widgets/app_error_widget.dart';
 
 class RouteDetailScreen extends ConsumerWidget {
   final String routeId;
@@ -265,7 +266,7 @@ class RouteDetailScreen extends ConsumerWidget {
                             );
                           },
                           loading: () => const Center(child: CircularProgressIndicator()),
-                          error: (error, _) => Text('Error: $error'),
+                          error: (error, _) => AppErrorWidget(message: error.toString()),
                         ),
                       ],
                     ),
@@ -276,7 +277,7 @@ class RouteDetailScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => AppErrorWidget(message: error.toString()),
       ),
     );
   }

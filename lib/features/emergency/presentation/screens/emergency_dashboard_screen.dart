@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/emergency.dart';
 import '../../providers/emergency_provider.dart';
 
@@ -12,9 +13,10 @@ class EmergencyDashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Emergency Center'),
-        backgroundColor: Colors.red,
-        foregroundColor: Colors.white,
+        title: const Text(
+          'Emergency Center',
+          style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold),
+        ),
       ),
       body: Column(
         children: [
@@ -27,7 +29,22 @@ class EmergencyDashboardScreen extends ConsumerWidget {
               return _ActiveAlertBanner(alert: alert);
             },
             loading: () => const LinearProgressIndicator(),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (error, __) => Container(
+              padding: const EdgeInsets.all(12),
+              color: AppColors.errorLight,
+              child: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: AppColors.error),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Could not load alert status: $error',
+                      style: const TextStyle(color: AppColors.error),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           Expanded(
             child: DefaultTabController(
@@ -65,15 +82,15 @@ class _NoActiveAlertBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Colors.green.shade50,
-      child: Row(
+      color: AppColors.successLight,
+      child: const Row(
         children: [
-          Icon(Icons.check_circle, color: Colors.green.shade700),
-          const SizedBox(width: 12),
+          Icon(Icons.check_circle, color: AppColors.success),
+          SizedBox(width: 12),
           Text(
             'All Clear - No Active Emergencies',
             style: TextStyle(
-              color: Colors.green.shade700,
+              color: AppColors.success,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -100,7 +117,7 @@ class _ActiveAlertBanner extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.warning, color: Colors.white, size: 28),
+              const Icon(Icons.warning, color: AppColors.background, size: 28),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -109,14 +126,14 @@ class _ActiveAlertBanner extends StatelessWidget {
                     Text(
                       'ACTIVE ALERT: ${alert.title}',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.background,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
                     Text(
                       alert.message,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: AppColors.background),
                     ),
                   ],
                 ),
@@ -129,8 +146,8 @@ class _ActiveAlertBanner extends StatelessWidget {
               FilledButton.tonal(
                 onPressed: () => _respondSafe(context),
                 style: FilledButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.green,
+                  backgroundColor: AppColors.background,
+                  foregroundColor: AppColors.success,
                 ),
                 child: const Text("I'm Safe"),
               ),
@@ -138,8 +155,8 @@ class _ActiveAlertBanner extends StatelessWidget {
               FilledButton.tonal(
                 onPressed: () => _respondNeedHelp(context),
                 style: FilledButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.red,
+                  backgroundColor: AppColors.background,
+                  foregroundColor: AppColors.error,
                 ),
                 child: const Text('Need Help'),
               ),
@@ -153,15 +170,15 @@ class _ActiveAlertBanner extends StatelessWidget {
   Color _getSeverityColor(String severity) {
     switch (severity) {
       case 'critical':
-        return Colors.red.shade900;
+        return AppColors.error;
       case 'high':
-        return Colors.red.shade700;
+        return AppColors.error;
       case 'medium':
-        return Colors.orange.shade700;
+        return AppColors.warning;
       case 'low':
-        return Colors.amber.shade700;
+        return AppColors.warning;
       default:
-        return Colors.red;
+        return AppColors.error;
     }
   }
 
@@ -169,7 +186,7 @@ class _ActiveAlertBanner extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Response recorded: Safe'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.success,
       ),
     );
   }
@@ -212,11 +229,11 @@ class _ActiveAlertBanner extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Help request sent!'),
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.error,
                 ),
               );
             },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
             child: const Text('Send Help Request'),
           ),
         ],
@@ -237,37 +254,37 @@ class _QuickActionsTab extends StatelessWidget {
         _EmergencyActionCard(
           icon: Icons.local_fire_department,
           label: 'Fire',
-          color: Colors.orange,
+          color: AppColors.warning,
           onTap: () => _initiateAlert(context, 'fire', 'Fire Emergency'),
         ),
         _EmergencyActionCard(
           icon: Icons.lock,
           label: 'Lockdown',
-          color: Colors.red,
+          color: AppColors.error,
           onTap: () => _initiateAlert(context, 'lockdown', 'Lockdown Alert'),
         ),
         _EmergencyActionCard(
           icon: Icons.medical_services,
           label: 'Medical',
-          color: Colors.blue,
+          color: AppColors.primary,
           onTap: () => _initiateAlert(context, 'medical', 'Medical Emergency'),
         ),
         _EmergencyActionCard(
           icon: Icons.cloud,
           label: 'Weather',
-          color: Colors.teal,
+          color: AppColors.info,
           onTap: () => _initiateAlert(context, 'weather', 'Severe Weather Alert'),
         ),
         _EmergencyActionCard(
           icon: Icons.vibration,
           label: 'Earthquake',
-          color: Colors.brown,
+          color: AppColors.grey600,
           onTap: () => _initiateAlert(context, 'earthquake', 'Earthquake Alert'),
         ),
         _EmergencyActionCard(
           icon: Icons.assignment,
           label: 'Start Drill',
-          color: Colors.green,
+          color: AppColors.success,
           onTap: () => _startDrill(context),
         ),
       ],
@@ -294,11 +311,11 @@ class _QuickActionsTab extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('$title initiated!'),
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.error,
                 ),
               );
             },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
             child: const Text('Confirm'),
           ),
         ],
@@ -317,7 +334,7 @@ class _QuickActionsTab extends StatelessWidget {
             const Text('Select drill type:'),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.local_fire_department, color: Colors.orange),
+              leading: const Icon(Icons.local_fire_department, color: AppColors.warning),
               title: const Text('Fire Drill'),
               onTap: () {
                 Navigator.pop(context);
@@ -327,7 +344,7 @@ class _QuickActionsTab extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.lock, color: Colors.red),
+              leading: const Icon(Icons.lock, color: AppColors.error),
               title: const Text('Lockdown Drill'),
               onTap: () {
                 Navigator.pop(context);
@@ -337,7 +354,7 @@ class _QuickActionsTab extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.vibration, color: Colors.brown),
+              leading: const Icon(Icons.vibration, color: AppColors.grey600),
               title: const Text('Earthquake Drill'),
               onTap: () {
                 Navigator.pop(context);
@@ -438,13 +455,13 @@ class _AlertHistoryCard extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: alert.isActive
-                ? Colors.red.withAlpha(30)
-                : Colors.grey.withAlpha(30),
+                ? AppColors.error.withAlpha(30)
+                : AppColors.grey400.withAlpha(30),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             _getAlertIcon(alert.alertType),
-            color: alert.isActive ? Colors.red : Colors.grey,
+            color: alert.isActive ? AppColors.error : AppColors.grey400,
           ),
         ),
         title: Text(
@@ -460,11 +477,11 @@ class _AlertHistoryCard extends StatelessWidget {
           label: Text(
             alert.isActive ? 'ACTIVE' : 'RESOLVED',
             style: TextStyle(
-              color: alert.isActive ? Colors.white : Colors.grey,
+              color: alert.isActive ? AppColors.background : AppColors.grey500,
               fontSize: 10,
             ),
           ),
-          backgroundColor: alert.isActive ? Colors.red : Colors.grey[200],
+          backgroundColor: alert.isActive ? AppColors.error : AppColors.grey200,
         ),
       ),
     );
@@ -525,16 +542,16 @@ class _ContactCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.red.shade100,
+          backgroundColor: AppColors.errorLight,
           child: Icon(
             _getContactIcon(contact.contactType),
-            color: Colors.red,
+            color: AppColors.error,
           ),
         ),
         title: Text(contact.name),
         subtitle: Text(contact.contactTypeDisplay),
         trailing: IconButton(
-          icon: const Icon(Icons.call, color: Colors.green),
+          icon: const Icon(Icons.call, color: AppColors.success),
           onPressed: () {
             // In a real app, launch phone dialer
             ScaffoldMessenger.of(context).showSnackBar(

@@ -37,7 +37,9 @@ class _TemplateListScreenState extends ConsumerState<TemplateListScreen> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // Search templates placeholder
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Search coming soon')),
+              );
             },
           ),
         ],
@@ -161,13 +163,13 @@ class _TemplateListScreenState extends ConsumerState<TemplateListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.description_outlined,
-                size: 64, color: Colors.grey[400]),
+            const Icon(Icons.description_outlined,
+                size: 64, color: AppColors.grey400),
             const SizedBox(height: 16),
             Text(
               'No Templates Found',
               style: theme.textTheme.titleMedium?.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.grey600,
               ),
             ),
             const SizedBox(height: 8),

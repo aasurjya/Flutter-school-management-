@@ -62,7 +62,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
               subtitle: const Text('View and edit your profile'),
               onTap: () {
                 Navigator.of(context).pop();
-                // TODO: Navigate to profile screen
+                context.push(AppRoutes.profile);
               },
             ),
             ListTile(
@@ -71,7 +71,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
               subtitle: const Text('App preferences'),
               onTap: () {
                 Navigator.of(context).pop();
-                // TODO: Navigate to settings screen
+                context.push(AppRoutes.settings);
               },
             ),
           ],
@@ -155,7 +155,9 @@ class TeacherDashboardScreen extends ConsumerWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-                onPressed: () {},
+                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Notifications coming soon')),
+                ),
               ),
               IconButton(
                 icon: const Icon(Icons.settings_outlined, color: Colors.white),
@@ -295,7 +297,9 @@ class TeacherDashboardScreen extends ConsumerWidget {
               ),
         ),
         TextButton(
-          onPressed: () {},
+          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('View all $title coming soon')),
+          ),
           child: const Text('View All'),
         ),
       ],
@@ -769,6 +773,9 @@ class TeacherDashboardScreen extends ConsumerWidget {
       child: Column(
         children: tasks.map((task) {
           return ListTile(
+            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('${task['title']}')),
+            ),
             leading: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(

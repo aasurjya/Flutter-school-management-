@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_error_widget.dart';
 import '../../providers/notice_board_provider.dart';
 
 class NoticeDetailScreen extends ConsumerWidget {
@@ -47,13 +48,13 @@ class NoticeDetailScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
+                        color: AppColors.grey100,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         notice.audience.label,
-                        style: TextStyle(
-                          color: Colors.grey.shade700,
+                        style: const TextStyle(
+                          color: AppColors.grey700,
                           fontSize: 12,
                         ),
                       ),
@@ -75,15 +76,15 @@ class NoticeDetailScreen extends ConsumerWidget {
                 if (notice.authorName != null)
                   Text(
                     'Posted by ${notice.authorName} · ${notice.timeAgo}',
-                    style: TextStyle(
-                        color: Colors.grey.shade500, fontSize: 13),
+                    style: const TextStyle(
+                        color: AppColors.grey500, fontSize: 13),
                   ),
                 if (notice.expiresAt != null) ...[
                   const SizedBox(height: 4),
                   Text(
                     'Expires: ${notice.expiresAt!.toLocal().toString().split('.')[0]}',
-                    style: TextStyle(
-                        color: Colors.orange.shade700, fontSize: 12),
+                    style: const TextStyle(
+                        color: AppColors.warning, fontSize: 12),
                   ),
                 ],
                 const SizedBox(height: 20),
@@ -101,12 +102,17 @@ class NoticeDetailScreen extends ConsumerWidget {
                     leading: const Icon(Icons.attach_file),
                     title: Text(notice.attachmentName ?? 'Attachment'),
                     subtitle: const Text('Tap to open'),
-                    tileColor: Colors.grey.shade50,
+                    tileColor: AppColors.grey50,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     onTap: () {
-                      // TODO: open attachment URL
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              'Opening ${notice.attachmentName ?? 'attachment'}...'),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -115,7 +121,7 @@ class NoticeDetailScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => AppErrorWidget(message: e.toString()),
       ),
     );
   }

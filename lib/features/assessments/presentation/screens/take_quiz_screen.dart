@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/quiz.dart';
 import '../../providers/assessment_provider.dart';
 
@@ -59,7 +60,7 @@ class _TakeQuizScreenState extends ConsumerState<TakeQuizScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const Icon(Icons.error_outline, size: 64, color: AppColors.error),
                 const SizedBox(height: 16),
                 Text('Error: $error'),
                 const SizedBox(height: 16),
@@ -131,12 +132,12 @@ class _QuizContent extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.timer, size: 16, color: Colors.white),
+                const Icon(Icons.timer, size: 16, color: AppColors.background),
                 const SizedBox(width: 4),
                 Text(
                   session.timerDisplay,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.background,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -150,7 +151,7 @@ class _QuizContent extends ConsumerWidget {
           // Progress bar
           LinearProgressIndicator(
             value: session.progress,
-            backgroundColor: Colors.grey[200],
+            backgroundColor: AppColors.grey200,
           ),
           // Question info
           Padding(
@@ -208,7 +209,7 @@ class _QuizContent extends ConsumerWidget {
               color: theme.colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withAlpha(25),
+                  color: AppColors.grey900.withAlpha(25),
                   blurRadius: 4,
                   offset: const Offset(0, -2),
                 ),
@@ -291,9 +292,9 @@ class _QuizContent extends ConsumerWidget {
   }
 
   Color _getTimerColor(int seconds) {
-    if (seconds <= 60) return Colors.red;
-    if (seconds <= 300) return Colors.orange;
-    return Colors.green;
+    if (seconds <= 60) return AppColors.error;
+    if (seconds <= 300) return AppColors.warning;
+    return AppColors.success;
   }
 
   void _showExitConfirmation(BuildContext context, WidgetRef ref) {
@@ -357,8 +358,8 @@ class _QuizContent extends ConsumerWidget {
                       color: isCurrent
                           ? Theme.of(context).colorScheme.primary
                           : isAnswered
-                              ? Colors.green
-                              : Colors.grey[200],
+                              ? AppColors.success
+                              : AppColors.grey200,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
@@ -366,8 +367,8 @@ class _QuizContent extends ConsumerWidget {
                         '${index + 1}',
                         style: TextStyle(
                           color: isCurrent || isAnswered
-                              ? Colors.white
-                              : Colors.black,
+                              ? AppColors.background
+                              : AppColors.grey900,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -379,14 +380,14 @@ class _QuizContent extends ConsumerWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                _LegendItem(color: Colors.green, label: 'Answered'),
+                const _LegendItem(color: AppColors.success, label: 'Answered'),
                 const SizedBox(width: 16),
                 _LegendItem(
                   color: Theme.of(context).colorScheme.primary,
                   label: 'Current',
                 ),
                 const SizedBox(width: 16),
-                _LegendItem(color: Colors.grey[200]!, label: 'Unanswered'),
+                const _LegendItem(color: AppColors.grey200, label: 'Unanswered'),
               ],
             ),
           ],
@@ -410,7 +411,7 @@ class _QuizContent extends ConsumerWidget {
             if (unanswered > 0)
               Text(
                 'Warning: $unanswered questions are unanswered!',
-                style: const TextStyle(color: Colors.orange),
+                style: const TextStyle(color: AppColors.warning),
               ),
             const SizedBox(height: 8),
             const Text('Are you sure you want to submit?'),
@@ -505,13 +506,13 @@ class _MCQOptions extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: isSelected
                           ? Theme.of(context).colorScheme.primary
-                          : Colors.grey[200],
+                          : AppColors.grey200,
                     ),
                     child: Center(
                       child: Text(
                         key,
                         style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black,
+                          color: isSelected ? AppColors.background : AppColors.grey900,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

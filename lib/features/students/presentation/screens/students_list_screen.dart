@@ -40,7 +40,9 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              // TODO: Navigate to add student
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Add student coming soon')),
+              );
             },
           ),
         ],
@@ -61,8 +63,8 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
                 ),
                 filled: true,
                 fillColor: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.grey.withValues(alpha: 0.1),
+                    ? AppColors.grey700
+                    : AppColors.grey100,
               ),
             ),
           ),
@@ -115,7 +117,9 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // TODO: Navigate to add student
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Add student coming soon')),
+          );
         },
         icon: const Icon(Icons.person_add),
         label: const Text('Add Student'),
@@ -223,25 +227,25 @@ class _StudentCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${student['class']} • Roll No: ${student['rollNo']}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
-                    color: Colors.grey[600],
+                    color: AppColors.grey600,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.phone,
                       size: 14,
-                      color: Colors.grey[500],
+                      color: AppColors.grey500,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       student['phone'],
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[500],
+                        color: AppColors.grey500,
                       ),
                     ),
                   ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/library.dart';
 import '../../providers/library_provider.dart';
 
@@ -305,12 +306,12 @@ class _BookCard extends StatelessWidget {
                     _BookPlaceholder(),
                   if (!book.isAvailable)
                     Container(
-                      color: Colors.black54,
+                      color: AppColors.grey900.withAlpha(140),
                       child: const Center(
                         child: Text(
                           'Not Available',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.background,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -345,7 +346,7 @@ class _BookCard extends StatelessWidget {
                     Text(
                       book.availabilityText,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: book.isAvailable ? Colors.green : Colors.red,
+                        color: book.isAvailable ? AppColors.success : AppColors.error,
                       ),
                     ),
                   ],
@@ -396,8 +397,8 @@ class _BookListTile extends StatelessWidget {
         title: Text(book.title),
         subtitle: Text(book.author ?? 'Unknown Author'),
         trailing: book.isAvailable
-            ? const Icon(Icons.check_circle, color: Colors.green)
-            : const Icon(Icons.cancel, color: Colors.red),
+            ? const Icon(Icons.check_circle, color: AppColors.success)
+            : const Icon(Icons.cancel, color: AppColors.error),
         onTap: () => context.push('/library/book/${book.id}'),
       ),
     );

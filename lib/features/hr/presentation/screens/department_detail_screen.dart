@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_error_widget.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/hr_provider.dart';
 import '../widgets/staff_card.dart';
@@ -160,7 +161,7 @@ class DepartmentDetailScreen extends ConsumerWidget {
                 },
                 loading: () =>
                     const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Text('Error: $error'),
+                error: (error, _) => AppErrorWidget(message: error.toString()),
               ),
 
               const SizedBox(height: 24),
@@ -184,7 +185,7 @@ class DepartmentDetailScreen extends ConsumerWidget {
           ),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => AppErrorWidget(message: error.toString()),
       ),
     );
   }

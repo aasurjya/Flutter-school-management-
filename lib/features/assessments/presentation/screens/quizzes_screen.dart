@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/quiz.dart';
 import '../../providers/assessment_provider.dart';
 
@@ -103,7 +104,7 @@ class _AllQuizzesTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.quiz_outlined, size: 64, color: Colors.grey),
+                Icon(Icons.quiz_outlined, size: 64, color: AppColors.grey400),
                 SizedBox(height: 16),
                 Text('No quizzes found'),
                 SizedBox(height: 8),
@@ -144,7 +145,7 @@ class _MyQuizzesTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.quiz_outlined, size: 64, color: Colors.grey),
+                Icon(Icons.quiz_outlined, size: 64, color: AppColors.grey400),
                 SizedBox(height: 16),
                 Text('You haven\'t created any quizzes yet'),
               ],
@@ -229,7 +230,7 @@ class _QuestionBankTabState extends ConsumerState<_QuestionBankTab> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.help_outline, size: 64, color: Colors.grey),
+                      Icon(Icons.help_outline, size: 64, color: AppColors.grey400),
                       SizedBox(height: 16),
                       Text('No questions in the bank'),
                     ],
@@ -308,7 +309,7 @@ class _QuestionBankTabState extends ConsumerState<_QuestionBankTab> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.circle, color: Colors.green[300]),
+            leading: const Icon(Icons.circle, color: AppColors.success),
             title: const Text('Easy'),
             onTap: () {
               setState(() => _selectedDifficulty = 'easy');
@@ -316,7 +317,7 @@ class _QuestionBankTabState extends ConsumerState<_QuestionBankTab> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.circle, color: Colors.orange[300]),
+            leading: const Icon(Icons.circle, color: AppColors.warning),
             title: const Text('Medium'),
             onTap: () {
               setState(() => _selectedDifficulty = 'medium');
@@ -324,7 +325,7 @@ class _QuestionBankTabState extends ConsumerState<_QuestionBankTab> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.circle, color: Colors.red[300]),
+            leading: const Icon(Icons.circle, color: AppColors.error),
             title: const Text('Hard'),
             onTap: () {
               setState(() => _selectedDifficulty = 'hard');
@@ -452,16 +453,16 @@ class _StatusChip extends StatelessWidget {
     Color color;
     switch (status) {
       case 'draft':
-        color = Colors.grey;
+        color = AppColors.grey400;
         break;
       case 'published':
-        color = Colors.green;
+        color = AppColors.success;
         break;
       case 'closed':
-        color = Colors.red;
+        color = AppColors.error;
         break;
       default:
-        color = Colors.grey;
+        color = AppColors.grey400;
     }
 
     return Container(
@@ -574,13 +575,13 @@ class _QuestionCard extends StatelessWidget {
   Color _getDifficultyColor(String difficulty) {
     switch (difficulty) {
       case 'easy':
-        return Colors.green.shade100;
+        return AppColors.successLight;
       case 'medium':
-        return Colors.orange.shade100;
+        return AppColors.warningLight;
       case 'hard':
-        return Colors.red.shade100;
+        return AppColors.errorLight;
       default:
-        return Colors.grey.shade100;
+        return AppColors.grey100;
     }
   }
 }
@@ -598,23 +599,23 @@ class _QuestionTypeIcon extends StatelessWidget {
     switch (type) {
       case 'mcq':
         icon = Icons.check_box;
-        color = Colors.blue;
+        color = AppColors.primary;
         break;
       case 'true_false':
         icon = Icons.toggle_on;
-        color = Colors.purple;
+        color = AppColors.info;
         break;
       case 'short_answer':
         icon = Icons.short_text;
-        color = Colors.orange;
+        color = AppColors.warning;
         break;
       case 'long_answer':
         icon = Icons.notes;
-        color = Colors.teal;
+        color = AppColors.success;
         break;
       default:
         icon = Icons.help_outline;
-        color = Colors.grey;
+        color = AppColors.grey400;
     }
 
     return Container(

@@ -59,7 +59,7 @@ class _AttendanceInsightsScreenState
               ),
               background: Container(
                 decoration: const BoxDecoration(
-                  gradient: AppColors.oceanGradient,
+                  gradient: AppColors.primaryGradient,
                 ),
               ),
             ),

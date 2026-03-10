@@ -40,7 +40,7 @@ class _TrendDashboardScreenState extends ConsumerState<TrendDashboardScreen> {
               ),
               background: Container(
                 decoration: const BoxDecoration(
-                  gradient: AppColors.forestGradient,
+                  gradient: AppColors.primaryGradient,
                 ),
               ),
             ),

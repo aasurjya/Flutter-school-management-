@@ -40,7 +40,7 @@ class ParentDigestListScreen extends ConsumerWidget {
               ),
               background: Container(
                 decoration: const BoxDecoration(
-                  gradient: AppColors.sunriseGradient,
+                  gradient: AppColors.primaryGradient,
                 ),
               ),
             ),

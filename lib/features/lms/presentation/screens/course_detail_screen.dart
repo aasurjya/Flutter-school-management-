@@ -346,9 +346,9 @@ class CourseDetailScreen extends ConsumerWidget {
   LinearGradient _gradientForCourse(String title) {
     final gradients = [
       AppColors.primaryGradient,
-      AppColors.oceanGradient,
-      AppColors.forestGradient,
-      AppColors.sunriseGradient,
+      AppColors.primaryGradient,
+      AppColors.primaryGradient,
+      AppColors.primaryGradient,
     ];
     return gradients[title.hashCode.abs() % gradients.length];
   }

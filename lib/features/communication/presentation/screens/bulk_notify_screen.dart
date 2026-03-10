@@ -499,7 +499,7 @@ class _RadioDot<T> extends StatelessWidget {
     super.key,
     required this.value,
     required this.groupValue,
-    this.activeColor = const Color(0xFF2563EB),
+    this.activeColor = AppColors.primary,
   });
 
   @override

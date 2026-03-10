@@ -135,7 +135,7 @@ class _TopicFormScreenState extends ConsumerState<TopicFormScreen> {
               ),
               background: Container(
                 decoration: const BoxDecoration(
-                  gradient: AppColors.forestGradient,
+                  gradient: AppColors.primaryGradient,
                 ),
               ),
             ),

@@ -51,7 +51,9 @@ class _PTMSchedulerScreenState extends ConsumerState<PTMSchedulerScreen>
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/ptm/create'),
+        onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('PTM creation coming soon')),
+        ),
         icon: const Icon(Icons.add),
         label: const Text('Create PTM'),
       ),

@@ -81,7 +81,7 @@ class InventoryDashboardScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/inventory/assets/new'),
+        onPressed: () => context.push('/inventory/assets/form'),
         icon: const Icon(Icons.add),
         label: const Text('Add Asset'),
       ),
@@ -154,7 +154,7 @@ class _DashboardContent extends StatelessWidget {
                   iconColor: lowStockCount > 0
                       ? AppColors.warning
                       : AppColors.success,
-                  onTap: () => context.push('/inventory/items'),
+                  onTap: () => context.push('/inventory/stock'),
                 ),
                 GlassStatCard(
                   title: 'Maintenance Due',
@@ -288,7 +288,7 @@ class _DashboardContent extends StatelessWidget {
                     icon: Icons.category_outlined,
                     label: 'Consumables',
                     color: AppColors.secondary,
-                    onTap: () => context.push('/inventory/items'),
+                    onTap: () => context.push('/inventory/stock'),
                   ),
                   _QuickActionCard(
                     icon: Icons.qr_code_scanner,
@@ -300,7 +300,7 @@ class _DashboardContent extends StatelessWidget {
                     icon: Icons.assignment_outlined,
                     label: 'Assign',
                     color: AppColors.info,
-                    onTap: () => context.push('/inventory/assign'),
+                    onTap: () => context.push('/inventory/assets'),
                   ),
                   _QuickActionCard(
                     icon: Icons.build_outlined,
@@ -349,7 +349,7 @@ class _DashboardContent extends StatelessWidget {
                         ),
                         TextButton(
                           onPressed: () =>
-                              context.push('/inventory/items'),
+                              context.push('/inventory/stock'),
                           child: const Text('View All'),
                         ),
                       ],

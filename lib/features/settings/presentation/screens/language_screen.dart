@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/locale_provider.dart';
+import '../../../../core/theme/app_colors.dart';
 
 /// Map from language code to flag emoji.
 const _flagEmojis = {
@@ -28,7 +29,7 @@ class _RadioDot<T> extends StatelessWidget {
     super.key,
     required this.value,
     required this.groupValue,
-    this.activeColor = const Color(0xFF2563EB),
+    this.activeColor = AppColors.primary,
   });
 
   @override

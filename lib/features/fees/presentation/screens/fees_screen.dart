@@ -198,7 +198,7 @@ class _ParentOverview extends StatelessWidget {
           // Pending Payment Card
           GlassCard(
             padding: const EdgeInsets.all(20),
-            gradient: AppColors.sunriseGradient,
+            gradient: AppColors.primaryGradient,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

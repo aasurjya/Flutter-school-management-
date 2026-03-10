@@ -85,7 +85,7 @@ class SuperAdminDashboardScreen extends ConsumerWidget {
               child: _ActionCard(
                 icon: Icons.analytics,
                 title: 'Analytics',
-                onTap: () => context.push('/super-admin/analytics'),
+                onTap: () => context.push('/super-admin'),
               ),
             ),
           ],

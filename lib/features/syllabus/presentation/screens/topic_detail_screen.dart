@@ -62,7 +62,7 @@ class TopicDetailScreen extends ConsumerWidget {
                   ),
                   background: Container(
                     decoration: const BoxDecoration(
-                      gradient: AppColors.forestGradient,
+                      gradient: AppColors.primaryGradient,
                     ),
                   ),
                 ),

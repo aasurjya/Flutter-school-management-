@@ -312,7 +312,7 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/inventory/assets/new'),
+        onPressed: () => context.push('/inventory/assets/form'),
         child: const Icon(Icons.add),
       ),
     );

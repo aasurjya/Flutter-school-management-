@@ -89,7 +89,7 @@ class LessonPlanScreen extends ConsumerWidget {
             ),
             background: Container(
               decoration: const BoxDecoration(
-                gradient: AppColors.oceanGradient,
+                gradient: AppColors.primaryGradient,
               ),
             ),
           ),

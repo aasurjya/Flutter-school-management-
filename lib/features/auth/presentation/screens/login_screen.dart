@@ -179,64 +179,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: Theme.of(context).brightness == Brightness.dark
-                ? [
-                    const Color(0xFF1a1a2e),
-                    const Color(0xFF16213e),
-                    const Color(0xFF0f3460),
-                  ]
-                : [
-                    AppColors.primary.withValues(alpha: 0.1),
-                    AppColors.secondary.withValues(alpha: 0.05),
-                    Colors.white,
-                  ],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                SizedBox(height: size.height * 0.08),
-                // Logo and Title
-                _buildHeader(),
-                SizedBox(height: size.height * 0.06),
-                // Quick login shortcuts (only in non-production)
-                if (AppEnvironment.showDemoCredentials) _buildQuickLoginButtons(),
-                const SizedBox(height: 16),
-                // Error message
-                if (_errorMessage != null) _buildErrorBanner(),
-                // Login Form
-                _buildLoginForm(isDark),
-                const SizedBox(height: 24),
-                // Forgot Password
-                TextButton(
-                  onPressed: _handleForgotPassword,
-                  child: const Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              SizedBox(height: size.height * 0.08),
+              _buildHeader(),
+              SizedBox(height: size.height * 0.06),
+              if (AppEnvironment.showDemoCredentials) _buildQuickLoginButtons(),
+              const SizedBox(height: 16),
+              if (_errorMessage != null) _buildErrorBanner(),
+              _buildLoginForm(),
+              const SizedBox(height: 24),
+              TextButton(
+                onPressed: _handleForgotPassword,
+                child: const Text(
+                  'Forgot Password?',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                // Environment indicator (only in non-production)
-                if (!AppEnvironment.isProduction) ...[
-                  const SizedBox(height: 16),
-                  _buildEnvironmentBadge(),
-                ],
+              ),
+              if (!AppEnvironment.isProduction) ...[
+                const SizedBox(height: 16),
+                _buildEnvironmentBadge(),
               ],
-            ),
+            ],
           ),
         ),
       ),
@@ -386,7 +359,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildLoginForm(bool isDark) {
+  Widget _buildLoginForm() {
     return GlassCard(
       padding: const EdgeInsets.all(24),
       child: Form(

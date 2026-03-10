@@ -39,7 +39,7 @@ class ClassTeacherDashboardScreen extends ConsumerWidget {
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: const BoxDecoration(
-                  gradient: AppColors.oceanGradient,
+                  gradient: AppColors.primaryGradient,
                 ),
                 child: SafeArea(
                   child: Padding(

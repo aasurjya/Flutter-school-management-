@@ -59,13 +59,8 @@ class _GradebookScreenState extends ConsumerState<GradebookScreen>
               ? 'Gradebook — ${_selectedClass!.subjectName ?? "No Subject"}'
               : 'Gradebook',
         ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white60,
-          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: 'By Student'),
             Tab(text: 'By Assignment'),

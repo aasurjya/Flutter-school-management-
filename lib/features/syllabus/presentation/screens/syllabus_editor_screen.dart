@@ -71,7 +71,7 @@ class _SyllabusEditorScreenState extends ConsumerState<SyllabusEditorScreen> {
               ),
               background: Container(
                 decoration: const BoxDecoration(
-                  gradient: AppColors.forestGradient,
+                  gradient: AppColors.primaryGradient,
                 ),
               ),
             ),

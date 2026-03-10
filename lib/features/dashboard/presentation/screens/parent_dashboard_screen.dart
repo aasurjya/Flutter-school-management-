@@ -91,7 +91,7 @@ class ParentDashboardScreen extends ConsumerWidget {
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: const BoxDecoration(
-                  gradient: AppColors.sunriseGradient,
+                  gradient: AppColors.primaryGradient,
                 ),
                 child: SafeArea(
                   child: Padding(
@@ -209,9 +209,7 @@ class ParentDashboardScreen extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                ),
+                gradient: AppColors.primaryGradient,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -264,7 +262,7 @@ class ParentDashboardScreen extends ConsumerWidget {
                     child: Text(
                       '$count',
                       style: const TextStyle(
-                        color: Color(0xFF667eea),
+                        color: AppColors.grey900,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),

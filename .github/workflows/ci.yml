@@ -71,15 +71,16 @@ jobs:
         run: supabase db push
 
       # -------------------------------------------------------
-      - name: Integration tests (against remote DB, headless Chrome)
-        run: |
-          flutter test integration_test/ \
-            -d chrome \
-            --dart-define=TEST_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-            --dart-define=TEST_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
-            --dart-define=TEST_ADMIN_EMAIL=${{ secrets.TEST_ADMIN_EMAIL }} \
-            --dart-define=TEST_ADMIN_PASSWORD=${{ secrets.TEST_ADMIN_PASSWORD }} \
-            --reporter=github
+      # Integration tests — disabled until integration_test/ directory exists
+      # - name: Integration tests (against remote DB, headless Chrome)
+      #   run: |
+      #     flutter test integration_test/ \
+      #       -d chrome \
+      #       --dart-define=TEST_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+      #       --dart-define=TEST_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
+      #       --dart-define=TEST_ADMIN_EMAIL=${{ secrets.TEST_ADMIN_EMAIL }} \
+      #       --dart-define=TEST_ADMIN_PASSWORD=${{ secrets.TEST_ADMIN_PASSWORD }} \
+      #       --reporter=github
 
   # -----------------------------------------------------------
   # Deploy job — only runs on main branch after tests pass

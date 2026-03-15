@@ -9,7 +9,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/app_environment.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../shared/widgets/glass_card.dart';
 import '../../../../shared/widgets/loading_button.dart';
 import '../../providers/auth_provider.dart';
 
@@ -136,10 +135,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _navigateToDashboard() {
     final currentUser = ref.read(currentUserProvider);
     final primaryRole = currentUser?.primaryRole;
+    final profileComplete = currentUser?.profileComplete ?? false;
 
     if (kDebugMode) {
-      developer.log('Navigating to dashboard for role: $primaryRole',
+      developer.log('Navigating to dashboard for role: $primaryRole, profileComplete: $profileComplete',
           name: 'LoginScreen');
+    }
+
+    // First-login: redirect to profile setup (super_admin is exempt)
+    if (!profileComplete && primaryRole != 'super_admin') {
+      final setupRoute = _getProfileSetupRoute(primaryRole);
+      if (setupRoute != null) {
+        if (kDebugMode) {
+          developer.log('LoginScreen: redirecting to profile setup $setupRoute',
+              name: 'LoginScreen');
+        }
+        context.go(setupRoute);
+        return;
+      }
     }
 
     switch (primaryRole) {
@@ -159,6 +172,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       case 'parent':
         context.go(AppRoutes.parentDashboard);
         break;
+      case 'accountant':
+        context.go(AppRoutes.accountantDashboard);
+        break;
+      case 'librarian':
+        context.go(AppRoutes.librarianDashboard);
+        break;
+      case 'transport_manager':
+        context.go(AppRoutes.transportDashboard);
+        break;
+      case 'hostel_warden':
+        context.go(AppRoutes.hostelWardenDashboard);
+        break;
+      case 'canteen_staff':
+        context.go(AppRoutes.canteenStaffDashboard);
+        break;
+      case 'receptionist':
+        context.go(AppRoutes.receptionistDashboard);
+        break;
       default:
         // Unknown role — redirect to login for safety
         if (kDebugMode) {
@@ -176,105 +207,86 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              SizedBox(height: size.height * 0.08),
-              _buildHeader(),
-              SizedBox(height: size.height * 0.06),
-              if (AppEnvironment.showDemoCredentials) _buildQuickLoginButtons(),
-              const SizedBox(height: 16),
-              if (_errorMessage != null) _buildErrorBanner(),
-              _buildLoginForm(),
-              const SizedBox(height: 24),
-              TextButton(
-                onPressed: _handleForgotPassword,
-                child: const Text(
-                  'Forgot Password?',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              if (!AppEnvironment.isProduction) ...[
-                const SizedBox(height: 16),
-                _buildEnvironmentBadge(),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
+  String? _getProfileSetupRoute(String? role) {
+    switch (role) {
+      case 'teacher':
+        return AppRoutes.profileSetupTeacher;
+      case 'student':
+        return AppRoutes.profileSetupStudent;
+      case 'parent':
+        return AppRoutes.profileSetupParent;
+      case 'accountant':
+      case 'librarian':
+      case 'transport_manager':
+      case 'hostel_warden':
+      case 'canteen_staff':
+      case 'receptionist':
+        return AppRoutes.profileSetupStaff;
+      case 'tenant_admin':
+      case 'principal':
+        return AppRoutes.profileSetupAdmin;
+      default:
+        return null;
+    }
   }
 
-  /// Quick-fill demo credentials for faster testing
-  Widget _buildQuickLoginButtons() {
-    const password = 'Demo@2026';
-    final demoUsers = [
-      (
-        label: 'Admin',
-        email: 'admin@demo-school.edu',
-      ),
-      (
-        label: 'Teacher',
-        email: 'teacher@demo-school.edu',
-      ),
-      (
-        label: 'Student',
-        email: 'student@demo-school.edu',
-      ),
-      (
-        label: 'Parent',
-        email: 'parent@demo-school.edu',
-      ),
-    ];
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
 
-    return GlassCard(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Stack(
         children: [
-          const Row(
-            children: [
-              Icon(Icons.bolt, color: Colors.amber),
-              SizedBox(width: 8),
-              Text(
-                'Quick Login',
-                style: TextStyle(fontWeight: FontWeight.w700),
+          // Background Decorative Elements
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withValues(alpha: 0.03),
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final user in demoUsers)
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+          Positioned(
+            bottom: -50,
+            left: -50,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.info.withValues(alpha: 0.03),
+              ),
+            ),
+          ),
+          
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 450),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 48),
+                      if (_errorMessage != null) _buildErrorBanner(),
+                      _buildLoginForm(),
+                      if (!AppEnvironment.isProduction) ...[
+                        const SizedBox(height: 24),
+                        _buildEnvironmentBadge(),
+                      ],
+                    ],
                   ),
-                  icon: const Icon(Icons.login, size: 18),
-                  label: Text(user.label),
-                  onPressed: () {
-                    _emailController.text = user.email;
-                    _passwordController.text = password;
-                    _handleLogin();
-                  },
                 ),
-            ],
+              ),
+            ),
           ),
         ],
       ),
@@ -284,31 +296,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildErrorBanner() {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.error.withValues(alpha: 0.1),
+        color: AppColors.error.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: AppColors.error, size: 20),
-          const SizedBox(width: 12),
+          const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 18),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
-              _errorMessage!,
+              _errorMessage ?? '',
               style: const TextStyle(
                 color: AppColors.error,
-                fontSize: 14,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.close, size: 18),
-            color: AppColors.error,
-            onPressed: () => setState(() => _errorMessage = null),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
+          GestureDetector(
+            onTap: () => setState(() => _errorMessage = null),
+            child: const Icon(Icons.close_rounded, color: AppColors.error, size: 16),
           ),
         ],
       ),
@@ -316,43 +326,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Widget _buildHeader() {
+    final theme = Theme.of(context);
     return Column(
       children: [
-        // Animated Logo Container
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
-            borderRadius: BorderRadius.circular(25),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.school_rounded,
-            size: 50,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          'Welcome Back',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
+        Hero(
+          tag: 'app_logo',
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.auto_awesome_mosaic_rounded,
+              size: 40,
+              color: Colors.white,
+            ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 32),
         Text(
-          'Sign in to continue to EduSaaS',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
+          'EduSaaS Enterprise',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -1.5,
+            color: AppColors.grey900,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'The complete operating system for modern education.',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: AppColors.grey500,
+            fontWeight: FontWeight.w500,
+            height: 1.5,
           ),
         ),
       ],
@@ -360,35 +376,46 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Widget _buildLoginForm() {
-    return GlassCard(
-      padding: const EdgeInsets.all(24),
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(
+              'Sign In',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 24),
             // Email Field
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
-              autocorrect: false,
-              enableSuggestions: false,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                hintText: 'Enter your email',
-                prefixIcon: const Icon(Icons.email_outlined),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+              decoration: const InputDecoration(
+                labelText: 'Work Email',
+                prefixIcon: Icon(Icons.mail_outline_rounded, size: 20),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
-                }
-                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                    .hasMatch(value)) {
-                  return 'Please enter a valid email';
+                if (value == null || value.isEmpty) return 'Email is required';
+                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                  return 'Enter a valid work email';
                 }
                 return null;
               },
@@ -402,53 +429,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               onFieldSubmitted: (_) => _handleLogin(),
               decoration: InputDecoration(
                 labelText: 'Password',
-                hintText: 'Enter your password',
-                prefixIcon: const Icon(Icons.lock_outline),
+                prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
+                    size: 20,
                   ),
-                  onPressed: () {
-                    setState(() => _obscurePassword = !_obscurePassword);
-                  },
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your password';
-                }
-                if (value.length < 8) {
-                  return 'Password must be at least 8 characters';
-                }
-                if (!RegExp(r'[A-Z]').hasMatch(value)) {
-                  return 'Password must contain an uppercase letter';
-                }
-                if (!RegExp(r'[a-z]').hasMatch(value)) {
-                  return 'Password must contain a lowercase letter';
-                }
-                if (!RegExp(r'[0-9]').hasMatch(value)) {
-                  return 'Password must contain a digit';
-                }
+                if (value == null || value.isEmpty) return 'Password is required';
+                if (value.length < 8) return 'Minimum 8 characters';
                 return null;
               },
             ),
-            const SizedBox(height: 28),
-            // Login Button
+            const SizedBox(height: 32),
             LoadingButton(
               onPressed: _handleLogin,
               isLoading: _isLoading,
-              child: const Text(
-                'Sign In',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+              child: const Text('Access Dashboard'),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: _handleForgotPassword,
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.secondary,
+                minimumSize: const Size(double.infinity, 36),
               ),
+              child: const Text('Forgot Password?', style: TextStyle(fontWeight: FontWeight.w600)),
             ),
           ],
         ),
@@ -461,7 +472,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.warning.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
       ),
       child: Row(

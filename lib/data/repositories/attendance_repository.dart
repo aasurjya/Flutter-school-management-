@@ -50,7 +50,8 @@ class AttendanceRepository extends BaseRepository {
           )
         ''')
         .eq('section_id', sectionId)
-        .eq('date', date.toIso8601String().split('T')[0]);
+        .eq('date', date.toIso8601String().split('T')[0])
+        .limit(100);
 
     return (response as List)
         .map((json) => Attendance.fromJson(json))
@@ -95,7 +96,7 @@ class AttendanceRepository extends BaseRepository {
       query = query.eq('year', year);
     }
 
-    final response = await query.order('month', ascending: false);
+    final response = await query.order('month', ascending: false).limit(100);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -226,7 +227,8 @@ class AttendanceRepository extends BaseRepository {
         .from('v_section_daily_attendance')
         .select('attendance_percentage')
         .eq('tenant_id', requireTenantId)
-        .eq('date', today);
+        .eq('date', today)
+        .limit(100);
 
     if (response.isEmpty) return 0;
     

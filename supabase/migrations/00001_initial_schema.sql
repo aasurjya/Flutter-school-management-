@@ -3,8 +3,20 @@
 -- =============================================
 
 -- Enable required extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS "moddatetime" WITH SCHEMA extensions;
+
+-- Make uuid_generate_v4 available in public schema (hosted Supabase puts extensions in extensions schema)
+CREATE OR REPLACE FUNCTION public.uuid_generate_v4() RETURNS uuid LANGUAGE sql AS 'SELECT gen_random_uuid()';
+
+-- Make moddatetime accessible from public schema
+CREATE OR REPLACE FUNCTION public.moddatetime() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$;
 
 -- =============================================
 -- ENUMS

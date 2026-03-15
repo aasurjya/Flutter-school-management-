@@ -304,6 +304,29 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
   }
 
   Future<void> _submitAttendance() async {
+    // Confirm before overwriting any existing attendance
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Submit Attendance'),
+        content: Text(
+          'This will record attendance for ${_students.length} students. '
+          'Any existing records for this date will be overwritten.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
     setState(() => _isSubmitting = true);
 
     try {
@@ -364,7 +387,7 @@ class _SummaryChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
             '$count',

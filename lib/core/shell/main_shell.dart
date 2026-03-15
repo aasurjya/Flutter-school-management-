@@ -25,6 +25,10 @@ class _MainShellState extends ConsumerState<MainShell> {
     final currentUser = ref.watch(currentUserProvider);
     final primaryRole = currentUser?.primaryRole ?? 'student';
 
+    if (primaryRole == 'super_admin') {
+      return widget.child;
+    }
+
     return Scaffold(
       body: RepaintBoundary(
         key: ScreenCaptureService.repaintKey,
@@ -136,12 +140,12 @@ class _PremiumBottomNav extends ConsumerWidget {
 
   List<_NavItemData> _getPrimaryItems(String role) {
     switch (role) {
-      case 'super_admin':
       case 'tenant_admin':
       case 'principal':
         return [
           _dashboardItem,
           _studentsItem,
+          _staffItem,
           _attendanceItem,
           _feesItem,
         ];
@@ -165,6 +169,48 @@ class _PremiumBottomNav extends ConsumerWidget {
           _attendanceItem,
           _feesItem,
           _messagesItem,
+        ];
+      case 'accountant':
+        return [
+          _dashboardItem,
+          _feesItem,
+          _reportsItem,
+          _messagesItem,
+        ];
+      case 'librarian':
+        return [
+          _dashboardItem,
+          _libraryItem,
+          _myBooksItem,
+          _noticesItem,
+        ];
+      case 'transport_manager':
+        return [
+          _dashboardItem,
+          _transportItem,
+          _busTrackingItem,
+          _noticesItem,
+        ];
+      case 'hostel_warden':
+        return [
+          _dashboardItem,
+          _hostelItem,
+          _allocationItem,
+          _noticesItem,
+        ];
+      case 'canteen_staff':
+        return [
+          _dashboardItem,
+          _canteenItem,
+          _ordersItem,
+          _noticesItem,
+        ];
+      case 'receptionist':
+        return [
+          _dashboardItem,
+          _visitorsItem,
+          _calendarItem,
+          _noticesItem,
         ];
       default:
         return [
@@ -199,12 +245,12 @@ class _PremiumBottomNav extends ConsumerWidget {
 
   List<String> _getPrimaryRoutes(String role) {
     switch (role) {
-      case 'super_admin':
       case 'tenant_admin':
       case 'principal':
         return [
           AppRoutes.adminDashboard,
           AppRoutes.studentManagement,
+          AppRoutes.staffManagement,
           AppRoutes.attendance,
           AppRoutes.fees,
         ];
@@ -228,6 +274,48 @@ class _PremiumBottomNav extends ConsumerWidget {
           AppRoutes.attendance,
           AppRoutes.fees,
           AppRoutes.messages,
+        ];
+      case 'accountant':
+        return [
+          AppRoutes.accountantDashboard,
+          AppRoutes.fees,
+          AppRoutes.reports,
+          AppRoutes.messages,
+        ];
+      case 'librarian':
+        return [
+          AppRoutes.librarianDashboard,
+          AppRoutes.library,
+          AppRoutes.libraryMyBooks,
+          AppRoutes.noticeBoard,
+        ];
+      case 'transport_manager':
+        return [
+          AppRoutes.transportDashboard,
+          AppRoutes.transport,
+          AppRoutes.busTrackingDashboard,
+          AppRoutes.noticeBoard,
+        ];
+      case 'hostel_warden':
+        return [
+          AppRoutes.hostelWardenDashboard,
+          AppRoutes.hostel,
+          AppRoutes.hostelMyRoom,
+          AppRoutes.noticeBoard,
+        ];
+      case 'canteen_staff':
+        return [
+          AppRoutes.canteenStaffDashboard,
+          AppRoutes.canteen,
+          AppRoutes.canteenOrders,
+          AppRoutes.noticeBoard,
+        ];
+      case 'receptionist':
+        return [
+          AppRoutes.receptionistDashboard,
+          AppRoutes.visitorDashboard,
+          AppRoutes.calendar,
+          AppRoutes.noticeBoard,
         ];
       default:
         return [
@@ -428,6 +516,11 @@ const _studentsItem = _NavItemData(
   activeIcon: Icons.people,
   label: 'Students',
 );
+const _staffItem = _NavItemData(
+  icon: Icons.badge_outlined,
+  activeIcon: Icons.badge,
+  label: 'Staff',
+);
 const _feesItem = _NavItemData(
   icon: Icons.payment_outlined,
   activeIcon: Icons.payment,
@@ -447,6 +540,66 @@ const _messagesItem = _NavItemData(
   icon: Icons.chat_bubble_outline,
   activeIcon: Icons.chat_bubble,
   label: 'Messages',
+);
+const _reportsItem = _NavItemData(
+  icon: Icons.analytics_outlined,
+  activeIcon: Icons.analytics,
+  label: 'Reports',
+);
+const _libraryItem = _NavItemData(
+  icon: Icons.library_books_outlined,
+  activeIcon: Icons.library_books,
+  label: 'Library',
+);
+const _myBooksItem = _NavItemData(
+  icon: Icons.bookmark_outlined,
+  activeIcon: Icons.bookmark,
+  label: 'My Books',
+);
+const _noticesItem = _NavItemData(
+  icon: Icons.campaign_outlined,
+  activeIcon: Icons.campaign,
+  label: 'Notices',
+);
+const _transportItem = _NavItemData(
+  icon: Icons.directions_bus_outlined,
+  activeIcon: Icons.directions_bus,
+  label: 'Transport',
+);
+const _busTrackingItem = _NavItemData(
+  icon: Icons.gps_fixed_outlined,
+  activeIcon: Icons.gps_fixed,
+  label: 'Tracking',
+);
+const _hostelItem = _NavItemData(
+  icon: Icons.apartment_outlined,
+  activeIcon: Icons.apartment,
+  label: 'Hostel',
+);
+const _allocationItem = _NavItemData(
+  icon: Icons.meeting_room_outlined,
+  activeIcon: Icons.meeting_room,
+  label: 'Allocation',
+);
+const _canteenItem = _NavItemData(
+  icon: Icons.restaurant_outlined,
+  activeIcon: Icons.restaurant,
+  label: 'Canteen',
+);
+const _ordersItem = _NavItemData(
+  icon: Icons.receipt_long_outlined,
+  activeIcon: Icons.receipt_long,
+  label: 'Orders',
+);
+const _visitorsItem = _NavItemData(
+  icon: Icons.badge_outlined,
+  activeIcon: Icons.badge,
+  label: 'Visitors',
+);
+const _calendarItem = _NavItemData(
+  icon: Icons.calendar_month_outlined,
+  activeIcon: Icons.calendar_month,
+  label: 'Calendar',
 );
 
 // ─── AI Tutor FAB ─────────────────────────────────────────────────────────────

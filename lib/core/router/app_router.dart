@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
@@ -13,6 +14,12 @@ import '../../features/dashboard/presentation/screens/admin_dashboard_screen.dar
 import '../../features/dashboard/presentation/screens/parent_dashboard_screen.dart';
 import '../../features/dashboard/presentation/screens/student_dashboard_screen.dart';
 import '../../features/dashboard/presentation/screens/teacher_dashboard_screen.dart';
+import '../../features/staff_portal/presentation/screens/accountant_dashboard_screen.dart';
+import '../../features/staff_portal/presentation/screens/librarian_dashboard_screen.dart';
+import '../../features/staff_portal/presentation/screens/transport_manager_dashboard_screen.dart';
+import '../../features/staff_portal/presentation/screens/hostel_warden_dashboard_screen.dart';
+import '../../features/staff_portal/presentation/screens/canteen_staff_dashboard_screen.dart';
+import '../../features/staff_portal/presentation/screens/receptionist_dashboard_screen.dart';
 import '../../features/students/presentation/screens/students_list_screen.dart';
 import '../../features/students/presentation/screens/student_detail_screen.dart';
 import '../../features/attendance/presentation/screens/attendance_screen.dart';
@@ -244,8 +251,15 @@ import '../../data/models/notice_board.dart' as notice;
 import '../../features/portfolio/presentation/screens/student_portfolio_screen.dart';
 import '../../features/portfolio/presentation/screens/portfolio_work_screen.dart';
 import '../../features/student_portfolio/presentation/screens/digital_id_screen.dart';
+import '../../features/id_card/presentation/screens/staff_id_card_screen.dart';
+import '../../features/id_card/presentation/screens/school_branding_screen.dart';
 import '../../features/homework/presentation/screens/homework_create_screen.dart';
 import '../../features/homework/presentation/screens/homework_detail_screen.dart';
+import '../../features/profile_setup/screens/teacher_profile_setup_screen.dart';
+import '../../features/profile_setup/screens/student_profile_setup_screen.dart';
+import '../../features/profile_setup/screens/parent_profile_setup_screen.dart';
+import '../../features/profile_setup/screens/staff_profile_setup_screen.dart';
+import '../../features/profile_setup/screens/admin_profile_setup_screen.dart';
 import '../../features/homework/presentation/screens/homework_submit_screen.dart';
 import '../../features/homework/presentation/screens/homework_submissions_screen.dart';
 import '../../features/homework/presentation/screens/homework_calendar_screen.dart';
@@ -620,6 +634,25 @@ class AppRoutes {
   static const String childProgress = '/parent/child-progress/:childId';
   static const String homeworkTracker = '/parent/homework-tracker';
   static const String teacherMessage = '/parent/teacher-message';
+
+  // Operational staff dashboard routes
+  static const String accountantDashboard   = '/staff/accountant';
+  static const String librarianDashboard    = '/staff/librarian';
+  static const String transportDashboard    = '/staff/transport-manager';
+  static const String hostelWardenDashboard = '/staff/hostel-warden';
+  static const String canteenStaffDashboard = '/staff/canteen-staff';
+  static const String receptionistDashboard = '/staff/receptionist';
+
+  // ID Card routes
+  static const String staffIdCard = '/my-id-card';
+  static const String schoolBranding = '/admin/school-branding';
+
+  // Profile setup routes (first-login)
+  static const String profileSetupTeacher = '/profile-setup/teacher';
+  static const String profileSetupStudent = '/profile-setup/student';
+  static const String profileSetupParent  = '/profile-setup/parent';
+  static const String profileSetupStaff   = '/profile-setup/staff';
+  static const String profileSetupAdmin   = '/profile-setup/admin';
 }
 
 /// Router provider
@@ -636,9 +669,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Read current session and user synchronously on every redirect
       final session = supabase.auth.currentSession;
       final currentUser = ref.read(currentUserProvider);
+      final sessionRole = _getSessionRole(session);
       final isLoggedIn = session != null || currentUser != null;
       final isLoggingIn = state.matchedLocation == AppRoutes.login;
       final isSplash = state.matchedLocation == AppRoutes.splash;
+      final isPublicRoute = isLoggingIn;
 
       developer.log(
         'Router redirect: location=${state.matchedLocation}, '
@@ -650,34 +685,67 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // If on splash, don't redirect
       if (isSplash) return null;
 
-      // If not logged in and not on login page, redirect to login
-      if (!isLoggedIn && !isLoggingIn) {
+      // If not logged in and not on a public page, redirect to login
+      if (!isLoggedIn && !isPublicRoute) {
         return AppRoutes.login;
       }
 
       // If logged in and on login page, redirect to dashboard
-      if (isLoggedIn && isLoggingIn) {
+      if (isLoggedIn && isPublicRoute) {
         return _getDashboardRoute(ref);
       }
 
+      // Profile-setup enforcement: force first-login users to complete profile
+      // (super_admin is exempt; profile-setup routes themselves are always allowed)
+      final isOnProfileSetup = state.matchedLocation.startsWith('/profile-setup');
+      if (isLoggedIn &&
+          currentUser != null &&
+          !(currentUser.profileComplete) &&
+          currentUser.primaryRole != 'super_admin' &&
+          !isOnProfileSetup) {
+        final setupRoute = _getProfileSetupRoute(currentUser.primaryRole);
+        if (setupRoute != null) {
+          developer.log(
+            'Router: profileComplete=false, redirecting to $setupRoute',
+            name: 'AppRouter',
+          );
+          return setupRoute;
+        }
+      }
+
       // Role-based route guards for authenticated users
-      if (isLoggedIn && currentUser != null) {
-        final role = currentUser.primaryRole ?? '';
+      if (isLoggedIn) {
+        final role = currentUser?.primaryRole ?? sessionRole ?? '';
         final location = state.matchedLocation;
+
+        if (role == 'super_admin' &&
+            !location.startsWith('/super-admin') &&
+            !isPublicRoute) {
+          return AppRoutes.superAdminDashboard;
+        }
 
         // Super-admin routes require super_admin role
         if (location.startsWith('/super-admin') && role != 'super_admin') {
           return _getDashboardRoute(ref);
         }
 
-        // Admin routes require super_admin, tenant_admin, or principal
+        // Admin routes require tenant_admin or principal
         if (location.startsWith('/admin') &&
-            !const ['super_admin', 'tenant_admin', 'principal'].contains(role)) {
+            !const ['tenant_admin', 'principal'].contains(role)) {
           return _getDashboardRoute(ref);
         }
 
         // Teacher routes require teacher role
         if (location.startsWith('/teacher') && role != 'teacher') {
+          return _getDashboardRoute(ref);
+        }
+
+        // Staff routes require an operational staff role
+        const operationalStaff = [
+          'accountant', 'librarian', 'transport_manager',
+          'hostel_warden', 'canteen_staff', 'receptionist',
+        ];
+        if (location.startsWith('/staff') && !operationalStaff.contains(role)) {
           return _getDashboardRoute(ref);
         }
       }
@@ -695,6 +763,46 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.superAdminDashboard,
+        builder: (context, state) => const SuperAdminDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.tenantsList,
+        builder: (context, state) => const TenantsListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.createTenant,
+        builder: (context, state) => const CreateTenantScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.tenantDetail,
+        builder: (context, state) => TenantDetailScreen(
+          tenantId: state.pathParameters['tenantId']!,
+        ),
+      ),
+
+      // Profile Setup Routes (first-login, outside shell so no bottom nav)
+      GoRoute(
+        path: AppRoutes.profileSetupTeacher,
+        builder: (context, state) => const TeacherProfileSetupScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.profileSetupStudent,
+        builder: (context, state) => const StudentProfileSetupScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.profileSetupParent,
+        builder: (context, state) => const ParentProfileSetupScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.profileSetupStaff,
+        builder: (context, state) => const StaffProfileSetupScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.profileSetupAdmin,
+        builder: (context, state) => const AdminProfileSetupScreen(),
       ),
 
       // Main Shell with bottom navigation
@@ -724,6 +832,44 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.parentDashboard,
             pageBuilder: (context, state) => const NoTransitionPage(
               child: ParentDashboardScreen(),
+            ),
+          ),
+
+          // Operational Staff Dashboards
+          GoRoute(
+            path: AppRoutes.accountantDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: AccountantDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.librarianDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: LibrarianDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.transportDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: TransportManagerDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.hostelWardenDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: HostelWardenDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.canteenStaffDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: CanteenStaffDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.receptionistDashboard,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ReceptionistDashboardScreen(),
             ),
           ),
 
@@ -1176,32 +1322,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => ClassTeacherDashboardScreen(
               sectionId: state.pathParameters['sectionId']!,
               sectionName: state.uri.queryParameters['name'],
-            ),
-          ),
-
-          // Super Admin Dashboard
-          GoRoute(
-            path: AppRoutes.superAdminDashboard,
-            builder: (context, state) => const SuperAdminDashboardScreen(),
-          ),
-
-          // Tenants List
-          GoRoute(
-            path: AppRoutes.tenantsList,
-            builder: (context, state) => const TenantsListScreen(),
-          ),
-
-          // Create Tenant
-          GoRoute(
-            path: AppRoutes.createTenant,
-            builder: (context, state) => const CreateTenantScreen(),
-          ),
-
-          // Tenant Detail
-          GoRoute(
-            path: AppRoutes.tenantDetail,
-            builder: (context, state) => TenantDetailScreen(
-              tenantId: state.pathParameters['tenantId']!,
             ),
           ),
 
@@ -2039,6 +2159,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
 
+      // ==================== STAFF ID CARD ====================
+      GoRoute(
+        path: AppRoutes.staffIdCard,
+        builder: (context, state) => const StaffIdCardScreen(),
+      ),
+
+      // ==================== SCHOOL BRANDING (ADMIN) ====================
+      GoRoute(
+        path: AppRoutes.schoolBranding,
+        builder: (context, state) => const SchoolBrandingScreen(),
+      ),
+
       // ==================== SETTINGS ====================
       GoRoute(
         path: AppRoutes.languageSettings,
@@ -2138,11 +2270,65 @@ String _getDashboardRoute(Ref ref) {
       return AppRoutes.studentDashboard;
     case 'parent':
       return AppRoutes.parentDashboard;
+    case 'accountant':
+      return AppRoutes.accountantDashboard;
+    case 'librarian':
+      return AppRoutes.librarianDashboard;
+    case 'transport_manager':
+      return AppRoutes.transportDashboard;
+    case 'hostel_warden':
+      return AppRoutes.hostelWardenDashboard;
+    case 'canteen_staff':
+      return AppRoutes.canteenStaffDashboard;
+    case 'receptionist':
+      return AppRoutes.receptionistDashboard;
     default:
       developer.log('No valid role found, redirecting to login',
           name: 'AppRouter', level: 800);
       return AppRoutes.login;
   }
+}
+
+/// Returns the profile-setup route for a given role, or null if exempt.
+String? _getProfileSetupRoute(String? role) {
+  switch (role) {
+    case 'teacher':
+      return AppRoutes.profileSetupTeacher;
+    case 'student':
+      return AppRoutes.profileSetupStudent;
+    case 'parent':
+      return AppRoutes.profileSetupParent;
+    case 'accountant':
+    case 'librarian':
+    case 'transport_manager':
+    case 'hostel_warden':
+    case 'canteen_staff':
+    case 'receptionist':
+      return AppRoutes.profileSetupStaff;
+    case 'tenant_admin':
+    case 'principal':
+      return AppRoutes.profileSetupAdmin;
+    default:
+      return null;
+  }
+}
+
+String? _getSessionRole(Session? session) {
+  final metadata = session?.user.appMetadata;
+  final directRole = metadata?['role'];
+  if (directRole is String && directRole.isNotEmpty) {
+    return directRole;
+  }
+
+  final roles = metadata?['roles'];
+  if (roles is List && roles.isNotEmpty) {
+    final firstRole = roles.first;
+    if (firstRole is String && firstRole.isNotEmpty) {
+      return firstRole;
+    }
+  }
+
+  return null;
 }
 
 /// Converts a [Stream] into a [ChangeNotifier] for GoRouter's refreshListenable

@@ -42,7 +42,7 @@ class DonationProgressCard extends StatelessWidget {
       case 'sports':
         return AppColors.success;
       case 'library':
-        return const Color(0xFF8B5CF6);
+        return const Color(0xFFF97316);
       default:
         return AppColors.primary;
     }

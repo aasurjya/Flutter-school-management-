@@ -1,3 +1,5 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../models/student.dart';
 import 'base_repository.dart';
 
@@ -9,32 +11,39 @@ class StudentRepository extends BaseRepository {
     String? classId,
     String? searchQuery,
     bool activeOnly = true,
-    int limit = 50,
+    int limit = 25,
     int offset = 0,
   }) async {
+    // When filtering by section or class, use inner join to only return
+    // students with matching enrollments. Otherwise, use left join so
+    // students without enrollments still appear.
+    final needsEnrollmentFilter = sectionId != null || classId != null;
+
+    final enrollJoin = needsEnrollmentFilter
+        ? '''student_enrollments!inner(
+            id, tenant_id, student_id, section_id, academic_year_id,
+            roll_number, status, enrollment_date, created_at,
+            sections!inner(id, name, classes!inner(id, name)),
+            academic_years!inner(id, name, is_current)
+          )'''
+        : '''student_enrollments(
+            id, tenant_id, student_id, section_id, academic_year_id,
+            roll_number, status, enrollment_date, created_at,
+            sections(id, name, classes(id, name)),
+            academic_years(id, name, is_current)
+          )''';
+
     var query = client
         .from('students')
-        .select('''
-          *,
-          student_enrollments!inner(
-            id,
-            section_id,
-            academic_year_id,
-            roll_number,
-            status,
-            sections!inner(
-              id,
-              name,
-              classes!inner(id, name)
-            ),
-            academic_years!inner(id, name, is_current)
-          )
-        ''')
-        .eq('tenant_id', requireTenantId)
-        .eq('student_enrollments.academic_years.is_current', true);
+        .select('*, $enrollJoin')
+        .eq('tenant_id', requireTenantId);
 
     if (activeOnly) {
       query = query.eq('is_active', true);
+    }
+
+    if (needsEnrollmentFilter) {
+      query = query.eq('student_enrollments.academic_years.is_current', true);
     }
 
     if (sectionId != null) {
@@ -45,9 +54,47 @@ class StudentRepository extends BaseRepository {
       query = query.eq('student_enrollments.sections.class_id', classId);
     }
 
-    final response = await query.order('first_name').range(offset, offset + limit - 1);
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      query = query.or(
+        'first_name.ilike.%$searchQuery%,'
+        'last_name.ilike.%$searchQuery%,'
+        'admission_number.ilike.%$searchQuery%',
+      );
+    }
+
+    final response = await query
+        .order('first_name')
+        .range(offset, offset + limit - 1);
 
     return (response as List).map((json) => Student.fromJson(json)).toList();
+  }
+
+  Future<int> getStudentCount({
+    String? classId,
+    String? sectionId,
+    String? searchQuery,
+  }) async {
+    var query = client
+        .from('students')
+        .count(CountOption.exact)
+        .eq('tenant_id', requireTenantId)
+        .eq('is_active', true);
+
+    if (classId != null) {
+      query = query.eq('class_id', classId);
+    }
+    if (sectionId != null) {
+      query = query.eq('section_id', sectionId);
+    }
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      query = query.or(
+        'first_name.ilike.%$searchQuery%,'
+        'last_name.ilike.%$searchQuery%,'
+        'admission_number.ilike.%$searchQuery%',
+      );
+    }
+
+    return await query;
   }
 
   Future<Student?> getStudentById(String studentId) async {
@@ -254,18 +301,4 @@ class StudentRepository extends BaseRepository {
     return Student.fromJson(response);
   }
 
-  Future<int> getStudentCount({String? sectionId, String? classId}) async {
-    try {
-      final query = client
-          .from('students')
-          .select('id')
-          .eq('tenant_id', requireTenantId)
-          .eq('is_active', true);
-
-      final response = await query;
-      return (response as List).length;
-    } catch (e) {
-      return 0;
-    }
-  }
 }

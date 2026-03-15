@@ -79,7 +79,7 @@ class _BehaviorSettingsScreenState
       '#F59E0B', // amber
       '#22C55E', // green
       '#3B82F6', // blue
-      '#8B5CF6', // purple
+      '#F97316', // orange
       '#EC4899', // pink
       '#64748B', // slate
     ];

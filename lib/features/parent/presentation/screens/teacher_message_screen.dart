@@ -195,7 +195,7 @@ class _TeacherCard extends StatelessWidget {
       AppColors.primary,
       AppColors.secondary,
       AppColors.accent,
-      Color(0xFF8B5CF6),
+      Color(0xFFF97316),
       Color(0xFF06B6D4),
     ];
     return colors[teacher.userId.hashCode.abs() % colors.length];

@@ -42,6 +42,14 @@ final platformStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   return repository.getPlatformStats();
 });
 
+/// Tenant users provider
+final tenantUsersProvider = FutureProvider.family<List<Map<String, dynamic>>, String>(
+  (ref, tenantId) async {
+    final repository = ref.watch(tenantRepositoryProvider);
+    return repository.getTenantUsers(tenantId);
+  },
+);
+
 /// Tenants filter
 class TenantsFilter {
   final String? status;

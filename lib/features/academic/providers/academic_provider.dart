@@ -18,6 +18,11 @@ final sectionsByClassProvider = FutureProvider.family<List<Section>, String>((re
   return repository.getSections(classId: classId);
 });
 
+final allSectionsProvider = FutureProvider<List<Section>>((ref) async {
+  final repository = ref.watch(academicRepositoryProvider);
+  return repository.getSections();
+});
+
 final academicYearsProvider = FutureProvider<List<AcademicYear>>((ref) async {
   final repository = ref.watch(academicRepositoryProvider);
   return repository.getAcademicYears();
@@ -26,6 +31,16 @@ final academicYearsProvider = FutureProvider<List<AcademicYear>>((ref) async {
 final currentAcademicYearProvider = FutureProvider<AcademicYear?>((ref) async {
   final repository = ref.watch(academicRepositoryProvider);
   return repository.getCurrentAcademicYear();
+});
+
+final termsProvider = FutureProvider.family<List<Term>, String>((ref, academicYearId) async {
+  final repository = ref.watch(academicRepositoryProvider);
+  return repository.getTerms(academicYearId);
+});
+
+final subjectsProvider = FutureProvider<List<Subject>>((ref) async {
+  final repository = ref.watch(academicRepositoryProvider);
+  return repository.getSubjects();
 });
 
 final classTeacherSectionsProvider =

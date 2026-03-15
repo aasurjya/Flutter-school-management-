@@ -104,7 +104,7 @@ class _ResultCard extends StatelessWidget {
     final color = isPassed ? AppColors.success : AppColors.error;
 
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(32),
@@ -114,7 +114,7 @@ class _ResultCard extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [color.withAlpha(15), color.withAlpha(5)],
           ),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           children: [
@@ -178,7 +178,7 @@ class _ResultCard extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               decoration: BoxDecoration(
                 color: color.withAlpha(20),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 '${attempt.percentage.toStringAsFixed(1)}%',

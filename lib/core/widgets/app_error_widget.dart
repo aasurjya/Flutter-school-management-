@@ -21,7 +21,7 @@ class AppErrorWidget extends StatelessWidget {
               height: 64,
               decoration: BoxDecoration(
                 color: AppColors.errorLight,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: const Icon(Icons.error_outline, color: AppColors.error, size: 32),
             ),
@@ -86,7 +86,7 @@ class AppEmptyWidget extends StatelessWidget {
               height: 64,
               decoration: BoxDecoration(
                 color: AppColors.grey100,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(icon, color: AppColors.grey400, size: 32),
             ),

@@ -339,7 +339,7 @@ class _QuickActionChip extends StatelessWidget {
       onPressed: onTap,
       backgroundColor: AppColors.primary.withValues(alpha: 0.06),
       side: BorderSide(color: AppColors.primary.withValues(alpha: 0.15)),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     );
   }
 }

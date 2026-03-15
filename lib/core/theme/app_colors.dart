@@ -24,14 +24,15 @@ class AppColors {
 
   // ============================================
   // SEMANTIC — keep full color ONLY for status
+  // Adjusted for WCAG AA 4.5:1 contrast ratio against white background
   // ============================================
-  static const Color success      = Color(0xFF16A34A); // green-600
+  static const Color success      = Color(0xFF15803D); // green-700 (5.02:1)
   static const Color successLight = Color(0xFFDCFCE7); // green-50
-  static const Color error        = Color(0xFFDC2626); // red-600
+  static const Color error        = Color(0xFFDC2626); // red-600 (4.83:1)
   static const Color errorLight   = Color(0xFFFEE2E2); // red-50
-  static const Color warning      = Color(0xFFD97706); // amber-600
+  static const Color warning      = Color(0xFFB45309); // amber-700 (5.02:1)
   static const Color warningLight = Color(0xFFFEF3C7); // amber-50
-  static const Color info         = Color(0xFF0284C7); // sky-600
+  static const Color info         = Color(0xFF0369A1); // sky-700 (5.93:1)
   static const Color infoLight    = Color(0xFFE0F2FE); // sky-50
 
   // ============================================
@@ -67,20 +68,20 @@ class AppColors {
   // TEXT
   // ============================================
   static const Color textPrimaryLight   = grey900; // #111827
-  static const Color textSecondaryLight = grey500; // #6B7280
-  static const Color textTertiaryLight  = grey400; // #9CA3AF
+  static const Color textSecondaryLight = grey600; // #4B5563 (7.5:1)
+  static const Color textTertiaryLight  = grey500; // #6B7280 (4.8:1)
 
   static const Color textPrimaryDark    = Color(0xFFF8FAFC);
-  static const Color textSecondaryDark  = Color(0xFF94A3B8);
-  static const Color textTertiaryDark   = Color(0xFF64748B);
+  static const Color textSecondaryDark  = Color(0xFFCBD5E1); // grey-300 (10.9:1)
+  static const Color textTertiaryDark   = Color(0xFF94A3B8); // grey-400 (6.9:1)
 
   // ============================================
   // BORDERS & DIVIDERS
   // ============================================
-  static const Color borderLight  = grey200;
-  static const Color borderDark   = Color(0xFF334155);
-  static const Color dividerLight = grey200;
-  static const Color dividerDark  = Color(0xFF334155);
+  static const Color borderLight  = grey300; // #D1D5DB (better contrast)
+  static const Color borderDark   = Color(0xFF475569); // slate-600
+  static const Color dividerLight = grey300;
+  static const Color dividerDark  = Color(0xFF475569);
 
   // ============================================
   // INPUTS
@@ -95,15 +96,15 @@ class AppColors {
   static const Color absent  = error;
   static const Color late    = warning;
   static const Color excused = info;
-  static const Color halfDay = Color(0xFF8B5CF6);
+  static const Color halfDay = Color(0xFF0F766E); // teal-700 (5.4:1)
 
   // ============================================
   // GRADE COLORS
   // ============================================
   static const Color gradeA = success;
-  static const Color gradeB = Color(0xFF0284C7); // sky — keep for grade distinction
+  static const Color gradeB = Color(0xFF0369A1); // sky-700
   static const Color gradeC = warning;
-  static const Color gradeD = Color(0xFFF97316); // orange
+  static const Color gradeD = Color(0xFFC2410C); // orange-700
   static const Color gradeF = error;
 
   // ============================================

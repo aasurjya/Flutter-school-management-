@@ -1,62 +1,67 @@
-# Build and Fix
+# Flutter Build Fix
 
-Incrementally fix build and type errors with minimal, safe changes.
+Incrementally fix Flutter build and analysis errors with minimal, safe changes.
 
-## Step 1: Detect Build System
+## Step 1: Identify Errors
 
-Identify the project's build tool and run the build:
+```bash
+# Auto-fix safe issues first
+dart fix --apply
 
-| Indicator | Build Command |
-|-----------|---------------|
-| `package.json` with `build` script | `npm run build` or `pnpm build` |
-| `tsconfig.json` (TypeScript only) | `npx tsc --noEmit` |
-| `Cargo.toml` | `cargo build 2>&1` |
-| `pom.xml` | `mvn compile` |
-| `build.gradle` | `./gradlew compileJava` |
-| `go.mod` | `go build ./...` |
-| `pyproject.toml` | `python -m py_compile` or `mypy .` |
+# Run full analysis
+flutter analyze 2>&1
+```
 
-## Step 2: Parse and Group Errors
+## Step 2: Group Errors by Type
 
-1. Run the build command and capture stderr
-2. Group errors by file path
-3. Sort by dependency order (fix imports/types before logic errors)
-4. Count total errors for progress tracking
+| Error Pattern | First Action |
+|---|---|
+| `Undefined name`, `isn't defined` | Missing import — add the import |
+| `The method 'x' isn't defined` | Wrong type or missing package |
+| `A value of type 'X' can't be assigned to 'Y'` | Type mismatch — check nullability |
+| `The non-nullable variable must be assigned` | Add null check or `late` keyword |
+| `Missing concrete implementation of` | Implement abstract method |
+| `Undefined class` | Missing import or build_runner needed |
+| `Part of directive` / `.freezed.dart not found` | Run build_runner |
+| `ref.watch called outside build` | Change to `ref.read` |
+| `mounted` warning | Add `if (!mounted) return;` after await |
 
-## Step 3: Fix Loop (One Error at a Time)
+## Step 3: Fix Systematically
 
-For each error:
+Start with **missing imports** (they cascade into many other errors), then fix types.
 
-1. **Read the file** — Use Read tool to see error context (10 lines around the error)
-2. **Diagnose** — Identify root cause (missing import, wrong type, syntax error)
-3. **Fix minimally** — Use Edit tool for the smallest change that resolves the error
-4. **Re-run build** — Verify the error is gone and no new errors introduced
-5. **Move to next** — Continue with remaining errors
+```bash
+# After each batch of fixes, re-analyze
+flutter analyze
+```
 
-## Step 4: Guardrails
+## Step 4: Freezed / Code Generation Errors
 
-Stop and ask the user if:
-- A fix introduces **more errors than it resolves**
-- The **same error persists after 3 attempts** (likely a deeper issue)
-- The fix requires **architectural changes** (not just a build fix)
-- Build errors stem from **missing dependencies** (need `npm install`, `cargo add`, etc.)
+If you see errors about `.freezed.dart`, `.g.dart`, or `@riverpod` generated files:
 
-## Step 5: Summary
+```bash
+flutter pub run build_runner build --delete-conflicting-outputs
+flutter analyze
+```
 
-Show results:
-- Errors fixed (with file paths)
-- Errors remaining (if any)
-- New errors introduced (should be zero)
-- Suggested next steps for unresolved issues
+## Step 5: Nuclear Clean (Last Resort)
 
-## Recovery Strategies
+If errors persist after fixing:
 
-| Situation | Action |
-|-----------|--------|
-| Missing module/import | Check if package is installed; suggest install command |
-| Type mismatch | Read both type definitions; fix the narrower type |
-| Circular dependency | Identify cycle with import graph; suggest extraction |
-| Version conflict | Check `package.json` / `Cargo.toml` for version constraints |
-| Build tool misconfiguration | Read config file; compare with working defaults |
+```bash
+flutter clean && flutter pub get && flutter analyze
+```
 
-Fix one error at a time for safety. Prefer minimal diffs over refactoring.
+With codegen:
+
+```bash
+flutter clean && flutter pub get && \
+  flutter pub run build_runner build --delete-conflicting-outputs && \
+  flutter analyze
+```
+
+## Success Criteria
+
+`flutter analyze` returns **0 errors** before marking this complete.
+
+Use `build-error-resolver` agent for complex error cascades.

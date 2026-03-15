@@ -86,7 +86,7 @@ class MyTransportScreen extends ConsumerWidget {
                           ),
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.secondaryContainer,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
                             transport.serviceType,

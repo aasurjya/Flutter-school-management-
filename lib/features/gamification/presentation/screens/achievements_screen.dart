@@ -366,7 +366,7 @@ class _AchievementBadge extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 '${achievement.points} points',
@@ -469,7 +469,7 @@ class _AchievementBadge extends StatelessWidget {
       case 'sports':
         return Colors.orange;
       case 'arts':
-        return Colors.purple;
+        return Colors.orange;
       case 'behavior':
         return Colors.teal;
       case 'leadership':

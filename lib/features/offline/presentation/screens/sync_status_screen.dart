@@ -572,7 +572,7 @@ class _EmptyState extends StatelessWidget {
               height: 72,
               decoration: BoxDecoration(
                 color: AppColors.successLight,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: const Icon(
                 Icons.cloud_done_outlined,

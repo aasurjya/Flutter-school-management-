@@ -155,7 +155,7 @@ class _PeriodCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isBreak = entry['isBreak'] == true;
     final isFree = entry['class'] == null && !isBreak;
-    final colors = [AppColors.primary, AppColors.secondary, AppColors.accent, AppColors.info, AppColors.success, Colors.purple, Colors.teal];
+    final colors = [AppColors.primary, AppColors.secondary, AppColors.accent, AppColors.info, AppColors.success, Colors.orange, Colors.teal];
     final color = isBreak ? Colors.orange : (isFree ? Colors.grey : colors[index % colors.length]);
 
     return Container(

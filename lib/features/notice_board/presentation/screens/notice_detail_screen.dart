@@ -32,7 +32,7 @@ class NoticeDetailScreen extends ConsumerWidget {
                           horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: Text(
                         notice.category.label,
@@ -49,7 +49,7 @@ class NoticeDetailScreen extends ConsumerWidget {
                           horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppColors.grey100,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: Text(
                         notice.audience.label,

@@ -26,7 +26,7 @@ class NoticeCategoryChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: selected ? color : color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: selected ? color : color.withValues(alpha: 0.3),
           ),
@@ -68,7 +68,7 @@ class NoticeCategoryChip extends StatelessWidget {
       case NoticeCategory.holiday:
         return Colors.teal;
       case NoticeCategory.examination:
-        return Colors.deepPurple;
+        return Colors.deepOrange;
       case NoticeCategory.fee:
         return Colors.orange;
       case NoticeCategory.general:

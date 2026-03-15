@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/config/app_environment.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/user.dart';
 
@@ -119,6 +120,72 @@ class AuthRepository {
       'full_name': fullName,
       'tenant_id': tenantId,
     });
+  }
+
+  /// Creates a system tenant for super_admin users (if it doesn't exist).
+  /// Returns the system tenant ID.
+  Future<String> _ensureSystemTenant() async {
+    const systemTenantId = '00000000-0000-0000-0000-000000000001';
+    await _client.from('tenants').upsert({
+      'id': systemTenantId,
+      'name': 'System',
+      'slug': 'system',
+      'is_active': true,
+    }, onConflict: 'id');
+    return systemTenantId;
+  }
+
+  /// Creates user profile + assigns role.
+  /// If email matches superAdminEmail, assigns super_admin on system tenant.
+  /// Otherwise creates profile with no role (pending admin assignment).
+  Future<void> createUserWithRole({
+    required String userId,
+    required String email,
+    String? fullName,
+    String? phone,
+  }) async {
+    final isSuperAdmin = AppEnvironment.superAdminEmail != null &&
+        email.toLowerCase().trim() == AppEnvironment.superAdminEmail;
+
+    String? tenantId;
+    String? role;
+
+    if (isSuperAdmin) {
+      tenantId = await _ensureSystemTenant();
+      role = 'super_admin';
+    }
+
+    // Create profile
+    await _client.from('users').insert({
+      'id': userId,
+      'email': email,
+      'full_name': fullName,
+      if (phone != null) 'phone': phone,
+      if (tenantId != null) 'tenant_id': tenantId,
+      'is_active': true,
+    });
+
+    // Assign role if super_admin
+    if (tenantId != null && role != null) {
+      await _client.from('user_roles').insert({
+        'user_id': userId,
+        'tenant_id': tenantId,
+        'role': role,
+        'is_primary': true,
+      });
+
+      // Refresh session so the JWT reflects the updated app_metadata
+      // (the on_user_role_change trigger updates auth.users.raw_app_meta_data)
+      await _client.auth.refreshSession();
+    }
+  }
+
+  /// Mark a user's profile as complete.
+  Future<void> markProfileComplete(String userId) async {
+    await _client
+        .from('users')
+        .update({'profile_complete': true, 'updated_at': DateTime.now().toIso8601String()})
+        .eq('id', userId);
   }
 
   /// Update user profile
@@ -245,6 +312,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
     required String email,
     required String password,
     String? fullName,
+    String? phone,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -254,10 +322,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
         fullName: fullName,
       );
       if (response.user != null) {
-        await _repository.createUserProfile(
+        await _repository.createUserWithRole(
           userId: response.user!.id,
           email: email,
           fullName: fullName,
+          phone: phone,
         );
         await _loadUserProfile(response.user!.id);
       }
@@ -279,6 +348,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
     if (user != null) {
       await _loadUserProfile(user.id);
     }
+  }
+
+  /// Marks the current user's profile as complete and refreshes local state.
+  Future<void> markProfileComplete() async {
+    final user = _repository.currentUser;
+    if (user == null) return;
+    await _repository.markProfileComplete(user.id);
+    await _loadUserProfile(user.id);
   }
 }
 

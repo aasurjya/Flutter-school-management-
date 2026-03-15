@@ -9,7 +9,9 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/fee_default_prediction.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../../data/models/invoice.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../students/providers/students_provider.dart';
 import '../../providers/fees_provider.dart';
 
 class FeesScreen extends ConsumerWidget {
@@ -72,61 +74,105 @@ class _OverviewTab extends StatelessWidget {
   }
 }
 
-class _AdminOverview extends StatelessWidget {
+class _AdminOverview extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final statsAsync = ref.watch(feeCollectionStatsProvider(null));
+    final recentPaymentsAsync = ref.watch(
+      paymentsProvider(const PaymentsFilter()),
+    );
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Summary Cards
-          const Row(
-            children: [
-              Expanded(
-                child: GlassStatCard(
-                  title: 'Total Collection',
-                  value: '₹45.2L',
-                  icon: Icons.account_balance_wallet,
-                  iconColor: AppColors.success,
-                  subtitle: 'This month',
+          // Summary Cards from real stats
+          statsAsync.when(
+            loading: () => const SizedBox(
+              height: 120,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, _) => Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: AppColors.error),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text('Failed to load stats: $e')),
+                    TextButton(
+                      onPressed: () => ref.invalidate(feeCollectionStatsProvider(null)),
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(width: 12),
-              Expanded(
-                child: GlassStatCard(
-                  title: 'Pending',
-                  value: '₹12.8L',
-                  icon: Icons.pending_actions,
-                  iconColor: AppColors.warning,
-                  subtitle: '234 students',
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const Row(
-            children: [
-              Expanded(
-                child: GlassStatCard(
-                  title: 'Overdue',
-                  value: '₹4.5L',
-                  icon: Icons.warning_amber,
-                  iconColor: AppColors.error,
-                  subtitle: '56 students',
-                ),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: GlassStatCard(
-                  title: 'Today',
-                  value: '₹1.2L',
-                  icon: Icons.today,
-                  iconColor: AppColors.info,
-                  subtitle: '12 payments',
-                ),
-              ),
-            ],
+            ),
+            data: (stats) {
+              final collected = stats['total_collected'] ?? 0.0;
+              final pending = stats['total_pending'] ?? 0.0;
+              final overdue = stats['total_overdue'] ?? 0.0;
+              final todayCollected = stats['today_collected'] ?? 0.0;
+
+              String fmtAmount(double v) {
+                if (v >= 100000) return '₹${(v / 100000).toStringAsFixed(1)}L';
+                if (v >= 1000) return '₹${(v / 1000).toStringAsFixed(1)}K';
+                return '₹${v.toStringAsFixed(0)}';
+              }
+
+              return Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GlassStatCard(
+                          title: 'Total Collection',
+                          value: fmtAmount(collected),
+                          icon: Icons.account_balance_wallet,
+                          iconColor: AppColors.success,
+                          subtitle: 'All time',
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: GlassStatCard(
+                          title: 'Pending',
+                          value: fmtAmount(pending),
+                          icon: Icons.pending_actions,
+                          iconColor: AppColors.warning,
+                          subtitle: 'Outstanding',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GlassStatCard(
+                          title: 'Overdue',
+                          value: fmtAmount(overdue),
+                          icon: Icons.warning_amber,
+                          iconColor: AppColors.error,
+                          subtitle: 'Past due date',
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: GlassStatCard(
+                          title: 'Today',
+                          value: fmtAmount(todayCollected),
+                          icon: Icons.today,
+                          iconColor: AppColors.info,
+                          subtitle: "Today's collection",
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 24),
 
@@ -175,291 +221,585 @@ class _AdminOverview extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
           const SizedBox(height: 12),
-          ..._mockRecentPayments.map((payment) => _PaymentItem(
-                studentName: payment['student'] as String,
-                amount: payment['amount'] as String,
-                date: payment['date'] as String,
-                method: payment['method'] as String,
-              )),
+          recentPaymentsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                'Failed to load payments: $e',
+                style: const TextStyle(color: AppColors.error),
+              ),
+            ),
+            data: (payments) {
+              if (payments.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(child: Text('No recent payments')),
+                );
+              }
+              // Show up to 10 most recent
+              final recent = payments.take(10).toList();
+              return Column(
+                children: recent.map((payment) {
+                  final dateStr = payment.paidAt != null
+                      ? DateFormat('d MMM').format(payment.paidAt!)
+                      : '—';
+                  final amountStr = '₹${payment.amount.toStringAsFixed(0)}';
+                  return _PaymentItem(
+                    studentName: payment.studentName ?? 'Unknown',
+                    amount: amountStr,
+                    date: dateStr,
+                    method: payment.paymentMethodDisplay,
+                  );
+                }).toList(),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 }
 
-class _ParentOverview extends StatelessWidget {
+class _ParentOverview extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Pending Payment Card
-          GlassCard(
-            padding: const EdgeInsets.all(20),
-            gradient: AppColors.primaryGradient,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Total Due',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text(
-                        'Due in 5 days',
-                        style: TextStyle(color: Colors.white, fontSize: 11),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '₹25,000',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: AppColors.error,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: const Text('Pay Now'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final studentAsync = ref.watch(currentStudentProvider);
 
-          // Fee Breakdown
-          const Text(
-            'Fee Breakdown',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-          ),
-          const SizedBox(height: 12),
-          const GlassCard(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _FeeBreakdownItem(
-                  label: 'Tuition Fee (Term 2)',
-                  amount: '₹20,000',
-                  status: 'pending',
-                ),
-                Divider(height: 24),
-                _FeeBreakdownItem(
-                  label: 'Transport Fee',
-                  amount: '₹3,000',
-                  status: 'pending',
-                ),
-                Divider(height: 24),
-                _FeeBreakdownItem(
-                  label: 'Activity Fee',
-                  amount: '₹2,000',
-                  status: 'pending',
-                ),
-                Divider(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Total',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      '₹25,000',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.error,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+    return studentAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            const SizedBox(height: 12),
+            Text('Failed to load student data: $e'),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => ref.invalidate(currentStudentProvider),
+              child: const Text('Retry'),
             ),
-          ),
-          const SizedBox(height: 24),
-
-          // Payment History
-          const Text(
-            'Payment History',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-          ),
-          const SizedBox(height: 12),
-          ..._mockPaymentHistory.map((payment) => _PaymentHistoryItem(
-                description: payment['description'] as String,
-                amount: payment['amount'] as String,
-                date: payment['date'] as String,
-                status: payment['status'] as String,
-              )),
-        ],
+          ],
+        ),
       ),
-    );
-  }
-}
+      data: (student) {
+        final studentId = student?.id;
+        if (studentId == null) {
+          return const Center(child: Text('No student profile found'));
+        }
 
-class _InvoicesTab extends StatelessWidget {
-  final bool isAdmin;
+        final summaryAsync = ref.watch(
+          studentFeeSummaryProvider(StudentFeeFilter(studentId: studentId)),
+        );
+        final invoicesAsync = ref.watch(
+          invoicesProvider(InvoicesFilter(studentId: studentId)),
+        );
 
-  const _InvoicesTab({required this.isAdmin});
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Pending Payment Card
+              summaryAsync.when(
+                loading: () => const SizedBox(
+                  height: 160,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (e, _) => Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text('Failed to load fee summary: $e'),
+                  ),
+                ),
+                data: (summary) {
+                  final totalPending = summary?.totalPending ?? 0.0;
+                  final pendingInvoices = summary?.pendingInvoices ?? 0;
+                  final overdueCount = summary?.overdueInvoices ?? 0;
 
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _mockInvoices.length,
-      itemBuilder: (context, index) {
-        final invoice = _mockInvoices[index];
-        return _InvoiceCard(
-          invoiceNo: invoice['invoiceNo'] as String,
-          studentName: invoice['student'] as String,
-          amount: invoice['amount'] as String,
-          dueDate: invoice['dueDate'] as String,
-          status: invoice['status'] as String,
-          isAdmin: isAdmin,
+                  String dueLabel = 'No amount due';
+                  if (overdueCount > 0) {
+                    dueLabel = '$overdueCount invoice(s) overdue';
+                  } else if (pendingInvoices > 0) {
+                    dueLabel = '$pendingInvoices pending invoice(s)';
+                  }
+
+                  return GlassCard(
+                    padding: const EdgeInsets.all(20),
+                    gradient: AppColors.primaryGradient,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Total Due',
+                              style: TextStyle(
+                                  color: Colors.white70, fontSize: 14),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                dueLabel,
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 11),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '₹${totalPending.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (totalPending > 0) ...[
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: AppColors.error,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                              child: const Text('Pay Now'),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+
+              // Fee Breakdown from invoices
+              const Text(
+                'Fee Breakdown',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+              const SizedBox(height: 12),
+              invoicesAsync.when(
+                loading: () =>
+                    const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Text(
+                  'Failed to load invoices: $e',
+                  style: const TextStyle(color: AppColors.error),
+                ),
+                data: (invoices) {
+                  if (invoices.isEmpty) {
+                    return const GlassCard(
+                      padding: EdgeInsets.all(16),
+                      child: Center(child: Text('No invoices found')),
+                    );
+                  }
+                  // Show pending/overdue invoices in breakdown, up to 5
+                  final pending = invoices
+                      .where((inv) => !inv.isPaid && !inv.isCancelled)
+                      .take(5)
+                      .toList();
+                  final totalPending = pending.fold<double>(
+                      0, (sum, inv) => sum + inv.pendingAmount);
+
+                  if (pending.isEmpty) {
+                    return const GlassCard(
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Icon(Icons.check_circle,
+                              color: AppColors.success, size: 32),
+                          SizedBox(height: 8),
+                          Text('All fees paid!',
+                              style: TextStyle(color: AppColors.success)),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return GlassCard(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        ...pending.expand((inv) => [
+                              _FeeBreakdownItem(
+                                label:
+                                    '${inv.invoiceNumber}${inv.termName != null ? ' (${inv.termName})' : ''}',
+                                amount:
+                                    '₹${inv.pendingAmount.toStringAsFixed(0)}',
+                                status: inv.status,
+                              ),
+                              const Divider(height: 24),
+                            ]),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Total',
+                              style:
+                                  TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              '₹${totalPending.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.error,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+
+              // Payment History from paid invoices
+              const Text(
+                'Payment History',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+              const SizedBox(height: 12),
+              invoicesAsync.when(
+                loading: () =>
+                    const Center(child: CircularProgressIndicator()),
+                error: (e, _) => const SizedBox.shrink(),
+                data: (invoices) {
+                  final paid = invoices
+                      .where((inv) => inv.isPaid)
+                      .take(10)
+                      .toList();
+                  if (paid.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Center(child: Text('No payment history yet')),
+                    );
+                  }
+                  return Column(
+                    children: paid.map((inv) {
+                      final dateStr = inv.updatedAt != null
+                          ? DateFormat('d MMM, yyyy').format(inv.updatedAt!)
+                          : '—';
+                      return _PaymentHistoryItem(
+                        description:
+                            'Invoice ${inv.invoiceNumber}${inv.termName != null ? ' — ${inv.termName}' : ''}',
+                        amount: '₹${inv.paidAmount.toStringAsFixed(0)}',
+                        date: dateStr,
+                        status: 'success',
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ],
+          ),
         );
       },
     );
   }
 }
 
-class _CollectionTab extends StatelessWidget {
+class _InvoicesTab extends ConsumerStatefulWidget {
+  final bool isAdmin;
+
+  const _InvoicesTab({required this.isAdmin});
+
+  @override
+  ConsumerState<_InvoicesTab> createState() => _InvoicesTabState();
+}
+
+class _InvoicesTabState extends ConsumerState<_InvoicesTab> {
+  static const int _pageSize = 20;
+  int _page = 0;
+
   @override
   Widget build(BuildContext context) {
+    final currentUser = ref.watch(currentUserProvider);
+
+    // For admin: load all invoices; for student/parent: load by student
+    final studentId =
+        (currentUser?.isAdmin ?? false) ? null : currentUser?.id;
+
+    final invoicesAsync = ref.watch(
+      invoicesProvider(InvoicesFilter(studentId: studentId)),
+    );
+
+    return invoicesAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            const SizedBox(height: 12),
+            Text('Failed to load invoices: $e'),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => ref.invalidate(
+                invoicesProvider(InvoicesFilter(studentId: studentId)),
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+      data: (invoices) {
+        if (invoices.isEmpty) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.receipt_long_outlined,
+                    size: 48, color: Colors.grey),
+                SizedBox(height: 12),
+                Text('No invoices found'),
+              ],
+            ),
+          );
+        }
+
+        // Client-side pagination
+        final start = _page * _pageSize;
+        final end = (start + _pageSize).clamp(0, invoices.length);
+        final page = invoices.sublist(start, end);
+        final hasMore = end < invoices.length;
+        final hasPrev = _page > 0;
+
+        return Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: page.length,
+                itemBuilder: (context, index) {
+                  final invoice = page[index];
+                  final dueDateStr =
+                      DateFormat('d MMM, yyyy').format(invoice.dueDate);
+                  final amountStr =
+                      '₹${invoice.pendingAmount.toStringAsFixed(0)}';
+                  return _InvoiceCard(
+                    invoiceNo: invoice.invoiceNumber,
+                    studentName: invoice.studentName ?? '—',
+                    amount: amountStr,
+                    dueDate: dueDateStr,
+                    status: invoice.status,
+                    isAdmin: widget.isAdmin,
+                  );
+                },
+              ),
+            ),
+            if (hasPrev || hasMore)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton.icon(
+                      onPressed: hasPrev
+                          ? () => setState(() => _page--)
+                          : null,
+                      icon: const Icon(Icons.chevron_left),
+                      label: const Text('Previous'),
+                    ),
+                    Text(
+                      'Page ${_page + 1}',
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                    TextButton.icon(
+                      onPressed: hasMore
+                          ? () => setState(() => _page++)
+                          : null,
+                      icon: const Icon(Icons.chevron_right),
+                      label: const Text('Next'),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _CollectionTab extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final statsAsync = ref.watch(feeCollectionStatsProvider(null));
+    final summariesAsync = ref.watch(
+      feeSummariesProvider(const FeeSummaryFilter()),
+    );
+
+    String fmtAmount(double v) {
+      if (v >= 100000) return '₹${(v / 100000).toStringAsFixed(1)}L';
+      if (v >= 1000) return '₹${(v / 1000).toStringAsFixed(1)}K';
+      return '₹${v.toStringAsFixed(0)}';
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Filter
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  initialValue: 'This Month',
-                  decoration: const InputDecoration(
-                    labelText: 'Period',
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                  items: ['Today', 'This Week', 'This Month', 'This Term']
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (value) {},
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  initialValue: 'All Classes',
-                  decoration: const InputDecoration(
-                    labelText: 'Class',
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                  items: ['All Classes', 'Class 10', 'Class 9', 'Class 8']
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (value) {},
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
 
-          // Collection Summary
-          GlassCard(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Collection Summary from real stats
+          statsAsync.when(
+            loading: () => const SizedBox(
+              height: 160,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, _) => Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
                   children: [
-                    const Text(
-                      'Collection Summary',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
+                    const Icon(Icons.error_outline, color: AppColors.error),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text('Failed to load stats: $e')),
                     TextButton(
-                      onPressed: () {},
-                      child: const Text('Export'),
+                      onPressed: () =>
+                          ref.invalidate(feeCollectionStatsProvider(null)),
+                      child: const Text('Retry'),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                const _CollectionRow(
-                  label: 'Total Expected',
-                  amount: '₹62.5L',
-                  color: AppColors.info,
-                ),
-                const SizedBox(height: 12),
-                const _CollectionRow(
-                  label: 'Collected',
-                  amount: '₹45.2L',
-                  color: AppColors.success,
-                ),
-                const SizedBox(height: 12),
-                const _CollectionRow(
-                  label: 'Pending',
-                  amount: '₹12.8L',
-                  color: AppColors.warning,
-                ),
-                const SizedBox(height: 12),
-                const _CollectionRow(
-                  label: 'Overdue',
-                  amount: '₹4.5L',
-                  color: AppColors.error,
-                ),
-                const SizedBox(height: 16),
-                LinearProgressIndicator(
-                  value: 0.72,
-                  backgroundColor: Colors.grey.withValues(alpha: 0.2),
-                  valueColor: const AlwaysStoppedAnimation(AppColors.success),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '72% collected',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
+              ),
             ),
+            data: (stats) {
+              final collected = stats['total_collected'] ?? 0.0;
+              final pending = stats['total_pending'] ?? 0.0;
+              final overdue = stats['total_overdue'] ?? 0.0;
+              final total = collected + pending;
+              final pct = total > 0 ? collected / total : 0.0;
+
+              return GlassCard(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Collection Summary',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: const Text('Export'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _CollectionRow(
+                      label: 'Total Expected',
+                      amount: fmtAmount(total),
+                      color: AppColors.info,
+                    ),
+                    const SizedBox(height: 12),
+                    _CollectionRow(
+                      label: 'Collected',
+                      amount: fmtAmount(collected),
+                      color: AppColors.success,
+                    ),
+                    const SizedBox(height: 12),
+                    _CollectionRow(
+                      label: 'Pending',
+                      amount: fmtAmount(pending - overdue),
+                      color: AppColors.warning,
+                    ),
+                    const SizedBox(height: 12),
+                    _CollectionRow(
+                      label: 'Overdue',
+                      amount: fmtAmount(overdue),
+                      color: AppColors.error,
+                    ),
+                    const SizedBox(height: 16),
+                    LinearProgressIndicator(
+                      value: pct.clamp(0.0, 1.0),
+                      backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                      valueColor:
+                          const AlwaysStoppedAnimation(AppColors.success),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${(pct * 100).toStringAsFixed(0)}% collected',
+                      style:
+                          const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
           const SizedBox(height: 24),
 
-          // Class-wise Collection
+          // Class-wise Collection from fee summaries grouped by class
           const Text(
             'Class-wise Collection',
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
           const SizedBox(height: 12),
-          ..._mockClassCollection.map((item) => _ClassCollectionItem(
-                className: item['class'] as String,
-                collected: item['collected'] as String,
-                pending: item['pending'] as String,
-                percentage: item['percentage'] as int,
-              )),
+          summariesAsync.when(
+            loading: () =>
+                const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Text(
+              'Failed to load class data: $e',
+              style: const TextStyle(color: AppColors.error),
+            ),
+            data: (summaries) {
+              if (summaries.isEmpty) {
+                return const Center(
+                    child: Text('No class collection data available'));
+              }
+
+              // Group by className
+              final byClass = <String, List<FeeSummary>>{};
+              for (final s in summaries) {
+                byClass.putIfAbsent(s.className, () => []).add(s);
+              }
+
+              return Column(
+                children: byClass.entries.map((entry) {
+                  final className = entry.key;
+                  final items = entry.value;
+                  final totalPaid = items.fold<double>(
+                      0, (sum, s) => sum + s.totalPaid);
+                  final totalFee = items.fold<double>(
+                      0, (sum, s) => sum + s.totalFee);
+                  final totalPending = items.fold<double>(
+                      0, (sum, s) => sum + s.totalPending);
+                  final pct =
+                      totalFee > 0 ? (totalPaid / totalFee * 100).round() : 0;
+
+                  return _ClassCollectionItem(
+                    className: className,
+                    collected: fmtAmount(totalPaid),
+                    pending: fmtAmount(totalPending),
+                    percentage: pct,
+                  );
+                }).toList(),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -874,31 +1214,6 @@ class _ClassCollectionItem extends StatelessWidget {
   }
 }
 
-// Mock Data
-final _mockRecentPayments = [
-  {'student': 'Arjun Kumar', 'amount': '₹25,000', 'date': 'Today', 'method': 'UPI'},
-  {'student': 'Priya Sharma', 'amount': '₹22,000', 'date': 'Yesterday', 'method': 'Card'},
-  {'student': 'Rahul Singh', 'amount': '₹25,000', 'date': '2 days ago', 'method': 'Cash'},
-];
-
-final _mockPaymentHistory = [
-  {'description': 'Term 1 Fee Payment', 'amount': '₹25,000', 'date': 'Aug 15, 2024', 'status': 'success'},
-  {'description': 'Activity Fee', 'amount': '₹2,000', 'date': 'Jul 10, 2024', 'status': 'success'},
-  {'description': 'Admission Fee', 'amount': '₹15,000', 'date': 'Apr 1, 2024', 'status': 'success'},
-];
-
-final _mockInvoices = [
-  {'invoiceNo': 'INV-2024-001234', 'student': 'Arjun Kumar', 'amount': '₹25,000', 'dueDate': 'Dec 15, 2024', 'status': 'pending'},
-  {'invoiceNo': 'INV-2024-001235', 'student': 'Priya Sharma', 'amount': '₹22,000', 'dueDate': 'Dec 10, 2024', 'status': 'overdue'},
-  {'invoiceNo': 'INV-2024-001236', 'student': 'Rahul Singh', 'amount': '₹25,000', 'dueDate': 'Nov 30, 2024', 'status': 'paid'},
-];
-
-final _mockClassCollection = [
-  {'class': 'Class 10', 'collected': '₹12.5L', 'pending': '₹2.5L', 'percentage': 83},
-  {'class': 'Class 9', 'collected': '₹10.2L', 'pending': '₹3.8L', 'percentage': 73},
-  {'class': 'Class 8', 'collected': '₹8.5L', 'pending': '₹1.5L', 'percentage': 85},
-];
-
 // =============================================================
 // Risk Tab — Predictive Fee Collection Intelligence
 // =============================================================
@@ -999,7 +1314,7 @@ class _RiskTabState extends ConsumerState<_RiskTab> {
                     horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   '${summary.totalAtRisk} accounts at risk',
@@ -1680,7 +1995,7 @@ class _FilterChip extends StatelessWidget {
             const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: selected ? color : color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: color, width: selected ? 0 : 1),
         ),
         child: Text(

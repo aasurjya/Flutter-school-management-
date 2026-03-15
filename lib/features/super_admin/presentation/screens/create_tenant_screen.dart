@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/services/admin_user_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/credential_generator.dart';
+import '../../../../features/admin/presentation/widgets/credential_display_dialog.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/tenant_provider.dart';
@@ -331,49 +335,75 @@ class _CreateTenantScreenState extends ConsumerState<CreateTenantScreen> {
         'is_active': true,
       });
 
-      // TODO: Create admin user for this tenant via Edge Function
-      // await ref.read(tenantRepositoryProvider).createTenantAdmin(
-      //   tenantId: tenant.id,
-      //   email: _adminEmailController.text.trim(),
-      //   fullName: _adminNameController.text.trim(),
-      //   phone: _adminPhoneController.text.trim(),
-      // );
+      // Create admin user for this tenant via Edge Function
+      final adminEmail = _adminEmailController.text.trim();
+      final adminName = _adminNameController.text.trim();
+      final adminPhone = _adminPhoneController.text.trim();
+      final password = CredentialGenerator.generatePassword();
+
+      final service = AdminUserService(Supabase.instance.client);
+      CreatedUserResult? adminResult;
+      String? adminError;
+
+      try {
+        adminResult = await service.createUser(
+          email: adminEmail,
+          password: password,
+          fullName: adminName,
+          tenantId: tenant.id,
+          role: 'tenant_admin',
+          phone: adminPhone.isEmpty ? null : adminPhone,
+        );
+      } catch (e) {
+        adminError = e.toString();
+      }
 
       if (mounted) {
         setState(() => _isSubmitting = false);
-        
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            title: const Row(
-              children: [
-                Icon(Icons.check_circle, color: AppColors.success),
-                SizedBox(width: 12),
-                Text('Tenant Created!'),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('School: ${tenant.name}'),
-                Text('URL: ${tenant.slug}.schoolsaas.com'),
-                const SizedBox(height: 12),
-                const Text('Note: Admin user creation requires Edge Function setup.', style: TextStyle(color: AppColors.grey500)),
-              ],
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  Navigator.pop(context);
-                },
-                child: const Text('Done'),
+
+        if (adminResult != null) {
+          await CredentialDisplayDialog.show(
+            context,
+            fullName: adminName,
+            email: adminResult.email,
+            password: adminResult.password,
+            role: 'tenant_admin',
+          );
+        } else {
+          // Tenant created but admin creation failed — show info dialog
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (ctx) => AlertDialog(
+              title: const Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: AppColors.warning),
+                  SizedBox(width: 12),
+                  Text('Tenant Created'),
+                ],
               ),
-            ],
-          ),
-        );
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('School "${tenant.name}" was created successfully.'),
+                  const SizedBox(height: 12),
+                  const Text('However, the admin account could not be created:', style: TextStyle(color: AppColors.grey600)),
+                  const SizedBox(height: 4),
+                  Text(adminError ?? 'Unknown error', style: const TextStyle(color: AppColors.error, fontSize: 12)),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (mounted) Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {

@@ -1,6 +1,6 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
@@ -467,83 +467,49 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
   Widget _buildPerformanceTrend(List<dynamic> exams) {
     if (exams.length < 2) return const SizedBox.shrink();
 
+    // Show exam history as a summary list — avoids N+1 provider calls per exam
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Performance Trend',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          'Exam History',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
-        GlassCard(
-          padding: const EdgeInsets.all(16),
-          child: SizedBox(
-            height: 200,
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(
-                  show: true,
-                  horizontalInterval: 20,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(color: Colors.grey.withValues(alpha: 0.2), strokeWidth: 1);
-                  },
-                  drawVerticalLine: false,
+        ...exams.take(5).map((exam) {
+          final examPerformance = ref.watch(studentPerformanceProvider(
+            StudentPerformanceFilter(examId: exam.id, studentId: widget.childId),
+          ));
+          return examPerformance.when(
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (performance) {
+              if (performance.isEmpty) return const SizedBox.shrink();
+              final totalObtained = performance.fold<double>(0, (s, p) => s + p.marksObtained);
+              final totalMax = performance.fold<double>(0, (s, p) => s + p.maxMarks);
+              final pct = totalMax > 0 ? (totalObtained / totalMax) * 100 : 0.0;
+              return GlassCard(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(exam.name,
+                          style: const TextStyle(fontWeight: FontWeight.w500)),
+                    ),
+                    Text(
+                      '${pct.toStringAsFixed(1)}%',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: pct >= 50 ? AppColors.success : AppColors.error,
+                      ),
+                    ),
+                  ],
                 ),
-                titlesData: FlTitlesData(
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        if (value.toInt() >= exams.length) return const SizedBox.shrink();
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            'Exam ${value.toInt() + 1}',
-                            style: const TextStyle(fontSize: 10),
-                          ),
-                        );
-                      },
-                      reservedSize: 30,
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        return Text('${value.toInt()}%', style: const TextStyle(fontSize: 10));
-                      },
-                      reservedSize: 35,
-                    ),
-                  ),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
-                borderData: FlBorderData(show: false),
-                minY: 0,
-                maxY: 100,
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: List.generate(exams.length, (index) {
-                      // Mock data - in real app, fetch actual performance
-                      return FlSpot(index.toDouble(), 65 + (index * 5).toDouble());
-                    }),
-                    isCurved: true,
-                    color: AppColors.primary,
-                    barWidth: 3,
-                    dotData: const FlDotData(show: true),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+              );
+            },
+          );
+        }),
       ],
     );
   }

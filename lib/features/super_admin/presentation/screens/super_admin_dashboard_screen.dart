@@ -1,91 +1,277 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fl_chart/fl_chart.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/providers/auth_provider.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../providers/tenant_provider.dart';
 
-class SuperAdminDashboardScreen extends ConsumerWidget {
+class SuperAdminDashboardScreen extends ConsumerStatefulWidget {
   const SuperAdminDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SuperAdminDashboardScreen> createState() =>
+      _SuperAdminDashboardScreenState();
+}
+
+class _SuperAdminDashboardScreenState
+    extends ConsumerState<SuperAdminDashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(tenantsNotifierProvider.notifier).loadTenants();
+    });
+  }
+
+  Future<void> _logout() async {
+    await ref.read(authNotifierProvider.notifier).signOut();
+    if (mounted) context.go(AppRoutes.login);
+  }
+
+  Future<void> _refresh() async {
+    ref.invalidate(platformStatsProvider);
+    await ref.read(tenantsNotifierProvider.notifier).loadTenants();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentUser = ref.watch(currentUserProvider);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Super Admin Dashboard'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildPlatformStats(),
-            const SizedBox(height: 24),
-            _buildQuickActions(context),
-            const SizedBox(height: 24),
-            _buildTenantOverview(context),
-            const SizedBox(height: 24),
-            _buildRevenueChart(),
-            const SizedBox(height: 24),
-            _buildRecentActivity(),
+      backgroundColor: AppColors.background,
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            // ── Premium header ────────────────────────────────────────────
+            SliverAppBar(
+              expandedHeight: 200,
+              floating: false,
+              pinned: true,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              backgroundColor: AppColors.primary,
+              actions: [
+                IconButton(
+                  tooltip: 'Refresh',
+                  icon: const Icon(Icons.refresh, color: Colors.white),
+                  onPressed: _refresh,
+                ),
+                IconButton(
+                  tooltip: 'Sign out',
+                  icon: const Icon(Icons.logout, color: Colors.white),
+                  onPressed: _logout,
+                ),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppColors.primary, AppColors.grey800],
+                    ),
+                  ),
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 20, 80, 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    currentUser?.initials ?? 'SA',
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Platform Admin',
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(alpha: 0.6),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    Text(
+                                      currentUser?.fullName ?? 'Super Admin',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.shield_outlined,
+                                    size: 14, color: Colors.white70),
+                                SizedBox(width: 6),
+                                Text(
+                                  'EduSaaS Platform',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // ── Body ─────────────────────────────────────────────────────
+            SliverPadding(
+              padding: const EdgeInsets.all(20),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  _buildPlatformStats(),
+                  const SizedBox(height: 24),
+                  _buildQuickActions(context),
+                  const SizedBox(height: 24),
+                  _buildTenantOverview(context),
+                  const SizedBox(height: 32),
+                ]),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
+  // ── Platform stats ──────────────────────────────────────────────────────────
+
   Widget _buildPlatformStats() {
-    return const Row(
-      children: [
-        Expanded(child: _StatCard(title: 'Total Tenants', value: '24', icon: Icons.business, color: AppColors.primary, trend: '+3 this month')),
-        SizedBox(width: 12),
-        Expanded(child: _StatCard(title: 'Active Users', value: '12.5K', icon: Icons.people, color: AppColors.success, trend: '+8.2%')),
-      ],
+    final statsAsync = ref.watch(platformStatsProvider);
+
+    return statsAsync.when(
+      loading: () => const Row(
+        children: [
+          Expanded(child: _StatCardLoading()),
+          SizedBox(width: 12),
+          Expanded(child: _StatCardLoading()),
+        ],
+      ),
+      error: (error, _) => GlassCard(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const Icon(Icons.error_outline, color: AppColors.error),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text('Failed to load stats: $error',
+                  style: const TextStyle(color: AppColors.error)),
+            ),
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () => ref.invalidate(platformStatsProvider),
+            ),
+          ],
+        ),
+      ),
+      data: (stats) => Row(
+        children: [
+          Expanded(
+            child: _StatCard(
+              title: 'Total Tenants',
+              value: '${stats['total_tenants'] ?? 0}',
+              icon: Icons.business_outlined,
+              color: AppColors.primary,
+              subtitle: '${stats['active_tenants'] ?? 0} active',
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _StatCard(
+              title: 'Total Users',
+              value: '${stats['total_users'] ?? 0}',
+              icon: Icons.people_outlined,
+              color: const Color(0xFF10B981),
+              subtitle: '${stats['suspended_tenants'] ?? 0} suspended',
+            ),
+          ),
+        ],
+      ),
     );
   }
 
+  // ── Quick actions ───────────────────────────────────────────────────────────
+
   Widget _buildQuickActions(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Quick Actions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(
+          'Quick Actions',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: AppColors.grey900,
+          ),
+        ),
         const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
               child: _ActionCard(
-                icon: Icons.add_business,
-                title: 'New Tenant',
-                onTap: () => context.push('/super-admin/tenants/create'),
+                icon: Icons.add_business_outlined,
+                label: 'New Tenant',
+                onTap: () => context.push(AppRoutes.createTenant),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _ActionCard(
-                icon: Icons.list_alt,
-                title: 'All Tenants',
-                onTap: () => context.push('/super-admin/tenants'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _ActionCard(
-                icon: Icons.analytics,
-                title: 'Analytics',
-                onTap: () => context.push('/super-admin'),
+                icon: Icons.list_alt_outlined,
+                label: 'All Tenants',
+                onTap: () => context.push(AppRoutes.tenantsList),
               ),
             ),
           ],
@@ -94,192 +280,316 @@ class SuperAdminDashboardScreen extends ConsumerWidget {
     );
   }
 
+  // ── Tenant list ─────────────────────────────────────────────────────────────
+
   Widget _buildTenantOverview(BuildContext context) {
-    final tenants = [
-      {'name': 'Delhi Public School', 'students': 2500, 'status': 'active', 'plan': 'Enterprise'},
-      {'name': 'St. Xavier\'s High School', 'students': 1800, 'status': 'active', 'plan': 'Pro'},
-      {'name': 'Modern Academy', 'students': 1200, 'status': 'active', 'plan': 'Pro'},
-      {'name': 'Sunrise International', 'students': 800, 'status': 'trial', 'plan': 'Trial'},
-    ];
+    final tenantsAsync = ref.watch(tenantsNotifierProvider);
+    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Text('Recent Tenants', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              'Recent Tenants',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.grey900,
+              ),
+            ),
             const Spacer(),
             TextButton(
-              onPressed: () => context.push('/super-admin/tenants'),
+              onPressed: () => context.push(AppRoutes.tenantsList),
               child: const Text('View All'),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        ...tenants.map((t) => _TenantListItem(tenant: t)),
-      ],
-    );
-  }
-
-  Widget _buildRevenueChart() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Monthly Revenue', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-        GlassCard(
-          padding: const EdgeInsets.all(16),
-          child: SizedBox(
-            height: 200,
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(
-                  show: true,
-                  horizontalInterval: 25,
-                  getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey.withValues(alpha: 0.2), strokeWidth: 1),
-                  drawVerticalLine: false,
-                ),
-                titlesData: FlTitlesData(
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-                        if (value.toInt() < months.length) {
-                          return Text(months[value.toInt()], style: const TextStyle(fontSize: 10));
-                        }
-                        return const SizedBox.shrink();
-                      },
-                      reservedSize: 22,
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) => Text('${value.toInt()}L', style: const TextStyle(fontSize: 10)),
-                      reservedSize: 30,
-                    ),
-                  ),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
-                borderData: FlBorderData(show: false),
-                minY: 0,
-                maxY: 100,
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: const [
-                      FlSpot(0, 45), FlSpot(1, 52), FlSpot(2, 48), FlSpot(3, 65), FlSpot(4, 72), FlSpot(5, 85),
-                    ],
-                    isCurved: true,
-                    color: AppColors.primary,
-                    barWidth: 3,
-                    dotData: const FlDotData(show: true),
-                    belowBarData: BarAreaData(show: true, color: AppColors.primary.withValues(alpha: 0.1)),
-                  ),
-                ],
-              ),
+        tenantsAsync.when(
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: CircularProgressIndicator(),
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRecentActivity() {
-    final activities = [
-      {'action': 'New tenant registered', 'tenant': 'Sunrise International', 'time': '2 hours ago'},
-      {'action': 'Subscription upgraded', 'tenant': 'St. Xavier\'s High School', 'time': '5 hours ago'},
-      {'action': 'Payment received', 'tenant': 'Delhi Public School', 'time': '1 day ago'},
-      {'action': 'Tenant suspended', 'tenant': 'ABC School', 'time': '2 days ago'},
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Recent Activity', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-        GlassCard(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: activities.map((a) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.info.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.history, size: 16, color: AppColors.info),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(a['action']!, style: const TextStyle(fontWeight: FontWeight.w500)),
-                        Text(a['tenant']!, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                      ],
-                    ),
-                  ),
-                  Text(a['time']!, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-                ],
-              ),
-            )).toList(),
+          error: (error, _) => GlassCard(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                const Icon(Icons.error_outline,
+                    color: AppColors.error, size: 32),
+                const SizedBox(height: 8),
+                Text('Failed to load tenants: $error',
+                    textAlign: TextAlign.center),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () =>
+                      ref.read(tenantsNotifierProvider.notifier).loadTenants(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
           ),
+          data: (tenants) {
+            if (tenants.isEmpty) {
+              return GlassCard(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  children: [
+                    Icon(Icons.business_outlined,
+                        size: 48, color: AppColors.grey400),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'No tenants yet',
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600,
+                          color: AppColors.grey900),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Create your first school tenant to get started',
+                      style: TextStyle(color: AppColors.grey500),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: () => context.push(AppRoutes.createTenant),
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text('New Tenant'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final recentTenants = tenants.take(5).toList();
+            return Column(
+              children: recentTenants
+                  .map((tenant) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: GlassCard(
+                          padding: const EdgeInsets.all(14),
+                          child: InkWell(
+                            onTap: () => context.push(
+                                '${AppRoutes.tenantsList}/${tenant.id}'),
+                            borderRadius: BorderRadius.circular(16),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      tenant.name
+                                          .substring(0, 1)
+                                          .toUpperCase(),
+                                      style: const TextStyle(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        tenant.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                          color: AppColors.grey900,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${tenant.slug} · ${tenant.subscriptionPlan}',
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.grey500),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: tenant.isActive
+                                        ? const Color(0xFF10B981)
+                                            .withValues(alpha: 0.1)
+                                        : AppColors.error
+                                            .withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    tenant.isActive ? 'Active' : 'Suspended',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: tenant.isActive
+                                          ? const Color(0xFF10B981)
+                                          : AppColors.error,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ))
+                  .toList(),
+            );
+          },
         ),
       ],
     );
   }
 }
+
+// ── Stat card ──────────────────────────────────────────────────────────────────
 
 class _StatCard extends StatelessWidget {
   final String title;
   final String value;
   final IconData icon;
   final Color color;
-  final String trend;
+  final String subtitle;
 
-  const _StatCard({required this.title, required this.value, required this.icon, required this.color, required this.trend});
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+    required this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 24),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: color.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text(trend, style: const TextStyle(fontSize: 10, color: AppColors.success)),
+                child: Text(
+                  subtitle,
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: color),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: color)),
-          Text(title, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+          const SizedBox(height: 14),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: AppColors.grey900,
+              letterSpacing: -1,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: AppColors.grey500,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
+// ── Stat card skeleton ─────────────────────────────────────────────────────────
+
+class _StatCardLoading extends StatelessWidget {
+  const _StatCardLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+              height: 36,
+              width: 36,
+              decoration: BoxDecoration(
+                  color: AppColors.grey200,
+                  borderRadius: BorderRadius.circular(10))),
+          const SizedBox(height: 14),
+          Container(
+              height: 28,
+              width: 56,
+              decoration: BoxDecoration(
+                  color: AppColors.grey200,
+                  borderRadius: BorderRadius.circular(4))),
+          const SizedBox(height: 6),
+          Container(
+              height: 12,
+              width: 80,
+              decoration: BoxDecoration(
+                  color: AppColors.grey200,
+                  borderRadius: BorderRadius.circular(4))),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Action card ────────────────────────────────────────────────────────────────
+
 class _ActionCard extends StatelessWidget {
   final IconData icon;
-  final String title;
+  final String label;
   final VoidCallback onTap;
 
-  const _ActionCard({required this.icon, required this.title, required this.onTap});
+  const _ActionCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -289,68 +599,31 @@ class _ActionCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: AppColors.primary, size: 28),
-              const SizedBox(height: 8),
-              Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: AppColors.primary, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.grey900,
+                ),
+              ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _TenantListItem extends StatelessWidget {
-  final Map<String, dynamic> tenant;
-
-  const _TenantListItem({required this.tenant});
-
-  @override
-  Widget build(BuildContext context) {
-    final isActive = tenant['status'] == 'active';
-    final isTrial = tenant['status'] == 'trial';
-
-    return GlassCard(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-            child: Text(
-              tenant['name'].toString().substring(0, 1),
-              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(tenant['name'], style: const TextStyle(fontWeight: FontWeight.w500)),
-                Text('${tenant['students']} students • ${tenant['plan']}', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: isActive ? AppColors.success.withValues(alpha: 0.1) : (isTrial ? AppColors.warning.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1)),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              tenant['status'].toString().toUpperCase(),
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: isActive ? AppColors.success : (isTrial ? AppColors.warning : Colors.grey),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

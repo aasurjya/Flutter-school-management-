@@ -6,12 +6,13 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../attendance/providers/attendance_provider.dart';
 import '../../../homework/providers/homework_provider.dart';
+import '../../../exams/providers/exams_provider.dart';
 import '../../../../data/models/homework.dart';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const _bg   = AppColors.background;
-const _surf = Color(0xFFF8F9FA);
 const _ink  = AppColors.grey900;
 const _muted = AppColors.grey500;
 const _border = AppColors.grey200;
@@ -23,168 +24,182 @@ class StudentDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
+    final theme = Theme.of(context);
     final firstName = (user?.fullName ?? 'Student').split(' ').first;
 
     return Scaffold(
-      backgroundColor: _bg,
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // ── Greeting header ──────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: CustomScrollView(
+        slivers: [
+          // Professional Header
+          SliverAppBar(
+            expandedHeight: 180,
+            floating: false,
+            pinned: true,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            backgroundColor: AppColors.primary,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppColors.primary, AppColors.grey800],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: -30,
+                    right: -30,
+                    child: CircleAvatar(
+                      radius: 70,
+                      backgroundColor: Colors.white.withValues(alpha: 0.03),
+                    ),
+                  ),
+                  SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(
-                            _greeting(),
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: _muted,
-                              letterSpacing: 0.1,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            firstName,
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                              color: _ink,
-                              letterSpacing: -0.5,
-                              height: 1.1,
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _greeting(),
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(alpha: 0.6),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      firstName,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => _showMenu(context, ref),
+                                child: _AvatarCircle(initials: user?.initials ?? 'S'),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
-                    // Avatar circle — tap to open menu
-                    GestureDetector(
-                      onTap: () => _showMenu(context, ref),
-                      child: _AvatarCircle(initials: user?.initials ?? 'S'),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                onPressed: () {},
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
 
-            // ── Hero attendance card ─────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-                child: _HeroAttendanceCard(),
+          // Main Analytics Section
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _AttendanceMetricCard(userId: user?.id),
+                  const SizedBox(height: 24),
+                  _StudentStatPillsRow(userId: user?.id),
+                ],
               ),
             ),
+          ),
 
-            // ── Stat pills row ───────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-                child: _StatPillsRow(),
-              ),
+          // Today's Schedule Section
+          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: _SectionHeader(label: 'Academic Timeline', action: 'Full View'),
             ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: _TodayScheduleCard(),
+            ),
+          ),
 
-            // ── Section: Today's Classes ─────────────────────────────────────
-            const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: _SectionHeader(label: 'Today'),
+          // Academic Performance & AI
+          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: () => context.push(AppRoutes.studyRecommendations),
+                    child: const _StudyTipsEntry(),
+                  ),
+                  const SizedBox(height: 16),
+                  const _UpcomingExamCard(),
+                ],
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _TodayScheduleCard(),
-              ),
-            ),
+          ),
 
-            // ── Section: Upcoming ────────────────────────────────────────────
-            const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: _SectionHeader(label: 'Upcoming'),
-              ),
+          // Homework & Tasks
+          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: _SectionHeader(label: 'Coursework', action: 'Planner'),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _UpcomingCard(),
-              ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: _HomeworkWidget(),
             ),
+          ),
 
-            // ── Section: Homework ────────────────────────────────────────────
-            const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: _SectionHeader(label: 'Homework'),
-              ),
+          // Tools & Resources
+          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: _SectionHeader(label: 'Quick Tools', action: null),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _HomeworkWidget(),
-              ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: _QuickActionsRow(user: user),
             ),
+          ),
 
-            // ── AI Study Tips entry ──────────────────────────────────────────
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: GestureDetector(
-                  onTap: () => context.push(AppRoutes.studyRecommendations),
-                  child: const _StudyTipsEntry(),
-                ),
-              ),
-            ),
-
-            // ── Section: Upcoming Exam ───────────────────────────────────────
-            const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: _SectionHeader(label: 'Next Exam'),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: _UpcomingExamCard(),
-              ),
-            ),
-
-            // ── Quick Actions ────────────────────────────────────────────────
-            const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: _SectionHeader(label: 'Quick Actions'),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _QuickActionsRow(user: user),
-              ),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 120)),
-          ],
-        ),
+          const SliverToBoxAdapter(child: SizedBox(height: 120)),
+        ],
       ),
     );
   }
@@ -235,101 +250,214 @@ class _AvatarCircle extends StatelessWidget {
   }
 }
 
-// ─── Hero Attendance Card ──────────────────────────────────────────────────────
-// ─── Hero: floating attendance number (no card, no color box) ─────────────────
-// Design principle: the NUMBER is the hero. White space IS the design.
-// Inspired by Stripe dashboard revenue number — confidence through scale.
-class _HeroAttendanceCard extends StatelessWidget {
+// ─── Attendance Metric Card — backed by real provider ─────────────────────────
+class _AttendanceMetricCard extends ConsumerWidget {
+  final String? userId;
+
+  const _AttendanceMetricCard({this.userId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (userId == null) {
+      return _AttendanceMetricDisplay(percentage: null);
+    }
+    final statsAsync = ref.watch(attendanceStatsProvider(userId!));
+    return statsAsync.when(
+      loading: () => _AttendanceMetricDisplay(percentage: null, loading: true),
+      error: (_, __) => _AttendanceMetricDisplay(percentage: null),
+      data: (stats) {
+        final present = stats['present'] ?? 0;
+        final total = (stats['present'] ?? 0) + (stats['absent'] ?? 0) + (stats['late'] ?? 0);
+        final pct = total > 0 ? (present / total * 100).round() : null;
+        return _AttendanceMetricDisplay(percentage: pct);
+      },
+    );
+  }
+}
+
+class _AttendanceMetricDisplay extends StatelessWidget {
+  final int? percentage;
+  final bool loading;
+
+  const _AttendanceMetricDisplay({this.percentage, this.loading = false});
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Thin progress bar — understated, not a big colored block
-        ClipRRect(
-          borderRadius: BorderRadius.circular(2),
-          child: const LinearProgressIndicator(
-            value: 0.94,
-            backgroundColor: AppColors.grey100,
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-            minHeight: 3,
+    final pct = percentage;
+    final displayValue = loading ? '--' : (pct != null ? '$pct' : '--');
+    final progressValue = pct != null ? (pct / 100.0).clamp(0.0, 1.0) : 0.0;
+    final statusLabel = pct == null
+        ? 'Loading'
+        : pct >= 90
+            ? 'Excellent'
+            : pct >= 75
+                ? 'Good'
+                : 'Needs Attention';
+    final statusColor = pct == null
+        ? AppColors.grey400
+        : pct >= 90
+            ? AppColors.success
+            : pct >= 75
+                ? AppColors.info
+                : AppColors.error;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
-        ),
-        const SizedBox(height: 24),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            const Text(
-              '94',
-              style: TextStyle(
-                fontSize: 72,
-                fontWeight: FontWeight.w800,
-                color: AppColors.grey900,
-                letterSpacing: -4,
-                height: 1,
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(bottom: 10, left: 2),
-              child: Text(
-                '%',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.grey400,
-                  letterSpacing: -1,
-                ),
-              ),
-            ),
-            const Spacer(),
-            // Status pill — single accent, used once
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: AppColors.successLight,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                'On track',
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Attendance Health',
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.success,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.grey500,
+                  letterSpacing: 0.5,
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'attendance this term',
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.grey500,
-            fontWeight: FontWeight.w400,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  statusLabel,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                displayValue,
+                style: const TextStyle(
+                  fontSize: 56,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.grey900,
+                  letterSpacing: -2,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '%',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.grey400,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progressValue,
+              backgroundColor: AppColors.grey100,
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              minHeight: 6,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Student Stat Pills — due tasks + upcoming exams from real providers ───────
+class _StudentStatPillsRow extends ConsumerWidget {
+  final String? userId;
+
+  const _StudentStatPillsRow({this.userId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Due tasks: student's homework not yet submitted, due in future
+    final homeworkAsync = userId != null
+        ? ref.watch(studentHomeworkProvider(userId!))
+        : const AsyncValue<List<Homework>>.data([]);
+
+    // Upcoming exams: published exams (no filter needed for student)
+    final examsAsync = ref.watch(
+      examsProvider(const ExamsFilter(publishedOnly: true)),
+    );
+
+    final dueCount = homeworkAsync.when(
+      loading: () => null,
+      error: (_, __) => 0,
+      data: (items) {
+        final now = DateTime.now();
+        return items
+            .where((hw) =>
+                hw.status == HomeworkStatus.published &&
+                hw.dueDate.isAfter(now))
+            .length;
+      },
+    );
+
+    final examCount = examsAsync.when(
+      loading: () => null,
+      error: (_, __) => 0,
+      data: (exams) {
+        final now = DateTime.now();
+        return exams
+            .where((e) =>
+                e.isPublished &&
+                e.startDate != null &&
+                e.startDate!.isAfter(now))
+            .length;
+      },
+    );
+
+    return Row(
+      children: [
+        Expanded(
+          child: _StatNum(
+            value: dueCount != null ? '$dueCount' : '--',
+            label: 'due',
+          ),
+        ),
+        const _StatDivider(),
+        Expanded(
+          child: _StatNum(
+            value: examCount != null ? '$examCount' : '--',
+            label: 'exams',
+          ),
+        ),
+        const _StatDivider(),
+        const Expanded(
+          child: _StatNum(value: '--', label: 'rank'),
         ),
       ],
     );
   }
 }
 
-// ─── Stat strip — numbers only, no containers, no icons
-// Design principle: let the data breathe. Stripe uses this exact pattern.
-class _StatPillsRow extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const Row(
-      children: [
-        Expanded(child: _StatNum(value: '3', label: 'due')),
-        _StatDivider(),
-        Expanded(child: _StatNum(value: '2', label: 'exams')),
-        _StatDivider(),
-        Expanded(child: _StatNum(value: '#5', label: 'rank')),
-      ],
-    );
-  }
-}
+// ─── Stat strip backing widgets ────────────────────────────────────────────────
 
 class _StatNum extends StatelessWidget {
   final String value;
@@ -380,42 +508,59 @@ class _StatDivider extends StatelessWidget {
   }
 }
 
-// ─── Section header ────────────────────────────────────────────────────────────
 class _SectionHeader extends StatelessWidget {
   final String label;
+  final String? action;
 
-  const _SectionHeader({required this.label});
+  const _SectionHeader({required this.label, this.action});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w700,
-        color: _ink,
-        letterSpacing: -0.3,
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+                fontSize: 18,
+              ),
+        ),
+        if (action != null)
+          TextButton(
+            onPressed: () {},
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+            ),
+            child: Row(
+              children: [
+                Text(action!),
+                const SizedBox(width: 4),
+                const Icon(Icons.arrow_forward_rounded, size: 14),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }
 
-// ─── Today's schedule card ─────────────────────────────────────────────────────
 class _TodayScheduleCard extends StatelessWidget {
   static const _classes = [
-    ('08:30', 'Mathematics', 'Mr. Kumar · Room 101', true),
-    ('09:30', 'Physics', 'Mrs. Sharma · Room 102', false),
-    ('10:30', 'Chemistry', 'Dr. Patel · Lab 1', false),
-    ('11:30', 'English', 'Ms. Wilson · Room 103', false),
-    ('12:30', 'History', 'Mr. Singh · Room 104', false),
+    ('08:30', 'Mathematics', 'Mr. Kumar • Room 101', true),
+    ('09:30', 'Physics', 'Mrs. Sharma • Room 102', false),
+    ('10:30', 'Chemistry', 'Dr. Patel • Lab 1', false),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _surf,
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
         children: _classes.asMap().entries.map((e) {
@@ -424,8 +569,7 @@ class _TodayScheduleCard extends StatelessWidget {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: _ClassRow(
                   time: c.$1,
                   subject: c.$2,
@@ -434,12 +578,7 @@ class _TodayScheduleCard extends StatelessWidget {
                 ),
               ),
               if (i < _classes.length - 1)
-                const Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: _border,
-                    indent: 16,
-                    endIndent: 16),
+                const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.borderLight),
             ],
           );
         }).toList(),
@@ -465,53 +604,18 @@ class _ClassRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Time column
         SizedBox(
-          width: 56,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                time,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: isCurrent ? _ink : _muted,
-                ),
-              ),
-              if (isCurrent)
-                Container(
-                  margin: const EdgeInsets.only(top: 4),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Text(
-                    'NOW',
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      letterSpacing: 0.6,
-                    ),
-                  ),
-                ),
-            ],
+          width: 50,
+          child: Text(
+            time,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: isCurrent ? AppColors.primary : AppColors.grey400,
+            ),
           ),
         ),
-        // Left accent line
-        Container(
-          width: 2,
-          height: 36,
-          margin: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: isCurrent ? AppColors.primary : _border,
-            borderRadius: BorderRadius.circular(1),
-          ),
-        ),
-        // Subject info
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -520,100 +624,36 @@ class _ClassRow extends StatelessWidget {
                 subject,
                 style: TextStyle(
                   fontSize: 14,
-                  fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
-                  color: _ink,
+                  fontWeight: FontWeight.w700,
+                  color: isCurrent ? AppColors.primary : AppColors.grey900,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 detail,
-                style: const TextStyle(fontSize: 12, color: _muted),
+                style: TextStyle(fontSize: 12, color: AppColors.grey500),
               ),
             ],
           ),
         ),
-      ],
-    );
-  }
-}
-
-// ─── Upcoming card ─────────────────────────────────────────────────────────────
-class _UpcomingCard extends StatelessWidget {
-  static const _items = [
-    ('Physics Assignment Due', 'Chapter 5 — Wave Optics', 'Tomorrow'),
-    ('Chemistry Quiz', 'Organic Chemistry', 'In 3 days'),
-    ('Parent-Teacher Meeting', 'Annual Review', 'Next week'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: _surf,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: _items.asMap().entries.map((e) {
-          final i = e.key;
-          final item = e.value;
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 14),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.$1,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: _ink,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            item.$2,
-                            style: const TextStyle(
-                                fontSize: 12, color: _muted),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.grey100,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        item.$3,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: _muted,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+        if (isCurrent)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Text(
+              'LIVE',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                letterSpacing: 1,
               ),
-              if (i < _items.length - 1)
-                const Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: _border,
-                    indent: 16,
-                    endIndent: 16),
-            ],
-          );
-        }).toList(),
-      ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -630,28 +670,30 @@ class _HomeworkWidget extends ConsumerWidget {
 
     return homeworkAsync.when(
       loading: () => const SizedBox(
-        height: 48,
-        child: Center(
-            child: CircularProgressIndicator(
-                strokeWidth: 2, color: AppColors.primary)),
+        height: 100,
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)),
       ),
       error: (_, __) => const SizedBox.shrink(),
       data: (items) {
         if (items.isEmpty) {
           return Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: _surf,
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.borderLight),
             ),
-            child: const Row(
+            child: Column(
               children: [
-                Icon(Icons.check_circle_outline,
-                    size: 18, color: AppColors.success),
-                SizedBox(width: 10),
+                Icon(Icons.check_circle_rounded, size: 32, color: AppColors.success.withValues(alpha: 0.5)),
+                const SizedBox(height: 12),
                 Text(
-                  'No pending homework — nice work!',
-                  style: TextStyle(fontSize: 13, color: _muted),
+                  'All caught up!',
+                  style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.grey900),
+                ),
+                Text(
+                  'No pending assignments for today.',
+                  style: TextStyle(fontSize: 12, color: AppColors.grey500),
                 ),
               ],
             ),
@@ -661,8 +703,9 @@ class _HomeworkWidget extends ConsumerWidget {
         final pending = items.take(3).toList();
         return Container(
           decoration: BoxDecoration(
-            color: _surf,
-            borderRadius: BorderRadius.circular(16),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.borderLight),
           ),
           child: Column(
             children: pending.asMap().entries.map((entry) {
@@ -670,18 +713,9 @@ class _HomeworkWidget extends ConsumerWidget {
               final hw = entry.value;
               return Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
-                    child: _HomeworkRow(homework: hw),
-                  ),
+                  _HomeworkRow(homework: hw),
                   if (i < pending.length - 1)
-                    const Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: _border,
-                        indent: 16,
-                        endIndent: 16),
+                    const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.borderLight),
                 ],
               );
             }).toList(),
@@ -700,55 +734,42 @@ class _HomeworkRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isHigh = homework.priority.name == 'high';
-    final dotColor = isHigh ? AppColors.error : AppColors.grey300;
 
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          margin: const EdgeInsets.only(right: 12),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: dotColor,
-          ),
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      leading: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: (isHigh ? AppColors.error : AppColors.primary).withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
         ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                homework.title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: _ink,
-                ),
+        child: Icon(
+          Icons.assignment_outlined,
+          color: isHigh ? AppColors.error : AppColors.primary,
+          size: 20,
+        ),
+      ),
+      title: Text(
+        homework.title,
+        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.grey900),
+      ),
+      subtitle: Text(
+        homework.subjectName ?? 'Curriculum Task',
+        style: TextStyle(fontSize: 12, color: AppColors.grey500),
+      ),
+      trailing: isHigh
+          ? Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
               ),
-              const SizedBox(height: 2),
-              Text(
-                homework.subjectName ?? 'Subject',
-                style: const TextStyle(fontSize: 12, color: _muted),
+              child: const Text(
+                'Urgent',
+                style: TextStyle(color: AppColors.error, fontSize: 10, fontWeight: FontWeight.w800),
               ),
-            ],
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppColors.grey100,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Text(
-            'Due tomorrow',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: _muted,
-            ),
-          ),
-        ),
-      ],
+            )
+          : const Icon(Icons.chevron_right_rounded, color: AppColors.grey400, size: 20),
     );
   }
 }
@@ -760,39 +781,44 @@ class _StudyTipsEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.2), width: 1),
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: const Row(
         children: [
-          Icon(Icons.auto_awesome_outlined,
-              size: 18, color: AppColors.primary),
-          SizedBox(width: 12),
+          Icon(Icons.auto_awesome_rounded, size: 24, color: Colors.white),
+          SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'AI Study Tips',
+                  'Academic Intelligence',
                   style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: 0.2,
                   ),
                 ),
-                SizedBox(height: 2),
+                SizedBox(height: 4),
                 Text(
-                  'Personalized recommendations just for you',
-                  style: TextStyle(fontSize: 12, color: AppColors.primaryDark),
+                  'Get AI-powered study recommendations',
+                  style: TextStyle(fontSize: 12, color: Colors.white70),
                 ),
               ],
             ),
           ),
-          Icon(Icons.chevron_right, size: 18, color: AppColors.primary),
+          Icon(Icons.chevron_right_rounded, size: 24, color: Colors.white),
         ],
       ),
     );
@@ -806,11 +832,11 @@ class _UpcomingExamCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _surf,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _border),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Row(
         children: [
@@ -818,11 +844,10 @@ class _UpcomingExamCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: AppColors.info.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.quiz_outlined,
-                color: AppColors.primary, size: 22),
+            child: const Icon(Icons.quiz_outlined, color: AppColors.info, size: 24),
           ),
           const SizedBox(width: 16),
           const Expanded(
@@ -830,34 +855,35 @@ class _UpcomingExamCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Mathematics — Mid Term',
+                  'Mid-Term Assessment',
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: _ink,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.grey900,
                   ),
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'Chapters 1–5  ·  80 marks',
-                  style: TextStyle(fontSize: 12, color: _muted),
+                  'Mathematics • Units 1–5',
+                  style: TextStyle(fontSize: 12, color: AppColors.grey500),
                 ),
               ],
             ),
           ),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: AppColors.grey50,
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.borderLight),
             ),
             child: const Text(
-              'In 5 days',
+              'In 5 Days',
               style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: AppColors.grey700,
+                letterSpacing: 0.5,
               ),
             ),
           ),
@@ -877,36 +903,32 @@ class _QuickActionsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final studentId = user?.id ?? 'me';
 
-    return Row(
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 3,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 1,
       children: [
-        Expanded(
-          child: _QuickActionTile(
-            icon: Icons.collections_bookmark_outlined,
-            label: 'Portfolio',
-            onTap: () => context.push(
-              AppRoutes.studentPortfolio
-                  .replaceFirst(':studentId', studentId),
-            ),
+        _QuickActionTile(
+          icon: Icons.collections_bookmark_rounded,
+          label: 'Portfolio',
+          onTap: () => context.push(
+            AppRoutes.studentPortfolio.replaceFirst(':studentId', studentId),
           ),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _QuickActionTile(
-            icon: Icons.badge_outlined,
-            label: 'ID Card',
-            onTap: () => context.push(
-              AppRoutes.digitalIdCard
-                  .replaceFirst(':studentId', studentId),
-            ),
+        _QuickActionTile(
+          icon: Icons.badge_rounded,
+          label: 'ID Card',
+          onTap: () => context.push(
+            AppRoutes.digitalIdCard.replaceFirst(':studentId', studentId),
           ),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _QuickActionTile(
-            icon: Icons.fact_check_outlined,
-            label: 'Attendance',
-            onTap: () => context.push(AppRoutes.studentAttendance),
-          ),
+        _QuickActionTile(
+          icon: Icons.fact_check_rounded,
+          label: 'Attendance',
+          onTap: () => context.push(AppRoutes.studentAttendance),
         ),
       ],
     );
@@ -926,30 +948,38 @@ class _QuickActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: _surf,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          child: Column(
-            children: [
-              Icon(icon, size: 22, color: AppColors.primary),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: _ink,
-                  letterSpacing: -0.1,
-                ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
               ),
-            ],
-          ),
+              child: Icon(icon, size: 20, color: AppColors.primary),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: AppColors.grey700,
+                letterSpacing: -0.2,
+              ),
+            ),
+          ],
         ),
       ),
     );

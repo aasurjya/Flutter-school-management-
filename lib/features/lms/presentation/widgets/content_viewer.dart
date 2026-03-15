@@ -57,7 +57,7 @@ class _VideoContent extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Center(
                 child: Column(

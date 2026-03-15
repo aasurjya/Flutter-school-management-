@@ -356,7 +356,7 @@ class _GatewayConfigSheetState extends ConsumerState<_GatewayConfigSheet> {
       padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottom),
       decoration: BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

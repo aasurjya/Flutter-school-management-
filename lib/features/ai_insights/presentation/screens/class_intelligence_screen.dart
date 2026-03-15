@@ -262,7 +262,7 @@ class _ClassIntelligenceScreenState
                 ),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: color.withValues(alpha: 0.3),
                   ),

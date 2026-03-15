@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -34,6 +35,35 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
   final _designationController = TextEditingController();
   String _selectedRole = 'teacher';
   bool _isSubmitting = false;
+  bool _passwordVisible = false;
+  late String _generatedPassword;
+  String _previewEmail = '';
+  String _tenantSlug = 'school';
+
+  @override
+  void initState() {
+    super.initState();
+    _generatedPassword = CredentialGenerator.generatePassword();
+    _loadTenantSlug();
+  }
+
+  Future<void> _loadTenantSlug() async {
+    final tenantId = ref.read(currentUserProvider)?.tenantId;
+    if (tenantId == null || tenantId.isEmpty) return;
+    try {
+      final data = await Supabase.instance.client
+          .from('tenants')
+          .select('slug')
+          .eq('id', tenantId)
+          .maybeSingle();
+      if (data != null && mounted) {
+        setState(() {
+          _tenantSlug = data['slug'] as String? ?? 'school';
+          _updatePreviewEmail();
+        });
+      }
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -44,6 +74,33 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
     _departmentController.dispose();
     _designationController.dispose();
     super.dispose();
+  }
+
+  void _updatePreviewEmail() {
+    if (_emailController.text.trim().isNotEmpty) {
+      setState(() => _previewEmail = _emailController.text.trim());
+      return;
+    }
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    if (firstName.isEmpty || lastName.isEmpty) {
+      setState(() => _previewEmail = '');
+      return;
+    }
+    setState(() => _previewEmail = CredentialGenerator.generateUsername(
+          firstName: firstName,
+          lastName: lastName,
+          tenantSlug: _tenantSlug,
+        ));
+  }
+
+  void _regeneratePassword() =>
+      setState(() => _generatedPassword = CredentialGenerator.generatePassword());
+
+  void _copyField(String label, String value) {
+    Clipboard.setData(ClipboardData(text: value));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('$label copied')));
   }
 
   @override
@@ -98,6 +155,7 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
                               border: OutlineInputBorder(),
                             ),
                             textCapitalization: TextCapitalization.words,
+                            onChanged: (_) => _updatePreviewEmail(),
                             validator: (v) =>
                                 (v == null || v.trim().isEmpty) ? 'Required' : null,
                           ),
@@ -111,6 +169,7 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
                               border: OutlineInputBorder(),
                             ),
                             textCapitalization: TextCapitalization.words,
+                            onChanged: (_) => _updatePreviewEmail(),
                             validator: (v) =>
                                 (v == null || v.trim().isEmpty) ? 'Required' : null,
                           ),
@@ -121,11 +180,12 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
                     TextFormField(
                       controller: _emailController,
                       decoration: const InputDecoration(
-                        labelText: 'Email *',
+                        labelText: 'Email (optional — auto-generated from name)',
                         border: OutlineInputBorder(),
                         helperText: 'Leave blank to auto-generate',
                       ),
                       keyboardType: TextInputType.emailAddress,
+                      onChanged: (_) => _updatePreviewEmail(),
                       validator: (v) {
                         if (v == null || v.trim().isEmpty) return null; // auto-gen ok
                         if (!v.contains('@') || !v.contains('.')) {
@@ -180,7 +240,92 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
                         hintText: 'e.g. Mathematics',
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 20),
+
+                    // ── Credentials preview ──────────────────────────────
+                    const Text(
+                      'GENERATED CREDENTIALS',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
+                          color: AppColors.grey500),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.amber.shade200),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.warning_amber_rounded,
+                                  size: 14, color: Colors.amber),
+                              const SizedBox(width: 6),
+                              const Expanded(
+                                child: Text(
+                                  'Save these before creating — password shown here only.',
+                                  style: TextStyle(
+                                      fontSize: 11, color: Colors.orange),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          _CredRow(
+                            label: 'Username',
+                            value: _previewEmail.isNotEmpty
+                                ? _previewEmail.split('@').first
+                                : '(enter name above)',
+                            onCopy: _previewEmail.isNotEmpty
+                                ? () => _copyField('Username', _previewEmail.split('@').first)
+                                : null,
+                          ),
+                          const SizedBox(height: 8),
+                          _CredRow(
+                            label: 'Email',
+                            value: _previewEmail.isNotEmpty
+                                ? _previewEmail
+                                : '(enter name above)',
+                            onCopy: _previewEmail.isNotEmpty
+                                ? () => _copyField('Email', _previewEmail)
+                                : null,
+                          ),
+                          const SizedBox(height: 8),
+                          _CredRow(
+                            label: 'Password',
+                            value: _passwordVisible ? _generatedPassword : '••••••••••',
+                            trailingWidgets: [
+                              GestureDetector(
+                                onTap: () => setState(() => _passwordVisible = !_passwordVisible),
+                                child: Icon(
+                                  _passwordVisible ? Icons.visibility_off : Icons.visibility,
+                                  size: 16,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: _regeneratePassword,
+                                child: Icon(Icons.refresh, size: 16, color: Colors.grey.shade500),
+                              ),
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () => _copyField('Password', _generatedPassword),
+                                child: Icon(Icons.copy, size: 16, color: Colors.grey.shade500),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -209,15 +354,6 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
                                   fontSize: 16,
                                 ),
                               ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Center(
-                      child: Text(
-                        'Login credentials will be generated and shown once.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey.shade600,
-                            ),
                       ),
                     ),
                   ],
@@ -294,9 +430,7 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
     // Derive credentials.
     final supaClient = Supabase.instance.client;
     final tenantId = ref.read(currentUserProvider)?.tenantId ?? '';
-    final tenantSlug =
-        (supaClient.auth.currentUser?.appMetadata['tenant_slug'] as String?)
-            ?? (tenantId.isNotEmpty ? tenantId.substring(0, 8) : 'school');
+    final tenantSlug = _tenantSlug;
 
     final email = _emailController.text.trim().isNotEmpty
         ? _emailController.text.trim()
@@ -305,7 +439,7 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
             lastName: lastName,
             tenantSlug: tenantSlug,
           );
-    final password = CredentialGenerator.generatePassword();
+    final password = _generatedPassword;
 
     if (tenantId.isEmpty) {
       context.showErrorSnackBar('Session error: tenant not found. Please log out and log in again.');
@@ -384,5 +518,67 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
       return 'tenant_admin';
     }
     return 'other';
+  }
+}
+
+// ── Shared credential preview row ─────────────────────────────────────────────
+
+class _CredRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final VoidCallback? onCopy;
+  final List<Widget> trailingWidgets;
+
+  const _CredRow({
+    required this.label,
+    required this.value,
+    this.onCopy,
+    this.trailingWidgets = const [],
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade600,
+                letterSpacing: 0.3)),
+        const SizedBox(height: 3),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                      fontSize: 13,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.w500),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (trailingWidgets.isNotEmpty)
+                ...trailingWidgets
+              else if (onCopy != null)
+                GestureDetector(
+                  onTap: onCopy,
+                  child:
+                      Icon(Icons.copy, size: 14, color: Colors.grey.shade500),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

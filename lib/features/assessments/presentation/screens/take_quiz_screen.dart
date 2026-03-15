@@ -127,7 +127,7 @@ class _QuizContent extends ConsumerWidget {
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
               color: _getTimerColor(session.remainingSeconds),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

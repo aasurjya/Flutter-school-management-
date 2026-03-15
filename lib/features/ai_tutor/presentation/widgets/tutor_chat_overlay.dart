@@ -410,7 +410,7 @@ class _InputBar extends StatelessWidget {
                       .surfaceContainerHighest
                       .withValues(alpha: 0.5),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
                   contentPadding: const EdgeInsets.symmetric(

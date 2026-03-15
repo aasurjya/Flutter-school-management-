@@ -132,17 +132,21 @@ class StaffRepository extends BaseRepository {
   ///
   /// [role] must be passed by the caller (it is already known from the creation
   /// flow) so we avoid a second PostgREST round-trip for user_roles.
+  ///
+  /// Pass [tenantIdOverride] when calling from a super_admin context where
+  /// the JWT has no tenant_id claim — e.g. creating staff from TenantDetailScreen.
   Future<StaffMember> createStaff({
     required String userId,
     required String firstName,
     required String lastName,
+    String? tenantIdOverride,
     String? phone,
     String? designation,
     String? department,
     DateTime? joinDate,
     String role = 'teacher',
   }) async {
-    final tenantId = requireTenantId;
+    final tenantId = tenantIdOverride ?? requireTenantId;
     final employeeId = _generateEmployeeId();
 
     final response = await client.from('staff').insert({
@@ -161,6 +165,20 @@ class StaffRepository extends BaseRepository {
     return StaffMember.fromJson(
       _injectRole(response, {userId: role}),
     );
+  }
+
+  /// Updates mutable fields on a staff record.
+  ///
+  /// [data] may contain any subset of: designation, department, phone,
+  /// address, city, state, date_of_birth, qualification, experience_years.
+  Future<void> updateStaff(String staffId, Map<String, dynamic> data) async {
+    final payload = Map<String, dynamic>.from(data)
+      ..['updated_at'] = DateTime.now().toIso8601String();
+    await client
+        .from('staff')
+        .update(payload)
+        .eq('id', staffId)
+        .eq('tenant_id', requireTenantId);
   }
 
   /// Soft-deletes a staff member by marking them inactive.

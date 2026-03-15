@@ -291,7 +291,7 @@ class _HomeworkItem extends StatelessWidget {
     AppColors.primary,
     AppColors.secondary,
     AppColors.accent,
-    Color(0xFF8B5CF6),
+    Color(0xFFF97316),
     Color(0xFFEC4899),
     Color(0xFF06B6D4),
   ];

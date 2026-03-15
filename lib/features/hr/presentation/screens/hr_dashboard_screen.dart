@@ -312,7 +312,7 @@ class _QuickActionsGrid extends StatelessWidget {
       const _QuickAction(
         icon: Icons.description,
         label: 'Contracts',
-        color: Color(0xFF8B5CF6),
+        color: Color(0xFFF97316),
         route: '/hr/contracts',
       ),
       const _QuickAction(

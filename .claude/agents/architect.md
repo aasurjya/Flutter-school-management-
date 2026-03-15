@@ -183,6 +183,34 @@ Watch for these architectural anti-patterns:
 - **Tight Coupling**: Components too dependent
 - **God Object**: One class/component does everything
 
+## Supabase + Flutter Data Layer Contract
+
+When designing features that touch the Supabase data layer, enforce these rules:
+
+### Query → Model Contract
+Every Supabase select query has a CONTRACT with the Dart model's `fromJson`. They must stay in sync:
+1. **Select fields must cover fromJson** — If `fromJson` reads `json['enrollment_date']`, the select MUST include `enrollment_date`. Missing fields = runtime crash.
+2. **Join keys are table names** — Supabase returns nested data keyed by TABLE NAME (`sections`, `classes`, `academic_years`). Models must use plural keys or handle both (`json['sections'] ?? json['section']`).
+3. **Nested joins are always Lists** — Even 1:1 relationships return `List<dynamic>`. Cast to `Map` will crash. Always extract `.first` from the list.
+
+### Join Strategy
+- **Inner join (`!inner`)**: Use ONLY when the related record is REQUIRED for the feature to make sense (e.g., "show students in section X" — enrollment must exist).
+- **Left join (no `!inner`)**: Use for OPTIONAL relationships (e.g., "list all students" — some may not be enrolled yet).
+- **Default to left join** unless you have a specific filtering reason for inner.
+
+### Screen → Repository → Provider Pipeline
+Every screen that displays data MUST follow this pipeline:
+```
+Screen → ref.watch(provider) → Repository.method() → Supabase query → Model.fromJson()
+```
+NO screen should have hardcoded demo data in local state. If a screen needs CRUD, the repository MUST have create/update/delete methods, not just read.
+
+### Multi-Step Operation Safety
+Operations that span multiple tables (e.g., create auth user → insert profile → assign role → create domain record):
+1. Use a single Edge Function/RPC when possible (atomic)
+2. If client-side multi-step is unavoidable, implement rollback for each step
+3. Design for retry safety — partial state must not block retry attempts
+
 ## Project-Specific Architecture (Example)
 
 Example architecture for an AI-powered SaaS platform:

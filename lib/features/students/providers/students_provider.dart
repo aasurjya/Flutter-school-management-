@@ -161,3 +161,123 @@ final studentsNotifierProvider =
 });
 
 final selectedChildProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
+
+// ─── Paginated Students (for infinite scroll) ────────────────────────────────
+
+class PaginatedStudentsState {
+  final List<Student> students;
+  final bool isLoading;
+  final bool isLoadingMore;
+  final bool hasMore;
+  final String? error;
+  final String? searchQuery;
+  final String? filterClassId;
+  final String? filterSectionId;
+
+  const PaginatedStudentsState({
+    this.students = const [],
+    this.isLoading = false,
+    this.isLoadingMore = false,
+    this.hasMore = true,
+    this.error,
+    this.searchQuery,
+    this.filterClassId,
+    this.filterSectionId,
+  });
+
+  PaginatedStudentsState copyWith({
+    List<Student>? students,
+    bool? isLoading,
+    bool? isLoadingMore,
+    bool? hasMore,
+    String? error,
+    String? searchQuery,
+    String? filterClassId,
+    String? filterSectionId,
+  }) =>
+      PaginatedStudentsState(
+        students: students ?? this.students,
+        isLoading: isLoading ?? this.isLoading,
+        isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+        hasMore: hasMore ?? this.hasMore,
+        error: error,
+        searchQuery: searchQuery ?? this.searchQuery,
+        filterClassId: filterClassId ?? this.filterClassId,
+        filterSectionId: filterSectionId ?? this.filterSectionId,
+      );
+}
+
+class PaginatedStudentsNotifier
+    extends StateNotifier<PaginatedStudentsState> {
+  final StudentRepository _repo;
+  int _offset = 0;
+  static const _pageSize = 25;
+
+  PaginatedStudentsNotifier(this._repo)
+      : super(const PaginatedStudentsState());
+
+  Future<void> loadInitial({
+    String? searchQuery,
+    String? classId,
+    String? sectionId,
+  }) async {
+    _offset = 0;
+    state = PaginatedStudentsState(
+      isLoading: true,
+      searchQuery: searchQuery,
+      filterClassId: classId,
+      filterSectionId: sectionId,
+    );
+    try {
+      final results = await _repo.getStudents(
+        limit: _pageSize,
+        offset: 0,
+        searchQuery: searchQuery,
+        classId: classId,
+        sectionId: sectionId,
+      );
+      state = state.copyWith(
+        students: results,
+        isLoading: false,
+        hasMore: results.length == _pageSize,
+      );
+      _offset = results.length;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<void> loadMore() async {
+    if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
+    state = state.copyWith(isLoadingMore: true);
+    try {
+      final results = await _repo.getStudents(
+        limit: _pageSize,
+        offset: _offset,
+        searchQuery: state.searchQuery,
+        classId: state.filterClassId,
+        sectionId: state.filterSectionId,
+      );
+      state = state.copyWith(
+        students: [...state.students, ...results],
+        isLoadingMore: false,
+        hasMore: results.length == _pageSize,
+      );
+      _offset += results.length;
+    } catch (e) {
+      state = state.copyWith(isLoadingMore: false, error: e.toString());
+    }
+  }
+
+  void addStudent(Student student) {
+    state = state.copyWith(students: [student, ...state.students]);
+  }
+}
+
+final paginatedStudentsProvider =
+    StateNotifierProvider<PaginatedStudentsNotifier, PaginatedStudentsState>(
+  (ref) {
+    final repo = ref.watch(studentRepositoryProvider);
+    return PaginatedStudentsNotifier(repo);
+  },
+);

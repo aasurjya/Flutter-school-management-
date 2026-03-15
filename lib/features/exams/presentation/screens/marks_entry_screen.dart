@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/extensions/context_extensions.dart';
+import '../../../students/providers/students_provider.dart';
+import '../../providers/exams_provider.dart';
 
 class MarksEntryScreen extends ConsumerStatefulWidget {
   final String examId;
@@ -14,39 +16,100 @@ class MarksEntryScreen extends ConsumerStatefulWidget {
 }
 
 class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
-  String _selectedSubject = 'Mathematics';
-  final List<TextEditingController> _controllers = [];
+  String? _selectedExamSubjectId;
+  final Map<String, TextEditingController> _controllers = {};
   bool _isSubmitting = false;
 
   @override
-  void initState() {
-    super.initState();
-    _initControllers();
-  }
-
-  void _initControllers() {
-    _controllers.clear();
-    for (var _ in _mockStudents) {
-      _controllers.add(TextEditingController());
-    }
-  }
-
-  @override
   void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
+    for (final c in _controllers.values) {
+      c.dispose();
     }
     super.dispose();
   }
 
+  TextEditingController _controllerFor(String studentId) {
+    return _controllers.putIfAbsent(
+      studentId,
+      () => TextEditingController(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final examAsync = ref.watch(examByIdProvider(widget.examId));
+    final subjectsAsync = ref.watch(examSubjectsProvider(widget.examId));
+
+    return examAsync.when(
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => Scaffold(
+        appBar: AppBar(title: const Text('Enter Marks')),
+        body: Center(child: Text('Failed to load exam: $e')),
+      ),
+      data: (exam) => subjectsAsync.when(
+        loading: () => const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+        error: (e, _) => Scaffold(
+          appBar: AppBar(title: const Text('Enter Marks')),
+          body: Center(child: Text('Failed to load subjects: $e')),
+        ),
+        data: (subjects) {
+          if (subjects.isEmpty) {
+            return Scaffold(
+              appBar: AppBar(title: const Text('Enter Marks')),
+              body: const Center(
+                child: Text('No subjects configured for this exam'),
+              ),
+            );
+          }
+
+          // Select first subject by default
+          final selectedSubjectId =
+              _selectedExamSubjectId ?? subjects.first.id;
+          final selectedSubject = subjects.firstWhere(
+            (s) => s.id == selectedSubjectId,
+            orElse: () => subjects.first,
+          );
+          final classId = selectedSubject.classId;
+          final maxMarks = selectedSubject.maxMarks.toInt();
+          final passingMarks = selectedSubject.passingMarks.toInt();
+
+          return _buildContent(
+            context: context,
+            exam: exam,
+            subjects: subjects,
+            selectedSubject: selectedSubject,
+            classId: classId,
+            maxMarks: maxMarks,
+            passingMarks: passingMarks,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildContent({
+    required BuildContext context,
+    required exam,
+    required List subjects,
+    required selectedSubject,
+    required String classId,
+    required int maxMarks,
+    required int passingMarks,
+  }) {
+    final studentsAsync = ref.watch(
+      studentsProvider(StudentsFilter(classId: classId)),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Enter Marks'),
         actions: [
           TextButton.icon(
-            onPressed: _saveAsDraft,
+            onPressed: _isSubmitting ? null : () => _saveAsDraft(selectedSubject, studentsAsync),
             icon: const Icon(Icons.save_outlined),
             label: const Text('Save Draft'),
           ),
@@ -63,29 +126,33 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Mid Term Examination - Class 10-A',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                Text(
+                  '${exam?.name ?? 'Exam'} — ${selectedSubject.className ?? 'Class'}',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 // Subject Selector
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children: ['Mathematics', 'Physics', 'Chemistry', 'English']
+                    children: subjects
                         .map((subject) => Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: ChoiceChip(
-                                label: Text(subject),
-                                selected: _selectedSubject == subject,
+                                label:
+                                    Text(subject.subjectName ?? subject.id),
+                                selected: subject.id == selectedSubject.id,
                                 onSelected: (selected) {
                                   if (selected) {
-                                    setState(() => _selectedSubject = subject);
+                                    setState(() {
+                                      _selectedExamSubjectId = subject.id;
+                                    });
                                   }
                                 },
                                 selectedColor: AppColors.primary,
                                 labelStyle: TextStyle(
-                                  color: _selectedSubject == subject
+                                  color: subject.id == selectedSubject.id
                                       ? Colors.white
                                       : null,
                                 ),
@@ -95,61 +162,136 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const _InfoChip(
-                      icon: Icons.assignment,
-                      label: 'Max Marks: 100',
-                    ),
-                    const SizedBox(width: 12),
-                    const _InfoChip(
-                      icon: Icons.check_circle_outline,
-                      label: 'Pass: 35',
-                    ),
-                    const SizedBox(width: 12),
-                    _InfoChip(
-                      icon: Icons.people,
-                      label: '${_mockStudents.length} Students',
-                    ),
-                  ],
+                studentsAsync.when(
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                  data: (students) => Row(
+                    children: [
+                      _InfoChip(
+                        icon: Icons.assignment,
+                        label: 'Max Marks: $maxMarks',
+                      ),
+                      const SizedBox(width: 12),
+                      _InfoChip(
+                        icon: Icons.check_circle_outline,
+                        label: 'Pass: $passingMarks',
+                      ),
+                      const SizedBox(width: 12),
+                      _InfoChip(
+                        icon: Icons.people,
+                        label: '${students.length} Students',
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
 
-          // Stats Bar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
-              ),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _StatItem(label: 'Entered', value: '8', color: AppColors.success),
-                _StatItem(label: 'Pending', value: '2', color: AppColors.warning),
-                _StatItem(label: 'Absent', value: '1', color: AppColors.error),
-                _StatItem(label: 'Average', value: '72.5', color: AppColors.info),
-              ],
-            ),
+          // Stats Bar (computed from entered marks)
+          studentsAsync.when(
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (students) {
+              int entered = 0;
+              int absent = 0;
+              double total = 0;
+              for (final student in students) {
+                final ctrl = _controllers[student.id];
+                if (ctrl != null && ctrl.text.isNotEmpty) {
+                  if (ctrl.text == 'AB') {
+                    absent++;
+                  } else {
+                    final m = double.tryParse(ctrl.text);
+                    if (m != null) {
+                      entered++;
+                      total += m;
+                    }
+                  }
+                }
+              }
+              final pending = students.length - entered - absent;
+              final avg =
+                  entered > 0 ? (total / entered).toStringAsFixed(1) : '—';
+
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                        color: Colors.grey.withValues(alpha: 0.2)),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _StatItem(
+                        label: 'Entered',
+                        value: '$entered',
+                        color: AppColors.success),
+                    _StatItem(
+                        label: 'Pending',
+                        value: '$pending',
+                        color: AppColors.warning),
+                    _StatItem(
+                        label: 'Absent',
+                        value: '$absent',
+                        color: AppColors.error),
+                    _StatItem(
+                        label: 'Average',
+                        value: avg,
+                        color: AppColors.info),
+                  ],
+                ),
+              );
+            },
           ),
 
           // Student List
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _mockStudents.length,
-              itemBuilder: (context, index) {
-                final student = _mockStudents[index];
-                return _MarksEntryCard(
-                  rollNo: student['rollNo'] as String,
-                  name: student['name'] as String,
-                  controller: _controllers[index],
-                  maxMarks: 100,
-                  onChanged: (value) {
-                    setState(() {});
+            child: studentsAsync.when(
+              loading: () =>
+                  const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline,
+                        size: 48, color: AppColors.error),
+                    const SizedBox(height: 12),
+                    Text('Failed to load students: $e'),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () => ref.invalidate(
+                        studentsProvider(StudentsFilter(classId: classId)),
+                      ),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+              data: (students) {
+                if (students.isEmpty) {
+                  return const Center(
+                    child: Text('No students found for this class'),
+                  );
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: students.length,
+                  itemBuilder: (context, index) {
+                    final student = students[index];
+                    final rollNo = student.currentEnrollment?.rollNumber ??
+                        student.rollNumber ??
+                        '${index + 1}';
+                    return _MarksEntryCard(
+                      rollNo: rollNo,
+                      name: student.fullName,
+                      controller: _controllerFor(student.id),
+                      maxMarks: maxMarks,
+                      onChanged: (value) => setState(() {}),
+                    );
                   },
                 );
               },
@@ -164,7 +306,9 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: _saveAsDraft,
+                  onPressed: _isSubmitting
+                      ? null
+                      : () => _saveAsDraft(selectedSubject, studentsAsync),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
@@ -175,7 +319,10 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submitMarks,
+                  onPressed: _isSubmitting
+                      ? null
+                      : () => _submitMarks(
+                          selectedSubject, studentsAsync, maxMarks),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -186,7 +333,8 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation(Colors.white),
                           ),
                         )
                       : const Text(
@@ -202,7 +350,7 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
     );
   }
 
-  void _saveAsDraft() {
+  void _saveAsDraft(selectedSubject, AsyncValue studentsAsync) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Draft saved successfully'),
@@ -211,30 +359,54 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
     );
   }
 
-  Future<void> _submitMarks() async {
-    // Validate all marks
-    bool hasErrors = false;
-    for (int i = 0; i < _controllers.length; i++) {
-      final text = _controllers[i].text;
-      if (text.isNotEmpty) {
-        final marks = double.tryParse(text);
-        if (marks == null || marks < 0 || marks > 100) {
-          hasErrors = true;
-          break;
+  Future<void> _submitMarks(
+    selectedSubject,
+    AsyncValue studentsAsync,
+    int maxMarks,
+  ) async {
+    final students = studentsAsync.asData?.value;
+    if (students == null) return;
+
+    // Validate
+    for (final student in students) {
+      final ctrl = _controllers[student.id];
+      if (ctrl != null && ctrl.text.isNotEmpty && ctrl.text != 'AB') {
+        final marks = double.tryParse(ctrl.text);
+        if (marks == null || marks < 0 || marks > maxMarks) {
+          context.showErrorSnackBar(
+              'Please enter valid marks (0–$maxMarks) for ${student.fullName}');
+          return;
         }
       }
-    }
-
-    if (hasErrors) {
-      context.showErrorSnackBar('Please enter valid marks (0-100)');
-      return;
     }
 
     setState(() => _isSubmitting = true);
 
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      
+      final examSubjectId = selectedSubject.id as String;
+      final bulkMarks = <Map<String, dynamic>>[];
+
+      for (final student in students) {
+        final ctrl = _controllers[student.id];
+        if (ctrl != null && ctrl.text.isNotEmpty) {
+          final isAbsent = ctrl.text == 'AB';
+          final marksObtained =
+              isAbsent ? null : double.tryParse(ctrl.text);
+          bulkMarks.add({
+            'exam_subject_id': examSubjectId,
+            'student_id': student.id,
+            if (marksObtained != null) 'marks_obtained': marksObtained,
+            'is_absent': isAbsent,
+          });
+        }
+      }
+
+      if (bulkMarks.isNotEmpty) {
+        await ref
+            .read(marksEntryNotifierProvider.notifier)
+            .enterBulkMarks(bulkMarks);
+      }
+
       if (mounted) {
         context.showSuccessSnackBar('Marks submitted successfully');
         Navigator.pop(context);
@@ -263,7 +435,7 @@ class _InfoChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
       ),
       child: Row(
@@ -331,8 +503,11 @@ class _MarksEntryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final marks = double.tryParse(controller.text);
-    final isValid = marks == null || (marks >= 0 && marks <= maxMarks);
-    final isPassing = marks != null && marks >= 35;
+    final isAbsent = controller.text == 'AB';
+    final isValid = isAbsent ||
+        marks == null ||
+        (marks >= 0 && marks <= maxMarks);
+    final isPassing = marks != null && marks >= (maxMarks * 0.35);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -357,6 +532,7 @@ class _MarksEntryCard extends StatelessWidget {
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
+                    fontSize: 12,
                   ),
                 ),
               ),
@@ -376,8 +552,9 @@ class _MarksEntryCard extends StatelessWidget {
                 controller: controller,
                 keyboardType: TextInputType.number,
                 textAlign: TextAlign.center,
+                enabled: !isAbsent,
                 decoration: InputDecoration(
-                  hintText: '0',
+                  hintText: isAbsent ? 'AB' : '0',
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 8,
                     vertical: 12,
@@ -388,15 +565,18 @@ class _MarksEntryCard extends StatelessWidget {
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
-                      color: isValid ? Colors.grey.shade300 : AppColors.error,
+                      color:
+                          isValid ? Colors.grey.shade300 : AppColors.error,
                     ),
                   ),
                   filled: true,
                   fillColor: controller.text.isEmpty
                       ? Colors.grey.withValues(alpha: 0.05)
-                      : isPassing
-                          ? AppColors.success.withValues(alpha: 0.05)
-                          : AppColors.error.withValues(alpha: 0.05),
+                      : isAbsent
+                          ? AppColors.error.withValues(alpha: 0.1)
+                          : isPassing
+                              ? AppColors.success.withValues(alpha: 0.05)
+                              : AppColors.error.withValues(alpha: 0.05),
                 ),
                 onChanged: onChanged,
               ),
@@ -407,18 +587,22 @@ class _MarksEntryCard extends StatelessWidget {
               style: TextStyle(color: Colors.grey[600]),
             ),
             const SizedBox(width: 8),
-            // Absent checkbox
+            // Absent toggle
             IconButton(
               icon: Icon(
                 Icons.person_off_outlined,
-                color: Colors.grey[400],
+                color: isAbsent ? AppColors.error : Colors.grey[400],
                 size: 20,
               ),
               onPressed: () {
-                controller.text = 'AB';
-                onChanged('AB');
+                if (isAbsent) {
+                  controller.text = '';
+                } else {
+                  controller.text = 'AB';
+                }
+                onChanged(controller.text);
               },
-              tooltip: 'Mark Absent',
+              tooltip: isAbsent ? 'Mark Present' : 'Mark Absent',
             ),
           ],
         ),
@@ -426,17 +610,3 @@ class _MarksEntryCard extends StatelessWidget {
     );
   }
 }
-
-// Mock data
-final _mockStudents = [
-  {'rollNo': '01', 'name': 'Arjun Kumar'},
-  {'rollNo': '02', 'name': 'Priya Sharma'},
-  {'rollNo': '03', 'name': 'Rahul Singh'},
-  {'rollNo': '04', 'name': 'Sneha Patel'},
-  {'rollNo': '05', 'name': 'Amit Gupta'},
-  {'rollNo': '06', 'name': 'Neha Verma'},
-  {'rollNo': '07', 'name': 'Vikram Joshi'},
-  {'rollNo': '08', 'name': 'Kavita Reddy'},
-  {'rollNo': '09', 'name': 'Rohan Mishra'},
-  {'rollNo': '10', 'name': 'Ananya Das'},
-];

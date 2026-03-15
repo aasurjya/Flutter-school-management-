@@ -107,7 +107,7 @@ class _RouteCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.secondaryContainer,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: Text(
                         route.fareFormatted,

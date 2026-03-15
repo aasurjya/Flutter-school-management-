@@ -48,6 +48,9 @@ dependencies:
   # Calendar
   table_calendar: ^3.0.9
 
+  # Image Picker (profile photo upload)
+  image_picker: ^1.0.7
+
   # UI Helpers
   google_fonts: ^6.1.0
   qr_flutter: ^4.1.0

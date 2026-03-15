@@ -154,7 +154,7 @@ class NotificationCard extends StatelessWidget {
       case 'grade_update':
         return Colors.green;
       case 'assignment':
-        return Colors.purple;
+        return Colors.orange;
       case 'announcement':
         return Colors.teal;
       case 'emergency':
@@ -198,7 +198,7 @@ class _NotificationIcon extends StatelessWidget {
         break;
       case 'assignment':
         icon = Icons.assignment;
-        color = Colors.purple;
+        color = Colors.orange;
         break;
       case 'announcement':
         icon = Icons.campaign;

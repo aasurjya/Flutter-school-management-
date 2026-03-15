@@ -97,7 +97,7 @@ class _AlumniDirectoryScreenState
                                 ? AppColors.primary
                                 : AppColors.borderLight,
                           ),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: DropdownButton<String?>(
                           value: _selectedIndustry,
@@ -136,7 +136,7 @@ class _AlumniDirectoryScreenState
                                 ? AppColors.primary
                                 : AppColors.borderLight,
                           ),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: DropdownButton<int?>(
                           value: _selectedYear,

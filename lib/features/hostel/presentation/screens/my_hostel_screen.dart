@@ -83,7 +83,7 @@ class MyHostelScreen extends ConsumerWidget {
                             ),
                             decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.secondaryContainer,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
                               'Bed ${allocation.bedNumber}',
@@ -126,7 +126,7 @@ class MyHostelScreen extends ConsumerWidget {
                             color: allocation.isActive
                                 ? Colors.green.withValues(alpha: 0.1)
                                 : Colors.red.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
                             allocation.isActive ? 'Active' : 'Vacated',

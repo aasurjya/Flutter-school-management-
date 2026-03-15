@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/services/credential_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/academic.dart';
 import '../../../../data/models/student.dart';
@@ -9,6 +12,9 @@ import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../academic/providers/academic_provider.dart';
 import '../../../students/providers/students_provider.dart';
+import '../widgets/add_student_form.dart';
+import '../widgets/credential_display_dialog.dart';
+import '../widgets/parent_link_dialog.dart';
 
 class StudentManagementScreen extends ConsumerStatefulWidget {
   const StudentManagementScreen({super.key});
@@ -141,6 +147,11 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                         onEdit: () => _showEditStudentDialog(student),
                         onChangeSection: () => _showChangeSectionDialog(student),
                         onDeactivate: () => _confirmDeactivate(student),
+                        onManageParents: () => ParentLinkDialog.show(
+                          context,
+                          studentId: student.id,
+                          studentName: student.fullName,
+                        ),
                       );
                     },
                   ),
@@ -200,8 +211,19 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const _AddStudentSheet(),
+      useSafeArea: true,
+      builder: (_) => AddStudentForm(
+        onSuccess: (email, password, studentName) {
+          CredentialDisplayDialog.show(
+            context,
+            fullName: studentName,
+            email: email,
+            password: password,
+            role: 'Student',
+          );
+          ref.invalidate(studentsNotifierProvider);
+        },
+      ),
     );
   }
 
@@ -291,6 +313,7 @@ class _StudentCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onChangeSection;
   final VoidCallback onDeactivate;
+  final VoidCallback onManageParents;
 
   const _StudentCard({
     required this.student,
@@ -298,6 +321,7 @@ class _StudentCard extends StatelessWidget {
     required this.onEdit,
     required this.onChangeSection,
     required this.onDeactivate,
+    required this.onManageParents,
   });
 
   @override
@@ -373,6 +397,9 @@ class _StudentCard extends StatelessWidget {
                     case 'section':
                       onChangeSection();
                       break;
+                    case 'parents':
+                      onManageParents();
+                      break;
                     case 'deactivate':
                       onDeactivate();
                       break;
@@ -399,6 +426,16 @@ class _StudentCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const PopupMenuItem(
+                    value: 'parents',
+                    child: Row(
+                      children: [
+                        Icon(Icons.family_restroom, size: 18),
+                        SizedBox(width: 8),
+                        Text('Manage Parents'),
+                      ],
+                    ),
+                  ),
                   const PopupMenuDivider(),
                   const PopupMenuItem(
                     value: 'deactivate',
@@ -420,10 +457,47 @@ class _StudentCard extends StatelessWidget {
   }
 }
 
-class _StudentDetailSheet extends StatelessWidget {
+class _StudentDetailSheet extends StatefulWidget {
   final Student student;
 
   const _StudentDetailSheet({required this.student});
+
+  @override
+  State<_StudentDetailSheet> createState() => _StudentDetailSheetState();
+}
+
+class _StudentDetailSheetState extends State<_StudentDetailSheet> {
+  UserCredential? _credential;
+  bool _credentialLoading = true;
+  bool _passwordVisible = false;
+
+  Student get student => widget.student;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCredentials();
+  }
+
+  Future<void> _loadCredentials() async {
+    final userId = student.userId;
+    if (userId == null) {
+      setState(() => _credentialLoading = false);
+      return;
+    }
+    try {
+      final service = CredentialService(Supabase.instance.client);
+      final cred = await service.getCredentials(userId);
+      if (mounted) {
+        setState(() {
+          _credential = cred;
+          _credentialLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _credentialLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -494,6 +568,9 @@ class _StudentDetailSheet extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Credentials section
+                  _buildCredentialsSection(),
+                  const SizedBox(height: 16),
                   _DetailRow(label: 'Date of Birth', value: DateFormat('MMM d, yyyy').format(student.dateOfBirth)),
                   _DetailRow(label: 'Gender', value: student.gender ?? 'N/A'),
                   _DetailRow(label: 'Blood Group', value: student.bloodGroup ?? 'N/A'),
@@ -516,6 +593,104 @@ class _StudentDetailSheet extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCredentialsSection() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.key_rounded, size: 16, color: AppColors.primary),
+              SizedBox(width: 8),
+              Text('Login Credentials',
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (_credentialLoading)
+            const Center(
+              child: SizedBox(
+                  height: 16,
+                  width: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2)),
+            )
+          else if (_credential == null)
+            Text('No stored credentials',
+                style: TextStyle(fontSize: 13, color: Colors.grey[500]))
+          else ...[
+            _CredCopyableRow(label: 'Username', value: _credential!.email),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                SizedBox(
+                  width: 80,
+                  child: Text('Password',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                ),
+                Expanded(
+                  child: Text(
+                    _passwordVisible
+                        ? _credential!.initialPassword
+                        : '*' * _credential!.initialPassword.length,
+                    style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'monospace'),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    iconSize: 16,
+                    icon: Icon(
+                      _passwordVisible
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey[600],
+                    ),
+                    onPressed: () =>
+                        setState(() => _passwordVisible = !_passwordVisible),
+                  ),
+                ),
+                SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    iconSize: 16,
+                    icon: Icon(Icons.copy, color: Colors.grey[600]),
+                    onPressed: () {
+                      Clipboard.setData(
+                          ClipboardData(text: _credential!.initialPassword));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Password copied'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -555,6 +730,49 @@ class _DetailRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CredCopyableRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _CredCopyableRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(label,
+              style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+        ),
+        Expanded(
+          child: Text(value,
+              style:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              overflow: TextOverflow.ellipsis),
+        ),
+        SizedBox(
+          width: 32,
+          height: 32,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            iconSize: 16,
+            icon: Icon(Icons.copy, color: Colors.grey[600]),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: value));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('$label copied'),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

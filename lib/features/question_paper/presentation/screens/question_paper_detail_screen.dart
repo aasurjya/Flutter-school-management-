@@ -183,7 +183,7 @@ class _PaperDetailViewState extends ConsumerState<_PaperDetailView> {
                           horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: paper.status.color.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,

@@ -424,7 +424,7 @@ class _ContentListItem extends StatelessWidget {
       case ContentType.presentation:
         return const Color(0xFFF59E0B);
       case ContentType.link:
-        return const Color(0xFF8B5CF6);
+        return const Color(0xFFF97316);
       case ContentType.text:
         return const Color(0xFF6366F1);
       case ContentType.quiz:

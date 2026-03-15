@@ -101,6 +101,13 @@ class AppEnvironment {
     return (key != null && key.isNotEmpty) ? key : null;
   }
 
+  /// Super admin email — account with this email auto-receives super_admin role on signup.
+  /// Set SUPER_ADMIN_EMAIL in .env
+  static String? get superAdminEmail {
+    final email = dotenv.env['SUPER_ADMIN_EMAIL'];
+    return (email != null && email.isNotEmpty) ? email.toLowerCase().trim() : null;
+  }
+
   /// Environment name for display
   static String get environmentName {
     switch (environment) {

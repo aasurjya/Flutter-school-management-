@@ -341,7 +341,7 @@ class _GamificationCard extends StatelessWidget {
                   icon: Icons.military_tech,
                   value: '${insights.achievementsCount}',
                   label: 'Badges Earned',
-                  color: Colors.purple,
+                  color: Colors.orange,
                 ),
                 _GamificationStat(
                   icon: Icons.leaderboard,

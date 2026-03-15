@@ -1,26 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/services/credential_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/providers/auth_provider.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../providers/staff_provider.dart';
+import '../widgets/add_staff_sheet.dart';
+import '../widgets/credential_display_dialog.dart';
 
 class StaffManagementScreen extends ConsumerStatefulWidget {
   const StaffManagementScreen({super.key});
 
   @override
-  ConsumerState<StaffManagementScreen> createState() => _StaffManagementScreenState();
+  ConsumerState<StaffManagementScreen> createState() =>
+      _StaffManagementScreenState();
 }
 
 class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _searchController = TextEditingController();
+  late final List<String> _roles;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    final currentUser = ref.read(currentUserProvider);
+    final primaryRole = currentUser?.primaryRole;
+    final canManageAdmins =
+        primaryRole == 'principal' || primaryRole == 'super_admin';
+    _roles = canManageAdmins
+        ? const ['teacher', 'tenant_admin', 'other']
+        : const ['teacher', 'other'];
+    _tabController = TabController(length: _roles.length, vsync: this);
   }
 
   @override
@@ -42,41 +58,29 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen>
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(text: 'Teachers'),
-            Tab(text: 'Admins'),
-            Tab(text: 'Other Staff'),
-          ],
+          tabs: _roles.map((role) => Tab(text: _tabTitle(role))).toList(),
         ),
       ),
       body: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: AppColors.primary.withValues(alpha: 0.05),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search staff by name or ID...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.white,
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
+          _SearchBar(
+            controller: _searchController,
+            onChanged: (query) {
+              for (final role in _roles) {
+                ref
+                    .read(staffNotifierProvider(role).notifier)
+                    .loadInitial(searchQuery: query.isEmpty ? null : query);
+              }
+            },
           ),
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [
-                _StaffList(role: 'teacher', searchQuery: _searchController.text),
-                _StaffList(role: 'admin', searchQuery: _searchController.text),
-                _StaffList(role: 'other', searchQuery: _searchController.text),
-              ],
+              children: _roles
+                  .map(
+                    (role) => _StaffList(role: role),
+                  )
+                  .toList(),
             ),
           ),
         ],
@@ -84,7 +88,8 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen>
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddStaffSheet,
         backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add),
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.person_add),
         label: const Text('Add Staff'),
       ),
     );
@@ -95,121 +100,294 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const _AddStaffSheet(),
+      builder: (_) => const AddStaffSheet(),
+    );
+  }
+
+  String _tabTitle(String role) {
+    switch (role) {
+      case 'teacher':
+        return 'Teachers';
+      case 'tenant_admin':
+        return 'School Admins';
+      default:
+        return 'Other Staff';
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Search bar
+// ---------------------------------------------------------------------------
+
+class _SearchBar extends StatelessWidget {
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
+  const _SearchBar({required this.controller, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: AppColors.primary.withValues(alpha: 0.05),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          hintText: 'Search staff by name or ID...',
+          prefixIcon: const Icon(Icons.search),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.white,
+          suffixIcon: controller.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    controller.clear();
+                    onChanged('');
+                  },
+                )
+              : null,
+        ),
+        onChanged: onChanged,
+      ),
     );
   }
 }
 
-class _StaffList extends StatelessWidget {
-  final String role;
-  final String searchQuery;
+// ---------------------------------------------------------------------------
+// Staff list — driven by StaffNotifier
+// ---------------------------------------------------------------------------
 
-  const _StaffList({
-    required this.role,
-    required this.searchQuery,
-  });
+class _StaffList extends ConsumerStatefulWidget {
+  final String role;
+
+  const _StaffList({required this.role});
+
+  @override
+  ConsumerState<_StaffList> createState() => _StaffListState();
+}
+
+class _StaffListState extends ConsumerState<_StaffList> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(staffNotifierProvider(widget.role).notifier).loadMore();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Mock staff data
-    final staffList = _getMockStaff(role).where((s) {
-      if (searchQuery.isEmpty) return true;
-      final query = searchQuery.toLowerCase();
-      return s['name'].toLowerCase().contains(query) ||
-          s['id'].toLowerCase().contains(query);
-    }).toList();
+    final state = ref.watch(staffNotifierProvider(widget.role));
 
-    if (staffList.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              searchQuery.isNotEmpty ? 'No results found' : 'No staff members',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ],
-        ),
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.error != null && state.staff.isEmpty) {
+      return _ErrorView(
+        message: state.error!,
+        onRetry: () => ref
+            .read(staffNotifierProvider(widget.role).notifier)
+            .loadInitial(),
       );
     }
 
+    if (state.staff.isEmpty) {
+      return _EmptyView(role: widget.role);
+    }
+
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: staffList.length,
+      itemCount: state.staff.length + (state.isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
-        final staff = staffList[index];
+        if (index == state.staff.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final member = state.staff[index];
+        final canManageMember = _canManageMember(member);
         return _StaffCard(
-          staff: staff,
-          onTap: () => _showStaffDetail(context, staff),
-          onEdit: () => _showEditSheet(context, staff),
+          member: member,
+          onTap: () => _showStaffDetail(context, member),
+          onEdit:
+              canManageMember ? () => _showEditSheet(context, member) : null,
+          onDeactivate: canManageMember
+              ? () => _confirmDeactivate(context, member)
+              : null,
         );
       },
     );
   }
 
-  List<Map<String, dynamic>> _getMockStaff(String role) {
-    switch (role) {
-      case 'teacher':
-        return [
-          {'id': 'T001', 'name': 'Dr. Rajesh Kumar', 'email': 'rajesh@school.edu', 'phone': '9876543210', 'department': 'Mathematics', 'subjects': ['Math', 'Physics'], 'classes': ['10-A', '10-B', '11-A'], 'joinDate': '2020-06-15', 'isActive': true},
-          {'id': 'T002', 'name': 'Mrs. Priya Sharma', 'email': 'priya@school.edu', 'phone': '9876543211', 'department': 'Science', 'subjects': ['Biology', 'Chemistry'], 'classes': ['9-A', '9-B', '10-A'], 'joinDate': '2019-08-01', 'isActive': true},
-          {'id': 'T003', 'name': 'Mr. Amit Patel', 'email': 'amit@school.edu', 'phone': '9876543212', 'department': 'English', 'subjects': ['English'], 'classes': ['8-A', '8-B', '9-A'], 'joinDate': '2021-01-10', 'isActive': true},
-          {'id': 'T004', 'name': 'Ms. Sunita Verma', 'email': 'sunita@school.edu', 'phone': '9876543213', 'department': 'Hindi', 'subjects': ['Hindi', 'Sanskrit'], 'classes': ['7-A', '7-B', '8-A'], 'joinDate': '2018-04-20', 'isActive': true},
-          {'id': 'T005', 'name': 'Mr. Vikram Singh', 'email': 'vikram@school.edu', 'phone': '9876543214', 'department': 'Computer Science', 'subjects': ['Computer'], 'classes': ['10-A', '11-A', '12-A'], 'joinDate': '2022-07-01', 'isActive': false},
-        ];
-      case 'admin':
-        return [
-          {'id': 'A001', 'name': 'Mr. Suresh Gupta', 'email': 'suresh@school.edu', 'phone': '9876543220', 'role': 'Principal', 'department': 'Administration', 'joinDate': '2015-06-01', 'isActive': true},
-          {'id': 'A002', 'name': 'Mrs. Meera Joshi', 'email': 'meera@school.edu', 'phone': '9876543221', 'role': 'Vice Principal', 'department': 'Administration', 'joinDate': '2017-03-15', 'isActive': true},
-          {'id': 'A003', 'name': 'Mr. Rakesh Agarwal', 'email': 'rakesh@school.edu', 'phone': '9876543222', 'role': 'Admin Manager', 'department': 'Administration', 'joinDate': '2019-09-01', 'isActive': true},
-        ];
+  bool _canManageMember(StaffMember member) {
+    final currentUser = ref.read(currentUserProvider);
+    final primaryRole = currentUser?.primaryRole;
+
+    switch (primaryRole) {
+      case 'super_admin':
+        return true;
+      case 'principal':
+        return member.role != 'principal';
+      case 'tenant_admin':
+        return !const ['principal', 'tenant_admin'].contains(member.role);
       default:
-        return [
-          {'id': 'S001', 'name': 'Mr. Ramesh', 'email': 'ramesh@school.edu', 'phone': '9876543230', 'role': 'Accountant', 'department': 'Finance', 'joinDate': '2018-02-01', 'isActive': true},
-          {'id': 'S002', 'name': 'Mrs. Kavita', 'email': 'kavita@school.edu', 'phone': '9876543231', 'role': 'Librarian', 'department': 'Library', 'joinDate': '2016-07-15', 'isActive': true},
-          {'id': 'S003', 'name': 'Mr. Mohan', 'email': 'mohan@school.edu', 'phone': '9876543232', 'role': 'Lab Assistant', 'department': 'Science Lab', 'joinDate': '2020-01-10', 'isActive': true},
-        ];
+        return false;
     }
   }
 
-  void _showStaffDetail(BuildContext context, Map<String, dynamic> staff) {
+  void _showStaffDetail(BuildContext context, StaffMember member) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _StaffDetailSheet(staff: staff),
+      builder: (_) => _StaffDetailSheet(member: member),
     );
   }
 
-  void _showEditSheet(BuildContext context, Map<String, dynamic> staff) {
+  void _showEditSheet(BuildContext context, StaffMember member) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _EditStaffSheet(staff: staff),
+      builder: (_) => _EditStaffSheet(member: member),
     );
+  }
+
+  void _confirmDeactivate(BuildContext context, StaffMember member) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Deactivate Staff'),
+        content: Text(
+          'Are you sure you want to deactivate ${member.fullName}? '
+          'Their account will be disabled.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style:
+                ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await _deactivate(member);
+            },
+            child: const Text('Deactivate',
+                style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deactivate(StaffMember member) async {
+    try {
+      final repo = ref.read(staffRepositoryProvider);
+      await repo.deactivateStaff(member.id);
+      // Refresh list to remove deactivated member.
+      await ref
+          .read(staffNotifierProvider(widget.role).notifier)
+          .loadInitial();
+      if (mounted) {
+        context.showSuccessSnackBar('${member.fullName} deactivated');
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showErrorSnackBar('Failed to deactivate: $e');
+      }
+    }
   }
 }
 
+// ---------------------------------------------------------------------------
+// Staff card
+// ---------------------------------------------------------------------------
+
 class _StaffCard extends StatelessWidget {
-  final Map<String, dynamic> staff;
+  final StaffMember member;
   final VoidCallback onTap;
-  final VoidCallback onEdit;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDeactivate;
 
   const _StaffCard({
-    required this.staff,
+    required this.member,
     required this.onTap,
     required this.onEdit,
+    required this.onDeactivate,
   });
+
+  Future<void> _viewCredentials(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const AlertDialog(
+        content: Row(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(width: 16),
+            Text('Loading credentials...'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final service = CredentialService(Supabase.instance.client);
+      final cred = await service.getCredentials(member.userId);
+
+      if (context.mounted) Navigator.of(context).pop();
+      if (!context.mounted) return;
+
+      if (cred == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No credentials found for this user.')),
+        );
+        return;
+      }
+
+      await CredentialDisplayDialog.show(
+        context,
+        fullName: member.fullName,
+        email: cred.email,
+        password: cred.initialPassword,
+        role: member.role,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load credentials: $e')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isActive = staff['isActive'] as bool;
-    final subjects = staff['subjects'] as List<dynamic>?;
-    final classes = staff['classes'] as List<dynamic>?;
-
+    final initials = _initials(member.fullName);
     return GlassCard(
       margin: const EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.zero,
@@ -222,14 +400,13 @@ class _StaffCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: isActive 
-                    ? AppColors.primary.withValues(alpha: 0.1)
-                    : Colors.grey.withValues(alpha: 0.1),
+                backgroundColor:
+                    AppColors.primary.withValues(alpha: 0.1),
                 child: Text(
-                  staff['name'].split(' ').map((n) => n[0]).take(2).join(),
-                  style: TextStyle(
+                  initials,
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: isActive ? AppColors.primary : Colors.grey,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
@@ -238,121 +415,91 @@ class _StaffCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            staff['name'],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ),
-                        if (!isActive)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              'Inactive',
-                              style: TextStyle(fontSize: 10, color: Colors.grey),
-                            ),
-                          ),
-                      ],
+                    Text(
+                      member.fullName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${staff['id']} • ${staff['department'] ?? staff['role'] ?? ''}',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      '${member.employeeId} • ${member.designation ?? member.role}',
+                      style:
+                          TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
-                    if (subjects != null && subjects.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Wrap(
-                        spacing: 4,
-                        children: subjects.take(3).map((s) => Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.info.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            s,
-                            style: const TextStyle(fontSize: 10, color: AppColors.info),
-                          ),
-                        )).toList(),
+                    if (member.department != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        member.department!,
+                        style: TextStyle(
+                            fontSize: 11, color: Colors.grey[500]),
                       ),
                     ],
-                    if (classes != null && classes.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                    if (member.email.isNotEmpty) ...[
+                      const SizedBox(height: 2),
                       Text(
-                        'Classes: ${classes.join(", ")}',
-                        style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                        member.email,
+                        style: TextStyle(
+                            fontSize: 11, color: Colors.grey[500]),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ],
                 ),
               ),
               PopupMenuButton<String>(
-                onSelected: (value) {
-                  switch (value) {
-                    case 'edit':
-                      onEdit();
-                      break;
-                    case 'assign':
-                      _showAssignDialog(context);
-                      break;
-                    case 'deactivate':
-                      _showDeactivateDialog(context);
-                      break;
-                  }
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        Icon(Icons.edit, size: 18),
-                        SizedBox(width: 8),
-                        Text('Edit'),
-                      ],
-                    ),
-                  ),
-                  if (staff['subjects'] != null)
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'credentials':
+                        _viewCredentials(context);
+                        break;
+                      case 'edit':
+                        onEdit?.call();
+                        break;
+                      case 'deactivate':
+                        onDeactivate?.call();
+                        break;
+                    }
+                  },
+                  itemBuilder: (_) => [
                     const PopupMenuItem(
-                      value: 'assign',
+                      value: 'credentials',
                       child: Row(
                         children: [
-                          Icon(Icons.assignment, size: 18),
+                          Icon(Icons.key_rounded, size: 18, color: AppColors.primary),
                           SizedBox(width: 8),
-                          Text('Assign Classes'),
+                          Text('View Credentials'),
                         ],
                       ),
                     ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem(
-                    value: 'deactivate',
-                    child: Row(
-                      children: [
-                        Icon(
-                          isActive ? Icons.block : Icons.check_circle,
-                          size: 18,
-                          color: isActive ? AppColors.error : AppColors.success,
+                    if (onEdit != null) const PopupMenuDivider(),
+                    if (onEdit != null)
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, size: 18),
+                            SizedBox(width: 8),
+                            Text('Edit'),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          isActive ? 'Deactivate' : 'Activate',
-                          style: TextStyle(
-                            color: isActive ? AppColors.error : AppColors.success,
-                          ),
+                      ),
+                    if (onDeactivate != null) const PopupMenuDivider(),
+                    if (onDeactivate != null)
+                      const PopupMenuItem(
+                        value: 'deactivate',
+                        child: Row(
+                          children: [
+                            Icon(Icons.block, size: 18, color: AppColors.error),
+                            SizedBox(width: 8),
+                            Text('Deactivate',
+                                style: TextStyle(color: AppColors.error)),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                      ),
+                  ],
+                ),
             ],
           ),
         ),
@@ -360,171 +507,91 @@ class _StaffCard extends StatelessWidget {
     );
   }
 
-  void _showAssignDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Assign Classes'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Class assignment coming soon'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDeactivateDialog(BuildContext context) {
-    final isActive = staff['isActive'] as bool;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isActive ? 'Deactivate Staff' : 'Activate Staff'),
-        content: Text(
-          isActive
-              ? 'Are you sure you want to deactivate ${staff['name']}?'
-              : 'Are you sure you want to activate ${staff['name']}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.showSuccessSnackBar('Staff ${isActive ? 'deactivated' : 'activated'}');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isActive ? AppColors.error : AppColors.success,
-            ),
-            child: Text(isActive ? 'Deactivate' : 'Activate'),
-          ),
-        ],
-      ),
-    );
+  String _initials(String name) {
+    final parts = name.split(' ').where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts.first[0].toUpperCase();
+    return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
   }
 }
 
-class _StaffDetailSheet extends StatelessWidget {
-  final Map<String, dynamic> staff;
+// ---------------------------------------------------------------------------
+// Staff detail sheet (read-only)
+// ---------------------------------------------------------------------------
 
-  const _StaffDetailSheet({required this.staff});
+class _StaffDetailSheet extends StatefulWidget {
+  final StaffMember member;
+
+  const _StaffDetailSheet({required this.member});
+
+  @override
+  State<_StaffDetailSheet> createState() => _StaffDetailSheetState();
+}
+
+class _StaffDetailSheetState extends State<_StaffDetailSheet> {
+  UserCredential? _credential;
+  bool _credentialLoading = true;
+  bool _passwordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCredentials();
+  }
+
+  Future<void> _loadCredentials() async {
+    try {
+      final service = CredentialService(Supabase.instance.client);
+      final cred = await service.getCredentials(widget.member.userId);
+      if (mounted) {
+        setState(() {
+          _credential = cred;
+          _credentialLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _credentialLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.75,
+      height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 35,
-                  backgroundColor: Colors.white,
-                  child: Text(
-                    staff['name'].split(' ').map((n) => n[0]).take(2).join(),
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        staff['name'],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        '${staff['id']} • ${staff['department'] ?? staff['role'] ?? ''}',
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-          ),
+          _SheetHeader(member: widget.member),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _DetailRow(label: 'Email', value: staff['email']),
-                  _DetailRow(label: 'Phone', value: staff['phone']),
-                  if (staff['department'] != null)
-                    _DetailRow(label: 'Department', value: staff['department']),
-                  if (staff['role'] != null)
-                    _DetailRow(label: 'Role', value: staff['role']),
-                  _DetailRow(label: 'Join Date', value: staff['joinDate']),
+                  _DetailRow(label: 'Employee ID', value: widget.member.employeeId),
+                  _DetailRow(label: 'Email', value: widget.member.email),
+                  if (widget.member.phone != null)
+                    _DetailRow(label: 'Phone', value: widget.member.phone!),
+                  if (widget.member.designation != null)
+                    _DetailRow(label: 'Designation', value: widget.member.designation!),
+                  if (widget.member.department != null)
+                    _DetailRow(label: 'Department', value: widget.member.department!),
+                  _DetailRow(label: 'Role', value: widget.member.role),
+                  if (widget.member.joinDate != null)
+                    _DetailRow(
+                      label: 'Joined',
+                      value: '${widget.member.joinDate!.day}/${widget.member.joinDate!.month}/${widget.member.joinDate!.year}',
+                    ),
                   _DetailRow(
                     label: 'Status',
-                    value: staff['isActive'] ? 'Active' : 'Inactive',
-                    valueColor: staff['isActive'] ? AppColors.success : Colors.grey,
+                    value: widget.member.isActive ? 'Active' : 'Inactive',
+                    valueColor: widget.member.isActive ? AppColors.success : Colors.grey,
                   ),
-                  if (staff['subjects'] != null) ...[
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Subjects',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: (staff['subjects'] as List).map((s) => Chip(
-                        label: Text(s),
-                        backgroundColor: AppColors.info.withValues(alpha: 0.1),
-                      )).toList(),
-                    ),
-                  ],
-                  if (staff['classes'] != null) ...[
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Assigned Classes',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: (staff['classes'] as List).map((c) => Chip(
-                        label: Text(c),
-                        backgroundColor: AppColors.secondary.withValues(alpha: 0.1),
-                      )).toList(),
-                    ),
-                  ],
+                  const SizedBox(height: 20),
+                  _buildCredentialsSection(),
                 ],
               ),
             ),
@@ -533,7 +600,335 @@ class _StaffDetailSheet extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildCredentialsSection() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.key_rounded, size: 16, color: AppColors.primary),
+              const SizedBox(width: 8),
+              const Text('Login Credentials',
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (_credentialLoading)
+            const Center(
+              child: SizedBox(
+                  height: 16,
+                  width: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2)),
+            )
+          else if (_credential == null)
+            Text('No stored credentials',
+                style: TextStyle(fontSize: 13, color: Colors.grey[500]))
+          else ...[
+            _CopyableRow(label: 'Username', value: _credential!.email),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                SizedBox(
+                  width: 80,
+                  child: Text('Password',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                ),
+                Expanded(
+                  child: Text(
+                    _passwordVisible
+                        ? _credential!.initialPassword
+                        : '*' * _credential!.initialPassword.length,
+                    style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'monospace'),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    iconSize: 16,
+                    icon: Icon(
+                      _passwordVisible
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey[600],
+                    ),
+                    onPressed: () =>
+                        setState(() => _passwordVisible = !_passwordVisible),
+                  ),
+                ),
+                SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    iconSize: 16,
+                    icon: Icon(Icons.copy, color: Colors.grey[600]),
+                    onPressed: () {
+                      Clipboard.setData(
+                          ClipboardData(text: _credential!.initialPassword));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Password copied'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 }
+
+class _SheetHeader extends StatelessWidget {
+  final StaffMember member;
+
+  const _SheetHeader({required this.member});
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = member.fullName.isNotEmpty
+        ? member.fullName
+            .split(' ')
+            .where((p) => p.isNotEmpty)
+            .map((p) => p[0])
+            .take(2)
+            .join()
+            .toUpperCase()
+        : '?';
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 35,
+            backgroundColor: Colors.white,
+            child: Text(
+              initials,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  member.fullName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '${member.employeeId} • ${member.designation ?? member.role}',
+                  style:
+                      TextStyle(color: Colors.white.withValues(alpha: 0.8)),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Edit staff sheet
+// ---------------------------------------------------------------------------
+
+class _EditStaffSheet extends StatefulWidget {
+  final StaffMember member;
+
+  const _EditStaffSheet({required this.member});
+
+  @override
+  State<_EditStaffSheet> createState() => _EditStaffSheetState();
+}
+
+class _EditStaffSheetState extends State<_EditStaffSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _designationController;
+  late final TextEditingController _departmentController;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _designationController =
+        TextEditingController(text: widget.member.designation ?? '');
+    _departmentController =
+        TextEditingController(text: widget.member.department ?? '');
+  }
+
+  @override
+  void dispose() {
+    _designationController.dispose();
+    _departmentController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.6,
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: const BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Row(
+              children: [
+                const Text(
+                  'Edit Staff',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _designationController,
+                      decoration: const InputDecoration(
+                        labelText: 'Designation',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _departmentController,
+                      decoration: const InputDecoration(
+                        labelText: 'Department',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isSubmitting ? null : _submit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding:
+                              const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Save Changes'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isSubmitting = true);
+
+    try {
+      await _updateStaff();
+      if (mounted) {
+        Navigator.of(context).pop();
+        context.showSuccessSnackBar('Staff updated successfully');
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showErrorSnackBar('Update failed: $e');
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  Future<void> _updateStaff() async {
+    final supabase = Supabase.instance.client;
+    await supabase.from('staff').update({
+      'designation': _designationController.text.trim().isEmpty
+          ? null
+          : _designationController.text.trim(),
+      'department': _departmentController.text.trim().isEmpty
+          ? null
+          : _departmentController.text.trim(),
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', widget.member.id);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 class _DetailRow extends StatelessWidget {
   final String label;
@@ -554,10 +949,11 @@ class _DetailRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 100,
+            width: 110,
             child: Text(
               label,
-              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+              style:
+                  TextStyle(color: Colors.grey[600], fontSize: 13),
             ),
           ),
           Expanded(
@@ -575,301 +971,120 @@ class _DetailRow extends StatelessWidget {
   }
 }
 
-class _AddStaffSheet extends ConsumerStatefulWidget {
-  const _AddStaffSheet();
-
-  @override
-  ConsumerState<_AddStaffSheet> createState() => _AddStaffSheetState();
-}
-
-class _AddStaffSheetState extends ConsumerState<_AddStaffSheet> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  String _selectedRole = 'teacher';
-  bool _isSubmitting = false;
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    super.dispose();
-  }
+class _CopyableRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _CopyableRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.8,
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Row(
-              children: [
-                const Text(
-                  'Add New Staff',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(label,
+              style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+        ),
+        Expanded(
+          child: Text(value,
+              style:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              overflow: TextOverflow.ellipsis),
+        ),
+        SizedBox(
+          width: 32,
+          height: 32,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            iconSize: 16,
+            icon: Icon(Icons.copy, color: Colors.grey[600]),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: value));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('$label copied'),
+                  duration: const Duration(seconds: 2),
                 ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
+              );
+            },
           ),
-          Expanded(
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Full Name *',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Email *',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (v) {
-                        if (v?.isEmpty ?? true) return 'Required';
-                        if (!v!.contains('@')) return 'Invalid email';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _phoneController,
-                      decoration: const InputDecoration(
-                        labelText: 'Phone *',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.phone,
-                      validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      initialValue: _selectedRole,
-                      decoration: const InputDecoration(
-                        labelText: 'Role *',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: 'teacher', child: Text('Teacher')),
-                        DropdownMenuItem(value: 'admin', child: Text('Admin')),
-                        DropdownMenuItem(value: 'accountant', child: Text('Accountant')),
-                        DropdownMenuItem(value: 'librarian', child: Text('Librarian')),
-                        DropdownMenuItem(value: 'other', child: Text('Other Staff')),
-                      ],
-                      onChanged: (v) => setState(() => _selectedRole = v!),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isSubmitting ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: _isSubmitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                              )
-                            : const Text('Add Staff'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyView extends StatelessWidget {
+  final String role;
+
+  const _EmptyView({required this.role});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            'No ${_roleLabel(role)} found',
+            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Tap "Add Staff" to create the first record.',
+            style: TextStyle(color: Colors.grey[400], fontSize: 13),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isSubmitting = true);
-
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (mounted) {
-      Navigator.pop(context);
-      context.showSuccessSnackBar('Staff member added successfully');
+  String _roleLabel(String role) {
+    switch (role) {
+      case 'teacher':
+        return 'teachers';
+      case 'tenant_admin':
+        return 'school admins';
+      default:
+        return 'staff members';
     }
   }
 }
 
-class _EditStaffSheet extends StatefulWidget {
-  final Map<String, dynamic> staff;
+class _ErrorView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
 
-  const _EditStaffSheet({required this.staff});
-
-  @override
-  State<_EditStaffSheet> createState() => _EditStaffSheetState();
-}
-
-class _EditStaffSheetState extends State<_EditStaffSheet> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameController;
-  late TextEditingController _emailController;
-  late TextEditingController _phoneController;
-  bool _isSubmitting = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController(text: widget.staff['name']);
-    _emailController = TextEditingController(text: widget.staff['email']);
-    _phoneController = TextEditingController(text: widget.staff['phone']);
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    super.dispose();
-  }
+  const _ErrorView({required this.message, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.7,
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+    return Center(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Row(
-              children: [
-                const Text(
-                  'Edit Staff',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
+          Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+          const SizedBox(height: 16),
+          Text(
+            'Failed to load staff',
+            style: TextStyle(color: Colors.grey[700], fontSize: 16),
           ),
-          Expanded(
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Full Name *',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Email *',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _phoneController,
-                      decoration: const InputDecoration(
-                        labelText: 'Phone *',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.phone,
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isSubmitting ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: _isSubmitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                              )
-                            : const Text('Save Changes'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          const SizedBox(height: 8),
+          Text(
+            message,
+            style: TextStyle(color: Colors.grey[500], fontSize: 12),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
           ),
         ],
       ),
     );
-  }
-
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (mounted) {
-      Navigator.pop(context);
-      context.showSuccessSnackBar('Staff updated successfully');
-    }
   }
 }

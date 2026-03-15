@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 ///
 /// Use this for empty list states, search-no-results, error fallbacks, etc.
 class EmptyState extends StatelessWidget {
-  /// The icon displayed above the message.
-  final IconData icon;
+  /// Optional image path or URL. If provided, replaces the icon.
+  final String? imagePath;
+
+  /// The icon displayed above the message (if imagePath is null).
+  final IconData? icon;
 
   /// Primary message (e.g., "No students found").
   final String message;
@@ -26,16 +29,21 @@ class EmptyState extends StatelessWidget {
   /// Icon color. Defaults to grey[400].
   final Color? iconColor;
 
+  /// Height for the image. Defaults to 200.
+  final double imageHeight;
+
   const EmptyState({
     super.key,
-    required this.icon,
+    this.imagePath,
+    this.icon,
     required this.message,
     this.description,
     this.actionLabel,
     this.onAction,
     this.iconSize = 64,
     this.iconColor,
-  });
+    this.imageHeight = 180,
+  }) : assert(imagePath != null || icon != null, 'Either imagePath or icon must be provided');
 
   @override
   Widget build(BuildContext context) {
@@ -43,37 +51,50 @@ class EmptyState extends StatelessWidget {
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: iconSize,
-              color: iconColor ?? Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
+            if (imagePath != null)
+              imagePath!.startsWith('http')
+                  ? Image.network(imagePath!, height: imageHeight, fit: BoxFit.contain)
+                  : Image.asset(imagePath!, height: imageHeight, fit: BoxFit.contain)
+            else if (icon != null)
+              Icon(
+                icon,
+                size: iconSize,
+                color: iconColor ?? theme.colorScheme.outline.withValues(alpha: 0.5),
+              ),
+            const SizedBox(height: 24),
             Text(
               message,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
               ),
               textAlign: TextAlign.center,
             ),
             if (description != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                description!,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
+              const SizedBox(height: 12),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 300),
+                child: Text(
+                  description!,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
             ],
             if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: onAction,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                ),
                 child: Text(actionLabel!),
               ),
             ],

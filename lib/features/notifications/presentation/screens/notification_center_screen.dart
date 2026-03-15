@@ -380,7 +380,7 @@ class _NotificationIcon extends StatelessWidget {
         break;
       case 'assignment':
         icon = Icons.assignment;
-        color = Colors.purple;
+        color = Colors.orange;
         break;
       case 'announcement':
         icon = Icons.campaign;

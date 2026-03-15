@@ -110,9 +110,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   void _navigateToDashboard() {
     final currentUser = ref.read(currentUserProvider);
     final primaryRole = currentUser?.primaryRole;
+    final profileComplete = currentUser?.profileComplete ?? false;
 
-    developer.log('SplashScreen: Navigating to dashboard for role: $primaryRole',
+    developer.log(
+        'SplashScreen: role=$primaryRole profileComplete=$profileComplete',
         name: 'SplashScreen');
+
+    // First-login users who have not completed their profile are redirected
+    // to the appropriate setup screen (super_admin is exempt).
+    if (!profileComplete && primaryRole != 'super_admin') {
+      final setupRoute = _profileSetupRoute(primaryRole);
+      if (setupRoute != null) {
+        developer.log('SplashScreen: redirecting to profile setup $setupRoute',
+            name: 'SplashScreen');
+        context.go(setupRoute);
+        return;
+      }
+    }
 
     switch (primaryRole) {
       case 'super_admin':
@@ -131,10 +145,51 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       case 'parent':
         context.go(AppRoutes.parentDashboard);
         break;
+      case 'accountant':
+        context.go(AppRoutes.accountantDashboard);
+        break;
+      case 'librarian':
+        context.go(AppRoutes.librarianDashboard);
+        break;
+      case 'transport_manager':
+        context.go(AppRoutes.transportDashboard);
+        break;
+      case 'hostel_warden':
+        context.go(AppRoutes.hostelWardenDashboard);
+        break;
+      case 'canteen_staff':
+        context.go(AppRoutes.canteenStaffDashboard);
+        break;
+      case 'receptionist':
+        context.go(AppRoutes.receptionistDashboard);
+        break;
       default:
         developer.log('SplashScreen: Unknown role, going to login',
             name: 'SplashScreen', level: 800);
         context.go(AppRoutes.login);
+    }
+  }
+
+  String? _profileSetupRoute(String? role) {
+    switch (role) {
+      case 'teacher':
+        return AppRoutes.profileSetupTeacher;
+      case 'student':
+        return AppRoutes.profileSetupStudent;
+      case 'parent':
+        return AppRoutes.profileSetupParent;
+      case 'accountant':
+      case 'librarian':
+      case 'transport_manager':
+      case 'hostel_warden':
+      case 'canteen_staff':
+      case 'receptionist':
+        return AppRoutes.profileSetupStaff;
+      case 'tenant_admin':
+      case 'principal':
+        return AppRoutes.profileSetupAdmin;
+      default:
+        return null;
     }
   }
 
@@ -176,7 +231,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           height: 120,
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.2),

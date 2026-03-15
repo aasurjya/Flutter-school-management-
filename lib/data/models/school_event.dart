@@ -105,7 +105,7 @@ enum EventType {
       case EventType.exam:
         return '#EF4444';
       case EventType.ptaMeeting:
-        return '#8B5CF6';
+        return '#F97316';
       case EventType.workshop:
         return '#06B6D4';
       case EventType.fieldTrip:

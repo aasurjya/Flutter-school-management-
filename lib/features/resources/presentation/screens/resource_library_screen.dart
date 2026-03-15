@@ -480,7 +480,7 @@ class _ResourceCard extends StatelessWidget {
       case 'video':
         return Colors.red;
       case 'audio':
-        return Colors.purple;
+        return Colors.orange;
       case 'link':
         return Colors.green;
       case 'image':

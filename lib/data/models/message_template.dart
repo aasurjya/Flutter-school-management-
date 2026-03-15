@@ -55,7 +55,7 @@ enum MessageType {
       case MessageType.ptmInvitation:
         return const Color(0xFF3B82F6);
       case MessageType.general:
-        return const Color(0xFF8B5CF6);
+        return const Color(0xFFF97316);
     }
   }
 }

@@ -20,7 +20,7 @@ class RiskScoreBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: riskScore.riskColor.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: riskScore.riskColor.withValues(alpha: 0.4),
         ),
@@ -90,7 +90,7 @@ class RiskScoreBadgeFromLevel extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: _color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: _color.withValues(alpha: 0.4)),
       ),
       child: Row(

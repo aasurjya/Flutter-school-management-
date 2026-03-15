@@ -36,7 +36,7 @@ class AdmissionPipelineChart extends StatelessWidget {
       _PipelineStage(
         'Interview',
         stats.interviewScheduled,
-        const Color(0xFF8B5CF6),
+        const Color(0xFFF97316),
         Icons.people,
       ),
       _PipelineStage(
@@ -184,7 +184,7 @@ class AdmissionPipelineChart extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

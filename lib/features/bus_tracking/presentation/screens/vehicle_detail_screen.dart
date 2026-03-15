@@ -202,7 +202,7 @@ class _VehicleHeaderCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: _statusColor(vehicle.statusLabel)
                         .withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
                     vehicle.statusLabel,
@@ -635,7 +635,7 @@ class _StatChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

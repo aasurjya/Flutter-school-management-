@@ -451,7 +451,7 @@ class _StudentAttendanceScreenState extends ConsumerState<StudentAttendanceScree
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: _getStatusColor(status).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   status[0].toUpperCase() + status.substring(1),

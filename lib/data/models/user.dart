@@ -10,6 +10,7 @@ class AppUser {
   final String? gender;
   final String? address;
   final bool isActive;
+  final bool profileComplete;
   final List<String> roles;
   final String? primaryRole;
   final DateTime? lastLoginAt;
@@ -27,6 +28,7 @@ class AppUser {
     this.gender,
     this.address,
     this.isActive = true,
+    this.profileComplete = false,
     this.roles = const [],
     this.primaryRole,
     this.lastLoginAt,
@@ -67,6 +69,7 @@ class AppUser {
       gender: json['gender'],
       address: json['address'],
       isActive: json['is_active'] ?? true,
+      profileComplete: json['profile_complete'] ?? false,
       roles: extractedRoles,
       primaryRole: primaryRole,
       lastLoginAt: json['last_login_at'] != null
@@ -89,6 +92,7 @@ class AppUser {
       'gender': gender,
       'address': address,
       'is_active': isActive,
+      'profile_complete': profileComplete,
     };
   }
 
@@ -103,6 +107,7 @@ class AppUser {
     String? gender,
     String? address,
     bool? isActive,
+    bool? profileComplete,
     List<String>? roles,
     String? primaryRole,
     DateTime? lastLoginAt,
@@ -120,6 +125,7 @@ class AppUser {
       gender: gender ?? this.gender,
       address: address ?? this.address,
       isActive: isActive ?? this.isActive,
+      profileComplete: profileComplete ?? this.profileComplete,
       roles: roles ?? this.roles,
       primaryRole: primaryRole ?? this.primaryRole,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
@@ -143,6 +149,33 @@ class AppUser {
 
   /// Check if user is parent
   bool get isParent => hasRole('parent');
+
+  /// Check if user is accountant
+  bool get isAccountant => hasRole('accountant');
+
+  /// Check if user is librarian
+  bool get isLibrarian => hasRole('librarian');
+
+  /// Check if user is transport manager
+  bool get isTransportManager => hasRole('transport_manager');
+
+  /// Check if user is hostel warden
+  bool get isHostelWarden => hasRole('hostel_warden');
+
+  /// Check if user is canteen staff
+  bool get isCanteenStaff => hasRole('canteen_staff');
+
+  /// Check if user is receptionist
+  bool get isReceptionist => hasRole('receptionist');
+
+  /// Check if user is any of the 6 operational staff roles
+  bool get isOperationalStaff =>
+      isAccountant ||
+      isLibrarian ||
+      isTransportManager ||
+      isHostelWarden ||
+      isCanteenStaff ||
+      isReceptionist;
 
   /// Get user initials
   String get initials {

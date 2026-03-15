@@ -232,13 +232,17 @@ class StudentEnrollment {
   });
 
   factory StudentEnrollment.fromJson(Map<String, dynamic> json) {
-    // Extract class and section names from nested data
+    // Extract class and section names from nested data.
+    // Supabase returns the join key as the table name ('sections')
+    // but older code may have used 'section' (singular).
     String? className;
     String? sectionName;
-    if (json['section'] != null) {
-      sectionName = json['section']['name'];
-      if (json['section']['class'] != null) {
-        className = json['section']['class']['name'];
+    final sectionData = json['sections'] ?? json['section'];
+    if (sectionData != null) {
+      sectionName = sectionData['name'];
+      final classData = sectionData['classes'] ?? sectionData['class'];
+      if (classData != null) {
+        className = classData['name'];
       }
     }
 
@@ -254,7 +258,7 @@ class StudentEnrollment {
       createdAt: DateTime.parse(json['created_at']),
       className: className,
       sectionName: sectionName,
-      academicYearName: json['academic_year']?['name'],
+      academicYearName: (json['academic_years'] ?? json['academic_year'])?['name'],
     );
   }
 }

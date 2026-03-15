@@ -90,7 +90,7 @@ class StudentRiskDetailScreen extends ConsumerWidget {
                                   ),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(20),
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Text(
                                     'Risk Score: ${risk.overallRiskScore.round()}/100',

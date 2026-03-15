@@ -255,7 +255,7 @@ class _ScanOverlay extends StatelessWidget {
                     height: scanSize,
                     decoration: BoxDecoration(
                       color: Colors.red, // any opaque color
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                 ),

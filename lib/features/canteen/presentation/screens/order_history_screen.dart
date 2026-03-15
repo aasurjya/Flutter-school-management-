@@ -205,7 +205,7 @@ class _OrderCard extends ConsumerWidget {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: Colors.orange[300],
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -343,8 +343,8 @@ class _StatusChip extends StatelessWidget {
         textColor = Colors.blue;
         break;
       case 'preparing':
-        backgroundColor = Colors.purple.withValues(alpha: 0.1);
-        textColor = Colors.purple;
+        backgroundColor = Colors.orange.withValues(alpha: 0.1);
+        textColor = Colors.orange;
         break;
       case 'ready':
         backgroundColor = Colors.teal.withValues(alpha: 0.1);
@@ -367,7 +367,7 @@ class _StatusChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         _getStatusText(status),

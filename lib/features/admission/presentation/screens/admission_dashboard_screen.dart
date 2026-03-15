@@ -162,7 +162,7 @@ class AdmissionDashboardScreen extends ConsumerWidget {
           child: _QuickActionButton(
             icon: Icons.event,
             label: 'Interviews',
-            color: const Color(0xFF8B5CF6),
+            color: const Color(0xFFF97316),
             onTap: () => context.push(AppRoutes.admissionInterviews),
           ),
         ),

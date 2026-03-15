@@ -4,6 +4,21 @@
 > **Stack:** Flutter 3.2+ / Dart / Supabase / Riverpod / GoRouter / Isar (offline) / Firebase (push)
 > **Architecture:** Multi-tenant SaaS with role-based access (12 roles)
 
+## Low-Token Startup Rules
+
+Read these files first before broad exploration:
+
+1. `AGENTS.md`
+2. `docs/context-map.json`
+
+Then:
+
+- read only the files mapped to the current task
+- avoid broad repo scans for role, routing, auth, and super-admin tasks
+- do not web search unless explicitly asked
+- ignore `agents/everything-claude-code/` unless the task is explicitly about that embedded plugin
+- prefer minimal, targeted reads over parallel deep exploration for small and medium tasks
+
 ## Quick Reference
 
 **Roles:** `super_admin`, `tenant_admin`, `principal`, `teacher`, `student`, `parent`, `accountant`, `librarian`, `transport_manager`, `hostel_warden`, `canteen_staff`, `receptionist`

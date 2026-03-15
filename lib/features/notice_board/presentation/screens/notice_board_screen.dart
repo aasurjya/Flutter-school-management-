@@ -122,7 +122,7 @@ class _Chip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
             color: selected ? AppColors.primary : Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
             label,
@@ -148,7 +148,7 @@ class _NoticeCard extends StatelessWidget {
     NoticeCategory.emergency: Colors.red,
     NoticeCategory.fee: Colors.orange,
     NoticeCategory.holiday: Colors.green,
-    NoticeCategory.examination: Colors.purple,
+    NoticeCategory.examination: Colors.orange,
     NoticeCategory.sports: Colors.teal,
     NoticeCategory.events: Colors.pink,
     NoticeCategory.general: Colors.grey,

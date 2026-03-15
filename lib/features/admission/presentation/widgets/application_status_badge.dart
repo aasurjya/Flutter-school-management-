@@ -45,7 +45,7 @@ class ApplicationStatusBadge extends StatelessWidget {
       case ApplicationStatus.underReview:
         return (const Color(0xFFF59E0B), const Color(0xFFFEF3C7));
       case ApplicationStatus.interviewScheduled:
-        return (const Color(0xFF8B5CF6), const Color(0xFFEDE9FE));
+        return (const Color(0xFFF97316), const Color(0xFFEDE9FE));
       case ApplicationStatus.accepted:
         return (const Color(0xFF22C55E), const Color(0xFFDCFCE7));
       case ApplicationStatus.rejected:
@@ -92,7 +92,7 @@ class InquiryStatusBadge extends StatelessWidget {
       case InquiryStatus.newInquiry:
         return (const Color(0xFF3B82F6), const Color(0xFFDBEAFE));
       case InquiryStatus.contacted:
-        return (const Color(0xFF8B5CF6), const Color(0xFFEDE9FE));
+        return (const Color(0xFFF97316), const Color(0xFFEDE9FE));
       case InquiryStatus.visitScheduled:
         return (const Color(0xFFF59E0B), const Color(0xFFFEF3C7));
       case InquiryStatus.visitCompleted:

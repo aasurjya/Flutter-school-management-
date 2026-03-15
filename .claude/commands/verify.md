@@ -1,59 +1,72 @@
-# Verification Command
+# Verify — Flutter
 
-Run comprehensive verification on current codebase state.
+Run the full Flutter validation pipeline on the current codebase state.
 
-## Instructions
+## Pipeline (Execute in Order)
 
-Execute verification in this exact order:
+### 1. Auto-fix
 
-1. **Build Check**
-   - Run the build command for this project
-   - If it fails, report errors and STOP
-
-2. **Type Check**
-   - Run TypeScript/type checker
-   - Report all errors with file:line
-
-3. **Lint Check**
-   - Run linter
-   - Report warnings and errors
-
-4. **Test Suite**
-   - Run all tests
-   - Report pass/fail count
-   - Report coverage percentage
-
-5. **Console.log Audit**
-   - Search for console.log in source files
-   - Report locations
-
-6. **Git Status**
-   - Show uncommitted changes
-   - Show files modified since last commit
-
-## Output
-
-Produce a concise verification report:
-
-```
-VERIFICATION: [PASS/FAIL]
-
-Build:    [OK/FAIL]
-Types:    [OK/X errors]
-Lint:     [OK/X issues]
-Tests:    [X/Y passed, Z% coverage]
-Secrets:  [OK/X found]
-Logs:     [OK/X console.logs]
-
-Ready for PR: [YES/NO]
+```bash
+dart fix --apply
 ```
 
-If any critical issues, list them with fix suggestions.
+### 2. Analysis (MUST PASS)
 
-## Arguments
+```bash
+flutter analyze
+```
 
-$ARGUMENTS can be:
-- `quick` - Only build + types
-- `full` - All checks (default)
-- `pre-commit` - Checks relevant for commits
-- `pre-pr` - Full checks plus security scan
+Reports all errors with file:line. Zero errors required to proceed.
+
+### 3. Tests (MUST PASS)
+
+```bash
+flutter test
+```
+
+Reports pass/fail count. Zero failures required.
+
+### 4. Coverage
+
+```bash
+flutter test --coverage
+lcov --summary coverage/lcov.info
+```
+
+Target: 80%+ on new/changed code. Report actual percentage.
+
+### 5. Build (Recommended for Larger Changes)
+
+```bash
+flutter build apk --debug
+```
+
+## Quick Scan (Critical Issues)
+
+```bash
+# Check for hardcoded demo credentials
+grep -r "admin@school.com\|admin123\|password123" lib/ && echo "CRITICAL: Demo creds found" || echo "OK: No demo creds"
+
+# Check for tenantId! force-unwrap
+grep -r "tenantId!" lib/ && echo "WARNING: Force-unwrap found" || echo "OK"
+
+# Check for missing pagination on common list calls
+grep -r "\.from(" lib/ | grep -v "\.range(" | grep -v "//.*\.from(" | head -5
+```
+
+## Output Format
+
+```
+flutter analyze: X errors (0 = PASS)
+flutter test: X failures, X tests (0 failures = PASS)
+Coverage: X% (≥80% = PASS)
+APK build: PASS | FAIL
+Demo creds: OK | CRITICAL FOUND
+```
+
+## If Any Step Fails
+
+- Analysis errors → use `/build-fix`
+- Test failures → use `/dart-test` to diagnose
+- Coverage < 80% → add tests for uncovered code
+- APK build fails → use `build-error-resolver` agent

@@ -102,7 +102,7 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: _selectedStatus != null
                               ? AppColors.primary
@@ -141,7 +141,7 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
                         padding:
                             const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: _selectedCategory != null
                                 ? AppColors.primary
@@ -185,7 +185,7 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
                         padding:
                             const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: _selectedLocation != null
                                 ? AppColors.primary

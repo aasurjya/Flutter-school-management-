@@ -168,7 +168,7 @@ class _FilterChipWidget extends StatelessWidget {
             color: isSelected
                 ? chipColor.withValues(alpha: 0.15)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isSelected
                   ? chipColor

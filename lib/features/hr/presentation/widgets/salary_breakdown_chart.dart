@@ -127,7 +127,7 @@ class SalaryBreakdownChart extends StatelessWidget {
       AppColors.primary,
       AppColors.secondary,
       AppColors.info,
-      Color(0xFF8B5CF6),
+      Color(0xFFF97316),
       Color(0xFF14B8A6),
     ];
     return colors[index % colors.length];

@@ -1,0 +1,64 @@
+{
+  "read_first": [
+    "AGENTS.md",
+    "docs/roles/README.md",
+    "lib/core/router/app_router.dart",
+    "lib/core/shell/main_shell.dart"
+  ],
+  "topics": {
+    "super_admin_routing": [
+      "lib/core/router/app_router.dart",
+      "lib/core/shell/main_shell.dart",
+      "lib/features/super_admin/presentation/screens/super_admin_dashboard_screen.dart",
+      "lib/features/super_admin/presentation/screens/tenants_list_screen.dart",
+      "lib/features/super_admin/presentation/screens/create_tenant_screen.dart",
+      "lib/features/super_admin/presentation/screens/tenant_detail_screen.dart"
+    ],
+    "roles_docs": [
+      "docs/roles/README.md",
+      "docs/roles/platform_admin.md",
+      "docs/roles/principal.md",
+      "docs/roles/school_admin.md",
+      "docs/roles/other_staff.md",
+      "docs/roles/teacher.md",
+      "docs/roles/student.md",
+      "docs/roles/parent.md"
+    ],
+    "staff_permissions": [
+      "lib/features/admin/presentation/widgets/add_staff_sheet.dart",
+      "lib/features/admin/presentation/screens/staff_management_screen.dart",
+      "lib/data/repositories/staff_repository.dart",
+      "supabase/functions/create-user/index.ts",
+      "lib/data/models/user.dart"
+    ],
+    "auth_role_detection": [
+      "lib/features/auth/providers/auth_provider.dart",
+      "lib/data/models/user.dart",
+      "lib/core/config/app_environment.dart",
+      "lib/core/router/app_router.dart"
+    ]
+  },
+  "authoritative": {
+    "routing": "lib/core/router/app_router.dart",
+    "shell_navigation": "lib/core/shell/main_shell.dart",
+    "staff_creation_ui": "lib/features/admin/presentation/widgets/add_staff_sheet.dart",
+    "staff_management_ui": "lib/features/admin/presentation/screens/staff_management_screen.dart",
+    "role_creation_backend": "supabase/functions/create-user/index.ts",
+    "role_docs_index": "docs/roles/README.md"
+  },
+  "avoid": [
+    "docs/CODEBASE_ANALYSIS_AND_INTEGRATION_PLAN.md",
+    "docs/CODEMAP.md",
+    "docs/ARCHITECTURE.md",
+    "agents/everything-claude-code/",
+    "broad repo scans for role tasks",
+    "web search unless user explicitly asks"
+  ],
+  "task_rules": {
+    "roles_or_permissions": "Read only roles docs, staff UI, user model, and create-user function first.",
+    "super_admin_bug": "Read only router, shell, super-admin screens, and auth role sources first.",
+    "small_change": "Do not launch parallel deep exploration agents.",
+    "docs_update": "Update existing docs in docs/roles instead of creating duplicate documentation.",
+    "embedded_plugin_repo": "Ignore agents/everything-claude-code unless the task is explicitly about that plugin."
+  }
+}

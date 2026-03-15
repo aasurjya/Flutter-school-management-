@@ -189,7 +189,7 @@ class _TimetableEntryCard extends StatelessWidget {
       AppColors.accent,
       AppColors.info,
       AppColors.success,
-      Colors.purple,
+      Colors.orange,
       Colors.teal,
       Colors.orange,
     ];

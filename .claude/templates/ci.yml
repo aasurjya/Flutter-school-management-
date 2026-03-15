@@ -1,0 +1,95 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  flutter-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run dart fix (auto-fix safe issues)
+        run: dart fix --apply
+
+      - name: Analyze code
+        run: flutter analyze --fatal-infos
+
+      - name: Run tests
+        run: flutter test --reporter expanded
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Check coverage threshold (80%)
+        run: |
+          if command -v lcov &> /dev/null; then
+            lcov --summary coverage/lcov.info
+            # Extract lines coverage and check >= 80%
+            COVERAGE=$(lcov --summary coverage/lcov.info 2>&1 | grep "lines" | grep -oP '\d+\.\d+' | head -1)
+            echo "Line coverage: $COVERAGE%"
+            python3 -c "
+          coverage = float('$COVERAGE')
+          if coverage < 80.0:
+              print(f'FAIL: Coverage {coverage}% is below 80% threshold')
+              exit(1)
+          else:
+              print(f'PASS: Coverage {coverage}% meets 80% threshold')
+          "
+          else
+            echo "lcov not available — skipping coverage threshold check"
+          fi
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/lcov.info
+
+      # Optional: build debug APK to verify compilation
+      # - name: Build debug APK
+      #   run: flutter build apk --debug
+
+  flutter-build:
+    runs-on: ubuntu-latest
+    needs: flutter-ci
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: build/app/outputs/flutter-apk/app-debug.apk

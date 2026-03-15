@@ -142,6 +142,18 @@ class TenantRepository extends BaseRepository {
     };
   }
 
+  /// Get users for a specific tenant
+  Future<List<Map<String, dynamic>>> getTenantUsers(String tenantId, {int limit = 20}) async {
+    final response = await client
+        .from('users')
+        .select('id, email, full_name, phone, avatar_url, date_of_birth, gender, address, is_active, profile_complete, created_at, user_roles(role, is_primary), staff(id, designation, department, qualification, experience_years, employee_id, phone, address)')
+        .eq('tenant_id', tenantId)
+        .order('created_at', ascending: false)
+        .limit(limit);
+
+    return List<Map<String, dynamic>>.from(response as List);
+  }
+
   /// Create tenant admin user
   Future<void> createTenantAdmin({
     required String tenantId,

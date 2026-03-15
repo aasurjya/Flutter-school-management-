@@ -451,7 +451,7 @@ class _AlertDetailScreenState extends ConsumerState<AlertDetailScreen> {
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: alert.status.color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: alert.status.color.withValues(alpha: 0.4),
                   ),

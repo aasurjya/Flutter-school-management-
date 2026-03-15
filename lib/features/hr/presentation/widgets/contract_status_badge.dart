@@ -119,7 +119,7 @@ class ContractTypeBadge extends StatelessWidget {
       case ContractType.contract:
         return AppColors.info;
       case ContractType.probation:
-        return const Color(0xFF8B5CF6);
+        return const Color(0xFFF97316);
     }
   }
 

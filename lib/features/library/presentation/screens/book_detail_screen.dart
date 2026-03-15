@@ -92,7 +92,7 @@ class BookDetailScreen extends ConsumerWidget {
                               color: book.isAvailable
                                   ? Colors.green.withValues(alpha: 0.1)
                                   : Colors.red.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
                               book.isAvailable ? 'Available' : 'Not Available',

@@ -466,7 +466,7 @@ class _ForumPostsViewState extends ConsumerState<_ForumPostsView> {
                         decoration: InputDecoration(
                           hintText: 'Write a response...',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 10),

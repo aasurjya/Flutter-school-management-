@@ -25,6 +25,16 @@ abstract class BaseRepository {
     return id;
   }
 
+  /// True when the current user is super_admin (no tenant context).
+  bool get isSuperAdmin => tenantId == null;
+
+  /// Returns tenantId if present, otherwise returns [fallback].
+  /// Use this in repositories that super_admin can also access.
+  String requireTenantIdOr(String fallback) => tenantId ?? fallback;
+
+  /// Returns tenantId or null — does NOT throw.
+  String? get tenantIdOrNull => tenantId;
+
   String get requireUserId {
     final id = currentUserId;
     if (id == null) {

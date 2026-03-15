@@ -211,7 +211,7 @@ class _PreRegListView extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
         ),
         title: const Text('Visitor QR Pass'),
         content: Column(

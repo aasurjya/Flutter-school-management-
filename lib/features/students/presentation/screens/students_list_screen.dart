@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../providers/students_provider.dart';
 
 class StudentsListScreen extends ConsumerStatefulWidget {
   const StudentsListScreen({super.key});
@@ -13,22 +16,63 @@ class StudentsListScreen extends ConsumerStatefulWidget {
 }
 
 class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
-  String _selectedClass = 'All';
-  String _searchQuery = '';
+  final _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  Timer? _searchDebounce;
 
-  final _classes = ['All', 'Class 10-A', 'Class 10-B', 'Class 9-A', 'Class 9-B'];
+  // Active filter state
+  String? _selectedClassId;
+  String? _selectedSectionId;
 
-  List<Map<String, dynamic>> get _filteredStudents {
-    return _mockStudents.where((s) {
-      final matchesClass = _selectedClass == 'All' || s['class'] == _selectedClass;
-      final matchesSearch = _searchQuery.isEmpty ||
-          (s['name'] as String).toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesClass && matchesSearch;
-    }).toList();
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(paginatedStudentsProvider.notifier).loadInitial();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    _searchController.dispose();
+    _searchDebounce?.cancel();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.extentAfter < 300) {
+      ref.read(paginatedStudentsProvider.notifier).loadMore();
+    }
+  }
+
+  void _onSearchChanged(String query) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      ref.read(paginatedStudentsProvider.notifier).loadInitial(
+            searchQuery: query.isEmpty ? null : query,
+            classId: _selectedClassId,
+            sectionId: _selectedSectionId,
+          );
+    });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _searchDebounce?.cancel();
+    ref.read(paginatedStudentsProvider.notifier).loadInitial(
+          classId: _selectedClassId,
+          sectionId: _selectedSectionId,
+        );
   }
 
   @override
   Widget build(BuildContext context) {
+    final paginatedState = ref.watch(paginatedStudentsProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Students'),
@@ -53,10 +97,17 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
-              onChanged: (value) => setState(() => _searchQuery = value),
+              controller: _searchController,
+              onChanged: _onSearchChanged,
               decoration: InputDecoration(
                 hintText: 'Search students...',
                 prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: _clearSearch,
+                      )
+                    : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -69,49 +120,28 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
             ),
           ),
 
-          // Class Filter Chips
-          SizedBox(
-            height: 40,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _classes.length,
-              itemBuilder: (context, index) {
-                final className = _classes[index];
-                final isSelected = className == _selectedClass;
-
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(className),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() => _selectedClass = className);
-                    },
-                    selectedColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : null,
+          // Students count
+          if (!paginatedState.isLoading && paginatedState.error == null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(
+                children: [
+                  Text(
+                    '${paginatedState.students.length}'
+                    '${paginatedState.hasMore ? '+' : ''}'
+                    ' student${paginatedState.students.length == 1 ? '' : 's'}',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 13,
                     ),
                   ),
-                );
-              },
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
 
-          // Students List
+          // List body
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _filteredStudents.length,
-              itemBuilder: (context, index) {
-                final student = _filteredStudents[index];
-                return _StudentCard(
-                  student: student,
-                  onTap: () => context.push('/students/${student['id']}'),
-                );
-              },
-            ),
+            child: _buildBody(paginatedState),
           ),
         ],
       ),
@@ -125,6 +155,74 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
         label: const Text('Add Student'),
         backgroundColor: AppColors.primary,
       ),
+    );
+  }
+
+  Widget _buildBody(PaginatedStudentsState state) {
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text('Failed to load students: ${state.error}'),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () =>
+                  ref.read(paginatedStudentsProvider.notifier).loadInitial(
+                        searchQuery: _searchController.text.isEmpty
+                            ? null
+                            : _searchController.text,
+                        classId: _selectedClassId,
+                        sectionId: _selectedSectionId,
+                      ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (state.students.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.people_outline, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(
+              _searchController.text.isEmpty
+                  ? 'No students found'
+                  : 'No students match "${_searchController.text}"',
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: state.students.length + (state.isLoadingMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == state.students.length) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final student = state.students[index];
+        return _StudentCard(
+          key: ValueKey(student.id),
+          student: student,
+          onTap: () => context.push('/students/${student.id}'),
+        );
+      },
     );
   }
 
@@ -151,7 +249,10 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
               Wrap(
                 spacing: 8,
                 children: [
-                  FilterChip(label: const Text('Active'), onSelected: (_) {}, selected: true),
+                  FilterChip(
+                      label: const Text('Active'),
+                      onSelected: (_) {},
+                      selected: true),
                   FilterChip(label: const Text('Inactive'), onSelected: (_) {}),
                   FilterChip(label: const Text('Alumni'), onSelected: (_) {}),
                 ],
@@ -162,7 +263,10 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
               Wrap(
                 spacing: 8,
                 children: [
-                  FilterChip(label: const Text('All'), onSelected: (_) {}, selected: true),
+                  FilterChip(
+                      label: const Text('All'),
+                      onSelected: (_) {},
+                      selected: true),
                   FilterChip(label: const Text('Male'), onSelected: (_) {}),
                   FilterChip(label: const Text('Female'), onSelected: (_) {}),
                 ],
@@ -176,7 +280,8 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
                     backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('Apply Filters', style: TextStyle(color: Colors.white)),
+                  child: const Text('Apply Filters',
+                      style: TextStyle(color: Colors.white)),
                 ),
               ),
             ],
@@ -188,13 +293,26 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
 }
 
 class _StudentCard extends StatelessWidget {
-  final Map<String, dynamic> student;
+  final dynamic student;
   final VoidCallback onTap;
 
-  const _StudentCard({required this.student, required this.onTap});
+  const _StudentCard({
+    required this.student,
+    required this.onTap,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final enrollment = student.currentEnrollment;
+    final classLabel = enrollment != null
+        ? '${enrollment.className ?? ''}${enrollment.sectionName != null ? ' - ${enrollment.sectionName}' : ''}'
+        : '';
+    final rollLabel =
+        student.rollNumber != null ? 'Roll: ${student.rollNumber}' : '';
+    final subtitle =
+        [classLabel, rollLabel].where((s) => s.isNotEmpty).join(' • ');
+
     return GlassCard(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -205,7 +323,7 @@ class _StudentCard extends StatelessWidget {
             radius: 28,
             backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             child: Text(
-              student['initials'],
+              student.initials,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
@@ -218,74 +336,45 @@ class _StudentCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  student['name'],
+                  student.fullName,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '${student['class']} • Roll No: ${student['rollNo']}',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.grey600,
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.grey600,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.phone,
-                      size: 14,
-                      color: AppColors.grey500,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      student['phone'],
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.grey500,
+                ],
+                if (student.phone != null) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.phone,
+                          size: 14, color: AppColors.grey500),
+                      const SizedBox(width: 4),
+                      Text(
+                        student.phone!,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.grey500,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: student['attendance'] >= 90
-                  ? AppColors.success.withValues(alpha: 0.1)
-                  : AppColors.warning.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '${student['attendance']}%',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: student['attendance'] >= 90
-                    ? AppColors.success
-                    : AppColors.warning,
-              ),
-            ),
-          ),
+          const Icon(Icons.chevron_right, color: AppColors.grey400),
         ],
       ),
     );
   }
 }
-
-// Mock data
-final _mockStudents = [
-  {'id': '1', 'name': 'Arjun Kumar', 'initials': 'AK', 'class': 'Class 10-A', 'rollNo': '15', 'phone': '+91 98765 43210', 'attendance': 94},
-  {'id': '2', 'name': 'Priya Sharma', 'initials': 'PS', 'class': 'Class 10-A', 'rollNo': '16', 'phone': '+91 98765 43211', 'attendance': 98},
-  {'id': '3', 'name': 'Rahul Singh', 'initials': 'RS', 'class': 'Class 10-B', 'rollNo': '12', 'phone': '+91 98765 43212', 'attendance': 85},
-  {'id': '4', 'name': 'Sneha Patel', 'initials': 'SP', 'class': 'Class 10-A', 'rollNo': '18', 'phone': '+91 98765 43213', 'attendance': 92},
-  {'id': '5', 'name': 'Amit Gupta', 'initials': 'AG', 'class': 'Class 9-A', 'rollNo': '8', 'phone': '+91 98765 43214', 'attendance': 96},
-  {'id': '6', 'name': 'Neha Verma', 'initials': 'NV', 'class': 'Class 9-B', 'rollNo': '22', 'phone': '+91 98765 43215', 'attendance': 88},
-  {'id': '7', 'name': 'Vikram Joshi', 'initials': 'VJ', 'class': 'Class 10-B', 'rollNo': '5', 'phone': '+91 98765 43216', 'attendance': 91},
-  {'id': '8', 'name': 'Kavita Reddy', 'initials': 'KR', 'class': 'Class 9-A', 'rollNo': '14', 'phone': '+91 98765 43217', 'attendance': 97},
-];

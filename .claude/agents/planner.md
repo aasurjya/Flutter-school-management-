@@ -196,6 +196,33 @@ When the feature is large, break it into independently deliverable phases:
 
 Each phase should be mergeable independently. Avoid plans that require all phases to complete before anything works.
 
+## Supabase + Flutter Integration Checklist (MANDATORY)
+
+Every plan that touches Supabase queries or data display MUST verify:
+
+### Query Completeness
+- [ ] **SELECT fields match fromJson** — Read the model's `fromJson()` and list every field it parses. The select query must include ALL of them. Missing fields cause null crashes at runtime, not compile time.
+- [ ] **Join key naming** — Supabase returns nested joins keyed by TABLE NAME (plural): `sections`, `classes`, `academic_years`. If `fromJson` uses singular (`section`, `class`), it will silently return null. Handle both: `json['sections'] ?? json['section']`.
+- [ ] **Nested joins return Lists** — `staff(*)`, `user_roles(*)` etc. always return `List<dynamic>`, even for 1:1 relationships. Never cast directly to `Map`. Always check `is List` and extract `.first`.
+
+### Join Types
+- [ ] **Inner vs left join** — `table!inner(...)` EXCLUDES parent records without matching children. Use left join (no `!inner`) for optional relationships (e.g., students may not have enrollments).
+- [ ] **Filter placement** — Filters like `.eq('nested.field', value)` on inner joins work differently than on left joins. Test with empty data.
+
+### Data Flow End-to-End
+- [ ] **No hardcoded demo data** — Every list on screen must load from a Riverpod provider backed by a repository method. If the repository method doesn't exist yet, the plan must include creating it.
+- [ ] **CRUD completeness** — If the plan adds a screen with add/edit/delete UI, the repository MUST have corresponding create/update/delete methods that call Supabase. No local-state-only mutations.
+- [ ] **Provider invalidation** — After any mutation (create/update/delete), the plan must invalidate the relevant providers so the UI refreshes.
+
+### Multi-Step Operations
+- [ ] **Atomic rollback** — Multi-step creations (auth user → profile → role → domain record) must have rollback logic. If step 3 fails, steps 1-2 must be undone. Log orphaned records.
+- [ ] **Retry safety** — If a user retries a failed operation, will it hit "already exists" errors from partial state? Plan for idempotency or cleanup.
+
+### Model Safety
+- [ ] **Null-safe parsing** — `fromJson` must handle null for every optional field. Use `DateTime.tryParse` not `DateTime.parse` for nullable dates.
+- [ ] **tenant_id scoping** — Every query on a tenant-scoped table includes `.eq('tenant_id', requireTenantId)`.
+- [ ] **super_admin compatibility** — `tenantId` is null for super_admin. Repository methods must not crash.
+
 ## Red Flags to Check
 
 - Large functions (>50 lines)

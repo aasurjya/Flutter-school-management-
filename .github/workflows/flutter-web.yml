@@ -30,6 +30,17 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Create .env for dotenv asset bundling
+        run: |
+          cat <<'EOF' > .env
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          APP_ENV=production
+          SHOW_DEMO_CREDENTIALS=false
+          SUPER_ADMIN_EMAIL=${{ secrets.SUPER_ADMIN_EMAIL }}
+          EOF
+          sed -i 's/^ *//' .env
+
       - name: Build Flutter web
         run: flutter build web --release --base-href /Flutter-school-management-/
 

@@ -331,30 +331,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       children: [
         Hero(
           tag: 'app_logo',
-          child: Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.2),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.auto_awesome_mosaic_rounded,
-              size: 40,
-              color: Colors.white,
-            ),
+          child: Image.asset(
+            'assets/icons/logo-192.png',
+            width: 72,
+            height: 72,
           ),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 24),
         Text(
-          'EduSaaS Enterprise',
+          'Campusly',
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w900,
             letterSpacing: -1.5,

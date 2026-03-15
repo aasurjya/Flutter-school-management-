@@ -2,7 +2,7 @@
 class AppConfig {
   AppConfig._();
 
-  static const String appName = 'EduSaaS';
+  static const String appName = 'Campusly';
   static const String appVersion = '1.0.0';
   
   // Pagination

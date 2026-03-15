@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <circle cx="256" cy="256" r="256" fill="#111827"/>
+  <text x="256" y="300" text-anchor="middle" font-family="SignPainter, 'Brush Script MT', cursive" font-weight="400" font-size="280" fill="#F9FAFB">C</text>
+  <line x1="144" y1="348" x2="368" y2="348" stroke="#D1D5DB" stroke-width="4"/>
+</svg>

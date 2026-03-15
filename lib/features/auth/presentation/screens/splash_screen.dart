@@ -225,46 +225,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Logo Container
-                        Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.2),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.school_rounded,
-                            size: 60,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        // App Name
-                        const Text(
-                          'EduSaaS',
-                          style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'School Management System',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white.withValues(alpha: 0.8),
-                            letterSpacing: 1,
-                          ),
+                        // App Logo + Wordmark
+                        Image.asset(
+                          'assets/icons/campusly-splash.png',
+                          width: 280,
+                          fit: BoxFit.contain,
                         ),
                         const SizedBox(height: 48),
                         // Loading indicator

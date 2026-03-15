@@ -148,7 +148,7 @@ class _SuperAdminDashboardScreenState
                                     size: 14, color: Colors.white70),
                                 SizedBox(width: 6),
                                 Text(
-                                  'EduSaaS Platform',
+                                  'Campusly Platform',
                                   style: TextStyle(
                                     color: Colors.white70,
                                     fontSize: 12,

@@ -440,15 +440,32 @@ class _SuperAdminDashboardScreenState
                                             .withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
-                                  child: Text(
-                                    tenant.isActive ? 'Active' : 'Suspended',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: tenant.isActive
-                                          ? const Color(0xFF10B981)
-                                          : AppColors.error,
-                                    ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        tenant.isActive
+                                            ? Icons.check_circle_outline
+                                            : Icons.block_outlined,
+                                        size: 12,
+                                        color: tenant.isActive
+                                            ? const Color(0xFF10B981)
+                                            : AppColors.error,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        tenant.isActive
+                                            ? 'Active'
+                                            : 'Suspended',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: tenant.isActive
+                                              ? const Color(0xFF10B981)
+                                              : AppColors.error,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],

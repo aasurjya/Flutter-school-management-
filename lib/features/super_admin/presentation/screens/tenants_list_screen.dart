@@ -102,9 +102,36 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
               data: (tenants) {
                 final filteredTenants = _filterTenants(tenants);
                 if (filteredTenants.isEmpty) {
+                  final hasActiveFilters = _searchQuery.isNotEmpty ||
+                      _statusFilter != 'all' ||
+                      _planFilter != 'all';
                   return Center(
-                    child: Text('No tenants found',
-                        style: theme.textTheme.bodyLarge),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.search_off,
+                            size: 48,
+                            color: theme.textTheme.bodySmall?.color),
+                        const SizedBox(height: 12),
+                        Text('No tenants found',
+                            style: theme.textTheme.titleSmall),
+                        if (hasActiveFilters) ...[
+                          const SizedBox(height: 4),
+                          Text('Try adjusting your filters',
+                              style: theme.textTheme.bodySmall),
+                          const SizedBox(height: 16),
+                          TextButton.icon(
+                            onPressed: () => setState(() {
+                              _searchQuery = '';
+                              _statusFilter = 'all';
+                              _planFilter = 'all';
+                            }),
+                            icon: const Icon(Icons.filter_alt_off, size: 18),
+                            label: const Text('Clear filters'),
+                          ),
+                        ],
+                      ],
+                    ),
                   );
                 }
                 return RefreshIndicator(
@@ -316,7 +343,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
                     .read(tenantsNotifierProvider.notifier)
                     .deleteTenant(tenant.id);
                 if (mounted) {
-                  context.showErrorSnackBar('Tenant deleted');
+                  context.showSuccessSnackBar('Tenant deleted');
                 }
               } catch (e) {
                 if (mounted) {
@@ -442,12 +469,25 @@ class _TenantCard extends StatelessWidget {
                       color: statusColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      status.toUpperCase(),
-                      style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: statusColor),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isActive
+                              ? Icons.check_circle_outline
+                              : Icons.block_outlined,
+                          size: 12,
+                          color: statusColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          status.toUpperCase(),
+                          style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: statusColor),
+                        ),
+                      ],
                     ),
                   ),
                 ],

@@ -105,7 +105,7 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
                 foregroundColor: Colors.white,
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
-                  tooltip: 'More options',
+                  tooltip: 'Back',
                   onPressed: () => context.pop(),
                 ),
                 actions: [
@@ -368,7 +368,7 @@ class _UsersTab extends ConsumerStatefulWidget {
 }
 
 class _UsersTabState extends ConsumerState<_UsersTab> {
-  final bool _isCreating = false;
+  bool _isCreating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -1166,15 +1166,29 @@ class _StatCard extends StatelessWidget {
 class _StatsRowLoading extends StatelessWidget {
   const _StatsRowLoading();
   @override
-  Widget build(BuildContext context) => const Row(
-        children: [
-          Expanded(child: SizedBox(height: 90)),
-          SizedBox(width: 8),
-          Expanded(child: SizedBox(height: 90)),
-          SizedBox(width: 8),
-          Expanded(child: SizedBox(height: 90)),
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final shimmerColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.grey.withValues(alpha: 0.12);
+
+    return Row(
+      children: [
+        for (var i = 0; i < 3; i++) ...[
+          if (i > 0) const SizedBox(width: 8),
+          Expanded(
+            child: Container(
+              height: 90,
+              decoration: BoxDecoration(
+                color: shimmerColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
         ],
-      );
+      ],
+    );
+  }
 }
 
 class _InfoRow extends StatelessWidget {

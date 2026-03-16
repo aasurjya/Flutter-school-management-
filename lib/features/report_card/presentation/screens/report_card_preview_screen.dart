@@ -27,7 +27,7 @@ class ReportCardPreviewScreen extends ConsumerWidget {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.share),
-                        tooltip: 'Share',
+                        tooltip: 'Share PDF',
                         onPressed: () async {
                           final data = report.data.isNotEmpty
                               ? ReportCardData.fromJson(report.data)
@@ -45,7 +45,6 @@ class ReportCardPreviewScreen extends ConsumerWidget {
                                 'report_card_${report.studentName ?? "student"}.pdf',
                           );
                         },
-                        tooltip: 'Share PDF',
                       ),
                       IconButton(
                         icon: const Icon(Icons.print),
@@ -64,7 +63,6 @@ class ReportCardPreviewScreen extends ConsumerWidget {
                           await Printing.layoutPdf(
                               onLayout: (_) => bytes);
                         },
-                        tooltip: 'Print',
                       ),
                     ],
                   );

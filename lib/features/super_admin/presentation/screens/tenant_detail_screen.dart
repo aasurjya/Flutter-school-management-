@@ -101,7 +101,7 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
                 floating: false,
                 elevation: 0,
                 scrolledUnderElevation: 0,
-                backgroundColor: AppColors.primary,
+                backgroundColor: const Color(0xFF0F172A),
                 foregroundColor: Colors.white,
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
@@ -125,10 +125,10 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
                   collapseMode: CollapseMode.pin,
                   background: Container(
                     decoration: const BoxDecoration(
-                      gradient: LinearGradient(
+                      gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [AppColors.primary, AppColors.grey800],
+                        colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
                       ),
                     ),
                     child: SafeArea(
@@ -809,9 +809,9 @@ class _CreateUserSheetState extends State<_CreateUserSheet> {
 
             // ── Credentials Preview ─────────────────────────────────────
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'GENERATED CREDENTIALS',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: AppColors.grey500),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: Theme.of(context).textTheme.bodySmall?.color),
             ),
             const SizedBox(height: 8),
             Container(

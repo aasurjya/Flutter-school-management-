@@ -90,7 +90,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).inputDecorationTheme.fillColor,
               ),
               onSubmitted: (_) => _loadStudents(),
             ),

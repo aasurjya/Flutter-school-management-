@@ -94,7 +94,7 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).inputDecorationTheme.fillColor,
               ),
               onChanged: (v) => setState(() => _searchQuery = v),
             ),

@@ -116,13 +116,13 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
                   CircleAvatar(
                     radius: 32,
                     backgroundColor:
-                        AppColors.primary.withValues(alpha: 0.12),
+                        const Color(0xFF6366F1).withValues(alpha: 0.12),
                     backgroundImage:
                         avatar != null ? NetworkImage(avatar) : null,
                     child: avatar == null
                         ? Text(initials,
                             style: const TextStyle(
-                                color: AppColors.primary,
+                                color: Color(0xFF6366F1),
                                 fontWeight: FontWeight.w700,
                                 fontSize: 20))
                         : null,
@@ -225,7 +225,7 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Text(
               'No stored credentials',
-              style: TextStyle(fontSize: 13, color: AppColors.grey500),
+              style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color),
             ),
           ),
         ],
@@ -246,10 +246,10 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
         ),
         Row(
           children: [
-            const Icon(Icons.lock_outline, size: 16, color: AppColors.grey500),
+            Icon(Icons.lock_outline, size: 16, color: Theme.of(context).textTheme.bodySmall?.color),
             const SizedBox(width: 10),
-            const Text('Password: ',
-                style: TextStyle(fontSize: 13, color: AppColors.grey500)),
+            Text('Password: ',
+                style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color)),
             Expanded(
               child: Text(
                 _passwordVisible ? cred.initialPassword : maskedPassword,
@@ -268,7 +268,7 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
                 iconSize: 16,
                 icon: Icon(
                   _passwordVisible ? Icons.visibility_off : Icons.visibility,
-                  color: AppColors.grey500,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
                 ),
                 tooltip: 'Toggle visibility',
                 onPressed: () =>
@@ -281,7 +281,7 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
               child: IconButton(
                 padding: EdgeInsets.zero,
                 iconSize: 16,
-                icon: const Icon(Icons.copy, color: AppColors.grey500),
+                icon: Icon(Icons.copy, color: Theme.of(context).textTheme.bodySmall?.color),
                 tooltip: 'Copy',
                 onPressed: () {
                   Clipboard.setData(
@@ -411,10 +411,10 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Text(title,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: AppColors.grey500,
+                color: Theme.of(context).textTheme.bodySmall?.color,
                 letterSpacing: 0.5)),
       );
 }
@@ -426,24 +426,26 @@ class _InfoRow extends StatelessWidget {
   const _InfoRow(this.icon, this.label, this.value);
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          children: [
-            Icon(icon, size: 16, color: AppColors.grey500),
-            const SizedBox(width: 10),
-            Text('$label: ',
+  Widget build(BuildContext context) {
+    final secondaryColor = Theme.of(context).textTheme.bodySmall?.color;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: secondaryColor),
+          const SizedBox(width: 10),
+          Text('$label: ',
+              style: TextStyle(fontSize: 13, color: secondaryColor)),
+          Expanded(
+            child: Text(value,
                 style: const TextStyle(
-                    fontSize: 13, color: AppColors.grey500)),
-            Expanded(
-              child: Text(value,
-                  style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w500),
-                  overflow: TextOverflow.ellipsis),
-            ),
-          ],
-        ),
-      );
+                    fontSize: 13, fontWeight: FontWeight.w500),
+                overflow: TextOverflow.ellipsis),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _CopyableInfoRow extends StatelessWidget {
@@ -454,43 +456,45 @@ class _CopyableInfoRow extends StatelessWidget {
       {required this.icon, required this.label, required this.value});
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          children: [
-            Icon(icon, size: 16, color: AppColors.grey500),
-            const SizedBox(width: 10),
-            Text('$label: ',
+  Widget build(BuildContext context) {
+    final secondaryColor = Theme.of(context).textTheme.bodySmall?.color;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: secondaryColor),
+          const SizedBox(width: 10),
+          Text('$label: ',
+              style: TextStyle(fontSize: 13, color: secondaryColor)),
+          Expanded(
+            child: Text(value,
                 style: const TextStyle(
-                    fontSize: 13, color: AppColors.grey500)),
-            Expanded(
-              child: Text(value,
-                  style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w500),
-                  overflow: TextOverflow.ellipsis),
+                    fontSize: 13, fontWeight: FontWeight.w500),
+                overflow: TextOverflow.ellipsis),
+          ),
+          SizedBox(
+            width: 32,
+            height: 32,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              iconSize: 16,
+              icon: Icon(Icons.copy, color: secondaryColor),
+              tooltip: 'Copy',
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: value));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('$label copied'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
             ),
-            SizedBox(
-              width: 32,
-              height: 32,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                iconSize: 16,
-                icon: const Icon(Icons.copy, color: AppColors.grey500),
-                tooltip: 'Copy',
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: value));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('$label copied'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _RoleBadge extends StatelessWidget {

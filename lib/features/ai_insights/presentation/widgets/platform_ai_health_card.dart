@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/platform_ai_stats_provider.dart';
 
@@ -50,6 +49,8 @@ class PlatformAIHealthCard extends ConsumerWidget {
     bool isLoading = false,
     bool isLLMGenerated = false,
   }) {
+    final accentColor = const Color(0xFF8B5CF6); // violet for AI features
+
     return GlassCard(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -60,12 +61,12 @@ class PlatformAIHealthCard extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.12),
+                  color: accentColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.hub_outlined,
-                  color: AppColors.accent,
+                  color: accentColor,
                   size: 22,
                 ),
               ),
@@ -84,9 +85,7 @@ class PlatformAIHealthCard extends ConsumerWidget {
                       isLLMGenerated
                           ? 'AI-generated summary'
                           : 'Platform overview',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textTertiaryLight,
-                      ),
+                      style: theme.textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -96,22 +95,22 @@ class PlatformAIHealthCard extends ConsumerWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.12),
+                    color: accentColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.auto_awesome,
                         size: 12,
-                        color: AppColors.accent,
+                        color: accentColor,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'AI',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.accent,
+                          color: accentColor,
                           fontWeight: FontWeight.w700,
                           fontSize: 10,
                         ),
@@ -127,16 +126,12 @@ class PlatformAIHealthCard extends ConsumerWidget {
           else if (narrative != null && narrative.isNotEmpty)
             Text(
               narrative,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                height: 1.6,
-                color: AppColors.textSecondaryLight,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
             )
           else
             Text(
               'Add tenants to see platform health insights.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.textTertiaryLight,
+              style: theme.textTheme.bodySmall?.copyWith(
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -146,7 +141,11 @@ class PlatformAIHealthCard extends ConsumerWidget {
   }
 
   Widget _buildShimmer(BuildContext context) {
-    final shimmerBase = Colors.grey.withValues(alpha: 0.15);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final shimmerBase = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.grey.withValues(alpha: 0.15);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

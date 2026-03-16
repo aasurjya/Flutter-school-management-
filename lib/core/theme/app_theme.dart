@@ -332,13 +332,17 @@ class AppTheme {
             const BorderSide(color: AppColors.error, width: 2),
       ),
       labelStyle: GoogleFonts.inter(
-          fontSize: 14, color: AppColors.textSecondaryLight),
+          fontSize: 14,
+          color: isDark
+              ? AppColors.textSecondaryDark
+              : AppColors.textSecondaryLight),
       hintStyle: GoogleFonts.inter(
-          fontSize: 14, color: AppColors.grey400),
+          fontSize: 14,
+          color: isDark ? AppColors.textTertiaryDark : AppColors.grey400),
       floatingLabelStyle: GoogleFonts.inter(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: AppColors.primary),
+          color: isDark ? AppColors.primaryLight : AppColors.primary),
     );
   }
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 
-/// A glassmorphism-style card widget
+/// A glassmorphism-style card widget that adapts to light/dark themes.
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -35,13 +35,15 @@ class GlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
+    // Dark mode: solid card surface instead of barely-visible frosted glass.
+    // Light mode: classic frosted-glass effect.
     final defaultBackgroundColor = isDark
-        ? Colors.white.withValues(alpha: 0.1)
+        ? AppColors.surfaceDark
         : Colors.white.withValues(alpha: 0.7);
-    
+
     final defaultBorderColor = isDark
-        ? Colors.white.withValues(alpha: 0.2)
+        ? AppColors.borderDark.withValues(alpha: 0.4)
         : Colors.white.withValues(alpha: 0.5);
 
     Widget cardContent = ClipRRect(
@@ -58,13 +60,15 @@ class GlassCard extends StatelessWidget {
               width: borderWidth,
             ),
             gradient: gradient,
-            boxShadow: boxShadow ?? [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
+            boxShadow: boxShadow ??
+                [
+                  BoxShadow(
+                    color:
+                        Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
           ),
           child: child,
         ),
@@ -146,7 +150,7 @@ class GlassStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final colorScheme = theme.colorScheme;
 
     return GlassCard(
       padding: const EdgeInsets.all(20),
@@ -161,12 +165,13 @@ class GlassStatCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: (iconColor ?? AppColors.primary).withValues(alpha: 0.1),
+                  color:
+                      (iconColor ?? colorScheme.primary).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,
-                  color: iconColor ?? AppColors.primary,
+                  color: iconColor ?? colorScheme.primary,
                   size: 24,
                 ),
               ),
@@ -187,20 +192,14 @@ class GlassStatCard extends StatelessWidget {
             style: theme.textTheme.bodyMedium?.copyWith(
               color: gradient != null
                   ? Colors.white.withValues(alpha: 0.8)
-                  : isDark
-                      ? AppColors.textSecondaryDark
-                      : AppColors.textSecondaryLight,
+                  : theme.textTheme.bodySmall?.color,
             ),
           ),
           if (subtitle != null) ...[
             const SizedBox(height: 8),
             Text(
               subtitle!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: gradient != null
-                    ? Colors.white.withValues(alpha: 0.6)
-                    : AppColors.textTertiaryLight,
-              ),
+              style: theme.textTheme.bodySmall,
             ),
           ],
         ],

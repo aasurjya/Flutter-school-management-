@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/app_environment.dart';
@@ -126,8 +129,9 @@ class AdminUserService {
     );
   }
 
-  /// Fallback path: creates auth user via `signUp()` on an ephemeral client,
-  /// then calls `create_user_profile` RPC on the admin's client.
+  /// Fallback path: creates auth user via raw HTTP signUp (avoids platform
+  /// issues with ephemeral SupabaseClient on web), then calls
+  /// `create_user_profile` RPC on the admin's client.
   Future<CreatedUserResult> _createUserViaSignUpAndRpc({
     required String email,
     required String password,
@@ -136,22 +140,38 @@ class AdminUserService {
     required String role,
     String? phone,
   }) async {
-    // Use an ephemeral SupabaseClient so signUp() doesn't hijack the admin session.
-    final ephemeral = SupabaseClient(
-      AppEnvironment.supabaseUrl,
-      AppEnvironment.supabaseAnonKey,
-    );
-
     String? newUserId;
     try {
-      // 1. Create auth user via signUp
-      final authResponse = await ephemeral.auth.signUp(
-        email: email,
-        password: password,
-        data: {'full_name': fullName},
+      // 1. Create auth user via raw HTTP POST — avoids creating a second
+      //    SupabaseClient which crashes on Flutter web due to missing
+      //    platform-specific auth storage initialization.
+      final signUpResponse = await http.post(
+        Uri.parse('${AppEnvironment.supabaseUrl}/auth/v1/signup'),
+        headers: {
+          'apikey': AppEnvironment.supabaseAnonKey,
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'data': {'full_name': fullName},
+        }),
       );
 
-      newUserId = authResponse.user?.id;
+      final body = jsonDecode(signUpResponse.body) as Map<String, dynamic>;
+
+      if (signUpResponse.statusCode >= 400) {
+        final errorMsg = body['msg'] as String? ??
+            body['error_description'] as String? ??
+            body['message'] as String? ??
+            'Sign-up failed (HTTP ${signUpResponse.statusCode})';
+        throw AdminUserCreationException(errorMsg);
+      }
+
+      // Supabase returns user inside 'user' key (or at top level for some versions)
+      final userObj = body['user'] as Map<String, dynamic>? ?? body;
+      newUserId = userObj['id'] as String?;
+
       if (newUserId == null) {
         throw const AdminUserCreationException(
           'Sign-up failed: email may already be registered',
@@ -188,8 +208,6 @@ class AdminUserService {
       }
       if (e is AdminUserCreationException) rethrow;
       throw AdminUserCreationException('Fallback user creation failed: $e');
-    } finally {
-      ephemeral.dispose();
     }
   }
 

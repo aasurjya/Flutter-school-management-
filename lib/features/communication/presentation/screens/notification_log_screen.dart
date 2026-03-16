@@ -32,6 +32,7 @@ class _NotificationLogScreenState
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
             onPressed: () {
               ref.invalidate(notificationLogsProvider);
               ref.invalidate(deliveryStatsProvider);

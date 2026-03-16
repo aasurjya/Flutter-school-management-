@@ -308,6 +308,7 @@ class _ForumPostsViewState extends ConsumerState<_ForumPostsView> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
+                    tooltip: 'Back',
                     onPressed: widget.onBack,
                     constraints: const BoxConstraints(),
                     padding: EdgeInsets.zero,
@@ -449,6 +450,7 @@ class _ForumPostsViewState extends ConsumerState<_ForumPostsView> {
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.close, size: 16),
+                        tooltip: 'Close',
                         onPressed: () =>
                             setState(() => _replyToPostId = null),
                         constraints: const BoxConstraints(),

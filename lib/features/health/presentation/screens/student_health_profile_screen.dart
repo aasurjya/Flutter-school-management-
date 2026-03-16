@@ -22,6 +22,7 @@ class StudentHealthProfileScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
+            tooltip: 'Edit',
             onPressed: () => context.push('/health/edit/$studentId'),
           ),
         ],

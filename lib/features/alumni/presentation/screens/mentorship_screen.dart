@@ -119,6 +119,7 @@ class _MentorshipScreenState extends ConsumerState<MentorshipScreen>
                     ),
                     const SizedBox(width: 8),
                     IconButton(
+                      tooltip: 'Add skill',
                       onPressed: () {
                         if (skillController.text.isNotEmpty) {
                           setDialogState(() {
@@ -155,6 +156,7 @@ class _MentorshipScreenState extends ConsumerState<MentorshipScreen>
                   children: [
                     const Text('Max Mentees: '),
                     IconButton(
+                      tooltip: 'Remove',
                       onPressed: menteeLimit > 1
                           ? () => setDialogState(() => menteeLimit--)
                           : null,
@@ -167,6 +169,7 @@ class _MentorshipScreenState extends ConsumerState<MentorshipScreen>
                       ),
                     ),
                     IconButton(
+                      tooltip: 'Increase limit',
                       onPressed: menteeLimit < 20
                           ? () => setDialogState(() => menteeLimit++)
                           : null,

@@ -47,6 +47,7 @@ class _AssetScanScreenState extends ConsumerState<AssetScanScreen> {
               _torchEnabled ? Icons.flash_on : Icons.flash_off,
               color: _torchEnabled ? AppColors.accent : Colors.white,
             ),
+            tooltip: 'Toggle flash',
             onPressed: () {
               _scannerController.toggleTorch();
               setState(() => _torchEnabled = !_torchEnabled);
@@ -54,6 +55,7 @@ class _AssetScanScreenState extends ConsumerState<AssetScanScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.flip_camera_ios),
+            tooltip: 'Switch camera',
             onPressed: () => _scannerController.switchCamera(),
           ),
         ],

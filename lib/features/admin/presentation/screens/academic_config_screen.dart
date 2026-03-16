@@ -173,6 +173,7 @@ class _AcademicYearsConfig extends ConsumerWidget {
                     ),
                   IconButton(
                     icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                    tooltip: 'Delete',
                     onPressed: () => _deleteYear(context, ref, year),
                   ),
                 ],
@@ -378,6 +379,7 @@ class _TermsForYear extends ConsumerWidget {
               ),
               trailing: IconButton(
                 icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                tooltip: 'Delete',
                 onPressed: () => _deleteTerm(context, ref, term),
               ),
             );
@@ -533,10 +535,12 @@ class _ClassesConfig extends ConsumerWidget {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit, size: 20),
+                    tooltip: 'Edit',
                     onPressed: () => _showClassDialog(context, ref, existing: cls),
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                    tooltip: 'Delete',
                     onPressed: () => _deleteClass(context, ref, cls),
                   ),
                 ],
@@ -718,10 +722,12 @@ class _SectionsConfig extends ConsumerWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.edit, size: 20),
+                  tooltip: 'Edit',
                   onPressed: () => _showEditSectionDialog(context, ref, section),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                  tooltip: 'Delete',
                   onPressed: () => _deleteSection(context, ref, section),
                 ),
               ],
@@ -976,10 +982,12 @@ class _SubjectsConfig extends ConsumerWidget {
                   _Badge(label: typeLabel, color: color),
                   IconButton(
                     icon: const Icon(Icons.edit, size: 20),
+                    tooltip: 'Edit',
                     onPressed: () => _showSubjectDialog(context, ref, existing: subject),
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                    tooltip: 'Delete',
                     onPressed: () => _deleteSubject(context, ref, subject),
                   ),
                 ],

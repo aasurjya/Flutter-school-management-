@@ -37,6 +37,7 @@ class _IncidentListScreenState extends ConsumerState<IncidentListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
+            tooltip: 'Filter',
             onPressed: _showFilterSheet,
           ),
         ],
@@ -216,6 +217,7 @@ class _IncidentListScreenState extends ConsumerState<IncidentListScreen> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.close),
+                        tooltip: 'Close',
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],

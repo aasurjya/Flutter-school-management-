@@ -469,6 +469,7 @@ class _StudentAttendanceCard extends StatelessWidget {
                 // More Options
                 IconButton(
                   icon: const Icon(Icons.more_vert, size: 20),
+                  tooltip: 'More options',
                   onPressed: () => _showOptions(context),
                 ),
               ],

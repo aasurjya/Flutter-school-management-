@@ -117,6 +117,7 @@ class _QuizContent extends ConsumerWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close),
+          tooltip: 'Close',
           onPressed: () => _showExitConfirmation(context, ref),
         ),
         title: Text(session.quiz.title),

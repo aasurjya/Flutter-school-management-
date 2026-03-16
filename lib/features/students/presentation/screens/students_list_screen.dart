@@ -79,10 +79,12 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
+            tooltip: 'Filter',
             onPressed: _showFilterSheet,
           ),
           IconButton(
             icon: const Icon(Icons.add),
+            tooltip: 'Add',
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Add student coming soon')),
@@ -105,6 +107,7 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear),
+                        tooltip: 'Clear',
                         onPressed: _clearSearch,
                       )
                     : null,

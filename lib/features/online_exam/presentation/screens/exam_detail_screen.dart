@@ -29,6 +29,7 @@ class ExamDetailScreen extends ConsumerWidget {
               if (exam.isDraft)
                 IconButton(
                   icon: const Icon(Icons.edit),
+                  tooltip: 'Edit',
                   onPressed: () =>
                       context.push('/online-exams/builder/${exam.id}'),
                 ),

@@ -30,6 +30,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
           actions: [
             IconButton(
               icon: const Icon(Icons.refresh),
+              tooltip: 'Refresh',
               onPressed: () => ref.read(announcementsNotifierProvider.notifier).loadAnnouncements(),
             ),
           ],
@@ -472,7 +473,7 @@ class _CreateAnnouncementSheetState extends State<_CreateAnnouncementSheet> {
                   style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
-                IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: () => Navigator.pop(context)),
+                IconButton(icon: const Icon(Icons.close, color: Colors.white), tooltip: 'Close', onPressed: () => Navigator.pop(context)),
               ],
             ),
           ),
@@ -651,6 +652,7 @@ class _EditAnnouncementSheetState extends State<_EditAnnouncementSheet> {
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.white),
+                  tooltip: 'Close',
                   onPressed: () => Navigator.pop(context),
                 ),
               ],

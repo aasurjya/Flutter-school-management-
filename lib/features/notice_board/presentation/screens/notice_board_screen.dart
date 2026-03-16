@@ -27,6 +27,7 @@ class _NoticeBoardScreenState extends ConsumerState<NoticeBoardScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
             onPressed: () => ref.invalidate(noticesProvider(filter)),
           ),
         ],

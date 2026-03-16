@@ -166,6 +166,7 @@ class _BehaviorPlanScreenState extends ConsumerState<BehaviorPlanScreen>
                         IconButton(
                           icon: const Icon(Icons.add_circle,
                               color: AppColors.primary),
+                          tooltip: 'Add goal',
                           onPressed: () {
                             if (goalController.text.trim().isNotEmpty) {
                               setSheetState(() {
@@ -194,6 +195,7 @@ class _BehaviorPlanScreenState extends ConsumerState<BehaviorPlanScreen>
                             trailing: IconButton(
                               icon: const Icon(Icons.remove_circle_outline,
                                   size: 18, color: AppColors.error),
+                              tooltip: 'Remove',
                               onPressed: () {
                                 setSheetState(() => goals.removeAt(e.key));
                               },
@@ -225,6 +227,7 @@ class _BehaviorPlanScreenState extends ConsumerState<BehaviorPlanScreen>
                         IconButton(
                           icon: const Icon(Icons.add_circle,
                               color: AppColors.secondary),
+                          tooltip: 'Add strategy',
                           onPressed: () {
                             if (strategyController.text.trim().isNotEmpty) {
                               setSheetState(() {
@@ -246,6 +249,7 @@ class _BehaviorPlanScreenState extends ConsumerState<BehaviorPlanScreen>
                             trailing: IconButton(
                               icon: const Icon(Icons.remove_circle_outline,
                                   size: 18, color: AppColors.error),
+                              tooltip: 'Remove',
                               onPressed: () {
                                 setSheetState(
                                     () => strategies.removeAt(e.key));

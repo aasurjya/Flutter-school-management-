@@ -404,6 +404,7 @@ class _CampaignListCard extends StatelessWidget {
                   ),
                 if (onDelete != null)
                   IconButton(
+                    tooltip: 'Delete',
                     onPressed: onDelete,
                     icon: const Icon(Icons.delete_outline, size: 18),
                     color: AppColors.error,

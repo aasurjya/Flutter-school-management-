@@ -400,6 +400,7 @@ class _DateTimePicker extends StatelessWidget {
               if (value != null)
                 IconButton(
                   icon: const Icon(Icons.clear, size: 18),
+                  tooltip: 'Clear',
                   onPressed: () => onChanged(null),
                 ),
             ],

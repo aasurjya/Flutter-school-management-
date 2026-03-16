@@ -97,14 +97,14 @@ class _SuperAdminDashboardScreenState
                                   child: Text(
                                     currentUser?.initials ?? 'SA',
                                     style: const TextStyle(
-                                      fontSize: 22,
+                                      fontSize: 24,
                                       fontWeight: FontWeight.w800,
                                       color: Colors.white,
                                     ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 20),
+                              const SizedBox(width: 24),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,7 +121,7 @@ class _SuperAdminDashboardScreenState
                                       currentUser?.fullName ?? 'Super Admin',
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 22,
+                                        fontSize: 24,
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: -0.5,
                                       ),
@@ -143,7 +143,7 @@ class _SuperAdminDashboardScreenState
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(Icons.shield_outlined,
-                                    size: 14, color: Colors.white70),
+                                    size: 16, color: Colors.white70),
                                 SizedBox(width: 6),
                                 Text(
                                   'Campusly Platform',
@@ -166,7 +166,7 @@ class _SuperAdminDashboardScreenState
 
             // ── Body ─────────────────────────────────────────────────────
             SliverPadding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _buildPlatformStats(),
@@ -209,6 +209,7 @@ class _SuperAdminDashboardScreenState
             ),
             IconButton(
               icon: const Icon(Icons.refresh),
+              tooltip: 'Refresh',
               onPressed: () => ref.invalidate(platformStatsProvider),
             ),
           ],
@@ -350,7 +351,7 @@ class _SuperAdminDashboardScreenState
                       style: TextStyle(color: AppColors.grey500),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     ElevatedButton.icon(
                       onPressed: () => context.push(AppRoutes.createTenant),
                       icon: const Icon(Icons.add, size: 18),
@@ -373,7 +374,7 @@ class _SuperAdminDashboardScreenState
                   .map((tenant) => Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: GlassCard(
-                          padding: const EdgeInsets.all(14),
+                          padding: const EdgeInsets.all(16),
                           child: InkWell(
                             onTap: () => context.push(
                                 '${AppRoutes.tenantsList}/${tenant.id}'),
@@ -401,7 +402,7 @@ class _SuperAdminDashboardScreenState
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 14),
+                                const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -438,7 +439,7 @@ class _SuperAdminDashboardScreenState
                                   child: Text(
                                     tenant.isActive ? 'Active' : 'Suspended',
                                     style: TextStyle(
-                                      fontSize: 11,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       color: tenant.isActive
                                           ? const Color(0xFF10B981)
@@ -480,7 +481,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -506,14 +507,14 @@ class _StatCard extends StatelessWidget {
                 child: Text(
                   subtitle,
                   style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: color),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           Text(
             value,
             style: TextStyle(
@@ -546,7 +547,7 @@ class _StatCardLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -556,7 +557,7 @@ class _StatCardLoading extends StatelessWidget {
               decoration: BoxDecoration(
                   color: AppColors.grey200,
                   borderRadius: BorderRadius.circular(10))),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           Container(
               height: 28,
               width: 56,
@@ -597,7 +598,7 @@ class _ActionCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -610,7 +611,7 @@ class _ActionCard extends StatelessWidget {
                 ),
                 child: Icon(icon, color: AppColors.primary, size: 20),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Text(
                 label,
                 style: const TextStyle(

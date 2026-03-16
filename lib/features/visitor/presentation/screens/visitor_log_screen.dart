@@ -69,6 +69,7 @@ class _VisitorLogScreenState extends ConsumerState<VisitorLogScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.date_range),
+            tooltip: 'Select date range',
             onPressed: _pickDateRange,
           ),
         ],
@@ -88,6 +89,7 @@ class _VisitorLogScreenState extends ConsumerState<VisitorLogScreen> {
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.clear),
+                            tooltip: 'Clear',
                             onPressed: () {
                               _searchController.clear();
                               setState(() {});

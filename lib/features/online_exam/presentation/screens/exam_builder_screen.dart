@@ -803,6 +803,7 @@ class _SectionCard extends StatelessWidget {
                   trailing: IconButton(
                     icon: const Icon(Icons.delete_outline,
                         size: 20, color: AppColors.error),
+                    tooltip: 'Delete',
                     onPressed: () => onDeleteQuestion(q.id),
                   ),
                 );

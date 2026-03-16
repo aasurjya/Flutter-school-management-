@@ -49,6 +49,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_today),
+            tooltip: 'Calendar',
             onPressed: _selectDate,
           ),
         ],

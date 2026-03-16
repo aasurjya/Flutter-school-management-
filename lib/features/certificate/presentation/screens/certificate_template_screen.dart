@@ -244,11 +244,13 @@ class _TemplateCard extends StatelessWidget {
               const SizedBox(width: 4),
               IconButton(
                 icon: const Icon(Icons.edit, size: 20),
+                tooltip: 'Edit',
                 onPressed: onEdit,
                 color: AppColors.primary,
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline, size: 20),
+                tooltip: 'Delete',
                 onPressed: onDelete,
                 color: AppColors.error,
               ),

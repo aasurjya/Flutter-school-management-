@@ -245,6 +245,7 @@ class _AudiencePickerState extends State<AudiencePicker> {
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
                     icon: const Icon(Icons.clear),
+                    tooltip: 'Clear',
                     onPressed: () {
                       _searchController.clear();
                       setState(() {});

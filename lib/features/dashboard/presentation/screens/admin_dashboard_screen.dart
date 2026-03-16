@@ -44,10 +44,17 @@ class AdminDashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          // Professional Header
-          SliverAppBar(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(studentCountProvider(null));
+          ref.invalidate(feeCollectionStatsProvider(null));
+          ref.invalidate(currentAcademicYearProvider);
+          ref.invalidate(currentTenantProvider);
+        },
+        child: CustomScrollView(
+          slivers: [
+            // Professional Header
+            SliverAppBar(
             expandedHeight: 200,
             floating: false,
             pinned: true,
@@ -84,7 +91,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                           Text(
                             'Administrative Command Center',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.6),
+                              color: Colors.white.withValues(alpha: 0.85),
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 1,
@@ -127,12 +134,14 @@ class AdminDashboardScreen extends ConsumerWidget {
               _HeaderActionBtn(
                 icon: Icons.notifications_none_rounded,
                 onTap: () => context.push(AppRoutes.notifications),
+                tooltip: 'Notifications',
               ),
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: _HeaderActionBtn(
                   icon: Icons.settings_outlined,
                   onTap: () => _showSettingsMenu(context, ref),
+                  tooltip: 'Settings',
                 ),
               ),
             ],
@@ -163,7 +172,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
 
           // Quick Actions Section
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
@@ -176,7 +185,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
 
           // Academic Setup Section
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
@@ -189,7 +198,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
 
           // School Operations Section
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
@@ -202,7 +211,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
 
           // Operations Summary
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
@@ -218,7 +227,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
 
           // Activity & Notices
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -241,6 +250,7 @@ class AdminDashboardScreen extends ConsumerWidget {
 
           const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
+      ),
       ),
     );
   }
@@ -528,7 +538,9 @@ class _HeaderActionBtn extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
 
-  const _HeaderActionBtn({required this.icon, required this.onTap});
+  final String? tooltip;
+
+  const _HeaderActionBtn({required this.icon, required this.onTap, this.tooltip});
 
   @override
   Widget build(BuildContext context) {
@@ -541,6 +553,7 @@ class _HeaderActionBtn extends StatelessWidget {
       child: IconButton(
         icon: Icon(icon, color: Colors.white, size: 20),
         onPressed: onTap,
+        tooltip: tooltip,
       ),
     );
   }
@@ -562,7 +575,7 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -642,31 +655,35 @@ class _QuickActionsGrid extends StatelessWidget {
       itemCount: actions.length,
       itemBuilder: (context, index) {
         final a = actions[index];
-        return GestureDetector(
-          onTap: () => context.push(a.route),
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.borderLight),
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => context.push(a.route),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.borderLight),
+                  ),
+                  child: Icon(a.icon, color: a.color, size: 24),
                 ),
-                child: Icon(a.icon, color: a.color, size: 24),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                a.label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.grey700,
+                const SizedBox(height: 8),
+                Text(
+                  a.label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.grey700,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -690,9 +707,9 @@ class _ViewAllBtn extends StatelessWidget {
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('View All', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          Text('View All', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
           SizedBox(width: 4),
-          Icon(Icons.arrow_forward_rounded, size: 14),
+          Icon(Icons.arrow_forward_rounded, size: 16),
         ],
       ),
     );
@@ -738,7 +755,7 @@ class _SummaryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
           Container(
@@ -747,7 +764,7 @@ class _SummaryItem extends StatelessWidget {
               color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: color, size: 18),
+            child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -765,7 +782,7 @@ class _SummaryItem extends StatelessWidget {
             style: const TextStyle(
               fontWeight: FontWeight.w800,
               color: AppColors.grey900,
-              fontSize: 15,
+              fontSize: 14,
               letterSpacing: -0.3,
             ),
           ),
@@ -802,7 +819,7 @@ class _ActivityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -844,7 +861,7 @@ class _ActivityTile extends StatelessWidget {
             data.time,
             style: TextStyle(
               color: AppColors.grey400,
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -967,31 +984,35 @@ class _AcademicActionsGrid extends StatelessWidget {
       itemCount: actions.length,
       itemBuilder: (context, index) {
         final a = actions[index];
-        return GestureDetector(
-          onTap: () => context.push(a.route),
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.borderLight),
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => context.push(a.route),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.borderLight),
+                  ),
+                  child: Icon(a.icon, color: a.color, size: 24),
                 ),
-                child: Icon(a.icon, color: a.color, size: 24),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                a.label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.grey700,
+                const SizedBox(height: 8),
+                Text(
+                  a.label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.grey700,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -1028,31 +1049,35 @@ class _OperationsActionsGrid extends StatelessWidget {
       itemCount: actions.length,
       itemBuilder: (context, index) {
         final a = actions[index];
-        return GestureDetector(
-          onTap: () => context.push(a.route),
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.borderLight),
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => context.push(a.route),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.borderLight),
+                  ),
+                  child: Icon(a.icon, color: a.color, size: 24),
                 ),
-                child: Icon(a.icon, color: a.color, size: 24),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                a.label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.grey700,
+                const SizedBox(height: 8),
+                Text(
+                  a.label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.grey700,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -1107,7 +1132,7 @@ class _AlertBanner extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      fontSize: 13,
+                      fontSize: 12,
                       color: accentColor,
                     ),
                   ),
@@ -1134,22 +1159,14 @@ class _AlertBanner extends StatelessWidget {
                   badge!,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
               const SizedBox(width: 8),
             ],
-            Icon(Icons.arrow_forward_ios_rounded, size: 14, color: accentColor),
-          ],
-        ),
-      ),
-    );
-  }
-}
-      ],
-            Icon(Icons.arrow_forward_ios_rounded, size: 14, color: accentColor),
+            Icon(Icons.arrow_forward_ios_rounded, size: 16, color: accentColor),
           ],
         ),
       ),

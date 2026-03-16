@@ -42,6 +42,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.leaderboard),
+            tooltip: 'Leaderboard',
             onPressed: () => context.push('/gamification/leaderboard'),
           ),
         ],

@@ -535,6 +535,7 @@ class _GradingScaleEditorSheetState extends State<_GradingScaleEditorSheet> {
                             child: IconButton(
                               icon: const Icon(Icons.close,
                                   size: 18, color: AppColors.error),
+                              tooltip: 'Close',
                               onPressed: () =>
                                   setState(() => _grades.removeAt(index)),
                               padding: EdgeInsets.zero,

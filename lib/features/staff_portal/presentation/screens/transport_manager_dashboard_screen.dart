@@ -41,6 +41,7 @@ class TransportManagerDashboardScreen extends ConsumerWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.more_vert, color: Colors.white),
+                tooltip: 'More options',
                 onPressed: () => _logout(context, ref),
               ),
             ],

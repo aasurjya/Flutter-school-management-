@@ -206,6 +206,7 @@ class _StudentAttendanceScreenState extends ConsumerState<StudentAttendanceScree
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
+          tooltip: 'Previous',
           onPressed: () {
             setState(() {
               _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
@@ -224,6 +225,7 @@ class _StudentAttendanceScreenState extends ConsumerState<StudentAttendanceScree
           ),
         ),
         IconButton(
+          tooltip: 'Next',
           onPressed: _selectedMonth.month < DateTime.now().month || 
                     _selectedMonth.year < DateTime.now().year
               ? () {

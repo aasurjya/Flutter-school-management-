@@ -48,6 +48,7 @@ class AlumniDashboardScreen extends ConsumerWidget {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.search),
+                  tooltip: 'Search',
                   onPressed: () =>
                       context.push(AppRoutes.alumniDirectory),
                 ),

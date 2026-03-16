@@ -236,7 +236,7 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
                           ),
                           child: Text(fh.code!, style: const TextStyle(fontSize: 12, color: AppColors.primary)),
                         ),
-                      IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () {}),
+                      IconButton(icon: const Icon(Icons.edit, size: 20), tooltip: 'Edit', onPressed: () {}),
                     ],
                   ),
                   if (fh.description != null)

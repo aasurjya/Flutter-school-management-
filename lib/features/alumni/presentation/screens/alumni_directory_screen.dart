@@ -61,6 +61,7 @@ class _AlumniDirectoryScreenState
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear),
+                        tooltip: 'Clear',
                         onPressed: () {
                           _searchController.clear();
                           setState(() {});

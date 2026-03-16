@@ -29,11 +29,15 @@ class StudentDashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          // Professional Header
-          SliverAppBar(
-            expandedHeight: 180,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(currentUserProvider);
+        },
+        child: CustomScrollView(
+          slivers: [
+            // Professional Header
+            SliverAppBar(
+              expandedHeight: 180,
             floating: false,
             pinned: true,
             elevation: 0,
@@ -76,7 +80,7 @@ class StudentDashboardScreen extends ConsumerWidget {
                                     Text(
                                       _greeting(),
                                       style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.6),
+                                        color: Colors.white.withValues(alpha: 0.85),
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                         letterSpacing: 0.5,
@@ -111,6 +115,7 @@ class StudentDashboardScreen extends ConsumerWidget {
             actions: [
               IconButton(
                 icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                tooltip: 'Notifications',
                 onPressed: () => context.push(AppRoutes.notifications),
               ),
               const SizedBox(width: 8),
@@ -133,7 +138,7 @@ class StudentDashboardScreen extends ConsumerWidget {
           ),
 
           // Today's Schedule Section
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
@@ -149,7 +154,7 @@ class StudentDashboardScreen extends ConsumerWidget {
           ),
 
           // Academic Performance & AI
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -167,7 +172,7 @@ class StudentDashboardScreen extends ConsumerWidget {
           ),
 
           // Homework & Tasks
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
@@ -183,7 +188,7 @@ class StudentDashboardScreen extends ConsumerWidget {
           ),
 
           // Tools & Resources
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
@@ -200,6 +205,7 @@ class StudentDashboardScreen extends ConsumerWidget {
 
           const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
+      ),
       ),
     );
   }
@@ -242,7 +248,7 @@ class _AvatarCircle extends StatelessWidget {
           style: const TextStyle(
             fontWeight: FontWeight.w700,
             color: AppColors.primary,
-            fontSize: 15,
+            fontSize: 14,
           ),
         ),
       ),
@@ -340,7 +346,7 @@ class _AttendanceMetricDisplay extends StatelessWidget {
                   statusLabel,
                   style: TextStyle(
                     color: statusColor,
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -473,7 +479,7 @@ class _StatNum extends StatelessWidget {
         Text(
           value,
           style: const TextStyle(
-            fontSize: 22,
+            fontSize: 24,
             fontWeight: FontWeight.w800,
             color: _ink,
             letterSpacing: -0.8,
@@ -532,13 +538,13 @@ class _SectionHeader extends StatelessWidget {
             onPressed: () {},
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primary,
-              textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
             ),
             child: Row(
               children: [
                 Text(action!),
                 const SizedBox(width: 4),
-                const Icon(Icons.arrow_forward_rounded, size: 14),
+                const Icon(Icons.arrow_forward_rounded, size: 16),
               ],
             ),
           ),
@@ -569,7 +575,7 @@ class _TodayScheduleCard extends StatelessWidget {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: _ClassRow(
                   time: c.$1,
                   subject: c.$2,
@@ -578,7 +584,7 @@ class _TodayScheduleCard extends StatelessWidget {
                 ),
               ),
               if (i < _classes.length - 1)
-                const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.borderLight),
+                const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
             ],
           );
         }).toList(),
@@ -646,7 +652,7 @@ class _ClassRow extends StatelessWidget {
             child: const Text(
               'LIVE',
               style: TextStyle(
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
                 letterSpacing: 1,
@@ -715,7 +721,7 @@ class _HomeworkWidget extends ConsumerWidget {
                 children: [
                   _HomeworkRow(homework: hw),
                   if (i < pending.length - 1)
-                    const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.borderLight),
+                    const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
                 ],
               );
             }).toList(),
@@ -736,7 +742,7 @@ class _HomeworkRow extends StatelessWidget {
     final bool isHigh = homework.priority.name == 'high';
 
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       leading: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -781,7 +787,7 @@ class _StudyTipsEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(20),
@@ -804,7 +810,7 @@ class _StudyTipsEntry extends StatelessWidget {
                 Text(
                   'Academic Intelligence',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
                     letterSpacing: 0.2,
@@ -832,7 +838,7 @@ class _UpcomingExamCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -948,38 +954,42 @@ class _QuickActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.borderLight),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.05),
-                shape: BoxShape.circle,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.05),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 20, color: AppColors.primary),
               ),
-              child: Icon(icon, size: 20, color: AppColors.primary),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: AppColors.grey700,
-                letterSpacing: -0.2,
+              const SizedBox(height: 8),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.grey700,
+                  letterSpacing: -0.2,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1062,7 +1072,7 @@ class _MenuRow extends StatelessWidget {
       title: Text(
         label,
         style: TextStyle(
-          fontSize: 15,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
           color: color,
         ),

@@ -49,6 +49,7 @@ class _AlumniEventsScreenState extends ConsumerState<AlumniEventsScreen>
           if (_selectedType != null)
             IconButton(
               icon: const Icon(Icons.filter_alt_off),
+              tooltip: 'Filter',
               onPressed: () => setState(() => _selectedType = null),
             ),
           PopupMenuButton<AlumniEventType?>(

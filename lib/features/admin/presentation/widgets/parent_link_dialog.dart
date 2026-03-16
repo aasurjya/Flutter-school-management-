@@ -163,6 +163,7 @@ class _ParentLinkDialogState extends ConsumerState<ParentLinkDialog> {
           ),
           IconButton(
             icon: const Icon(Icons.close),
+            tooltip: 'Close',
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],

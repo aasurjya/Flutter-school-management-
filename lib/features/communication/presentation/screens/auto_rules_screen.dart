@@ -34,6 +34,7 @@ class _AutoRulesScreenState extends ConsumerState<AutoRulesScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
+            tooltip: 'Info',
             onPressed: () => _showInfoDialog(context),
           ),
         ],
@@ -397,6 +398,7 @@ class _RuleCard extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.delete_outline, size: 18),
                 color: AppColors.error,
+                tooltip: 'Delete',
                 onPressed: onDelete,
                 visualDensity: VisualDensity.compact,
               ),
@@ -481,6 +483,7 @@ class _RuleEditorSheetState extends State<_RuleEditorSheet> {
               ),
               const Spacer(),
               IconButton(
+                tooltip: 'Close',
                 onPressed: () => Navigator.pop(context),
                 icon: const Icon(Icons.close),
               ),

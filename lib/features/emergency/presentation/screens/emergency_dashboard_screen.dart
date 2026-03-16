@@ -552,6 +552,7 @@ class _ContactCard extends StatelessWidget {
         subtitle: Text(contact.contactTypeDisplay),
         trailing: IconButton(
           icon: const Icon(Icons.call, color: AppColors.success),
+          tooltip: 'Call',
           onPressed: () {
             // In a real app, launch phone dialer
             ScaffoldMessenger.of(context).showSnackBar(

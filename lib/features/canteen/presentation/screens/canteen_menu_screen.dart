@@ -26,12 +26,14 @@ class _CanteenMenuScreenState extends ConsumerState<CanteenMenuScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.account_balance_wallet_outlined),
+            tooltip: 'Wallet',
             onPressed: () => context.push('/canteen/wallet'),
           ),
           Stack(
             children: [
               IconButton(
                 icon: const Icon(Icons.shopping_cart_outlined),
+                tooltip: 'Cart',
                 onPressed: () => context.push('/canteen/cart'),
               ),
               if (cartItemCount > 0)

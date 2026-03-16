@@ -75,6 +75,7 @@ class _ExamDashboardScreenState extends ConsumerState<ExamDashboardScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
             onPressed: () => ref.invalidate(onlineExamsProvider(filter)),
           ),
         ],

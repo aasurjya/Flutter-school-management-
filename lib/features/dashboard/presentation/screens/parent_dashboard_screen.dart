@@ -24,7 +24,7 @@ class ParentDashboardScreen extends ConsumerWidget {
           color: Theme.of(context).cardColor,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -68,11 +68,15 @@ class ParentDashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          // Professional Header
-          SliverAppBar(
-            expandedHeight: 180,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(currentUserProvider);
+        },
+        child: CustomScrollView(
+          slivers: [
+            // Professional Header
+            SliverAppBar(
+              expandedHeight: 180,
             floating: false,
             pinned: true,
             elevation: 0,
@@ -101,7 +105,7 @@ class ParentDashboardScreen extends ConsumerWidget {
                   ),
                   SafeArea(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -109,7 +113,7 @@ class ParentDashboardScreen extends ConsumerWidget {
                           Text(
                             'Hello,',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.6),
+                              color: Colors.white.withValues(alpha: 0.85),
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.5,
@@ -135,12 +139,14 @@ class ParentDashboardScreen extends ConsumerWidget {
             actions: [
               IconButton(
                 icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                tooltip: 'Notifications',
                 onPressed: () => context.push(AppRoutes.notifications),
               ),
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: IconButton(
                   icon: const Icon(Icons.settings_outlined, color: Colors.white),
+                  tooltip: 'Settings',
                   onPressed: () => _showSettingsMenu(context, ref),
                 ),
               ),
@@ -149,7 +155,7 @@ class ParentDashboardScreen extends ConsumerWidget {
 
           // Main Dashboard Content
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // Weekly Digest Banner - Elevated
@@ -193,6 +199,7 @@ class ParentDashboardScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
@@ -244,7 +251,7 @@ class ParentDashboardScreen extends ConsumerWidget {
                       size: 28,
                     ),
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 24),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,7 +270,7 @@ class ParentDashboardScreen extends ConsumerWidget {
                           '$count new personalized update${count > 1 ? 's' : ''} available',
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 13,
+                            fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -301,13 +308,13 @@ class ParentDashboardScreen extends ConsumerWidget {
             onPressed: () {},
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primary,
-              textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
             ),
             child: Row(
               children: [
                 Text(action),
                 const SizedBox(width: 4),
-                const Icon(Icons.arrow_forward_rounded, size: 14),
+                const Icon(Icons.arrow_forward_rounded, size: 16),
               ],
             ),
           ),
@@ -357,7 +364,7 @@ class ParentDashboardScreen extends ConsumerWidget {
               Text(
                 days[index],
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppColors.grey400,
                 ),
@@ -374,7 +381,7 @@ class ParentDashboardScreen extends ConsumerWidget {
                 child: Icon(
                   isPresent ? Icons.check_rounded : Icons.close_rounded,
                   color: isPresent ? AppColors.success : AppColors.error,
-                  size: 18,
+                  size: 20,
                 ),
               ),
             ],
@@ -403,7 +410,7 @@ class ParentDashboardScreen extends ConsumerWidget {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   children: [
                     Row(
@@ -432,7 +439,7 @@ class ParentDashboardScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              if (!isLast) const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.borderLight),
+              if (!isLast) const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
             ],
           );
         }).toList(),
@@ -574,9 +581,9 @@ class _ChildrenSelector extends ConsumerWidget {
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, color: AppColors.error, size: 18),
+            Icon(Icons.error_outline, color: AppColors.error, size: 20),
             SizedBox(width: 8),
-            Text('Could not load children', style: TextStyle(color: AppColors.error, fontSize: 13)),
+            Text('Could not load children', style: TextStyle(color: AppColors.error, fontSize: 12)),
           ],
         ),
       ),
@@ -593,7 +600,7 @@ class _ChildrenSelector extends ConsumerWidget {
             child: const Center(
               child: Text(
                 'No children linked to your account.',
-                style: TextStyle(color: AppColors.grey500, fontSize: 13),
+                style: TextStyle(color: AppColors.grey500, fontSize: 12),
               ),
             ),
           );
@@ -662,7 +669,7 @@ class _ChildOverviewCard extends ConsumerWidget {
         child: const Center(
           child: Text(
             'Select a child to view details.',
-            style: TextStyle(color: AppColors.grey500, fontSize: 13),
+            style: TextStyle(color: AppColors.grey500, fontSize: 12),
           ),
         ),
       );
@@ -721,7 +728,7 @@ class _ChildOverviewCard extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: 24),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -743,7 +750,7 @@ class _ChildOverviewCard extends ConsumerWidget {
                   ].join(' • '),
                   style: const TextStyle(
                     color: AppColors.grey500,
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -825,7 +832,7 @@ class _ParentStatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -889,7 +896,7 @@ class _StatusBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          Icon(icon, size: 16, color: color),
           const SizedBox(width: 4),
           Text(
             label,
@@ -970,7 +977,7 @@ class _FeeItem extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 13)),
+        Text(label, style: const TextStyle(fontSize: 12)),
         Text(amount, style: const TextStyle(fontWeight: FontWeight.w500)),
       ],
     );
@@ -1022,14 +1029,14 @@ class _ChildCard extends StatelessWidget {
               name,
               style: TextStyle(
                 fontWeight: FontWeight.w700,
-                fontSize: 13,
+                fontSize: 12,
                 color: isSelected ? Colors.white : AppColors.grey900,
               ),
             ),
             Text(
               className,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
                 color: isSelected
                     ? Colors.white.withValues(alpha: 0.75)
                     : AppColors.grey500,

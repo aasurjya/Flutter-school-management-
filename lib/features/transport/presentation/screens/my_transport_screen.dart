@@ -164,6 +164,7 @@ class MyTransportScreen extends ConsumerWidget {
                       trailing: route.driverPhone != null
                           ? IconButton(
                               icon: const Icon(Icons.phone),
+                              tooltip: 'Call',
                               onPressed: () async {
                                 final uri = Uri.parse('tel:${route.driverPhone}');
                                 if (await canLaunchUrl(uri)) {
@@ -187,6 +188,7 @@ class MyTransportScreen extends ConsumerWidget {
                       trailing: route.helperPhone != null
                           ? IconButton(
                               icon: const Icon(Icons.phone),
+                              tooltip: 'Call',
                               onPressed: () async {
                                 final uri = Uri.parse('tel:${route.helperPhone}');
                                 if (await canLaunchUrl(uri)) {

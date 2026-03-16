@@ -352,6 +352,7 @@ class _GeofenceCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 IconButton(
                   icon: const Icon(Icons.delete_outline, size: 20),
+                  tooltip: 'Delete',
                   onPressed: onDelete,
                   color: AppColors.error,
                   padding: EdgeInsets.zero,

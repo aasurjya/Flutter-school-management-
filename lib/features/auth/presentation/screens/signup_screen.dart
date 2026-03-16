@@ -433,6 +433,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         : Icons.visibility_off_outlined,
                     size: 20,
                   ),
+                  tooltip: 'Toggle visibility',
                   onPressed: () =>
                       setState(() => _obscurePassword = !_obscurePassword),
                 ),
@@ -465,6 +466,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         : Icons.visibility_off_outlined,
                     size: 20,
                   ),
+                  tooltip: 'Toggle visibility',
                   onPressed: () => setState(() =>
                       _obscureConfirmPassword = !_obscureConfirmPassword),
                 ),

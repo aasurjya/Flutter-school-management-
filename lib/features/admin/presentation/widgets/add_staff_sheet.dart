@@ -386,6 +386,7 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
           const Spacer(),
           IconButton(
             icon: const Icon(Icons.close, color: Colors.white),
+            tooltip: 'Close',
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],

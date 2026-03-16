@@ -27,7 +27,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
           color: Theme.of(context).cardColor,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -80,11 +80,16 @@ class TeacherDashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          // Professional Header
-          SliverAppBar(
-            expandedHeight: 220,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(currentUserProvider);
+          ref.invalidate(currentAcademicYearProvider);
+        },
+        child: CustomScrollView(
+          slivers: [
+            // Professional Header
+            SliverAppBar(
+              expandedHeight: 220,
             floating: false,
             pinned: true,
             elevation: 0,
@@ -144,7 +149,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 20),
+                              const SizedBox(width: 24),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +157,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                     Text(
                                       'Welcome back,',
                                       style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.6),
+                                        color: Colors.white.withValues(alpha: 0.85),
                                         fontSize: 14,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -173,7 +178,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 24),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(12),
@@ -181,7 +186,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.calendar_today, size: 14, color: Colors.white70),
+                                const Icon(Icons.calendar_today, size: 16, color: Colors.white70),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Academic Year 2023-24',
@@ -209,12 +214,14 @@ class TeacherDashboardScreen extends ConsumerWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                tooltip: 'Notifications',
                 onPressed: () => context.push(AppRoutes.notifications),
               ),
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: IconButton(
                   icon: const Icon(Icons.more_vert_rounded, color: Colors.white),
+                  tooltip: 'More options',
                   onPressed: () => _showSettingsMenu(context, ref),
                 ),
               ),
@@ -223,7 +230,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
 
           // Main Dashboard Content
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // Quick Summary Stats Grid
@@ -259,6 +266,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
@@ -307,13 +315,13 @@ class TeacherDashboardScreen extends ConsumerWidget {
             onPressed: () {},
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primary,
-              textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
             ),
             child: Row(
               children: [
                 Text(actionLabel),
                 const SizedBox(width: 4),
-                const Icon(Icons.arrow_forward_rounded, size: 14),
+                const Icon(Icons.arrow_forward_rounded, size: 16),
               ],
             ),
           ),
@@ -397,7 +405,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
           return Column(
             children: [
               ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 leading: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
@@ -427,7 +435,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 ),
                 onTap: () {},
               ),
-              if (!isLast) const Divider(height: 1, indent: 70, endIndent: 20, color: AppColors.borderLight),
+              if (!isLast) const Divider(height: 1, indent: 70, endIndent: 24, color: AppColors.borderLight),
             ],
           );
         }).toList(),
@@ -453,7 +461,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             ...sections.map((section) => Container(
                   margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -480,7 +488,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                           ),
                           child: const Icon(Icons.school_rounded, color: AppColors.primary, size: 24),
                         ),
-                        const SizedBox(width: 20),
+                        const SizedBox(width: 24),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -510,7 +518,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                     ),
                   ),
                 )),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
           ],
         );
       },
@@ -569,7 +577,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 Text(
                   item.time,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: isCurrent ? Colors.white70 : AppColors.grey400,
                   ),
@@ -676,7 +684,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                         ),
                       ),
                     )),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
               ],
             );
           },
@@ -833,47 +841,51 @@ class _AIToolCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 80,
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.borderLight),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
+          width: 80,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderLight),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: AppColors.grey700,
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 20),
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.grey700,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -897,7 +909,7 @@ class _TeacherStatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -953,6 +965,4 @@ class _ScheduleItem {
   final String period;
 
   _ScheduleItem(this.time, this.className, this.subject, this.period);
-}
-t, this.period);
 }

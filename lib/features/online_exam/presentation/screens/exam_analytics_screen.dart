@@ -24,6 +24,7 @@ class ExamAnalyticsScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
             onPressed: () {
               ref.invalidate(examAnalyticsProvider(examId));
               ref.invalidate(examScoreDistributionProvider(examId));

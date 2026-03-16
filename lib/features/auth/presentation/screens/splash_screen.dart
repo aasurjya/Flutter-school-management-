@@ -239,6 +239,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           'assets/icons/campusly-splash.png',
                           width: 280,
                           fit: BoxFit.contain,
+                          semanticLabel: 'Campusly logo',
                         ),
                         const SizedBox(height: 48),
                         // Loading indicator

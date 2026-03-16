@@ -370,6 +370,7 @@ class _AssignNewTabState extends ConsumerState<_AssignNewTab> {
               trailing: _expectedReturnDate != null
                   ? IconButton(
                       icon: const Icon(Icons.clear),
+                      tooltip: 'Clear',
                       onPressed: () =>
                           setState(() => _expectedReturnDate = null),
                     )

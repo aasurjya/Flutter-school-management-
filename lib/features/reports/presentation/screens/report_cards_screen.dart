@@ -612,6 +612,7 @@ class _GeneratedReportsSection extends StatelessWidget {
                       const SizedBox(width: 8),
                       IconButton(
                         icon: const Icon(Icons.visibility),
+                        tooltip: 'Toggle visibility',
                         onPressed: () => context.push('/reports/${report.id}'),
                       ),
                     ],

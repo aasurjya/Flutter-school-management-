@@ -247,6 +247,7 @@ class _PeriodCard extends StatelessWidget {
                       padding: const EdgeInsets.only(right: 12),
                       child: IconButton(
                         icon: const Icon(Icons.chevron_right),
+                        tooltip: 'Next',
                         onPressed: () {
                           // Navigate to class details
                         },

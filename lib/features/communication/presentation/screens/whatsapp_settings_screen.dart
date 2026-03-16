@@ -616,6 +616,7 @@ class _SecretField extends StatelessWidget {
         hintText: hint,
         suffixIcon: IconButton(
           icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+          tooltip: 'Toggle visibility',
           onPressed: onToggle,
         ),
       ),

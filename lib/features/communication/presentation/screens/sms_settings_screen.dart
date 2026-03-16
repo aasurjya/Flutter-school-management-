@@ -191,6 +191,7 @@ class _SmsSettingsScreenState extends ConsumerState<SmsSettingsScreen> {
                 icon: Icon(
                   _obscureKey ? Icons.visibility_off : Icons.visibility,
                 ),
+                tooltip: 'Toggle visibility',
                 onPressed: () => setState(() => _obscureKey = !_obscureKey),
               ),
             ),
@@ -210,6 +211,7 @@ class _SmsSettingsScreenState extends ConsumerState<SmsSettingsScreen> {
                 icon: Icon(
                   _obscureSecret ? Icons.visibility_off : Icons.visibility,
                 ),
+                tooltip: 'Toggle visibility',
                 onPressed: () =>
                     setState(() => _obscureSecret = !_obscureSecret),
               ),

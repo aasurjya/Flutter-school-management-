@@ -356,6 +356,7 @@ class _EmailSettingsScreenState extends ConsumerState<EmailSettingsScreen> {
               icon: Icon(
                 _obscurePassword ? Icons.visibility_off : Icons.visibility,
               ),
+              tooltip: 'Toggle visibility',
               onPressed: () =>
                   setState(() => _obscurePassword = !_obscurePassword),
             ),
@@ -391,6 +392,7 @@ class _EmailSettingsScreenState extends ConsumerState<EmailSettingsScreen> {
               icon: Icon(
                 _obscureKey ? Icons.visibility_off : Icons.visibility,
               ),
+              tooltip: 'Toggle visibility',
               onPressed: () => setState(() => _obscureKey = !_obscureKey),
             ),
           ),

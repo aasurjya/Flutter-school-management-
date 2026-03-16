@@ -60,6 +60,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
+            tooltip: 'Filter',
             onPressed: _showFilterDialog,
           ),
         ],
@@ -77,6 +78,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear),
+                        tooltip: 'Clear',
                         onPressed: () {
                           _searchController.clear();
                           _loadStudents();
@@ -557,6 +559,7 @@ class _StudentDetailSheetState extends State<_StudentDetailSheet> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.white),
+                  tooltip: 'Close',
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -665,6 +668,7 @@ class _StudentDetailSheetState extends State<_StudentDetailSheet> {
                           : Icons.visibility,
                       color: Colors.grey[600],
                     ),
+                    tooltip: 'Toggle visibility',
                     onPressed: () =>
                         setState(() => _passwordVisible = !_passwordVisible),
                   ),
@@ -676,6 +680,7 @@ class _StudentDetailSheetState extends State<_StudentDetailSheet> {
                     padding: EdgeInsets.zero,
                     iconSize: 16,
                     icon: Icon(Icons.copy, color: Colors.grey[600]),
+                    tooltip: 'Copy',
                     onPressed: () {
                       Clipboard.setData(
                           ClipboardData(text: _credential!.initialPassword));
@@ -761,6 +766,7 @@ class _CredCopyableRow extends StatelessWidget {
             padding: EdgeInsets.zero,
             iconSize: 16,
             icon: Icon(Icons.copy, color: Colors.grey[600]),
+            tooltip: 'Copy',
             onPressed: () {
               Clipboard.setData(ClipboardData(text: value));
               ScaffoldMessenger.of(context).showSnackBar(
@@ -848,6 +854,7 @@ class _AddStudentSheetState extends ConsumerState<_AddStudentSheet> {
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.white),
+                  tooltip: 'Close',
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -1323,6 +1330,7 @@ class _EditStudentSheetState extends ConsumerState<_EditStudentSheet> {
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.white),
+                  tooltip: 'Close',
                   onPressed: () => Navigator.pop(context),
                 ),
               ],

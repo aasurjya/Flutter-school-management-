@@ -104,6 +104,7 @@ class _HomeworkCalendarScreenState
                   children: [
                     IconButton(
                       icon: const Icon(Icons.chevron_left),
+                      tooltip: 'Previous',
                       onPressed: () {
                         setState(() {
                           _focusedMonth = DateTime(
@@ -121,6 +122,7 @@ class _HomeworkCalendarScreenState
                     ),
                     IconButton(
                       icon: const Icon(Icons.chevron_right),
+                      tooltip: 'Next',
                       onPressed: () {
                         setState(() {
                           _focusedMonth = DateTime(

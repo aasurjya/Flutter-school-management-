@@ -34,6 +34,7 @@ class ExamResultScreen extends ConsumerWidget {
             title: const Text('Exam Result'),
             leading: IconButton(
               icon: const Icon(Icons.close),
+              tooltip: 'Close',
               onPressed: () => context.go('/online-exams'),
             ),
           ),

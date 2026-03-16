@@ -179,6 +179,7 @@ class _ReportIncidentScreenState extends ConsumerState<ReportIncidentScreen> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
+                    tooltip: 'Add witness',
                     onPressed: () {
                       final name = _witnessController.text.trim();
                       if (name.isNotEmpty) {

@@ -304,21 +304,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 18),
-          const SizedBox(width: 10),
+          const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 20),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               _errorMessage ?? '',
               style: const TextStyle(
                 color: AppColors.error,
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ),
-          GestureDetector(
-            onTap: () => setState(() => _errorMessage = null),
-            child: const Icon(Icons.close_rounded, color: AppColors.error, size: 16),
+          IconButton(
+            onPressed: () => setState(() => _errorMessage = null),
+            icon: const Icon(Icons.close_rounded, color: AppColors.error, size: 16),
+            tooltip: 'Dismiss error',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            splashRadius: 20,
           ),
         ],
       ),
@@ -388,11 +392,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
             const SizedBox(height: 24),
+            AutofillGroup(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
             // Email Field
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.email],
               decoration: const InputDecoration(
                 labelText: 'Email Address',
                 prefixIcon: Icon(Icons.mail_outline_rounded, size: 20),
@@ -405,12 +414,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             // Password Field
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
               textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.password],
               onFieldSubmitted: (_) => _handleLogin(),
               decoration: InputDecoration(
                 labelText: 'Password',
@@ -422,6 +432,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         : Icons.visibility_off_outlined,
                     size: 20,
                   ),
+                  tooltip: _obscurePassword ? 'Show password' : 'Hide password',
                   onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
               ),
@@ -430,6 +441,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 if (value.length < 8) return 'Minimum 8 characters';
                 return null;
               },
+            ),
+                ],
+              ),
             ),
             const SizedBox(height: 32),
             LoadingButton(
@@ -442,7 +456,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               onPressed: _handleForgotPassword,
               style: TextButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.secondary,
-                minimumSize: const Size(double.infinity, 36),
+                minimumSize: const Size(double.infinity, 48),
               ),
               child: const Text('Forgot Password?', style: TextStyle(fontWeight: FontWeight.w600)),
             ),
@@ -560,7 +574,7 @@ class _ForgotPasswordDialogState extends ConsumerState<_ForgotPasswordDialog> {
               _message!,
               style: TextStyle(
                 color: _isSuccess ? AppColors.success : AppColors.error,
-                fontSize: 13,
+                fontSize: 12,
               ),
             ),
           ],

@@ -377,6 +377,7 @@ class _NewRequestTabState extends ConsumerState<_NewRequestTab> {
                         IconButton(
                           icon: const Icon(Icons.delete_outline,
                               size: 18, color: Colors.red),
+                          tooltip: 'Delete',
                           onPressed: () =>
                               setState(() => _items.removeAt(index)),
                         ),

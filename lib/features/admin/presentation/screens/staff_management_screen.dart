@@ -145,6 +145,7 @@ class _SearchBar extends StatelessWidget {
           suffixIcon: controller.text.isNotEmpty
               ? IconButton(
                   icon: const Icon(Icons.clear),
+                  tooltip: 'Clear',
                   onPressed: () {
                     controller.clear();
                     onChanged('');
@@ -668,6 +669,7 @@ class _StaffDetailSheetState extends State<_StaffDetailSheet> {
                           : Icons.visibility,
                       color: Colors.grey[600],
                     ),
+                    tooltip: 'Toggle visibility',
                     onPressed: () =>
                         setState(() => _passwordVisible = !_passwordVisible),
                   ),
@@ -679,6 +681,7 @@ class _StaffDetailSheetState extends State<_StaffDetailSheet> {
                     padding: EdgeInsets.zero,
                     iconSize: 16,
                     icon: Icon(Icons.copy, color: Colors.grey[600]),
+                    tooltip: 'Copy',
                     onPressed: () {
                       Clipboard.setData(
                           ClipboardData(text: _credential!.initialPassword));
@@ -760,6 +763,7 @@ class _SheetHeader extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.close, color: Colors.white),
+            tooltip: 'Close',
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
@@ -833,6 +837,7 @@ class _EditStaffSheetState extends State<_EditStaffSheet> {
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.white),
+                  tooltip: 'Close',
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
@@ -998,6 +1003,7 @@ class _CopyableRow extends StatelessWidget {
             padding: EdgeInsets.zero,
             iconSize: 16,
             icon: Icon(Icons.copy, color: Colors.grey[600]),
+            tooltip: 'Copy',
             onPressed: () {
               Clipboard.setData(ClipboardData(text: value));
               ScaffoldMessenger.of(context).showSnackBar(

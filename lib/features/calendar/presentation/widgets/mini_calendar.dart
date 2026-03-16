@@ -63,6 +63,7 @@ class _MiniCalendarState extends State<MiniCalendar> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
+                tooltip: 'Previous',
                 onPressed: _previousMonth,
                 icon: const Icon(Icons.chevron_left, size: 20),
                 constraints: const BoxConstraints(
@@ -76,6 +77,7 @@ class _MiniCalendarState extends State<MiniCalendar> {
                 ),
               ),
               IconButton(
+                tooltip: 'Next',
                 onPressed: _nextMonth,
                 icon: const Icon(Icons.chevron_right, size: 20),
                 constraints: const BoxConstraints(

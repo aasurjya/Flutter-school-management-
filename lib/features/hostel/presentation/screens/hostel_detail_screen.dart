@@ -106,6 +106,7 @@ class HostelDetailScreen extends ConsumerWidget {
                               trailing: hostel.contactNumber != null
                                   ? IconButton(
                                       icon: const Icon(Icons.phone),
+                                      tooltip: 'Call',
                                       onPressed: () {
                                         // TODO: Launch phone dialer
                                       },

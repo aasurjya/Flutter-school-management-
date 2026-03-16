@@ -105,6 +105,7 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
                 foregroundColor: Colors.white,
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
+                  tooltip: 'More options',
                   onPressed: () => context.pop(),
                 ),
                 actions: [

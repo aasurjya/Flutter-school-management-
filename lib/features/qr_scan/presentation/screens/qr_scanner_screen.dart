@@ -62,6 +62,7 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
           IconButton(
             icon: Icon(_torchEnabled ? Icons.flash_on : Icons.flash_off),
             color: _torchEnabled ? AppColors.accent : Colors.white,
+            tooltip: 'Toggle flash',
             onPressed: () {
               _controller.toggleTorch();
               setState(() => _torchEnabled = !_torchEnabled);
@@ -69,6 +70,7 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.cameraswitch),
+            tooltip: 'Switch camera',
             onPressed: () => _controller.switchCamera(),
           ),
         ],

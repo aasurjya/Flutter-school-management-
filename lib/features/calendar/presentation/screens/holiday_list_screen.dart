@@ -41,6 +41,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
+            tooltip: 'Filter',
             onPressed: () => _showFilterSheet(context),
           ),
         ],
@@ -319,6 +320,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
                         const Spacer(),
                         // Actions
                         IconButton(
+                          tooltip: 'Edit',
                           onPressed: () =>
                               _showEditHolidayDialog(context, holiday),
                           icon: const Icon(Icons.edit, size: 16),
@@ -328,6 +330,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
                           color: AppColors.textSecondaryLight,
                         ),
                         IconButton(
+                          tooltip: 'Delete',
                           onPressed: () =>
                               _confirmDeleteHoliday(context, holiday),
                           icon: const Icon(Icons.delete, size: 16),

@@ -43,6 +43,7 @@ class _CommunicationLogScreenState
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
+            tooltip: 'Filter',
             onPressed: () => _showFilterSheet(context),
           ),
         ],

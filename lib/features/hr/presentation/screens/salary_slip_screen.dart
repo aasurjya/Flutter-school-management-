@@ -97,6 +97,7 @@ class SalarySlipScreen extends ConsumerWidget {
                     const SizedBox(width: 8),
                     IconButton(
                       icon: const Icon(Icons.download),
+                      tooltip: 'Download',
                       onPressed: item != null
                           ? () => _downloadPdf(context, ref, item)
                           : null,

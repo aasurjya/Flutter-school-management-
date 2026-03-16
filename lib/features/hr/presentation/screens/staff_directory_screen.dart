@@ -53,6 +53,7 @@ class _StaffDirectoryScreenState extends ConsumerState<StaffDirectoryScreen> {
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.clear),
+                            tooltip: 'Clear',
                             onPressed: () {
                               _searchController.clear();
                               setState(() => _searchQuery = '');

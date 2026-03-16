@@ -290,6 +290,7 @@ class _AssetFormScreenState extends ConsumerState<AssetFormScreen> {
                 trailing: _purchaseDate != null
                     ? IconButton(
                         icon: const Icon(Icons.clear),
+                        tooltip: 'Clear',
                         onPressed: () =>
                             setState(() => _purchaseDate = null),
                       )
@@ -319,6 +320,7 @@ class _AssetFormScreenState extends ConsumerState<AssetFormScreen> {
                 trailing: _warrantyExpiry != null
                     ? IconButton(
                         icon: const Icon(Icons.clear),
+                        tooltip: 'Clear',
                         onPressed: () =>
                             setState(() => _warrantyExpiry = null),
                       )

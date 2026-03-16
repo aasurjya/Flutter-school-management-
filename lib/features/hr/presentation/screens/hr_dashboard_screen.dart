@@ -25,6 +25,7 @@ class HRDashboardScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
             onPressed: () {
               ref.invalidate(hrStatsProvider);
               ref.invalidate(expiringContractsProvider);

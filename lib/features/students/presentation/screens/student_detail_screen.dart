@@ -82,10 +82,12 @@ class StudentDetailScreen extends ConsumerWidget {
             actions: [
               IconButton(
                 icon: const Icon(Icons.edit, color: Colors.white),
+                tooltip: 'Edit student',
                 onPressed: () {},
               ),
               IconButton(
                 icon: const Icon(Icons.more_vert, color: Colors.white),
+                tooltip: 'More options',
                 onPressed: () {},
               ),
             ],

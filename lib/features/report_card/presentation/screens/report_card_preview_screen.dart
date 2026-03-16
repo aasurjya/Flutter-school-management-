@@ -27,6 +27,7 @@ class ReportCardPreviewScreen extends ConsumerWidget {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.share),
+                        tooltip: 'Share',
                         onPressed: () async {
                           final data = report.data.isNotEmpty
                               ? ReportCardData.fromJson(report.data)
@@ -48,6 +49,7 @@ class ReportCardPreviewScreen extends ConsumerWidget {
                       ),
                       IconButton(
                         icon: const Icon(Icons.print),
+                        tooltip: 'Print',
                         onPressed: () async {
                           final data = report.data.isNotEmpty
                               ? ReportCardData.fromJson(report.data)

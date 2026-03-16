@@ -305,6 +305,7 @@ class _AlumniRegistrationScreenState
                       ),
                       const SizedBox(width: 8),
                       IconButton(
+                        tooltip: 'Add skill',
                         onPressed: () {
                           if (_skillController.text.isNotEmpty) {
                             setState(() {

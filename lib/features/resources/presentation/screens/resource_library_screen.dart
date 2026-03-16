@@ -96,6 +96,7 @@ class _SearchBar extends ConsumerWidget {
           suffixIcon: controller.text.isNotEmpty
               ? IconButton(
                   icon: const Icon(Icons.clear),
+                  tooltip: 'Clear',
                   onPressed: () {
                     controller.clear();
                     ref.read(resourceSearchQueryProvider.notifier).state = '';
@@ -447,6 +448,7 @@ class _ResourceCard extends StatelessWidget {
               else
                 IconButton(
                   icon: const Icon(Icons.download),
+                  tooltip: 'Download',
                   onPressed: () => _downloadResource(context),
                 ),
             ],
@@ -990,6 +992,7 @@ class _UploadResourceSheetState extends ConsumerState<_UploadResourceSheet> {
                       ),
                       const SizedBox(width: 8),
                       IconButton(
+                        tooltip: 'Add',
                         onPressed: () {
                           if (_tagController.text.trim().isNotEmpty) {
                             setState(() {

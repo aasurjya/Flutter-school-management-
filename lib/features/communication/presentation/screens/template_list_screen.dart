@@ -36,6 +36,7 @@ class _TemplateListScreenState extends ConsumerState<TemplateListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
+            tooltip: 'Search',
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Search coming soon')),
@@ -373,6 +374,7 @@ class _TemplateCard extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.delete_outline, size: 18),
                 color: AppColors.error,
+                tooltip: 'Delete',
                 onPressed: onDelete,
                 visualDensity: VisualDensity.compact,
               ),

@@ -260,6 +260,7 @@ class _InquiryFormScreenState extends ConsumerState<InquiryFormScreen> {
                     trailing: _followupDate != null
                         ? IconButton(
                             icon: const Icon(Icons.clear),
+                            tooltip: 'Clear',
                             onPressed: () =>
                                 setState(() => _followupDate = null),
                           )

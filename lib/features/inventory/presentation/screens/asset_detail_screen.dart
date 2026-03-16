@@ -41,6 +41,7 @@ class AssetDetailScreen extends ConsumerWidget {
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.edit_outlined),
+                    tooltip: 'Edit',
                     onPressed: () =>
                         context.push('/inventory/assets/edit/$assetId'),
                   ),

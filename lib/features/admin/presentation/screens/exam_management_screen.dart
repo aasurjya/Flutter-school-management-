@@ -354,6 +354,7 @@ class _ExamDetailSheet extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.white),
+                  tooltip: 'Close',
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -458,7 +459,7 @@ class _CreateExamSheetState extends ConsumerState<_CreateExamSheet> {
               children: [
                 const Text('Create Exam', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                 const Spacer(),
-                IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: () => Navigator.pop(context)),
+                IconButton(icon: const Icon(Icons.close, color: Colors.white), tooltip: 'Close', onPressed: () => Navigator.pop(context)),
               ],
             ),
           ),

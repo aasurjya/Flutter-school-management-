@@ -270,6 +270,7 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
                   _passwordVisible ? Icons.visibility_off : Icons.visibility,
                   color: AppColors.grey500,
                 ),
+                tooltip: 'Toggle visibility',
                 onPressed: () =>
                     setState(() => _passwordVisible = !_passwordVisible),
               ),
@@ -281,6 +282,7 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
                 padding: EdgeInsets.zero,
                 iconSize: 16,
                 icon: const Icon(Icons.copy, color: AppColors.grey500),
+                tooltip: 'Copy',
                 onPressed: () {
                   Clipboard.setData(
                       ClipboardData(text: cred.initialPassword));
@@ -474,6 +476,7 @@ class _CopyableInfoRow extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 iconSize: 16,
                 icon: const Icon(Icons.copy, color: AppColors.grey500),
+                tooltip: 'Copy',
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: value));
                   ScaffoldMessenger.of(context).showSnackBar(

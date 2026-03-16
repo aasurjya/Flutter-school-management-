@@ -40,6 +40,7 @@ class _VisitorDashboardScreenState
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
             onPressed: () {
               ref.invalidate(visitorStatsProvider);
               ref.read(visitorLogNotifierProvider.notifier).loadTodayLogs();

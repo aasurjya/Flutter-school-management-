@@ -249,6 +249,7 @@ class _CartItemTile extends ConsumerWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.remove_circle_outline),
+                  tooltip: 'Decrease quantity',
                   onPressed: () => ref.read(cartProvider.notifier).updateQuantity(
                         cartItem.item.id,
                         cartItem.quantity - 1,
@@ -260,6 +261,7 @@ class _CartItemTile extends ConsumerWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.add_circle_outline),
+                  tooltip: 'Increase quantity',
                   onPressed: () => ref.read(cartProvider.notifier).updateQuantity(
                         cartItem.item.id,
                         cartItem.quantity + 1,

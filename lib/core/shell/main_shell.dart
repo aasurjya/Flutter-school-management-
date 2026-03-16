@@ -443,37 +443,41 @@ class _MoreSheet extends StatelessWidget {
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                  if (index < _moreRoutes.length) {
-                    context.go(_moreRoutes[index]);
-                  }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: AppColors.grey100,
-                        borderRadius: BorderRadius.circular(16),
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    Navigator.pop(context);
+                    if (index < _moreRoutes.length) {
+                      context.go(_moreRoutes[index]);
+                    }
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: AppColors.grey100,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(item.icon,
+                            color: AppColors.grey700, size: 24),
                       ),
-                      child: Icon(item.icon,
-                          color: AppColors.grey700, size: 24),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      item.label,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.grey700,
+                      const SizedBox(height: 8),
+                      Text(
+                        item.label,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.grey700,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },

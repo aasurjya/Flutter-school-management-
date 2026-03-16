@@ -365,6 +365,7 @@ class _CrewTile extends StatelessWidget {
         if (phone != null)
           IconButton(
             icon: const Icon(Icons.phone),
+            tooltip: 'Call',
             onPressed: () async {
               final uri = Uri.parse('tel:$phone');
               if (await canLaunchUrl(uri)) {

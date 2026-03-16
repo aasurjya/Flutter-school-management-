@@ -159,6 +159,7 @@ class _ExamInterface extends ConsumerWidget {
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.close),
+          tooltip: 'Close',
           onPressed: () => _showExitDialog(context, ref),
         ),
         title: Column(

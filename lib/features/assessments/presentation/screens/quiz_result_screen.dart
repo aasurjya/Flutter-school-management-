@@ -18,6 +18,7 @@ class QuizResultScreen extends ConsumerWidget {
         title: const Text('Quiz Result'),
         leading: IconButton(
           icon: const Icon(Icons.close),
+          tooltip: 'Close',
           onPressed: () => context.go('/assessments'),
         ),
       ),

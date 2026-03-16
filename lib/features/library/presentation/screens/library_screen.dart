@@ -219,6 +219,7 @@ class _SearchTabState extends ConsumerState<_SearchTab> {
               suffixIcon: widget.searchQuery.isNotEmpty
                   ? IconButton(
                       icon: const Icon(Icons.clear),
+                      tooltip: 'Clear',
                       onPressed: () {
                         _searchController.clear();
                         widget.onSearchChanged('');

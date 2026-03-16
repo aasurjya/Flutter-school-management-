@@ -364,6 +364,7 @@ class _AddStudentFormState extends ConsumerState<AddStudentForm> {
           const Spacer(),
           IconButton(
             icon: const Icon(Icons.close),
+            tooltip: 'Close',
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],

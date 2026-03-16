@@ -43,6 +43,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
+            tooltip: 'Search',
             onPressed: () {},
           ),
         ],
@@ -146,6 +147,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
                     children: [
                       IconButton(
                         icon: const Icon(Icons.attach_file),
+                        tooltip: 'Send',
                         onPressed: () {},
                       ),
                       const Spacer(),
@@ -555,8 +557,8 @@ class _ChatDetailScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.call), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.call), tooltip: 'Call', onPressed: () {}),
+          IconButton(icon: const Icon(Icons.more_vert), tooltip: 'More options', onPressed: () {}),
         ],
       ),
       body: Column(
@@ -607,6 +609,7 @@ class _ChatDetailScreen extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.attach_file),
+                    tooltip: 'Attach file',
                     onPressed: () {},
                   ),
                   Expanded(
@@ -631,6 +634,7 @@ class _ChatDetailScreen extends StatelessWidget {
                     backgroundColor: AppColors.primary,
                     child: IconButton(
                       icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                      tooltip: 'Send',
                       onPressed: () {},
                     ),
                   ),

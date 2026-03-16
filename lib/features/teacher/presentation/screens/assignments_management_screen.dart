@@ -311,6 +311,7 @@ class _AssignmentDetailSheet extends ConsumerWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.close, color: Colors.white),
+                      tooltip: 'Close',
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -661,6 +662,7 @@ class _CreateAssignmentSheetState extends ConsumerState<_CreateAssignmentSheet> 
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.white),
+                  tooltip: 'Close',
                   onPressed: () => Navigator.pop(context),
                 ),
               ],

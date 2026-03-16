@@ -59,6 +59,7 @@ class _AcademicCalendarScreenState
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
+            tooltip: 'Close',
             onPressed: () => _showFilterDialog(context),
           ),
         ],

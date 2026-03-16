@@ -79,6 +79,7 @@ class _DetentionManagementScreenState
               children: [
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
+                  tooltip: 'Previous',
                   onPressed: () {
                     setState(() {
                       _selectedDate = _selectedDate
@@ -113,6 +114,7 @@ class _DetentionManagementScreenState
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
+                  tooltip: 'Next',
                   onPressed: () {
                     setState(() {
                       _selectedDate =

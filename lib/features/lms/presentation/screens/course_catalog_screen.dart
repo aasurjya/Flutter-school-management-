@@ -57,6 +57,7 @@ class _CourseCatalogScreenState extends ConsumerState<CourseCatalogScreen> {
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear),
+                        tooltip: 'Clear',
                         onPressed: () {
                           _searchController.clear();
                           setState(() => _searchQuery = '');

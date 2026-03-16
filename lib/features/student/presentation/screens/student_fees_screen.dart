@@ -48,6 +48,7 @@ class StudentFeesScreen extends ConsumerWidget {
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh),
+                tooltip: 'Refresh',
                 onPressed: () {
                   ref.invalidate(feeCollectionStatsProvider(null));
                   ref.invalidate(invoicesProvider(InvoicesFilter(studentId: effectiveStudentId)));

@@ -6,6 +6,8 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logout_helper.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../ai_insights/presentation/widgets/staff_ai_insight_card.dart';
+import '../../../ai_insights/providers/canteen_insight_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../canteen/providers/canteen_provider.dart';
 
@@ -166,6 +168,21 @@ class CanteenStaffDashboardScreen extends ConsumerWidget {
                       _StatCard(label: 'Revenue Today', value: '\u20B9${stats['total_revenue'] ?? 0}', icon: Icons.payments_outlined, iconColor: const Color(0xFF10B981)),
                     ],
                   ),
+                ),
+
+                const SizedBox(height: 16),
+                StaffAIInsightCard(
+                  provider: canteenInsightProvider(
+                    CanteenInsightInput(
+                      pendingOrders: (statsAsync.valueOrNull?['pending_orders'] as num?)?.toInt() ?? 0,
+                      fulfilledToday: (statsAsync.valueOrNull?['fulfilled_today'] as num?)?.toInt() ?? 0,
+                      totalOrders: (statsAsync.valueOrNull?['total_orders'] as num?)?.toInt() ?? 0,
+                      revenueToday: (statsAsync.valueOrNull?['total_revenue'] as num?)?.toDouble() ?? 0,
+                    ),
+                  ),
+                  title: 'Canteen Insight',
+                  icon: Icons.restaurant_outlined,
+                  color: AppColors.primary,
                 ),
 
                 const SizedBox(height: 24),

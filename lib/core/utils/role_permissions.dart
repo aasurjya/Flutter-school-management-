@@ -82,6 +82,7 @@ class RolePermissions {
     AppFeature.dashboard,
     AppFeature.tenantManagement,
     AppFeature.settings,
+    AppFeature.aiInsights,
   };
 
   static const _adminFeatures = {
@@ -155,6 +156,7 @@ class RolePermissions {
     AppFeature.portfolio,
     AppFeature.onlineExams,
     AppFeature.homework,
+    AppFeature.aiInsights,
   };
 
   static const _parentFeatures = {
@@ -175,6 +177,7 @@ class RolePermissions {
     AppFeature.reports,
     AppFeature.messages,
     AppFeature.notifications,
+    AppFeature.aiInsights,
   };
 
   static const _librarianFeatures = {
@@ -183,6 +186,7 @@ class RolePermissions {
     AppFeature.messages,
     AppFeature.notifications,
     AppFeature.announcements,
+    AppFeature.aiInsights,
   };
 
   static const _transportManagerFeatures = {
@@ -191,6 +195,7 @@ class RolePermissions {
     AppFeature.messages,
     AppFeature.notifications,
     AppFeature.announcements,
+    AppFeature.aiInsights,
   };
 
   static const _hostelWardenFeatures = {
@@ -199,6 +204,7 @@ class RolePermissions {
     AppFeature.messages,
     AppFeature.notifications,
     AppFeature.announcements,
+    AppFeature.aiInsights,
   };
 
   static const _canteenStaffFeatures = {
@@ -207,6 +213,7 @@ class RolePermissions {
     AppFeature.messages,
     AppFeature.notifications,
     AppFeature.announcements,
+    AppFeature.aiInsights,
   };
 
   static const _receptionistFeatures = {
@@ -216,5 +223,6 @@ class RolePermissions {
     AppFeature.messages,
     AppFeature.notifications,
     AppFeature.announcements,
+    AppFeature.aiInsights,
   };
 }

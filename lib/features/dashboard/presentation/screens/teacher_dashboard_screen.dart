@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logout_helper.dart';
+import '../../../ai_insights/presentation/widgets/class_narrative_card.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../academic/providers/academic_provider.dart';
 import '../../../ai_insights/providers/risk_score_provider.dart';
@@ -333,11 +334,38 @@ class TeacherDashboardScreen extends ConsumerWidget {
     return Column(
       children: [
         const SizedBox(height: 32),
+        _buildSectionHeader(context, 'Class Health', null),
+        const SizedBox(height: 16),
+        _buildClassHealthCard(ref),
+        const SizedBox(height: 32),
         _buildSectionHeader(context, "Student Insights", "Analytics"),
         const SizedBox(height: 16),
         _buildAtRiskSection(context, ref),
         _buildEarlyWarningSection(context, ref),
       ],
+    );
+  }
+
+  Widget _buildClassHealthCard(WidgetRef ref) {
+    final academicYear = ref.watch(currentAcademicYearProvider);
+    return academicYear.when(
+      loading: () => const ClassNarrativeCard(isLoading: true),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (year) {
+        if (year == null) {
+          return const ClassNarrativeCard(
+            narrative: 'Set up an academic year to see class health insights.',
+          );
+        }
+        // For now, show a placeholder until teacher's primary section is known.
+        // The enrichedClassIntelligenceProvider requires a SectionYearFilter.
+        return const ClassNarrativeCard(
+          narrative:
+              'Select a class section from your assignments to view AI-powered '
+              'class health analysis including attendance trends, performance '
+              'patterns, and at-risk student identification.',
+        );
+      },
     );
   }
 

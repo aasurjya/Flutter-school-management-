@@ -617,4 +617,80 @@ class AITextGenerator {
       maxTokens: 300,
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // 14. School Health Narrative (Admin)
+  // ---------------------------------------------------------------------------
+
+  static const _schoolHealthSystemPrompt =
+      'You are a data analyst for a school principal or administrator. Given '
+      'key school health metrics, write a 3-5 sentence daily summary. Highlight '
+      'the most notable metric (good or concerning), compare to expected norms, '
+      'and end with one actionable suggestion. Do not use markdown or bullet '
+      'points. Be concise and professional.';
+
+  Future<AITextResult> generateSchoolHealthNarrative({
+    required double attendancePercent,
+    required double feeCollectionRate,
+    required Map<String, int> riskDistribution,
+    required int totalStudents,
+    required String fallback,
+  }) {
+    final highRisk = (riskDistribution['high'] ?? 0) +
+        (riskDistribution['critical'] ?? 0);
+
+    final userPrompt = StringBuffer()
+      ..writeln('Total students: $totalStudents')
+      ..writeln('Today\'s attendance: ${attendancePercent.round()}%')
+      ..writeln('Fee collection rate: ${feeCollectionRate.round()}%')
+      ..writeln('High-risk students: $highRisk')
+      ..writeln(
+          'Risk distribution: ${riskDistribution.entries.map((e) => "${e.key}: ${e.value}").join(", ")}')
+      ..writeln(
+          'Write a 3-5 sentence school health summary with one suggestion.');
+
+    return _generate(
+      systemPrompt: _schoolHealthSystemPrompt,
+      userPrompt: userPrompt.toString(),
+      fallback: fallback,
+      temperature: 0.5,
+      maxTokens: 350,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 15. Platform Health Narrative (Super Admin)
+  // ---------------------------------------------------------------------------
+
+  static const _platformHealthSystemPrompt =
+      'You are a platform analytics assistant for a multi-tenant school '
+      'management SaaS. Given platform-wide metrics, write a 3-5 sentence '
+      'summary covering tenant health, user activity, and revenue trends. '
+      'Flag any concern and suggest one action. Do not use markdown or bullet '
+      'points.';
+
+  Future<AITextResult> generatePlatformHealthNarrative({
+    required int tenantCount,
+    required int totalStudents,
+    required double activePercent,
+    required double monthlyRevenue,
+    required String fallback,
+  }) {
+    final userPrompt = StringBuffer()
+      ..writeln('Active tenants: $tenantCount')
+      ..writeln('Total students across platform: $totalStudents')
+      ..writeln('Active user percentage: ${activePercent.round()}%')
+      ..writeln(
+          'Monthly revenue: \$${monthlyRevenue.toStringAsFixed(0)}')
+      ..writeln(
+          'Write a 3-5 sentence platform health summary with one suggestion.');
+
+    return _generate(
+      systemPrompt: _platformHealthSystemPrompt,
+      userPrompt: userPrompt.toString(),
+      fallback: fallback,
+      temperature: 0.5,
+      maxTokens: 350,
+    );
+  }
 }

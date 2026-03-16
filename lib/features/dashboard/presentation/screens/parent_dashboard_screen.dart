@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logout_helper.dart';
+import '../../../ai_insights/presentation/widgets/parent_ai_insights_card.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../ai_insights/providers/parent_digest_provider.dart';
 import '../../../attendance/providers/attendance_provider.dart';
@@ -167,6 +168,10 @@ class ParentDashboardScreen extends ConsumerWidget {
 
                 // Active Child Overview - Wired to real data
                 _ChildOverviewCard(parentUserId: currentUser?.id),
+                const SizedBox(height: 16),
+
+                // AI Insights for selected child
+                const _ParentAISection(),
                 const SizedBox(height: 32),
 
                 // Academic Quick Stats Grid
@@ -1046,6 +1051,31 @@ class _ChildCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ─── Parent AI Insights Section ───────────────────────────────────────────────
+class _ParentAISection extends ConsumerWidget {
+  const _ParentAISection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedChild = ref.watch(selectedChildProvider);
+    if (selectedChild == null) return const SizedBox.shrink();
+
+    final studentId = selectedChild['student_id'] as String? ??
+        selectedChild['user_id'] as String? ??
+        '';
+    final name = selectedChild['student_name'] as String? ??
+        '${selectedChild['first_name'] ?? ''} ${selectedChild['last_name'] ?? ''}'
+            .trim();
+
+    if (studentId.isEmpty) return const SizedBox.shrink();
+
+    return ParentAIInsightsCard(
+      childUserId: studentId,
+      childName: name,
     );
   }
 }

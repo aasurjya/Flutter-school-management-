@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config/app_environment.dart';
 import '../services/ai_image_generator.dart';
+import '../services/ai_staff_text_generator.dart';
 import '../services/ai_text_generator.dart';
 import '../services/deepseek_service.dart';
 import '../services/openrouter_image_service.dart';
@@ -32,4 +33,9 @@ final openRouterImageServiceProvider = Provider<OpenRouterImageService?>((ref) {
 final aiImageGeneratorProvider = Provider<AIImageGenerator>((ref) {
   final service = ref.watch(openRouterImageServiceProvider);
   return AIImageGenerator(service: service);
+});
+
+final aiStaffTextGeneratorProvider = Provider<AIStaffTextGenerator>((ref) {
+  final service = ref.watch(deepSeekServiceProvider);
+  return AIStaffTextGenerator(service: service);
 });

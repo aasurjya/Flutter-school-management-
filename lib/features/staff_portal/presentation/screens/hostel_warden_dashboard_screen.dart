@@ -6,6 +6,8 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logout_helper.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../ai_insights/presentation/widgets/staff_ai_insight_card.dart';
+import '../../../ai_insights/providers/hostel_insight_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../hostel/providers/hostel_provider.dart';
 
@@ -185,6 +187,21 @@ class HostelWardenDashboardScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
+                ),
+
+                const SizedBox(height: 16),
+                StaffAIInsightCard(
+                  provider: hostelInsightProvider(
+                    HostelInsightInput(
+                      occupancyPercent: (statsAsync.valueOrNull?['occupancy_percent'] as num?)?.toDouble() ?? 0,
+                      availableBeds: (statsAsync.valueOrNull?['available_beds'] as num?)?.toInt() ?? 0,
+                      maintenanceRequests: (statsAsync.valueOrNull?['maintenance_requests'] as num?)?.toInt() ?? 0,
+                      totalHostels: (statsAsync.valueOrNull?['total_hostels'] as num?)?.toInt() ?? 0,
+                    ),
+                  ),
+                  title: 'Hostel Insight',
+                  icon: Icons.hotel_outlined,
+                  color: AppColors.primary,
                 ),
 
                 const SizedBox(height: 24),

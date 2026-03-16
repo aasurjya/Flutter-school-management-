@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logout_helper.dart';
+import '../../../ai_insights/presentation/widgets/admin_ai_narrative_card.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../id_card/providers/id_card_provider.dart';
 import '../../../academic/providers/academic_provider.dart';
@@ -168,6 +169,15 @@ class AdminDashboardScreen extends ConsumerWidget {
                   _buildSyllabusCoverageCard(context),
                 ],
               ),
+            ),
+          ),
+
+          // AI School Health Summary
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: AdminAINarrativeCard(),
             ),
           ),
 

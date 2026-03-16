@@ -6,6 +6,8 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logout_helper.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../ai_insights/presentation/widgets/staff_ai_insight_card.dart';
+import '../../../ai_insights/providers/fee_insight_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../fees/providers/fees_provider.dart';
 
@@ -156,6 +158,20 @@ class AccountantDashboardScreen extends ConsumerWidget {
                   mainAxisSpacing: 12,
                   childAspectRatio: 1.5,
                   children: _buildStatCards(feeStatsAsync, overdueAsync),
+                ),
+
+                const SizedBox(height: 16),
+                StaffAIInsightCard(
+                  provider: feeInsightProvider(
+                    FeeInsightInput(
+                      overdueCount: overdueAsync.valueOrNull?.length ?? 0,
+                      totalBilled: (feeStatsAsync.valueOrNull?['total_billed'] as num?)?.toDouble() ?? 0,
+                      totalCollected: (feeStatsAsync.valueOrNull?['total_collected'] as num?)?.toDouble() ?? 0,
+                    ),
+                  ),
+                  title: 'Fee Insight',
+                  icon: Icons.account_balance_wallet_outlined,
+                  color: AppColors.primary,
                 ),
 
                 const SizedBox(height: 24),

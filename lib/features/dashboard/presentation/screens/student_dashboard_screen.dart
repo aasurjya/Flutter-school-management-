@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../ai_insights/presentation/widgets/student_ai_summary_card.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../attendance/providers/attendance_provider.dart';
 import '../../../homework/providers/homework_provider.dart';
@@ -155,19 +156,17 @@ class StudentDashboardScreen extends ConsumerWidget {
 
           // Academic Performance & AI
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                children: [
-                  GestureDetector(
-                    onTap: () => context.push(AppRoutes.studyRecommendations),
-                    child: const _StudyTipsEntry(),
-                  ),
-                  const SizedBox(height: 16),
-                  const _UpcomingExamCard(),
-                ],
-              ),
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: StudentAISummaryCard(),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: _UpcomingExamCard(),
             ),
           ),
 
@@ -776,57 +775,6 @@ class _HomeworkRow extends StatelessWidget {
               ),
             )
           : const Icon(Icons.chevron_right_rounded, color: AppColors.grey400, size: 20),
-    );
-  }
-}
-
-// ─── AI Study Tips entry ───────────────────────────────────────────────────────
-class _StudyTipsEntry extends StatelessWidget {
-  const _StudyTipsEntry();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.2),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: const Row(
-        children: [
-          Icon(Icons.auto_awesome_rounded, size: 24, color: Colors.white),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Academic Intelligence',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Get AI-powered study recommendations',
-                  style: TextStyle(fontSize: 12, color: Colors.white70),
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right_rounded, size: 24, color: Colors.white),
-        ],
-      ),
     );
   }
 }

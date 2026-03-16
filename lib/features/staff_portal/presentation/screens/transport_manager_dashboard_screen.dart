@@ -6,6 +6,8 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logout_helper.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../ai_insights/presentation/widgets/staff_ai_insight_card.dart';
+import '../../../ai_insights/providers/transport_insight_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../transport/providers/transport_provider.dart';
 import '../../../bus_tracking/providers/bus_tracking_provider.dart';
@@ -148,6 +150,21 @@ class TransportManagerDashboardScreen extends ConsumerWidget {
                   mainAxisSpacing: 12,
                   childAspectRatio: 1.5,
                   children: _buildStatCards(transportAsync, busAsync),
+                ),
+
+                const SizedBox(height: 16),
+                StaffAIInsightCard(
+                  provider: transportInsightProvider(
+                    TransportInsightInput(
+                      activeRoutes: (transportAsync.valueOrNull?['active_routes'] as num?)?.toInt() ?? 0,
+                      capacityPercent: (transportAsync.valueOrNull?['capacity_percent'] as num?)?.toDouble() ?? 0,
+                      totalVehicles: (transportAsync.valueOrNull?['total_vehicles'] as num?)?.toInt() ?? 0,
+                      activeTrips: (busAsync.valueOrNull?['active_trips'] as num?)?.toInt() ?? 0,
+                    ),
+                  ),
+                  title: 'Transport Insight',
+                  icon: Icons.directions_bus_outlined,
+                  color: AppColors.primary,
                 ),
 
                 const SizedBox(height: 24),

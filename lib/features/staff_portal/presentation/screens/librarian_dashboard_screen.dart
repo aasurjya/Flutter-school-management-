@@ -6,6 +6,8 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logout_helper.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../ai_insights/presentation/widgets/staff_ai_insight_card.dart';
+import '../../../ai_insights/providers/library_insight_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../library/providers/library_provider.dart';
 
@@ -165,6 +167,21 @@ class LibrarianDashboardScreen extends ConsumerWidget {
                       _StatCard(label: 'Currently Issued', value: '${stats['issued_books'] ?? 0}', icon: Icons.checklist_outlined, iconColor: const Color(0xFFF59E0B)),
                     ],
                   ),
+                ),
+
+                const SizedBox(height: 16),
+                StaffAIInsightCard(
+                  provider: libraryInsightProvider(
+                    LibraryInsightInput(
+                      popularGenres: const ['Fiction', 'Science', 'History'],
+                      totalIssued: (statsAsync.valueOrNull?['issues_today'] as num?)?.toInt() ?? 0,
+                      overdueReturns: (statsAsync.valueOrNull?['overdue_books'] as num?)?.toInt() ?? 0,
+                      catalogSize: (statsAsync.valueOrNull?['total_books'] as num?)?.toInt() ?? 0,
+                    ),
+                  ),
+                  title: 'Library Insight',
+                  icon: Icons.auto_stories_outlined,
+                  color: AppColors.primary,
                 ),
 
                 const SizedBox(height: 24),

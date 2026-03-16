@@ -6,6 +6,8 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logout_helper.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../ai_insights/presentation/widgets/staff_ai_insight_card.dart';
+import '../../../ai_insights/providers/visitor_insight_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../visitor/providers/visitor_provider.dart';
 
@@ -165,6 +167,21 @@ class ReceptionistDashboardScreen extends ConsumerWidget {
                       _StatCard(label: 'Checked Out', value: '${stats.checkedOutToday}', icon: Icons.logout_outlined, iconColor: AppColors.grey500),
                     ],
                   ),
+                ),
+
+                const SizedBox(height: 16),
+                StaffAIInsightCard(
+                  provider: visitorInsightProvider(
+                    VisitorInsightInput(
+                      dailyVisitorCount: statsAsync.valueOrNull?.todayTotal ?? 0,
+                      onPremises: statsAsync.valueOrNull?.currentlyCheckedIn ?? 0,
+                      preRegistrations: statsAsync.valueOrNull?.preRegisteredToday ?? 0,
+                      checkedOut: statsAsync.valueOrNull?.checkedOutToday ?? 0,
+                    ),
+                  ),
+                  title: 'Visitor Insight',
+                  icon: Icons.badge_outlined,
+                  color: AppColors.primary,
                 ),
 
                 const SizedBox(height: 24),

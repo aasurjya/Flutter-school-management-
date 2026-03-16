@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logout_helper.dart';
+import '../../../ai_insights/presentation/widgets/platform_ai_health_card.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/tenant_provider.dart';
@@ -171,6 +172,8 @@ class _SuperAdminDashboardScreenState
                 delegate: SliverChildListDelegate([
                   _buildPlatformStats(),
                   const SizedBox(height: 24),
+                  _buildPlatformAIHealth(),
+                  const SizedBox(height: 24),
                   _buildQuickActions(context),
                   const SizedBox(height: 24),
                   _buildTenantOverview(context),
@@ -237,6 +240,20 @@ class _SuperAdminDashboardScreenState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ── Platform AI Health ─────────────────────────────────────────────────────
+
+  Widget _buildPlatformAIHealth() {
+    final statsAsync = ref.watch(platformStatsProvider);
+    return statsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (stats) => PlatformAIHealthCard(
+        tenantCount: (stats['total_tenants'] as num?)?.toInt() ?? 0,
+        totalUsers: (stats['total_users'] as num?)?.toInt() ?? 0,
       ),
     );
   }

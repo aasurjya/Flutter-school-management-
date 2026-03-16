@@ -1,21 +1,33 @@
 import 'dart:developer' as developer;
 
+import '../ai/ai_router.dart';
 import 'deepseek_service.dart';
 
 class AITextResult {
   final String text;
   final bool isLLMGenerated;
+  final bool isFromCache;
 
-  const AITextResult({required this.text, this.isLLMGenerated = false});
+  const AITextResult({
+    required this.text,
+    this.isLLMGenerated = false,
+    this.isFromCache = false,
+  });
 }
 
 class AITextGenerator {
   final DeepSeekService? _service;
+  final AIRouter? _router;
 
-  const AITextGenerator({DeepSeekService? service}) : _service = service;
+  const AITextGenerator({
+    DeepSeekService? service,
+    AIRouter? router,
+  })  : _service = service,
+        _router = router;
 
   // ---------------------------------------------------------------------------
-  // Generic orchestrator: try LLM, catch ALL errors, return fallback
+  // Generic orchestrator: try AIRouter first, fall back to direct service,
+  // catch ALL errors, return fallback
   // ---------------------------------------------------------------------------
 
   Future<AITextResult> _generate({
@@ -24,7 +36,36 @@ class AITextGenerator {
     required String fallback,
     double temperature = 0.7,
     int maxTokens = 300,
+    bool skipCache = false,
+    Duration? cacheTtl,
   }) async {
+    // Prefer the new AIRouter when available.
+    if (_router != null) {
+      try {
+        final response = await _router.generateText(
+          systemPrompt: systemPrompt,
+          userPrompt: userPrompt,
+          temperature: temperature,
+          maxTokens: maxTokens,
+          skipCache: skipCache,
+          cacheTtl: cacheTtl,
+        );
+        return AITextResult(
+          text: response.text,
+          isLLMGenerated: true,
+          isFromCache: response.isFromCache,
+        );
+      } catch (e) {
+        developer.log(
+          'AIRouter failed, trying legacy service',
+          name: 'AITextGenerator',
+          error: e,
+        );
+        // Fall through to legacy path.
+      }
+    }
+
+    // Legacy path: direct DeepSeek service.
     if (_service == null) {
       return AITextResult(text: fallback);
     }

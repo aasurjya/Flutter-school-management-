@@ -95,6 +95,22 @@ class AppEnvironment {
     return (key != null && key.isNotEmpty) ? key : null;
   }
 
+  // ---------------------------------------------------------------------------
+  // Model override env vars — swap providers via config, not code changes
+  // ---------------------------------------------------------------------------
+
+  /// Override model for text generation (default: deepseek-chat).
+  static String get modelText =>
+      dotenv.env['MODEL_TEXT'] ?? 'deepseek-chat';
+
+  /// Override model for vision tasks (default: claude-sonnet-4-6).
+  static String get modelVision =>
+      dotenv.env['MODEL_VISION'] ?? 'claude-sonnet-4-6';
+
+  /// Override model for image generation (default: sourceful/riverflow-v2-fast).
+  static String get modelImage =>
+      dotenv.env['MODEL_IMAGE'] ?? 'sourceful/riverflow-v2-fast';
+
   /// Razorpay key ID (optional — payment gateway)
   static String? get razorpayKeyId {
     final key = dotenv.env['RAZORPAY_KEY_ID'];

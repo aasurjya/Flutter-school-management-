@@ -1,14 +1,22 @@
+import 'dart:developer' as developer;
+
+import '../ai/ai_router.dart';
 import 'ai_text_generator.dart';
 import 'deepseek_service.dart';
 
 /// AI text generation methods for operational staff roles.
 ///
 /// Extracted from [AITextGenerator] to keep the main file under 800 lines.
-/// Uses the same [DeepSeekService] backend and fallback pattern.
+/// Uses AIRouter when available, falls back to direct [DeepSeekService].
 class AIStaffTextGenerator {
   final DeepSeekService? _service;
+  final AIRouter? _router;
 
-  const AIStaffTextGenerator({DeepSeekService? service}) : _service = service;
+  const AIStaffTextGenerator({
+    DeepSeekService? service,
+    AIRouter? router,
+  })  : _service = service,
+        _router = router;
 
   // ---------------------------------------------------------------------------
   // Generic orchestrator (mirrors AITextGenerator._generate)
@@ -20,7 +28,35 @@ class AIStaffTextGenerator {
     required String fallback,
     double temperature = 0.7,
     int maxTokens = 300,
+    bool skipCache = false,
+    Duration? cacheTtl,
   }) async {
+    // Prefer the new AIRouter when available.
+    if (_router != null) {
+      try {
+        final response = await _router.generateText(
+          systemPrompt: systemPrompt,
+          userPrompt: userPrompt,
+          temperature: temperature,
+          maxTokens: maxTokens,
+          skipCache: skipCache,
+          cacheTtl: cacheTtl,
+        );
+        return AITextResult(
+          text: response.text,
+          isLLMGenerated: true,
+          isFromCache: response.isFromCache,
+        );
+      } catch (e) {
+        developer.log(
+          'AIRouter failed in staff generator, trying legacy service',
+          name: 'AIStaffTextGenerator',
+          error: e,
+        );
+      }
+    }
+
+    // Legacy path.
     if (_service == null) {
       return AITextResult(text: fallback);
     }

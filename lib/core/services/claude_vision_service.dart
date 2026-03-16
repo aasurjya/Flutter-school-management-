@@ -27,6 +27,9 @@ class ClaudeVisionService {
       'If no image is provided, answer from the conversation context alone. '
       'Keep answers under 200 words unless a detailed explanation is essential.';
 
+  /// Expose system prompt for use by the AIRouter-based tutor.
+  static String get systemPromptText => _systemPrompt;
+
   final String _apiKey;
   final http.Client _httpClient;
   final bool _ownsClient;

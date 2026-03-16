@@ -37,6 +37,9 @@ dependencies:
   # HTTP Client
   http: ^1.2.0
 
+  # Cryptography
+  crypto: ^3.0.3
+
   # Utils
   intl: ^0.20.2
   path_provider: ^2.1.2

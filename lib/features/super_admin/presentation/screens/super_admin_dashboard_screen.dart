@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/logout_helper.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/tenant_provider.dart';
@@ -26,10 +27,7 @@ class _SuperAdminDashboardScreenState
     });
   }
 
-  Future<void> _logout() async {
-    await ref.read(authNotifierProvider.notifier).signOut();
-    if (mounted) context.go(AppRoutes.login);
-  }
+  Future<void> _logout() => confirmLogout(context, ref);
 
   Future<void> _refresh() async {
     ref.invalidate(platformStatsProvider);

@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/logout_helper.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../id_card/providers/id_card_provider.dart';
 import '../../../academic/providers/academic_provider.dart';
 import '../../../ai_insights/providers/risk_score_provider.dart';
 import '../../../ai_insights/providers/early_warning_provider.dart';
@@ -19,23 +21,7 @@ const _border = AppColors.grey200;
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
 
-  void _logout(BuildContext context, WidgetRef ref) async {
-    try {
-      await ref.read(authNotifierProvider.notifier).signOut();
-      if (context.mounted) {
-        context.go(AppRoutes.login);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to logout: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
-  }
+  void _logout(BuildContext context, WidgetRef ref) => confirmLogout(context, ref);
 
   void _showSettingsMenu(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
@@ -76,7 +62,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [AppColors.primary, Color(0xFF1F2937)],
+                        colors: [AppColors.primary, AppColors.grey800],
                       ),
                     ),
                   ),
@@ -105,9 +91,9 @@ class AdminDashboardScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'Central High School',
-                            style: TextStyle(
+                          Text(
+                            ref.watch(currentTenantProvider).valueOrNull?.name ?? 'Dashboard',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 28,
                               fontWeight: FontWeight.w800,
@@ -140,7 +126,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             actions: [
               _HeaderActionBtn(
                 icon: Icons.notifications_none_rounded,
-                onTap: () {},
+                onTap: () => context.push(AppRoutes.notifications),
               ),
               Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -1155,6 +1141,14 @@ class _AlertBanner extends StatelessWidget {
               ),
               const SizedBox(width: 8),
             ],
+            Icon(Icons.arrow_forward_ios_rounded, size: 14, color: accentColor),
+          ],
+        ),
+      ),
+    );
+  }
+}
+      ],
             Icon(Icons.arrow_forward_ios_rounded, size: 14, color: accentColor),
           ],
         ),

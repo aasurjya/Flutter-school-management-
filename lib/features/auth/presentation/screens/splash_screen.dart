@@ -20,6 +20,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  int _authRetryCount = 0;
+  static const _maxAuthRetries = 5;
 
   @override
   void initState() {
@@ -95,9 +97,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         }
       },
       loading: () {
-        developer.log('SplashScreen: Auth state loading, waiting...',
+        _authRetryCount++;
+        developer.log('SplashScreen: Auth state loading, retry $_authRetryCount/$_maxAuthRetries',
             name: 'SplashScreen');
-        Future.delayed(const Duration(seconds: 1), _checkAuth);
+        if (_authRetryCount >= _maxAuthRetries) {
+          developer.log('SplashScreen: Auth timeout, redirecting to login',
+              name: 'SplashScreen', level: 800);
+          if (mounted) context.go(AppRoutes.login);
+        } else {
+          Future.delayed(const Duration(seconds: 1), _checkAuth);
+        }
       },
       error: (error, _) {
         developer.log('SplashScreen: Auth error - $error',

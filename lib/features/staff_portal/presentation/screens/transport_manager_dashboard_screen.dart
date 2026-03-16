@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/logout_helper.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../transport/providers/transport_provider.dart';
@@ -12,18 +13,7 @@ import '../../../bus_tracking/providers/bus_tracking_provider.dart';
 class TransportManagerDashboardScreen extends ConsumerWidget {
   const TransportManagerDashboardScreen({super.key});
 
-  void _logout(BuildContext context, WidgetRef ref) async {
-    try {
-      await ref.read(authNotifierProvider.notifier).signOut();
-      if (context.mounted) context.go(AppRoutes.login);
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to logout: $e'), backgroundColor: AppColors.error),
-        );
-      }
-    }
-  }
+  void _logout(BuildContext context, WidgetRef ref) => confirmLogout(context, ref);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

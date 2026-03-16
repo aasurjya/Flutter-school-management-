@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/logout_helper.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../academic/providers/academic_provider.dart';
 import '../../../ai_insights/providers/risk_score_provider.dart';
@@ -15,23 +16,7 @@ import '../../../syllabus/presentation/widgets/coverage_summary_card.dart';
 class TeacherDashboardScreen extends ConsumerWidget {
   const TeacherDashboardScreen({super.key});
 
-  void _logout(BuildContext context, WidgetRef ref) async {
-    try {
-      await ref.read(authNotifierProvider.notifier).signOut();
-      if (context.mounted) {
-        context.go(AppRoutes.login);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to logout: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
-  }
+  void _logout(BuildContext context, WidgetRef ref) => confirmLogout(context, ref);
 
   void _showSettingsMenu(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
@@ -224,7 +209,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
-                onPressed: () {},
+                onPressed: () => context.push(AppRoutes.notifications),
               ),
               Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -353,7 +338,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
       {'icon': Icons.auto_fix_high, 'label': 'AI Remarks', 'color': AppColors.primary, 'route': AppRoutes.generateRemarks},
       {'icon': Icons.auto_awesome, 'label': 'AI Composer', 'color': AppColors.info, 'route': AppRoutes.aiMessageComposer},
       {'icon': Icons.insights, 'label': 'Class Intel', 'color': AppColors.secondary, 'route': AppRoutes.classIntelligence},
-      {'icon': Icons.quiz_outlined, 'label': 'Q. Gen', 'color': AppColors.warning, 'route': AppRoutes.questionPaperList},
+      {'icon': Icons.quiz_outlined, 'label': 'Questions', 'color': AppColors.warning, 'route': AppRoutes.questionPaperList},
     ];
 
     return GridView.builder(
@@ -510,7 +495,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Class Teacher Control Panel',
+                                'My Class',
                                 style: TextStyle(
                                   color: AppColors.grey500,
                                   fontSize: 12,
@@ -968,4 +953,6 @@ class _ScheduleItem {
   final String period;
 
   _ScheduleItem(this.time, this.className, this.subject, this.period);
+}
+t, this.period);
 }

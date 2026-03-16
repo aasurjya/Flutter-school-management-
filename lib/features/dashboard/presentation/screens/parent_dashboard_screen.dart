@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/logout_helper.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../ai_insights/providers/parent_digest_provider.dart';
 import '../../../attendance/providers/attendance_provider.dart';
@@ -12,23 +13,7 @@ import '../../../students/providers/students_provider.dart';
 class ParentDashboardScreen extends ConsumerWidget {
   const ParentDashboardScreen({super.key});
 
-  void _logout(BuildContext context, WidgetRef ref) async {
-    try {
-      await ref.read(authNotifierProvider.notifier).signOut();
-      if (context.mounted) {
-        context.go(AppRoutes.login);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to logout: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
-  }
+  void _logout(BuildContext context, WidgetRef ref) => confirmLogout(context, ref);
 
   void _showSettingsMenu(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
@@ -150,7 +135,7 @@ class ParentDashboardScreen extends ConsumerWidget {
             actions: [
               IconButton(
                 icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
-                onPressed: () {},
+                onPressed: () => context.push(AppRoutes.notifications),
               ),
               Padding(
                 padding: const EdgeInsets.only(right: 8),

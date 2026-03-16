@@ -111,7 +111,7 @@ class StudentDashboardScreen extends ConsumerWidget {
             actions: [
               IconButton(
                 icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
-                onPressed: () {},
+                onPressed: () => context.push(AppRoutes.notifications),
               ),
               const SizedBox(width: 8),
             ],

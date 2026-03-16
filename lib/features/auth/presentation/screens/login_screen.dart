@@ -394,13 +394,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               decoration: const InputDecoration(
-                labelText: 'Work Email',
+                labelText: 'Email Address',
                 prefixIcon: Icon(Icons.mail_outline_rounded, size: 20),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) return 'Email is required';
                 if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                  return 'Enter a valid work email';
+                  return 'Enter a valid email address';
                 }
                 return null;
               },
@@ -435,7 +435,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             LoadingButton(
               onPressed: _handleLogin,
               isLoading: _isLoading,
-              child: const Text('Access Dashboard'),
+              child: const Text('Sign In'),
             ),
             const SizedBox(height: 16),
             TextButton(

@@ -389,21 +389,25 @@ class _UsersTabState extends ConsumerState<_UsersTab> {
                   _RoleCard(
                     meta: const _RoleMeta('tenant_admin', 'Administrators', Icons.admin_panel_settings_outlined, Color(0xFFEF4444)),
                     count: stats['admins'] ?? 0,
+                    onTap: () => _showRoleUsersSheet(const _RoleMeta('tenant_admin', 'Administrators', Icons.admin_panel_settings_outlined, Color(0xFFEF4444))),
                     onAdd: () => _showCreateUserSheet(const _RoleMeta('tenant_admin', 'Admin', Icons.admin_panel_settings_outlined, Color(0xFFEF4444))),
                   ),
                   _RoleCard(
                     meta: const _RoleMeta('teacher', 'Teachers', Icons.school_outlined, Color(0xFF6366F1)),
                     count: stats['teachers'] ?? 0,
+                    onTap: () => _showRoleUsersSheet(const _RoleMeta('teacher', 'Teachers', Icons.school_outlined, Color(0xFF6366F1))),
                     onAdd: () => _showCreateUserSheet(const _RoleMeta('teacher', 'Teacher', Icons.school_outlined, Color(0xFF6366F1))),
                   ),
                   _RoleCard(
                     meta: const _RoleMeta('student', 'Students', Icons.person_outlined, Color(0xFF3B82F6)),
                     count: stats['students'] ?? 0,
+                    onTap: () => _showRoleUsersSheet(const _RoleMeta('student', 'Students', Icons.person_outlined, Color(0xFF3B82F6))),
                     onAdd: () => _showCreateUserSheet(const _RoleMeta('student', 'Student', Icons.person_outlined, Color(0xFF3B82F6))),
                   ),
                   _RoleCard(
                     meta: const _RoleMeta('parent', 'Parents', Icons.family_restroom_outlined, Color(0xFFF59E0B)),
                     count: stats['parents'] ?? 0,
+                    onTap: () => _showRoleUsersSheet(const _RoleMeta('parent', 'Parents', Icons.family_restroom_outlined, Color(0xFFF59E0B))),
                     onAdd: () => _showCreateUserSheet(const _RoleMeta('parent', 'Parent', Icons.family_restroom_outlined, Color(0xFFF59E0B))),
                   ),
                 ],
@@ -492,6 +496,25 @@ class _UsersTabState extends ConsumerState<_UsersTab> {
     );
   }
 
+  void _showRoleUsersSheet(_RoleMeta meta) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        minChildSize: 0.3,
+        maxChildSize: 0.9,
+        builder: (ctx, scrollController) => _RoleUsersSheet(
+          meta: meta,
+          tenantId: widget.tenantId,
+          scrollController: scrollController,
+        ),
+      ),
+    );
+  }
+
   void _showCreateUserSheet(_RoleMeta meta) {
     showModalBottomSheet(
       context: context,
@@ -510,20 +533,127 @@ class _UsersTabState extends ConsumerState<_UsersTab> {
   }
 }
 
+// ─── Role users sheet ─────────────────────────────────────────────────────────
+
+class _RoleUsersSheet extends ConsumerWidget {
+  final _RoleMeta meta;
+  final String tenantId;
+  final ScrollController scrollController;
+
+  const _RoleUsersSheet({
+    required this.meta,
+    required this.tenantId,
+    required this.scrollController,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final usersAsync = ref.watch(
+      tenantUsersByRoleProvider((tenantId: tenantId, role: meta.role)),
+    );
+
+    return Column(
+      children: [
+        // Handle
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Column(
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(meta.icon, color: meta.color, size: 22),
+                  const SizedBox(width: 10),
+                  Text(
+                    meta.label,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                  const Spacer(),
+                  usersAsync.whenOrNull(
+                    data: (users) => Text(
+                      '${users.length}',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: meta.color,
+                      ),
+                    ),
+                  ) ?? const SizedBox.shrink(),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+            ],
+          ),
+        ),
+        // List
+        Expanded(
+          child: usersAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text('Error: $e', style: TextStyle(color: Colors.grey[500])),
+              ),
+            ),
+            data: (users) {
+              if (users.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.people_outline, size: 40, color: Colors.grey[400]),
+                      const SizedBox(height: 8),
+                      Text('No ${meta.label.toLowerCase()} found',
+                          style: TextStyle(color: Colors.grey[500])),
+                    ],
+                  ),
+                );
+              }
+              return ListView.builder(
+                controller: scrollController,
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                itemCount: users.length,
+                itemBuilder: (context, index) => _UserListItem(user: users[index]),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 // ─── Role card ────────────────────────────────────────────────────────────────
 
 class _RoleCard extends StatelessWidget {
   final _RoleMeta meta;
   final int count;
   final VoidCallback onAdd;
-  const _RoleCard({required this.meta, required this.count, required this.onAdd});
+  final VoidCallback? onTap;
+  const _RoleCard({required this.meta, required this.count, required this.onAdd, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GlassCard(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
+      padding: EdgeInsets.zero,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
         children: [
           Container(
             width: 40,
@@ -556,6 +686,8 @@ class _RoleCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      ),
       ),
     );
   }

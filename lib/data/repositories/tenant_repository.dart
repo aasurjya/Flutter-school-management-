@@ -154,6 +154,38 @@ class TenantRepository extends BaseRepository {
     return List<Map<String, dynamic>>.from(response as List);
   }
 
+  /// Get users for a specific tenant filtered by role
+  Future<List<Map<String, dynamic>>> getTenantUsersByRole(
+    String tenantId,
+    String role,
+  ) async {
+    if (role == 'student') {
+      final response = await client
+          .from('students')
+          .select('id, tenant_id, first_name, last_name, admission_number, is_active, created_at')
+          .eq('tenant_id', tenantId)
+          .eq('is_active', true)
+          .order('first_name');
+      // Normalise to same shape as users list
+      return (response as List).map((s) {
+        final m = Map<String, dynamic>.from(s as Map);
+        m['full_name'] = '${m['first_name'] ?? ''} ${m['last_name'] ?? ''}'.trim();
+        m['user_roles'] = [{'role': 'student', 'is_primary': true}];
+        return m;
+      }).toList();
+    }
+
+    final roles = role == 'tenant_admin' ? ['tenant_admin', 'principal'] : [role];
+    final response = await client
+        .from('users')
+        .select('id, email, full_name, phone, avatar_url, is_active, created_at, user_roles!inner(role, is_primary)')
+        .eq('tenant_id', tenantId)
+        .inFilter('user_roles.role', roles)
+        .order('created_at', ascending: false);
+
+    return List<Map<String, dynamic>>.from(response as List);
+  }
+
   /// Create tenant admin user
   Future<void> createTenantAdmin({
     required String tenantId,

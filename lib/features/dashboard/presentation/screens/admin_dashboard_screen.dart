@@ -182,40 +182,40 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
 
           // Quick Actions Section
-          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: _AdminSectionHeader(label: 'Management Tools'),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
           SliverToBoxAdapter(
             child: _QuickActionsGrid(context: context),
           ),
 
           // Academic Setup Section
-          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: _AdminSectionHeader(label: 'Academic Setup'),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
           SliverToBoxAdapter(
             child: _AcademicActionsGrid(context: context),
           ),
 
           // School Operations Section
-          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: _AdminSectionHeader(label: 'School Operations'),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
           SliverToBoxAdapter(
             child: _OperationsActionsGrid(context: context),
           ),
@@ -633,6 +633,75 @@ class _MetricCard extends StatelessWidget {
   }
 }
 
+// ─── Responsive action grid (shared by all 3 grids) ──────────────────────────
+
+typedef _ActionItem = ({String label, IconData icon, Color color, String route});
+
+class _ResponsiveActionGrid extends StatelessWidget {
+  final List<_ActionItem> actions;
+  const _ResponsiveActionGrid({required this.actions});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      // Available width minus horizontal padding (24 * 2)
+      final availableWidth = constraints.maxWidth - 48;
+      // Each card ~80px wide on mobile, scale up on desktop
+      final crossAxisCount = (availableWidth / 90).floor().clamp(3, 7);
+      final spacing = crossAxisCount > 4 ? 10.0 : 12.0;
+
+      return GridView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: spacing,
+          mainAxisSpacing: spacing,
+          childAspectRatio: 0.85,
+        ),
+        itemCount: actions.length,
+        itemBuilder: (context, index) {
+          final a = actions[index];
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () => context.push(a.route),
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.borderLight),
+                    ),
+                    child: Icon(a.icon, color: a.color, size: 24),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    a.label,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.grey700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
+  }
+}
+
 class _QuickActionsGrid extends StatelessWidget {
   final BuildContext context;
 
@@ -652,52 +721,7 @@ class _QuickActionsGrid extends StatelessWidget {
       (label: 'Admissions',  icon: Icons.how_to_reg_rounded,         color: const Color(0xFFD97706), route: AppRoutes.admissionDashboard),
     ];
 
-    return GridView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: actions.length,
-      itemBuilder: (context, index) {
-        final a = actions[index];
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () => context.push(a.route),
-            child: Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.borderLight),
-                  ),
-                  child: Icon(a.icon, color: a.color, size: 24),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  a.label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.grey700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    return _ResponsiveActionGrid(actions: actions);
   }
 }
 
@@ -981,52 +1005,7 @@ class _AcademicActionsGrid extends StatelessWidget {
       (label: 'Q. Papers',    icon: Icons.quiz_rounded,               color: AppColors.error,          route: AppRoutes.questionPaperList),
     ];
 
-    return GridView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: actions.length,
-      itemBuilder: (context, index) {
-        final a = actions[index];
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () => context.push(a.route),
-            child: Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.borderLight),
-                  ),
-                  child: Icon(a.icon, color: a.color, size: 24),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  a.label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.grey700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    return _ResponsiveActionGrid(actions: actions);
   }
 }
 
@@ -1046,52 +1025,7 @@ class _OperationsActionsGrid extends StatelessWidget {
       (label: 'Visitors',    icon: Icons.badge_outlined,              color: AppColors.success,        route: AppRoutes.visitorDashboard),
     ];
 
-    return GridView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: actions.length,
-      itemBuilder: (context, index) {
-        final a = actions[index];
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () => context.push(a.route),
-            child: Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.borderLight),
-                  ),
-                  child: Icon(a.icon, color: a.color, size: 24),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  a.label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.grey700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    return _ResponsiveActionGrid(actions: actions);
   }
 }
 

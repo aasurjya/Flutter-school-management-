@@ -50,6 +50,15 @@ final tenantUsersProvider = FutureProvider.family<List<Map<String, dynamic>>, St
   },
 );
 
+/// Tenant users filtered by role
+final tenantUsersByRoleProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, ({String tenantId, String role})>(
+  (ref, params) async {
+    final repository = ref.watch(tenantRepositoryProvider);
+    return repository.getTenantUsersByRole(params.tenantId, params.role);
+  },
+);
+
 /// Tenants filter
 class TenantsFilter {
   final String? status;

@@ -1,3 +1,6 @@
+# Embedded claude-code plugin (standalone git repo, not a submodule)
+agents/everything-claude-code/
+
 # Environment files (contain secrets)
 .env
 .env.*

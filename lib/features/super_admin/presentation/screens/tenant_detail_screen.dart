@@ -682,15 +682,23 @@ class _CreateUserSheetState extends State<_CreateUserSheet> {
       // can see this person in Staff Management. The super_admin JWT has no
       // tenant_id claim, so we pass tenantIdOverride explicitly.
       if (_staffRoles.contains(widget.meta.role)) {
-        final staffRepo = StaffRepository(Supabase.instance.client);
-        final parts = fullName.split(' ');
-        await staffRepo.createStaff(
-          userId: result.userId,
-          firstName: parts.first,
-          lastName: parts.length > 1 ? parts.sublist(1).join(' ') : '',
-          tenantIdOverride: widget.tenantId,
-          role: widget.meta.role,
-        );
+        try {
+          final staffRepo = StaffRepository(Supabase.instance.client);
+          final parts = fullName.split(' ');
+          await staffRepo.createStaff(
+            userId: result.userId,
+            firstName: parts.first,
+            lastName: parts.length > 1 ? parts.sublist(1).join(' ') : '',
+            tenantIdOverride: widget.tenantId,
+            role: widget.meta.role,
+          );
+        } catch (staffError) {
+          // Rollback: delete orphaned auth user + profile
+          await service.deleteUser(result.userId);
+          throw AdminUserCreationException(
+            'Staff record creation failed (user rolled back): $staffError',
+          );
+        }
       }
 
       if (mounted) {

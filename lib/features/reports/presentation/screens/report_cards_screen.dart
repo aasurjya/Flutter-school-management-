@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../data/models/report_card.dart';
 import '../../providers/report_card_provider.dart';
 
@@ -573,13 +574,21 @@ class _GeneratedReportsSection extends StatelessWidget {
                 Row(
                   children: [
                     OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Bulk download coming soon')),
+                        );
+                      },
                       icon: const Icon(Icons.download),
                       label: const Text('Download All'),
                     ),
                     const SizedBox(width: 8),
                     FilledButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Bulk publish coming soon')),
+                        );
+                      },
                       icon: const Icon(Icons.publish),
                       label: const Text('Publish All'),
                     ),
@@ -624,7 +633,7 @@ class _GeneratedReportsSection extends StatelessWidget {
               const SizedBox(height: 8),
               Center(
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () => context.push(AppRoutes.reportCardList),
                   child: Text('View all ${reports.length} reports'),
                 ),
               ),

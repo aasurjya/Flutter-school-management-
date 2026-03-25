@@ -192,6 +192,66 @@ VALUES
     '{"provider": "email", "providers": ["email"], "tenant_id": "00000000-0000-0000-0000-000000000001", "roles": ["parent"]}'::jsonb,
     '{"full_name": "Michael Parent"}'::jsonb,
     false
+),
+-- Librarian
+(
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000021',
+    'authenticated', 'authenticated',
+    'librarian@demoschool.edu',
+    crypt('Demo@2026', gen_salt('bf')),
+    NOW(), NOW(), NOW(), '', '',
+    '{"provider": "email", "providers": ["email"], "tenant_id": "00000000-0000-0000-0000-000000000001", "roles": ["librarian"]}'::jsonb,
+    '{"full_name": "Linda Librarian"}'::jsonb,
+    false
+),
+-- Transport Manager
+(
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000022',
+    'authenticated', 'authenticated',
+    'transport@demoschool.edu',
+    crypt('Demo@2026', gen_salt('bf')),
+    NOW(), NOW(), NOW(), '', '',
+    '{"provider": "email", "providers": ["email"], "tenant_id": "00000000-0000-0000-0000-000000000001", "roles": ["transport_manager"]}'::jsonb,
+    '{"full_name": "Tom Transport"}'::jsonb,
+    false
+),
+-- Hostel Warden
+(
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000023',
+    'authenticated', 'authenticated',
+    'hostelwarden@demoschool.edu',
+    crypt('Demo@2026', gen_salt('bf')),
+    NOW(), NOW(), NOW(), '', '',
+    '{"provider": "email", "providers": ["email"], "tenant_id": "00000000-0000-0000-0000-000000000001", "roles": ["hostel_warden"]}'::jsonb,
+    '{"full_name": "Harry Warden"}'::jsonb,
+    false
+),
+-- Canteen Staff
+(
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000024',
+    'authenticated', 'authenticated',
+    'canteen@demoschool.edu',
+    crypt('Demo@2026', gen_salt('bf')),
+    NOW(), NOW(), NOW(), '', '',
+    '{"provider": "email", "providers": ["email"], "tenant_id": "00000000-0000-0000-0000-000000000001", "roles": ["canteen_staff"]}'::jsonb,
+    '{"full_name": "Carol Canteen"}'::jsonb,
+    false
+),
+-- Receptionist
+(
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000025',
+    'authenticated', 'authenticated',
+    'receptionist@demoschool.edu',
+    crypt('Demo@2026', gen_salt('bf')),
+    NOW(), NOW(), NOW(), '', '',
+    '{"provider": "email", "providers": ["email"], "tenant_id": "00000000-0000-0000-0000-000000000001", "roles": ["receptionist"]}'::jsonb,
+    '{"full_name": "Rachel Receptionist"}'::jsonb,
+    false
 )
 ON CONFLICT (id) DO NOTHING;
 
@@ -215,6 +275,11 @@ WHERE u.id IN (
     '20000000-0000-0000-0000-000000000011',
     '20000000-0000-0000-0000-000000000012',
     '20000000-0000-0000-0000-000000000020',
+    '20000000-0000-0000-0000-000000000021',
+    '20000000-0000-0000-0000-000000000022',
+    '20000000-0000-0000-0000-000000000023',
+    '20000000-0000-0000-0000-000000000024',
+    '20000000-0000-0000-0000-000000000025',
     '20000000-0000-0000-0000-000000000100',
     '20000000-0000-0000-0000-000000000101',
     '20000000-0000-0000-0000-000000000102',

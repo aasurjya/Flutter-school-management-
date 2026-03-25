@@ -10,6 +10,8 @@ import '../../../auth/providers/auth_provider.dart';
 import '../../../attendance/providers/attendance_provider.dart';
 import '../../../homework/providers/homework_provider.dart';
 import '../../../exams/providers/exams_provider.dart';
+import '../../../students/providers/students_provider.dart';
+import '../../../timetable/providers/timetable_provider.dart';
 import '../../../../data/models/homework.dart';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -140,10 +142,14 @@ class StudentDashboardScreen extends ConsumerWidget {
 
           // Today's Schedule Section
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: _SectionHeader(label: 'Academic Timeline', action: 'Full View'),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: _SectionHeader(
+                label: 'Academic Timeline',
+                action: 'Full View',
+                onTap: () => context.push(AppRoutes.studentTimetable),
+              ),
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -163,9 +169,9 @@ class StudentDashboardScreen extends ConsumerWidget {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: _UpcomingExamCard(),
             ),
           ),
@@ -454,6 +460,8 @@ class _StudentStatPillsRow extends ConsumerWidget {
           ),
         ),
         const _StatDivider(),
+        // TODO: Wire to studentOverallRankProvider once an active exam is
+        // available to derive the student's class rank dynamically.
         const Expanded(
           child: _StatNum(value: '--', label: 'rank'),
         ),
@@ -516,8 +524,9 @@ class _StatDivider extends StatelessWidget {
 class _SectionHeader extends StatelessWidget {
   final String label;
   final String? action;
+  final VoidCallback? onTap;
 
-  const _SectionHeader({required this.label, this.action});
+  const _SectionHeader({required this.label, this.action, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -534,7 +543,7 @@ class _SectionHeader extends StatelessWidget {
         ),
         if (action != null)
           TextButton(
-            onPressed: () {},
+            onPressed: onTap,
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primary,
               textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
@@ -552,41 +561,141 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _TodayScheduleCard extends StatelessWidget {
-  static const _classes = [
-    ('08:30', 'Mathematics', 'Mr. Kumar • Room 101', true),
-    ('09:30', 'Physics', 'Mrs. Sharma • Room 102', false),
-    ('10:30', 'Chemistry', 'Dr. Patel • Lab 1', false),
-  ];
-
+class _TodayScheduleCard extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final studentAsync = ref.watch(currentStudentProvider);
+
+    return studentAsync.when(
+      loading: () => _buildShimmer(),
+      error: (_, __) => _buildEmpty('Unable to load timetable'),
+      data: (student) {
+        final sectionId = student?.currentEnrollment?.sectionId;
+        if (sectionId == null) {
+          return _buildEmpty('No enrollment found');
+        }
+
+        final timetableAsync = ref.watch(
+          todayTimetableProvider(TodayTimetableFilter(sectionId: sectionId)),
+        );
+
+        return timetableAsync.when(
+          loading: () => _buildShimmer(),
+          error: (_, __) => _buildEmpty('Unable to load timetable'),
+          data: (entries) {
+            if (entries.isEmpty) {
+              return _buildEmpty('No classes scheduled today');
+            }
+
+            final now = TimeOfDay.now();
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.borderLight),
+              ),
+              child: Column(
+                children: entries.asMap().entries.map((e) {
+                  final i = e.key;
+                  final entry = e.value;
+                  final isCurrent = _isCurrentSlot(entry.startTime, entry.endTime, now);
+                  final teacher = entry.teacherName ?? '';
+                  final room = entry.roomNumber ?? '';
+                  final detail = [teacher, if (room.isNotEmpty) 'Room $room']
+                      .where((s) => s.isNotEmpty)
+                      .join(' • ');
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        child: _ClassRow(
+                          time: _formatTime(entry.startTime),
+                          subject: entry.subjectName ?? entry.slotName,
+                          detail: detail.isNotEmpty ? detail : entry.slotType,
+                          isCurrent: isCurrent,
+                        ),
+                      ),
+                      if (i < entries.length - 1)
+                        const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
+                    ],
+                  );
+                }).toList(),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Check if the current time falls within a slot's time range.
+  bool _isCurrentSlot(String startTime, String endTime, TimeOfDay now) {
+    final start = _parseTime(startTime);
+    final end = _parseTime(endTime);
+    if (start == null || end == null) return false;
+    final nowMinutes = now.hour * 60 + now.minute;
+    final startMinutes = start.hour * 60 + start.minute;
+    final endMinutes = end.hour * 60 + end.minute;
+    return nowMinutes >= startMinutes && nowMinutes < endMinutes;
+  }
+
+  TimeOfDay? _parseTime(String time) {
+    try {
+      final parts = time.split(':');
+      return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _formatTime(String time) {
+    try {
+      final parts = time.split(':');
+      final hour = int.parse(parts[0]);
+      final minute = int.parse(parts[1]);
+      final period = hour >= 12 ? 'PM' : 'AM';
+      final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+      return '${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
+    } catch (_) {
+      return time;
+    }
+  }
+
+  Widget _buildShimmer() {
     return Container(
+      height: 120,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+      ),
+    );
+  }
+
+  Widget _buildEmpty(String message) {
+    return Container(
+      padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
-        children: _classes.asMap().entries.map((e) {
-          final i = e.key;
-          final c = e.value;
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: _ClassRow(
-                  time: c.$1,
-                  subject: c.$2,
-                  detail: c.$3,
-                  isCurrent: c.$4,
-                ),
-              ),
-              if (i < _classes.length - 1)
-                const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
-            ],
-          );
-        }).toList(),
+        children: [
+          Icon(Icons.calendar_today_rounded, size: 32, color: AppColors.grey300),
+          const SizedBox(height: 12),
+          Text(
+            message,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              color: AppColors.grey500,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -780,69 +889,143 @@ class _HomeworkRow extends StatelessWidget {
 }
 
 // ─── Upcoming Exam Card ────────────────────────────────────────────────────────
-class _UpcomingExamCard extends StatelessWidget {
+class _UpcomingExamCard extends ConsumerWidget {
   const _UpcomingExamCard();
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderLight),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final examsAsync = ref.watch(
+      examsProvider(const ExamsFilter(publishedOnly: true)),
+    );
+
+    return examsAsync.when(
+      loading: () => Container(
+        height: 80,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+        ),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
+      error: (_, __) => const SizedBox.shrink(),
+      data: (exams) {
+        final now = DateTime.now();
+        // Find the nearest upcoming exam (start date in the future, sorted by date).
+        final upcoming = exams
+            .where((e) => e.isPublished && e.startDate != null && e.startDate!.isAfter(now))
+            .toList()
+          ..sort((a, b) => a.startDate!.compareTo(b.startDate!));
+
+        if (upcoming.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.info.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.borderLight),
             ),
-            child: const Icon(Icons.quiz_outlined, color: AppColors.info, size: 24),
-          ),
-          const SizedBox(width: 16),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Text(
-                  'Mid-Term Assessment',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.grey900,
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  child: const Icon(Icons.check_circle_outline_rounded, color: AppColors.success, size: 24),
                 ),
-                SizedBox(height: 4),
-                Text(
-                  'Mathematics • Units 1–5',
-                  style: TextStyle(fontSize: 12, color: AppColors.grey500),
+                const SizedBox(width: 16),
+                const Expanded(
+                  child: Text(
+                    'No upcoming exams',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.grey500,
+                    ),
+                  ),
                 ),
               ],
             ),
+          );
+        }
+
+        final exam = upcoming.first;
+        final daysUntil = exam.startDate!.difference(now).inDays;
+        final daysLabel = daysUntil == 0
+            ? 'Today'
+            : daysUntil == 1
+                ? 'Tomorrow'
+                : 'In $daysUntil Days';
+        final subtitle = exam.description ?? exam.examType;
+
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.borderLight),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.grey50,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.borderLight),
-            ),
-            child: const Text(
-              'In 5 Days',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                color: AppColors.grey700,
-                letterSpacing: 0.5,
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.info.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.quiz_outlined, color: AppColors.info, size: 24),
               ),
-            ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      exam.name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.grey900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(fontSize: 12, color: AppColors.grey500),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.grey50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Text(
+                  daysLabel,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.grey700,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

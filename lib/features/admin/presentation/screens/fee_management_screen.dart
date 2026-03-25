@@ -236,7 +236,7 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
                           ),
                           child: Text(fh.code!, style: const TextStyle(fontSize: 12, color: AppColors.primary)),
                         ),
-                      IconButton(icon: const Icon(Icons.edit, size: 20), tooltip: 'Edit', onPressed: () {}),
+                      IconButton(icon: const Icon(Icons.edit, size: 20), tooltip: 'Edit', onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Edit fee head coming soon')))),
                     ],
                   ),
                   if (fh.description != null)
@@ -346,7 +346,7 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment reminder coming soon'))),
                           icon: const Icon(Icons.message, size: 16),
                           label: const Text('Remind'),
                           style: OutlinedButton.styleFrom(foregroundColor: AppColors.secondary),

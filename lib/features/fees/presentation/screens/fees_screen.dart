@@ -188,28 +188,44 @@ class _AdminOverview extends ConsumerWidget {
                 icon: Icons.receipt_long,
                 label: 'Generate\nInvoices',
                 color: AppColors.primary,
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Invoice generation coming soon')),
+                  );
+                },
               ),
               const SizedBox(width: 12),
               _QuickAction(
                 icon: Icons.send,
                 label: 'Send\nReminders',
                 color: AppColors.warning,
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Send reminders coming soon')),
+                  );
+                },
               ),
               const SizedBox(width: 12),
               _QuickAction(
                 icon: Icons.download,
                 label: 'Export\nReport',
                 color: AppColors.success,
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Export report coming soon')),
+                  );
+                },
               ),
               const SizedBox(width: 12),
               _QuickAction(
                 icon: Icons.settings,
                 label: 'Fee\nStructure',
                 color: AppColors.info,
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Fee structure coming soon')),
+                  );
+                },
               ),
             ],
           ),
@@ -370,7 +386,7 @@ class _ParentOverview extends ConsumerWidget {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: () => context.push(AppRoutes.fees),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.white,
                                 foregroundColor: AppColors.error,
@@ -595,6 +611,7 @@ class _InvoicesTabState extends ConsumerState<_InvoicesTab> {
                       '₹${invoice.pendingAmount.toStringAsFixed(0)}';
                   return _InvoiceCard(
                     invoiceNo: invoice.invoiceNumber,
+                    invoiceId: invoice.id,
                     studentName: invoice.studentName ?? '—',
                     amount: amountStr,
                     dueDate: dueDateStr,
@@ -702,7 +719,11 @@ class _CollectionTab extends ConsumerWidget {
                           style: TextStyle(fontWeight: FontWeight.w600),
                         ),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Export collection report coming soon')),
+                            );
+                          },
                           child: const Text('Export'),
                         ),
                       ],
@@ -1003,6 +1024,7 @@ class _PaymentHistoryItem extends StatelessWidget {
 
 class _InvoiceCard extends StatelessWidget {
   final String invoiceNo;
+  final String invoiceId;
   final String studentName;
   final String amount;
   final String dueDate;
@@ -1011,6 +1033,7 @@ class _InvoiceCard extends StatelessWidget {
 
   const _InvoiceCard({
     required this.invoiceNo,
+    required this.invoiceId,
     required this.studentName,
     required this.amount,
     required this.dueDate,
@@ -1082,7 +1105,11 @@ class _InvoiceCard extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Invoice $invoiceNo detail coming soon')),
+                    );
+                  },
                   child: const Text('View'),
                 ),
               ),
@@ -1090,7 +1117,11 @@ class _InvoiceCard extends StatelessWidget {
               if (status != 'paid')
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.push(
+                        AppRoutes.paymentCheckout.replaceFirst(':invoiceId', invoiceId),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                     ),

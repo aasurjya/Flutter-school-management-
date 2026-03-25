@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../academic/providers/academic_provider.dart';
@@ -83,12 +84,57 @@ class StudentDetailScreen extends ConsumerWidget {
               IconButton(
                 icon: const Icon(Icons.edit, color: Colors.white),
                 tooltip: 'Edit student',
-                onPressed: () {},
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Student editing coming soon')),
+                  );
+                },
               ),
               IconButton(
                 icon: const Icon(Icons.more_vert, color: Colors.white),
                 tooltip: 'More options',
-                onPressed: () {},
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (ctx) => SafeArea(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.print),
+                            title: const Text('Print Profile'),
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Print coming soon')),
+                              );
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.share),
+                            title: const Text('Share Profile'),
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Share coming soon')),
+                              );
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.delete_outline, color: Colors.red),
+                            title: const Text('Delete Student', style: TextStyle(color: Colors.red)),
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Delete coming soon')),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -164,7 +210,7 @@ class StudentDetailScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () {},
+                        onPressed: () => context.push(AppRoutes.studentAttendance),
                         icon: const Icon(Icons.fact_check),
                         label: const Text('Attendance'),
                         style: OutlinedButton.styleFrom(
@@ -175,7 +221,7 @@ class StudentDetailScreen extends ConsumerWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () {},
+                        onPressed: () => context.push(AppRoutes.studentResults),
                         icon: const Icon(Icons.assignment),
                         label: const Text('Results'),
                         style: OutlinedButton.styleFrom(
@@ -190,7 +236,7 @@ class StudentDetailScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () {},
+                        onPressed: () => context.push(AppRoutes.studentFees),
                         icon: const Icon(Icons.payment),
                         label: const Text('Fees'),
                         style: OutlinedButton.styleFrom(
@@ -201,7 +247,7 @@ class StudentDetailScreen extends ConsumerWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () {},
+                        onPressed: () => context.push(AppRoutes.messages),
                         icon: const Icon(Icons.message),
                         label: const Text('Message'),
                         style: OutlinedButton.styleFrom(

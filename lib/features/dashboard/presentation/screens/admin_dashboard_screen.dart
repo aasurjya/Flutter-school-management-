@@ -245,7 +245,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const _AdminSectionHeader(label: 'Security & Activity'),
-                  _ViewAllBtn(onTap: () {}),
+                  _ViewAllBtn(onTap: () => context.push(AppRoutes.notifications)),
                 ],
               ),
             ),

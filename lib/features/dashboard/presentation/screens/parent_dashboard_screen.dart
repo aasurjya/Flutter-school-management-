@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logout_helper.dart';
+import '../../../../data/models/invoice.dart';
 import '../../../ai_insights/presentation/widgets/parent_ai_insights_card.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../ai_insights/providers/parent_digest_provider.dart';
 import '../../../attendance/providers/attendance_provider.dart';
+import '../../../fees/providers/fees_provider.dart';
 import '../../../students/providers/students_provider.dart';
 
 class ParentDashboardScreen extends ConsumerWidget {
@@ -72,6 +75,7 @@ class ParentDashboardScreen extends ConsumerWidget {
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(currentUserProvider);
+          ref.invalidate(parentChildrenProvider);
         },
         child: CustomScrollView(
           slivers: [
@@ -174,32 +178,22 @@ class ParentDashboardScreen extends ConsumerWidget {
                 const _ParentAISection(),
                 const SizedBox(height: 32),
 
-                // Academic Quick Stats Grid
-                _buildQuickStats(context),
+                // Academic Quick Stats Grid (real data)
+                const _QuickStatsSection(),
                 const SizedBox(height: 32),
 
-                // Weekly Performance Section
-                _buildSectionHeader(context, "Attendance Insights", "View Details"),
+                // Weekly Attendance (real data)
+                _buildSectionHeader(context, "Attendance Insights", "View Details",
+                    () => context.push(AppRoutes.attendance)),
                 const SizedBox(height: 16),
-                _buildAttendanceOverview(context),
+                const _WeeklyAttendanceSection(),
                 const SizedBox(height: 32),
 
-                // Curriculum Tracker
-                _buildSectionHeader(context, 'Academic Progress', 'See All'),
+                // Fee Summary (real data)
+                _buildSectionHeader(context, 'Financial Summary', 'Invoices',
+                    () => context.push(AppRoutes.fees)),
                 const SizedBox(height: 16),
-                _buildSyllabusProgress(context),
-                const SizedBox(height: 32),
-
-                // Exam Performance
-                _buildSectionHeader(context, 'Latest Assessment', 'History'),
-                const SizedBox(height: 16),
-                _buildPerformanceComparison(context),
-                const SizedBox(height: 32),
-
-                // Financial Health
-                _buildSectionHeader(context, 'Financial Summary', 'Invoices'),
-                const SizedBox(height: 16),
-                _buildFeeSummary(context),
+                const _FeeSummarySection(),
               ]),
             ),
           ),
@@ -296,7 +290,12 @@ class ParentDashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, String? action) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title,
+    String? action,
+    VoidCallback? onAction,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -310,7 +309,7 @@ class ParentDashboardScreen extends ConsumerWidget {
         ),
         if (action != null)
           TextButton(
-            onPressed: () {},
+            onPressed: onAction,
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primary,
               textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
@@ -326,30 +325,121 @@ class ParentDashboardScreen extends ConsumerWidget {
       ],
     );
   }
+}
 
-  Widget _buildQuickStats(BuildContext context) {
-    return Row(
-      children: [
-        _ParentStatTile(
-          label: 'Attendance',
-          value: '94%',
-          icon: Icons.calendar_today_rounded,
-          color: AppColors.success,
-        ),
-        const SizedBox(width: 12),
-        _ParentStatTile(
-          label: 'Class Rank',
-          value: '#05',
-          icon: Icons.leaderboard_rounded,
-          color: AppColors.info,
-        ),
-      ],
+// ─── Quick Stats — reads attendance + rank from providers ────────────────────
+class _QuickStatsSection extends ConsumerWidget {
+  const _QuickStatsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedChild = ref.watch(selectedChildProvider);
+    final studentId = selectedChild?['student_id'] as String?;
+
+    if (studentId == null) {
+      return Row(
+        children: [
+          _ParentStatTile(label: 'Attendance', value: '--', icon: Icons.calendar_today_rounded, color: AppColors.grey400),
+          const SizedBox(width: 12),
+          _ParentStatTile(label: 'Class Rank', value: '--', icon: Icons.leaderboard_rounded, color: AppColors.grey400),
+        ],
+      );
+    }
+
+    final statsAsync = ref.watch(attendanceStatsProvider(studentId));
+
+    return statsAsync.when(
+      loading: () => Row(
+        children: [
+          _ParentStatTile(label: 'Attendance', value: '...', icon: Icons.calendar_today_rounded, color: AppColors.grey400),
+          const SizedBox(width: 12),
+          _ParentStatTile(label: 'Class Rank', value: '...', icon: Icons.leaderboard_rounded, color: AppColors.grey400),
+        ],
+      ),
+      error: (_, __) => Row(
+        children: [
+          _ParentStatTile(label: 'Attendance', value: '--', icon: Icons.calendar_today_rounded, color: AppColors.error),
+          const SizedBox(width: 12),
+          _ParentStatTile(label: 'Class Rank', value: '--', icon: Icons.leaderboard_rounded, color: AppColors.grey400),
+        ],
+      ),
+      data: (stats) {
+        final present = stats['present'] ?? 0;
+        final total = present + (stats['absent'] ?? 0) + (stats['late'] ?? 0);
+        final pct = total > 0 ? (present / total * 100).round() : 0;
+
+        return Row(
+          children: [
+            _ParentStatTile(
+              label: 'Attendance',
+              value: '$pct%',
+              icon: Icons.calendar_today_rounded,
+              color: pct >= 90
+                  ? AppColors.success
+                  : pct >= 75
+                      ? AppColors.info
+                      : AppColors.error,
+            ),
+            const SizedBox(width: 12),
+            _ParentStatTile(
+              label: 'Class Rank',
+              value: '--',
+              icon: Icons.leaderboard_rounded,
+              color: AppColors.info,
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// ─── Weekly Attendance — reads real attendance data for current week ──────────
+class _WeeklyAttendanceSection extends ConsumerWidget {
+  const _WeeklyAttendanceSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedChild = ref.watch(selectedChildProvider);
+    final studentId = selectedChild?['student_id'] as String?;
+
+    if (studentId == null) {
+      return _buildGrid(context, List.filled(6, null));
+    }
+
+    // Get this week's Mon-Sat
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    final saturday = monday.add(const Duration(days: 5));
+
+    final filter = StudentAttendanceFilter(
+      studentId: studentId,
+      startDate: monday,
+      endDate: saturday,
+    );
+
+    final attendanceAsync = ref.watch(studentAttendanceProvider(filter));
+
+    return attendanceAsync.when(
+      loading: () => _buildGrid(context, List.filled(6, null)),
+      error: (_, __) => _buildGrid(context, List.filled(6, null)),
+      data: (records) {
+        final dayStatus = <String?>[null, null, null, null, null, null];
+        for (final record in records) {
+          final date = record.date;
+          final weekday = date.weekday; // 1=Mon, 6=Sat
+          if (weekday >= 1 && weekday <= 6) {
+            dayStatus[weekday - 1] = record.status.name;
+          }
+        }
+        return _buildGrid(context, dayStatus);
+      },
     );
   }
 
-  Widget _buildAttendanceOverview(BuildContext context) {
+  Widget _buildGrid(BuildContext context, List<String?> dayStatuses) {
     final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    final attendance = ['P', 'P', 'P', 'A', 'P', 'P'];
+    final todayIndex = DateTime.now().weekday - 1; // 0-based Mon
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -361,8 +451,11 @@ class ParentDashboardScreen extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(days.length, (index) {
-          final isPresent = attendance[index] == 'P';
-          final isToday = index == 4;
+          final status = dayStatuses[index];
+          final isPresent = status == 'present' || status == 'late';
+          final isAbsent = status == 'absent';
+          final hasData = status != null;
+          final isToday = index == todayIndex;
 
           return Column(
             children: [
@@ -379,15 +472,21 @@ class ParentDashboardScreen extends ConsumerWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: isPresent ? AppColors.success.withValues(alpha: 0.1) : AppColors.error.withValues(alpha: 0.1),
+                  color: hasData
+                      ? (isPresent
+                          ? AppColors.success.withValues(alpha: 0.1)
+                          : AppColors.error.withValues(alpha: 0.1))
+                      : AppColors.grey100,
                   shape: BoxShape.circle,
                   border: isToday ? Border.all(color: AppColors.primary, width: 2) : null,
                 ),
-                child: Icon(
-                  isPresent ? Icons.check_rounded : Icons.close_rounded,
-                  color: isPresent ? AppColors.success : AppColors.error,
-                  size: 20,
-                ),
+                child: hasData
+                    ? Icon(
+                        isAbsent ? Icons.close_rounded : Icons.check_rounded,
+                        color: isPresent ? AppColors.success : AppColors.error,
+                        size: 20,
+                      )
+                    : const Icon(Icons.remove, color: AppColors.grey300, size: 16),
               ),
             ],
           );
@@ -395,155 +494,159 @@ class ParentDashboardScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildSyllabusProgress(BuildContext context) {
-    final subjects = [
-      {'name': 'Mathematics', 'completed': 18, 'total': 24, 'percentage': 75},
-      {'name': 'Physics', 'completed': 14, 'total': 20, 'percentage': 70},
-    ];
+// ─── Fee Summary — reads real invoices from provider ─────────────────────────
+class _FeeSummarySection extends ConsumerWidget {
+  const _FeeSummarySection();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Column(
-        children: subjects.asMap().entries.map((entry) {
-          final isLast = entry.key == subjects.length - 1;
-          final s = entry.value;
-          return Column(
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedChild = ref.watch(selectedChildProvider);
+    final studentId = selectedChild?['student_id'] as String?;
+
+    if (studentId == null) {
+      return _buildEmpty();
+    }
+
+    final invoicesAsync = ref.watch(
+      invoicesProvider(InvoicesFilter(studentId: studentId)),
+    );
+
+    return invoicesAsync.when(
+      loading: () => _buildLoading(),
+      error: (_, __) => _buildEmpty(),
+      data: (invoices) {
+        if (invoices.isEmpty) return _buildEmpty();
+
+        final totalPending = invoices
+            .where((inv) => !inv.isPaid && !inv.isCancelled)
+            .fold<double>(0, (sum, inv) => sum + inv.pendingAmount);
+
+        final pendingInvoices = invoices
+            .where((inv) => !inv.isPaid && !inv.isCancelled)
+            .toList();
+
+        final hasOverdue = pendingInvoices.any((inv) => inv.isOverdueNow);
+        final formatter = NumberFormat('#,##0', 'en_IN');
+
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          s['name'] as String,
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-                        ),
-                        Text(
-                          '${s['completed']}/${s['total']} Units',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.grey500),
-                        ),
-                      ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Outstanding Balance',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.grey500),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '₹${formatter.format(totalPending)}',
+                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.grey900, letterSpacing: -1),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: hasOverdue
+                          ? AppColors.error.withValues(alpha: 0.1)
+                          : totalPending > 0
+                              ? AppColors.warning.withValues(alpha: 0.1)
+                              : AppColors.success.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: (s['percentage'] as int) / 100,
-                        backgroundColor: AppColors.grey100,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary.withValues(alpha: 0.8)),
-                        minHeight: 6,
+                    child: Text(
+                      hasOverdue
+                          ? 'Overdue'
+                          : totalPending > 0
+                              ? 'Pending'
+                              : 'Paid',
+                      style: TextStyle(
+                        color: hasOverdue
+                            ? AppColors.error
+                            : totalPending > 0
+                                ? AppColors.warning
+                                : AppColors.success,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                  ],
-                ),
-              ),
-              if (!isLast) const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
-            ],
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildPerformanceComparison(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Column(
-        children: [
-          const _ComparisonBar(label: 'Your Child', value: 87, color: AppColors.primary),
-          const SizedBox(height: 16),
-          _ComparisonBar(label: 'Class Avg', value: 72, color: AppColors.grey400),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.auto_graph_rounded, color: AppColors.success, size: 20),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Arjun is performing 15% better than the class average this term.',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.success, height: 1.4),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeeSummary(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Outstanding Balance',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.grey500),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    '₹25,000',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.grey900, letterSpacing: -1),
                   ),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+              const SizedBox(height: 24),
+              // Show up to 3 pending invoices
+              ...pendingInvoices.take(3).map((inv) {
+                final label = (inv.notes?.isNotEmpty == true)
+                    ? inv.notes!
+                    : 'Invoice #${inv.invoiceNumber}';
+                final pending = inv.totalAmount - inv.discountAmount - inv.paidAmount;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _FeeItem(
+                    label: label,
+                    amount: '₹${formatter.format(pending)}',
+                  ),
+                );
+              }),
+              if (pendingInvoices.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Text('All fees paid!', style: TextStyle(color: AppColors.success, fontSize: 12)),
                 ),
-                child: const Text(
-                  'Overdue',
-                  style: TextStyle(color: AppColors.error, fontSize: 10, fontWeight: FontWeight.w800),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    context.push(
+                      AppRoutes.feePayment.replaceFirst(':childId', studentId),
+                    );
+                  },
+                  child: Text(totalPending > 0 ? 'Proceed to Payment' : 'View Payment History'),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          const _FeeItem(label: 'Tuition Fee (Term 2)', amount: '₹20,000'),
-          const SizedBox(height: 12),
-          const _FeeItem(label: 'Transport & Activity', amount: '₹5,000'),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {},
-              child: const Text('Proceed to Payment'),
-            ),
-          ),
-        ],
+        );
+      },
+    );
+  }
+
+  Widget _buildEmpty() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight),
       ),
+      child: const Center(
+        child: Text('No fee data available', style: TextStyle(color: AppColors.grey500, fontSize: 12)),
+      ),
+    );
+  }
+
+  Widget _buildLoading() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
   }
 }
@@ -913,64 +1016,6 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
-class _ComparisonBar extends StatelessWidget {
-  final String label;
-  final int value;
-  final Color color;
-
-  const _ComparisonBar({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 100,
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 12),
-          ),
-        ),
-        Expanded(
-          child: Stack(
-            children: [
-              Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              FractionallySizedBox(
-                widthFactor: value / 100,
-                child: Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          '$value%',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _FeeItem extends StatelessWidget {
   final String label;
   final String amount;
@@ -982,7 +1027,7 @@ class _FeeItem extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12)),
+        Expanded(child: Text(label, style: const TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis)),
         Text(amount, style: const TextStyle(fontWeight: FontWeight.w500)),
       ],
     );

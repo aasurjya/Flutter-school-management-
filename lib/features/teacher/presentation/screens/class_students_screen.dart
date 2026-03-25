@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 
@@ -385,25 +387,38 @@ class _StudentDetailSheet extends StatelessWidget {
                     leading: const Icon(Icons.message, color: AppColors.primary),
                     title: const Text('Message Parent'),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push(AppRoutes.messages);
+                    },
                   ),
                   ListTile(
                     leading: const Icon(Icons.history, color: AppColors.secondary),
                     title: const Text('View Attendance History'),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push(AppRoutes.attendance);
+                    },
                   ),
                   ListTile(
                     leading: const Icon(Icons.assignment, color: AppColors.accent),
                     title: const Text('View Assignments'),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push(AppRoutes.assignments);
+                    },
                   ),
                   ListTile(
                     leading: const Icon(Icons.analytics, color: AppColors.info),
                     title: const Text('Performance Report'),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pop(context);
+                      final studentId = student['id'] as String;
+                      context.push(AppRoutes.childInsights.replaceFirst(':studentId', studentId));
+                    },
                   ),
                 ],
               ),

@@ -505,7 +505,7 @@ class _ResourceCard extends StatelessWidget {
         content: Text('Downloading ${resource.title}...'),
         action: SnackBarAction(
           label: 'Open',
-          onPressed: () {},
+          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Opening resource...'))),
         ),
       ),
     );

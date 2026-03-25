@@ -10,6 +10,7 @@ import '../../../auth/providers/auth_provider.dart';
 import '../../../academic/providers/academic_provider.dart';
 import '../../../ai_insights/providers/risk_score_provider.dart';
 import '../../../ai_insights/providers/early_warning_provider.dart';
+import '../../../attendance/providers/attendance_provider.dart';
 import '../../../ai_insights/presentation/widgets/risk_score_badge.dart';
 import '../../../syllabus/providers/syllabus_provider.dart';
 import '../../../syllabus/presentation/widgets/coverage_summary_card.dart';
@@ -85,6 +86,10 @@ class TeacherDashboardScreen extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(currentUserProvider);
           ref.invalidate(currentAcademicYearProvider);
+          ref.invalidate(todayAttendancePercentageProvider);
+          final userId = ref.read(currentUserProvider)?.id ?? '';
+          ref.invalidate(classTeacherSectionsProvider(userId));
+          ref.invalidate(alertsProvider(const AlertsFilter(status: 'new')));
         },
         child: CustomScrollView(
           slivers: [
@@ -235,14 +240,19 @@ class TeacherDashboardScreen extends ConsumerWidget {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // Quick Summary Stats Grid
-                _buildProfessionalStatsGrid(context),
+                _buildProfessionalStatsGrid(context, ref),
                 const SizedBox(height: 32),
-                
+
                 // Active Class Teacher Section (if applicable)
                 _buildClassTeacherSection(context, ref),
 
                 // Today's Schedule - Elevated
-                _buildSectionHeader(context, "Academic Schedule", "See Timeline"),
+                _buildSectionHeader(
+                  context,
+                  "Academic Schedule",
+                  "See Timeline",
+                  onAction: () => context.push(AppRoutes.teacherTimetable),
+                ),
                 const SizedBox(height: 16),
                 _buildTodaySchedule(context),
                 const SizedBox(height: 32),
@@ -260,7 +270,12 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 const SizedBox(height: 32),
 
                 // Administrative Tasks
-                _buildSectionHeader(context, 'Administrative Tasks', 'View All'),
+                _buildSectionHeader(
+                  context,
+                  'Administrative Tasks',
+                  'View All',
+                  onAction: () => context.push(AppRoutes.teacherAssignments),
+                ),
                 const SizedBox(height: 16),
                 _buildPendingTasksList(context),
               ]),
@@ -272,26 +287,53 @@ class TeacherDashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfessionalStatsGrid(BuildContext context) {
+  Widget _buildProfessionalStatsGrid(BuildContext context, WidgetRef ref) {
+    final currentUser = ref.watch(currentUserProvider);
+    final userId = currentUser?.id ?? '';
+
+    final sectionsAsync = ref.watch(classTeacherSectionsProvider(userId));
+    final attendanceAsync = ref.watch(todayAttendancePercentageProvider);
+    final alertsAsync = ref.watch(
+      alertsProvider(const AlertsFilter(status: 'new')),
+    );
+
+    final classesValue = sectionsAsync.when(
+      loading: () => '...',
+      error: (_, __) => '--',
+      data: (sections) => sections.length.toString().padLeft(2, '0'),
+    );
+
+    final attendanceValue = attendanceAsync.when(
+      loading: () => '...',
+      error: (_, __) => '--%',
+      data: (pct) => '${pct.round()}%',
+    );
+
+    final alertsValue = alertsAsync.when(
+      loading: () => '...',
+      error: (_, __) => '--',
+      data: (alerts) => alerts.length.toString().padLeft(2, '0'),
+    );
+
     return Row(
       children: [
         _TeacherStatTile(
           label: 'Classes',
-          value: '04',
+          value: classesValue,
           icon: Icons.groups_rounded,
           color: AppColors.primary,
         ),
         const SizedBox(width: 12),
         _TeacherStatTile(
           label: 'Attendance',
-          value: '92%',
+          value: attendanceValue,
           icon: Icons.fact_check_rounded,
           color: AppColors.success,
         ),
         const SizedBox(width: 12),
         _TeacherStatTile(
           label: 'Alerts',
-          value: '03',
+          value: alertsValue,
           icon: Icons.auto_awesome_rounded,
           color: AppColors.warning,
         ),
@@ -299,7 +341,12 @@ class TeacherDashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, String? actionLabel) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title,
+    String? actionLabel, {
+    VoidCallback? onAction,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -313,7 +360,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
         ),
         if (actionLabel != null)
           TextButton(
-            onPressed: () {},
+            onPressed: onAction,
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primary,
               textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
@@ -338,7 +385,12 @@ class TeacherDashboardScreen extends ConsumerWidget {
         const SizedBox(height: 16),
         _buildClassHealthCard(ref),
         const SizedBox(height: 32),
-        _buildSectionHeader(context, "Student Insights", "Analytics"),
+        _buildSectionHeader(
+          context,
+          "Student Insights",
+          "Analytics",
+          onAction: () => context.push(AppRoutes.classIntelligence.replaceFirst(':sectionId', 'default')),
+        ),
         const SizedBox(height: 16),
         _buildAtRiskSection(context, ref),
         _buildEarlyWarningSection(context, ref),
@@ -461,7 +513,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                     style: const TextStyle(color: AppColors.error, fontSize: 10, fontWeight: FontWeight.w800),
                   ),
                 ),
-                onTap: () {},
+                onTap: () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${task['title']} — coming soon'))),
               ),
               if (!isLast) const Divider(height: 1, indent: 70, endIndent: 24, color: AppColors.borderLight),
             ],
@@ -485,7 +537,12 @@ class TeacherDashboardScreen extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionHeader(context, 'Primary Class Management', 'Manage'),
+            _buildSectionHeader(
+              context,
+              'Primary Class Management',
+              'Manage',
+              onAction: () => context.push(AppRoutes.teacherClasses),
+            ),
             const SizedBox(height: 16),
             ...sections.map((section) => Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -662,7 +719,12 @@ class TeacherDashboardScreen extends ConsumerWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionHeader(context, 'Critical: At-Risk Students', 'View All'),
+                _buildSectionHeader(
+                  context,
+                  'Critical: At-Risk Students',
+                  'View All',
+                  onAction: () => context.push(AppRoutes.earlyWarningAlerts),
+                ),
                 const SizedBox(height: 16),
                 ...students.map((student) => Container(
                       margin: const EdgeInsets.only(bottom: 12),
@@ -732,7 +794,12 @@ class TeacherDashboardScreen extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionHeader(context, 'System Alerts', 'Review'),
+            _buildSectionHeader(
+              context,
+              'System Alerts',
+              'Review',
+              onAction: () => context.push(AppRoutes.earlyWarningAlerts),
+            ),
             const SizedBox(height: 16),
             ...alerts.map((alert) => Container(
                   margin: const EdgeInsets.only(bottom: 12),

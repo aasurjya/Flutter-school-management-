@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../academic/providers/academic_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../providers/attendance_provider.dart';
 
 class AttendanceScreen extends ConsumerStatefulWidget {
   const AttendanceScreen({super.key});
@@ -71,6 +73,14 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       return _buildStudentAttendanceView(context);
     }
 
+    final currentUser = ref.watch(currentUserProvider);
+    final isTeacher = currentUser?.isTeacher ?? false;
+
+    // Teachers see their assigned sections; admins see all sections
+    final sectionsAsync = isTeacher && currentUser != null
+        ? ref.watch(classTeacherSectionsProvider(currentUser.id))
+        : ref.watch(allSectionsProvider);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -117,57 +127,180 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
           ),
           const SizedBox(height: 12),
 
-          // Class Cards
-          ..._mockClasses.map((cls) => _ClassAttendanceCard(
-                className: cls['name'] as String,
-                studentCount: cls['students'] as int,
-                attendanceStatus: cls['status'] as String,
-                percentage: cls['percentage'] as int,
-                onTap: () => context.push(
-                  '/attendance/mark/${cls['id']}?date=${_selectedDate.toIso8601String()}',
+          // Class Cards from provider
+          sectionsAsync.when(
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (error, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Failed to load classes: $error',
+                  style: const TextStyle(color: AppColors.error),
                 ),
-              )),
+              ),
+            ),
+            data: (sections) {
+              if (sections.isEmpty) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Text('No classes assigned'),
+                  ),
+                );
+              }
+              return Column(
+                children: sections.map((section) {
+                  final dailyAsync = ref.watch(
+                    sectionDailyAttendanceProvider(
+                      SectionDateFilter(
+                        sectionId: section.id,
+                        date: _selectedDate,
+                      ),
+                    ),
+                  );
+
+                  final String statusText;
+                  final int percentage;
+                  dailyAsync.whenOrNull(
+                    data: (data) => data,
+                  );
+
+                  final dailyData = dailyAsync.valueOrNull;
+                  if (dailyData != null) {
+                    final total = (dailyData['total_students'] as num?)?.toInt() ?? 0;
+                    final present = (dailyData['present_count'] as num?)?.toInt() ?? 0;
+                    final lateCount = (dailyData['late_count'] as num?)?.toInt() ?? 0;
+                    statusText = total > 0 ? 'Marked' : 'Pending';
+                    percentage = total > 0
+                        ? ((present + lateCount) * 100 ~/ total)
+                        : 0;
+                  } else {
+                    statusText = dailyAsync.isLoading ? 'Loading...' : 'Pending';
+                    percentage = 0;
+                  }
+
+                  final displayName = section.className != null
+                      ? '${section.className} - ${section.name}'
+                      : section.name;
+
+                  return _ClassAttendanceCard(
+                    className: displayName,
+                    studentCount: section.studentCount ?? section.capacity,
+                    attendanceStatus: statusText,
+                    percentage: percentage,
+                    onTap: () => context.push(
+                      '/attendance/mark/${section.id}?date=${_selectedDate.toIso8601String()}',
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
   Widget _buildStudentAttendanceView(BuildContext context) {
+    final currentUser = ref.watch(currentUserProvider);
+    final studentId = currentUser?.id ?? '';
+
+    final statsAsync = ref.watch(attendanceStatsProvider(studentId));
+
+    // Fetch recent attendance (last 30 days)
+    final now = DateTime.now();
+    final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+    final historyAsync = ref.watch(
+      studentAttendanceProvider(
+        StudentAttendanceFilter(
+          studentId: studentId,
+          startDate: thirtyDaysAgo,
+          endDate: now,
+        ),
+      ),
+    );
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Monthly Summary
-          const GlassCard(
-            padding: EdgeInsets.all(20),
-            gradient: AppColors.primaryGradient,
-            child: Column(
-              children: [
-                Text(
-                  'This Month\'s Attendance',
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+          statsAsync.when(
+            loading: () => const GlassCard(
+              padding: EdgeInsets.all(20),
+              gradient: AppColors.primaryGradient,
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(color: Colors.white),
                 ),
-                SizedBox(height: 8),
-                Text(
-                  '94.5%',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+            ),
+            error: (error, _) => GlassCard(
+              padding: const EdgeInsets.all(20),
+              gradient: AppColors.primaryGradient,
+              child: Center(
+                child: Text(
+                  'Failed to load stats: $error',
+                  style: const TextStyle(color: Colors.white),
                 ),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+              ),
+            ),
+            data: (stats) {
+              final presentDays = stats['present_days'] ?? 0;
+              final absentDays = stats['absent_days'] ?? 0;
+              final lateDays = stats['late_days'] ?? 0;
+              final percentage = stats['attendance_percentage'] ?? 0;
+
+              return GlassCard(
+                padding: const EdgeInsets.all(20),
+                gradient: AppColors.primaryGradient,
+                child: Column(
                   children: [
-                    _AttendanceStat(label: 'Present', value: '21', color: Colors.white),
-                    _AttendanceStat(label: 'Absent', value: '1', color: Colors.white),
-                    _AttendanceStat(label: 'Late', value: '2', color: Colors.white),
+                    const Text(
+                      'This Month\'s Attendance',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '$percentage%',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _AttendanceStat(
+                          label: 'Present',
+                          value: '$presentDays',
+                          color: Colors.white,
+                        ),
+                        _AttendanceStat(
+                          label: 'Absent',
+                          value: '$absentDays',
+                          color: Colors.white,
+                        ),
+                        _AttendanceStat(
+                          label: 'Late',
+                          value: '$lateDays',
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
           const SizedBox(height: 24),
 
@@ -186,11 +319,44 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
           const SizedBox(height: 12),
-          ..._mockAttendanceHistory.map((item) => _AttendanceHistoryItem(
-                date: item['date']!,
-                status: item['status']!,
-                time: item['time']!,
-              )),
+          historyAsync.when(
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (error, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Failed to load history: $error',
+                  style: const TextStyle(color: AppColors.error),
+                ),
+              ),
+            ),
+            data: (records) {
+              if (records.isEmpty) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Text('No attendance records found'),
+                  ),
+                );
+              }
+              return Column(
+                children: records.map((record) {
+                  return _AttendanceHistoryItem(
+                    date: _formatDate(record.date),
+                    status: record.status.displayName,
+                    time: record.markedAt != null
+                        ? _formatTime(record.markedAt!)
+                        : '-',
+                  );
+                }).toList(),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -249,66 +415,123 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
   }
 
   Widget _buildReportsTab(BuildContext context) {
+    final sectionsAsync = ref.watch(allSectionsProvider);
+    final todayPercentageAsync = ref.watch(todayAttendancePercentageProvider);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Filter Options
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  initialValue: 'This Month',
-                  decoration: const InputDecoration(
-                    labelText: 'Period',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          sectionsAsync.when(
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (sections) {
+              final classNames = ['All Classes'];
+              for (final s in sections) {
+                final name = s.className != null
+                    ? '${s.className} - ${s.name}'
+                    : s.name;
+                if (!classNames.contains(name)) {
+                  classNames.add(name);
+                }
+              }
+              return Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: 'This Month',
+                      decoration: const InputDecoration(
+                        labelText: 'Period',
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                      items: ['Today', 'This Week', 'This Month', 'This Term']
+                          .map((e) =>
+                              DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (value) {},
+                    ),
                   ),
-                  items: ['Today', 'This Week', 'This Month', 'This Term']
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (value) {},
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  initialValue: 'All Classes',
-                  decoration: const InputDecoration(
-                    labelText: 'Class',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: 'All Classes',
+                      decoration: const InputDecoration(
+                        labelText: 'Class',
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                      items: classNames
+                          .map((e) =>
+                              DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (value) {},
+                    ),
                   ),
-                  items: ['All Classes', 'Class 10-A', 'Class 10-B', 'Class 9-A']
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (value) {},
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
           const SizedBox(height: 24),
 
           // Summary Cards
-          const Row(
-            children: [
-              Expanded(
-                child: _ReportCard(
-                  title: 'Average Attendance',
-                  value: '92.5%',
-                  icon: Icons.people,
-                  color: AppColors.success,
+          todayPercentageAsync.when(
+            loading: () => const Row(
+              children: [
+                Expanded(
+                  child: _ReportCard(
+                    title: 'Average Attendance',
+                    value: '...',
+                    icon: Icons.people,
+                    color: AppColors.success,
+                  ),
                 ),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: _ReportCard(
-                  title: 'Absent Today',
-                  value: '24',
-                  icon: Icons.person_off,
-                  color: AppColors.error,
+                SizedBox(width: 12),
+                Expanded(
+                  child: _ReportCard(
+                    title: 'Absent Today',
+                    value: '...',
+                    icon: Icons.person_off,
+                    color: AppColors.error,
+                  ),
                 ),
+              ],
+            ),
+            error: (error, _) => Center(
+              child: Text(
+                'Failed to load summary: $error',
+                style: const TextStyle(color: AppColors.error),
               ),
-            ],
+            ),
+            data: (avgPercentage) {
+              return Row(
+                children: [
+                  Expanded(
+                    child: _ReportCard(
+                      title: 'Average Attendance',
+                      value: '${avgPercentage.toStringAsFixed(1)}%',
+                      icon: Icons.people,
+                      color: AppColors.success,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ReportCard(
+                      title: 'Avg Attendance %',
+                      value: '${(100 - avgPercentage).toStringAsFixed(0)}%',
+                      icon: Icons.person_off,
+                      color: AppColors.error,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 24),
 
@@ -318,12 +541,84 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
           const SizedBox(height: 12),
-          ..._mockClassReport.map((item) => _ClassReportItem(
-                className: item['class'] as String,
-                present: item['present'] as int,
-                absent: item['absent'] as int,
-                percentage: item['percentage'] as double,
-              )),
+          sectionsAsync.when(
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (error, _) => Center(
+              child: Text(
+                'Failed to load report: $error',
+                style: const TextStyle(color: AppColors.error),
+              ),
+            ),
+            data: (sections) {
+              if (sections.isEmpty) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Text('No sections found'),
+                  ),
+                );
+              }
+              return Column(
+                children: sections.map((section) {
+                  final dailyAsync = ref.watch(
+                    sectionDailyAttendanceProvider(
+                      SectionDateFilter(
+                        sectionId: section.id,
+                        date: _selectedDate,
+                      ),
+                    ),
+                  );
+
+                  final displayName = section.className != null
+                      ? '${section.className} - ${section.name}'
+                      : section.name;
+
+                  return dailyAsync.when(
+                    loading: () => _ClassReportItem(
+                      className: displayName,
+                      present: 0,
+                      absent: 0,
+                      percentage: 0,
+                    ),
+                    error: (_, __) => _ClassReportItem(
+                      className: displayName,
+                      present: 0,
+                      absent: 0,
+                      percentage: 0,
+                    ),
+                    data: (data) {
+                      if (data == null) {
+                        return _ClassReportItem(
+                          className: displayName,
+                          present: 0,
+                          absent: 0,
+                          percentage: 0,
+                        );
+                      }
+                      final present =
+                          (data['present_count'] as num?)?.toInt() ?? 0;
+                      final absent =
+                          (data['absent_count'] as num?)?.toInt() ?? 0;
+                      final pct = (data['attendance_percentage'] as num?)
+                              ?.toDouble() ??
+                          0;
+                      return _ClassReportItem(
+                        className: displayName,
+                        present: present,
+                        absent: absent,
+                        percentage: pct,
+                      );
+                    },
+                  );
+                }).toList(),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -347,6 +642,14 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour;
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    return '$displayHour:$minute $period';
   }
 }
 
@@ -629,25 +932,3 @@ class _ClassReportItem extends StatelessWidget {
   }
 }
 
-// Mock data
-final _mockClasses = [
-  {'id': '1', 'name': 'Class 10-A', 'students': 42, 'status': 'Marked', 'percentage': 95},
-  {'id': '2', 'name': 'Class 9-B', 'students': 38, 'status': 'Pending', 'percentage': 0},
-  {'id': '3', 'name': 'Class 12-A', 'students': 35, 'status': 'Marked', 'percentage': 88},
-  {'id': '4', 'name': 'Class 11-B', 'students': 40, 'status': 'Pending', 'percentage': 0},
-];
-
-final _mockAttendanceHistory = [
-  {'date': 'Today, 6 Dec', 'status': 'Present', 'time': '8:25 AM'},
-  {'date': 'Yesterday, 5 Dec', 'status': 'Present', 'time': '8:30 AM'},
-  {'date': 'Wednesday, 4 Dec', 'status': 'Late', 'time': '8:45 AM'},
-  {'date': 'Tuesday, 3 Dec', 'status': 'Present', 'time': '8:20 AM'},
-  {'date': 'Monday, 2 Dec', 'status': 'Absent', 'time': '-'},
-];
-
-final _mockClassReport = [
-  {'class': 'Class 10-A', 'present': 40, 'absent': 2, 'percentage': 95.2},
-  {'class': 'Class 10-B', 'present': 36, 'absent': 4, 'percentage': 90.0},
-  {'class': 'Class 9-A', 'present': 38, 'absent': 3, 'percentage': 92.7},
-  {'class': 'Class 9-B', 'present': 35, 'absent': 5, 'percentage': 87.5},
-];

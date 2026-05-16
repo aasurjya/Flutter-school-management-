@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -27,11 +26,39 @@ class FeesPdfBuilder {
     await Printing.sharePdf(bytes: bytes, filename: 'fees-report-$date.pdf');
   }
 
+  /// Loads Noto Sans fonts: bundled asset first, Google Fonts CDN as fallback.
+  static Future<pw.Font> _loadFont(
+    String assetPath,
+    Future<pw.Font> Function() cdnLoader,
+  ) async {
+    try {
+      final data = await rootBundle.load(assetPath);
+      return pw.Font.ttf(data);
+    } catch (_) {
+      return cdnLoader();
+    }
+  }
+
   /// Returns raw PDF bytes. Exposed for testing.
   static Future<Uint8List> _buildBytes(List<Invoice> invoices) async {
+    final regular = await _loadFont(
+      'assets/fonts/NotoSans-Regular.ttf',
+      PdfGoogleFonts.notoSansRegular,
+    );
+    final bold = await _loadFont(
+      'assets/fonts/NotoSans-Bold.ttf',
+      PdfGoogleFonts.notoSansBold,
+    );
+    final theme = pw.ThemeData.withFont(
+      base: regular,
+      bold: bold,
+      fontFallback: [regular],
+    );
+
     final pdf = pw.Document(
       title: 'Fees Collection Report',
       author: 'School Management System',
+      theme: theme,
     );
 
     pdf.addPage(

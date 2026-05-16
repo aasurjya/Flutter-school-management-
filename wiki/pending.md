@@ -15,7 +15,7 @@ last_updated: 2026-05-16
 - 🔴 **Rotate OpenRouter API key** (the one in local `.env`) at openrouter.ai/keys
 - 🔴 **History scan** — `git log --all -p -- .env .env.* | grep -E "sk-[a-zA-Z0-9]{20,}"` — should return nothing; BFG-purge if anything surfaces
 - 🟠 **Provide production deploy URL** for `ALLOWED_ORIGINS` env var in Supabase Functions secrets
-- 🟠 **PDF rupee symbol (₹) renders as box in fees exports** — `fees_pdf_builder.dart` uses Helvetica which lacks Unicode. Register Noto Sans IN (or DejaVuSans) font and pass via `TextStyle.fontFallback`. Critical for Indian fees module — caught by `test/fees/fees_actions_test.dart` PDF warnings.
+- ✅ ~~**PDF rupee symbol (₹) renders as box in fees exports**~~ — DONE 2026-05-16 (PdfGoogleFonts.notoSansRegular/Bold via bundled TTF asset; `rootBundle` primary, CDN fallback)
 - ✅ ~~Decide on `ai_tutor` KILL~~ — DONE 2026-05-16 (panel verdict 4-1; 813 LOC deleted)
 - ✅ ~~Decide on admin dashboard mock-data ship-block~~ — DONE 2026-05-16 (5 mock surfaces wired, fake feed hidden, dead tiles fixed)
 - ✅ ~~Promote Sprint 3 fees-snackbars to Sprint 1.5?~~ — DONE 2026-05-16 (5 of 6 wired; Fee Structure CRUD deferred to 1.6)

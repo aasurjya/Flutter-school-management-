@@ -213,10 +213,10 @@ serve(async (req: Request) => {
     )
 
   } catch (error: unknown) {
-    console.error('Error computing exam stats:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    // FIX 2: Log full error server-side only; return generic message to client.
+    console.error('compute-exam-stats error:', error)
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'An internal error occurred.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/services/admin_user_service.dart';
 import '../../../../core/services/credential_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/providers/auth_provider.dart';
@@ -340,47 +341,46 @@ class _StaffCard extends StatelessWidget {
     required this.onDeactivate,
   });
 
-  Future<void> _viewCredentials(BuildContext context) async {
-    showDialog(
+  Future<void> _resetPassword(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
       context: context,
-      barrierDismissible: false,
-      builder: (_) => const AlertDialog(
-        content: Row(
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 16),
-            Text('Loading credentials...'),
-          ],
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: Text(
+          'Reset password for ${member.fullName}? '
+          'They will need to log in again with the new password.',
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Reset', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
 
+    if (confirmed != true || !context.mounted) return;
+
     try {
-      final service = CredentialService(Supabase.instance.client);
-      final cred = await service.getCredentials(member.userId);
-
-      if (context.mounted) Navigator.of(context).pop();
+      final service = AdminUserService(Supabase.instance.client);
+      final newPassword = await service.resetPassword(member.userId);
       if (!context.mounted) return;
-
-      if (cred == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No credentials found for this user.')),
-        );
-        return;
-      }
-
       await CredentialDisplayDialog.show(
         context,
         fullName: member.fullName,
-        email: cred.email,
-        password: cred.initialPassword,
+        email: member.email,
+        password: newPassword,
         role: member.role,
       );
-    } catch (e) {
+    } catch (_) {
       if (context.mounted) {
-        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load credentials: $e')),
+          const SnackBar(content: Text('Reset failed. Please try again.')),
         );
       }
     }
@@ -452,8 +452,8 @@ class _StaffCard extends StatelessWidget {
               PopupMenuButton<String>(
                   onSelected: (value) {
                     switch (value) {
-                      case 'credentials':
-                        _viewCredentials(context);
+                      case 'reset_password':
+                        _resetPassword(context);
                         break;
                       case 'edit':
                         onEdit?.call();
@@ -465,12 +465,12 @@ class _StaffCard extends StatelessWidget {
                   },
                   itemBuilder: (_) => [
                     const PopupMenuItem(
-                      value: 'credentials',
+                      value: 'reset_password',
                       child: Row(
                         children: [
-                          Icon(Icons.key_rounded, size: 18, color: AppColors.primary),
+                          Icon(Icons.lock_reset, size: 18, color: AppColors.primary),
                           SizedBox(width: 8),
-                          Text('View Credentials'),
+                          Text('Reset Password'),
                         ],
                       ),
                     ),
@@ -530,28 +530,76 @@ class _StaffDetailSheet extends StatefulWidget {
 }
 
 class _StaffDetailSheetState extends State<_StaffDetailSheet> {
-  UserCredential? _credential;
-  bool _credentialLoading = true;
-  bool _passwordVisible = false;
+  UserCredentialAudit? _audit;
+  bool _auditLoading = true;
+  bool _resetting = false;
 
   @override
   void initState() {
     super.initState();
-    _loadCredentials();
+    _loadAudit();
   }
 
-  Future<void> _loadCredentials() async {
+  Future<void> _loadAudit() async {
     try {
       final service = CredentialService(Supabase.instance.client);
-      final cred = await service.getCredentials(widget.member.userId);
+      final audit = await service.auditLookup(widget.member.userId);
       if (mounted) {
         setState(() {
-          _credential = cred;
-          _credentialLoading = false;
+          _audit = audit;
+          _auditLoading = false;
         });
       }
     } catch (_) {
-      if (mounted) setState(() => _credentialLoading = false);
+      if (mounted) setState(() => _auditLoading = false);
+    }
+  }
+
+  Future<void> _resetPassword() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: Text(
+          'Reset password for ${widget.member.fullName}? '
+          'They will need to log in again with the new password.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Reset', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _resetting = true);
+    try {
+      final service = AdminUserService(Supabase.instance.client);
+      final newPassword = await service.resetPassword(widget.member.userId);
+      if (!mounted) return;
+      await CredentialDisplayDialog.show(
+        context,
+        fullName: widget.member.fullName,
+        email: widget.member.email,
+        password: newPassword,
+        role: widget.member.role,
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Reset failed. Please try again.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _resetting = false);
     }
   }
 
@@ -613,11 +661,11 @@ class _StaffDetailSheetState extends State<_StaffDetailSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.key_rounded, size: 16, color: AppColors.primary),
-              const SizedBox(width: 8),
-              const Text('Login Credentials',
+              Icon(Icons.key_rounded, size: 16, color: AppColors.primary),
+              SizedBox(width: 8),
+              Text('Login Credentials',
                   style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -625,78 +673,50 @@ class _StaffDetailSheetState extends State<_StaffDetailSheet> {
             ],
           ),
           const SizedBox(height: 12),
-          if (_credentialLoading)
+          if (_auditLoading)
             const Center(
               child: SizedBox(
                   height: 16,
                   width: 16,
                   child: CircularProgressIndicator(strokeWidth: 2)),
             )
-          else if (_credential == null)
-            Text('No stored credentials',
+          else if (_audit == null)
+            Text('No account record found',
                 style: TextStyle(fontSize: 13, color: Colors.grey[500]))
           else ...[
-            _CopyableRow(label: 'Username', value: _credential!.email),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                SizedBox(
-                  width: 80,
-                  child: Text('Password',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                ),
-                Expanded(
-                  child: Text(
-                    _passwordVisible
-                        ? _credential!.initialPassword
-                        : '*' * _credential!.initialPassword.length,
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'monospace'),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                SizedBox(
-                  width: 32,
-                  height: 32,
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    iconSize: 16,
-                    icon: Icon(
-                      _passwordVisible
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: Colors.grey[600],
-                    ),
-                    tooltip: 'Toggle visibility',
-                    onPressed: () =>
-                        setState(() => _passwordVisible = !_passwordVisible),
-                  ),
-                ),
-                SizedBox(
-                  width: 32,
-                  height: 32,
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    iconSize: 16,
-                    icon: Icon(Icons.copy, color: Colors.grey[600]),
-                    tooltip: 'Copy',
-                    onPressed: () {
-                      Clipboard.setData(
-                          ClipboardData(text: _credential!.initialPassword));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Password copied'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+            _CopyableRow(label: 'Username', value: _audit!.email),
+            if (_audit!.createdBy != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Created by ${_audit!.createdBy}',
+                style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+              ),
+            ],
+            const SizedBox(height: 4),
+            Text(
+              'Account created ${_audit!.createdAt.day}/${_audit!.createdAt.month}/${_audit!.createdAt.year}',
+              style: TextStyle(fontSize: 11, color: Colors.grey[500]),
             ),
           ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _resetting ? null : _resetPassword,
+              icon: _resetting
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.lock_reset, size: 16),
+              label: const Text('Reset Password'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: const BorderSide(color: AppColors.primary),
+              ),
+            ),
+          ),
         ],
       ),
     );

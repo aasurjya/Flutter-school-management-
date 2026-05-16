@@ -6,11 +6,11 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/logout_helper.dart';
 import '../../../ai_insights/presentation/widgets/admin_ai_narrative_card.dart';
-import '../../../auth/providers/auth_provider.dart';
 import '../../../id_card/providers/id_card_provider.dart';
 import '../../../academic/providers/academic_provider.dart';
 import '../../../ai_insights/providers/risk_score_provider.dart';
 import '../../../ai_insights/providers/early_warning_provider.dart';
+import '../../../attendance/providers/attendance_provider.dart';
 import '../../../fees/providers/fees_provider.dart';
 import '../../../students/providers/students_provider.dart';
 
@@ -49,6 +49,8 @@ class AdminDashboardScreen extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(studentCountProvider(null));
           ref.invalidate(feeCollectionStatsProvider(null));
+          ref.invalidate(todayAttendancePercentageProvider);
+          ref.invalidate(todayStudentAttendanceCountsProvider);
           ref.invalidate(currentAcademicYearProvider);
           ref.invalidate(currentTenantProvider);
         },
@@ -136,6 +138,11 @@ class AdminDashboardScreen extends ConsumerWidget {
                 icon: Icons.notifications_none_rounded,
                 onTap: () => context.push(AppRoutes.notifications),
                 tooltip: 'Notifications',
+              ),
+              _HeaderActionBtn(
+                icon: Icons.account_circle_outlined,
+                onTap: () => context.go(AppRoutes.account),
+                tooltip: 'Account',
               ),
               Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -225,38 +232,18 @@ class AdminDashboardScreen extends ConsumerWidget {
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
-              child: _AdminSectionHeader(label: "Operational Health"),
+              child: _AdminSectionHeader(label: 'Operational Health'),
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: _buildTodaySummary(context),
+              child: _buildTodaySummary(context, ref),
             ),
           ),
 
-          // Activity & Notices
-          const SliverToBoxAdapter(child: SizedBox(height: 32)),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const _AdminSectionHeader(label: 'Security & Activity'),
-                  _ViewAllBtn(onTap: () => context.push(AppRoutes.notifications)),
-                ],
-              ),
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: _buildRecentActivity(context),
-            ),
-          ),
+          // Hidden 2026-05-16 — see wiki/panels/feature-audit-decision-2026-05-16.md
 
           const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
@@ -276,7 +263,8 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   Widget _buildMainMetricsGrid(WidgetRef ref) {
     final studentCountAsync = ref.watch(studentCountProvider(null));
-    final feeStatsAsync = ref.watch(feeCollectionStatsProvider(null));
+    final feeStatsAsync     = ref.watch(feeCollectionStatsProvider(null));
+    final attendancePctAsync = ref.watch(todayAttendancePercentageProvider);
 
     final enrollmentValue = studentCountAsync.when(
       loading: () => '--',
@@ -288,6 +276,12 @@ class AdminDashboardScreen extends ConsumerWidget {
       loading: () => '--',
       error: (_, __) => '--',
       data: (stats) => _formatCurrency(stats['total_paid'] ?? 0.0),
+    );
+
+    final attendanceValue = attendancePctAsync.when(
+      loading: () => '--',
+      error: (_, __) => '--',
+      data: (pct) => '${pct.toStringAsFixed(1)}%',
     );
 
     return Column(
@@ -347,7 +341,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             Expanded(
               child: _MetricCard(
                 label: 'Attendance',
-                value: '94.2%',
+                value: attendanceValue,
                 icon: Icons.how_to_reg_rounded,
                 color: AppColors.success,
               ),
@@ -444,7 +438,34 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   // ── Today's summary ─────────────────────────────────────────────────────────
 
-  Widget _buildTodaySummary(BuildContext context) {
+  Widget _buildTodaySummary(BuildContext context, WidgetRef ref) {
+    final studentCountsAsync = ref.watch(todayStudentAttendanceCountsProvider);
+    final staffAsync         = ref.watch(staffAttendanceTodayProvider);
+    final feeStatsAsync      = ref.watch(feeCollectionStatsProvider(null));
+
+    final studentValue = studentCountsAsync.when(
+      loading: () => '— / —',
+      error: (_, __) => '— / —',
+      data: (counts) {
+        final present = counts['present'] ?? 0;
+        final total   = counts['total'] ?? 0;
+        return '${_formatNumber(present)} / ${_formatNumber(total)}';
+      },
+    );
+
+    final staffValue = staffAsync.when(
+      loading: () => '—',
+      error: (_, __) => '—',
+      // No staff-scoped query yet — see staffAttendanceTodayProvider
+      data: (_) => '—',
+    );
+
+    final outstandingValue = feeStatsAsync.when(
+      loading: () => '—',
+      error: (_, __) => '—',
+      data: (stats) => _formatCurrency(stats['total_pending'] ?? 0.0),
+    );
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -456,28 +477,29 @@ class AdminDashboardScreen extends ConsumerWidget {
           _SummaryItem(
             icon: Icons.people_outline_rounded,
             label: 'Students present',
-            value: '2,312 / 2,456',
+            value: studentValue,
             color: AppColors.success,
           ),
           const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
           _SummaryItem(
             icon: Icons.school_outlined,
             label: 'Teachers present',
-            value: '121 / 124',
+            value: staffValue,
             color: AppColors.success,
           ),
           const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
           _SummaryItem(
             icon: Icons.pending_actions_rounded,
             label: 'Outstanding Invoices',
-            value: '₹4.2L',
+            value: outstandingValue,
             color: AppColors.warning,
           ),
           const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
           _SummaryItem(
             icon: Icons.calendar_today_rounded,
             label: 'Scheduled Events',
-            value: '03',
+            // TODO(sprint-1.6): wire to eventsProvider when built
+            value: '—',
             color: AppColors.info,
           ),
         ],
@@ -485,6 +507,7 @@ class AdminDashboardScreen extends ConsumerWidget {
     );
   }
 
+  // ignore: unused_element — kept for easy restore if pilot schools request it
   Widget _buildRecentActivity(BuildContext context) {
     final activities = [
       const _ActivityData(
@@ -725,31 +748,6 @@ class _QuickActionsGrid extends StatelessWidget {
   }
 }
 
-class _ViewAllBtn extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _ViewAllBtn({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onTap,
-      style: TextButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('View All', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-          SizedBox(width: 4),
-          Icon(Icons.arrow_forward_rounded, size: 16),
-        ],
-      ),
-    );
-  }
-}
-
 // ─── Section header ────────────────────────────────────────────────────────────
 class _AdminSectionHeader extends StatelessWidget {
   final String label;
@@ -937,7 +935,10 @@ class _SettingsSheet extends StatelessWidget {
             title: const Text('Profile',
                 style: TextStyle(fontWeight: FontWeight.w600)),
             subtitle: const Text('View and edit your profile'),
-            onTap: () => Navigator.of(context).pop(),
+            onTap: () {
+              Navigator.of(context).pop();
+              GoRouter.of(context).go(AppRoutes.account);
+            },
           ),
           const Divider(height: 1, color: _border),
           ListTile(
@@ -963,15 +964,7 @@ class _SettingsSheet extends StatelessWidget {
               GoRouter.of(context).push(AppRoutes.schoolBranding);
             },
           ),
-          const Divider(height: 1, color: _border),
-          ListTile(
-            leading: const Icon(Icons.settings_outlined,
-                color: AppColors.grey700, size: 20),
-            title: const Text('Settings',
-                style: TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: const Text('App preferences'),
-            onTap: () => Navigator.of(context).pop(),
-          ),
+          // Settings tile hidden — no settings route this sprint; restore when /settings is built
           const Divider(height: 1, color: _border),
           ListTile(
             leading: const Icon(Icons.logout,

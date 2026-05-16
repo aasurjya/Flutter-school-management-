@@ -121,6 +121,11 @@ class StudentDashboardScreen extends ConsumerWidget {
                 tooltip: 'Notifications',
                 onPressed: () => context.push(AppRoutes.notifications),
               ),
+              IconButton(
+                icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
+                tooltip: 'Account',
+                onPressed: () => context.go(AppRoutes.account),
+              ),
               const SizedBox(width: 8),
             ],
           ),

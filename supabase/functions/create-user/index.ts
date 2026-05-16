@@ -1,16 +1,29 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Max-Age': '86400',
+// FIX 3: Environment-driven CORS allowlist. Set ALLOWED_ORIGINS in Supabase
+// function secrets as a comma-separated list of trusted origins.
+const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? 'http://localhost:3000')
+  .split(',').map(s => s.trim())
+
+function corsHeadersFor(req: Request) {
+  const origin = req.headers.get('origin') ?? '';
+  const isAllowed = ALLOWED_ORIGINS.includes(origin);
+  return {
+    ...(isAllowed ? { 'Access-Control-Allow-Origin': origin } : {}),
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
 }
 
 serve(async (req: Request) => {
+  // FIX 3: Preflight — reject origins not in the allowlist with 403.
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    const origin = req.headers.get('origin') ?? ''
+    if (!ALLOWED_ORIGINS.includes(origin)) {
+      return new Response('Forbidden', { status: 403 })
+    }
+    return new Response('ok', { headers: corsHeadersFor(req) })
   }
 
   try {
@@ -19,7 +32,7 @@ serve(async (req: Request) => {
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: 'Missing authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -35,7 +48,7 @@ serve(async (req: Request) => {
     if (callerError || !caller) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -54,7 +67,7 @@ serve(async (req: Request) => {
       if (!callerAdminRoles || callerAdminRoles.length === 0) {
         return new Response(
           JSON.stringify({ error: 'Forbidden: only admins can delete users' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 403, headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
         )
       }
 
@@ -65,7 +78,7 @@ serve(async (req: Request) => {
       await adminClient.auth.admin.deleteUser(body.user_id)
       return new Response(
         JSON.stringify({ success: true }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -75,7 +88,7 @@ serve(async (req: Request) => {
     if (!email || !password || !full_name || !tenant_id || !role) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields: email, password, full_name, tenant_id, role' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -101,7 +114,7 @@ serve(async (req: Request) => {
       if (roleError || !callerRoles || callerRoles.length === 0) {
         return new Response(
           JSON.stringify({ error: 'Forbidden: insufficient permissions for this tenant' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 403, headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
         )
       }
 
@@ -135,7 +148,7 @@ serve(async (req: Request) => {
     if (!allowedRoles.includes(role)) {
       return new Response(
         JSON.stringify({ error: `Unsupported role: ${role}` }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -143,14 +156,14 @@ serve(async (req: Request) => {
       if (role === 'super_admin' || role === 'principal') {
         return new Response(
           JSON.stringify({ error: 'Forbidden: only platform admins can create this role' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 403, headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
         )
       }
 
       if (role === 'tenant_admin' && callerRole !== 'principal') {
         return new Response(
           JSON.stringify({ error: 'Forbidden: only principals can create school admins' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 403, headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
         )
       }
     }
@@ -181,7 +194,7 @@ serve(async (req: Request) => {
     if (authError || !authData.user) {
       return new Response(
         JSON.stringify({ error: authError?.message ?? 'Failed to create auth user' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -204,7 +217,7 @@ serve(async (req: Request) => {
       await adminClient.auth.admin.deleteUser(userId)
       return new Response(
         JSON.stringify({ error: `Profile creation failed: ${profileError.message}` }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 500, headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -223,29 +236,31 @@ serve(async (req: Request) => {
       await adminClient.auth.admin.deleteUser(userId)
       return new Response(
         JSON.stringify({ error: `Role assignment failed: ${roleAssignError.message}` }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 500, headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
       )
     }
 
-    // Store initial credentials so admins can look them up later
+    // FIX 1: initial_password is NOT inserted into user_credentials.
+    // The password is returned once in the response for the admin to relay; never persisted.
     await adminClient.from('user_credentials').insert({
       user_id: userId,
       tenant_id,
       email,
-      initial_password: password,
       created_by: caller.id,
     })
 
     return new Response(
-      JSON.stringify({ user_id: userId, email }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      // Returned once for admin to relay; never persisted.
+      JSON.stringify({ user_id: userId, email, one_time_password: password }),
+      { headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
     )
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
+    // FIX 2: Log full error server-side only; return generic message to client.
+    console.error('create-user error:', error)
     return new Response(
-      JSON.stringify({ error: `Internal server error: ${errorMessage}` }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: 'An internal error occurred.' }),
+      { status: 500, headers: { ...corsHeadersFor(req), 'Content-Type': 'application/json' } }
     )
   }
 })

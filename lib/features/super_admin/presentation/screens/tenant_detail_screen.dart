@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/services/admin_user_service.dart';
-import '../../../../core/services/credential_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/credential_generator.dart';
 import '../../../../data/repositories/staff_repository.dart';
@@ -1083,7 +1082,7 @@ class _UserListItem extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () => _UserProfileDetailSheet.show(context, user),
-        onLongPress: () => _showCredentials(context, userId, name, email, primaryRole),
+        onLongPress: () => _resetPassword(context, userId, name, email, primaryRole),
         child: Row(
           children: [
             CircleAvatar(
@@ -1120,7 +1119,7 @@ class _UserListItem extends StatelessWidget {
     );
   }
 
-  Future<void> _showCredentials(
+  Future<void> _resetPassword(
     BuildContext context,
     String userId,
     String name,
@@ -1129,47 +1128,46 @@ class _UserListItem extends StatelessWidget {
   ) async {
     if (userId.isEmpty) return;
 
-    showDialog(
+    final confirmed = await showDialog<bool>(
       context: context,
-      barrierDismissible: false,
-      builder: (_) => const AlertDialog(
-        content: Row(
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 16),
-            Text('Loading credentials...'),
-          ],
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: Text(
+          'Reset password for $email? They will need to log in again with the new password.',
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Reset'),
+          ),
+        ],
       ),
     );
 
+    if (confirmed != true || !context.mounted) return;
+
     try {
-      final service = CredentialService(Supabase.instance.client);
-      final cred = await service.getCredentials(userId);
-
-      if (context.mounted) Navigator.of(context).pop(); // close loading
-
+      final service = AdminUserService(Supabase.instance.client);
+      final newPassword = await service.resetPassword(userId);
       if (!context.mounted) return;
-
-      if (cred == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No credentials found for this user.')),
-        );
-        return;
-      }
-
       await CredentialDisplayDialog.show(
         context,
         fullName: name,
-        email: cred.email,
-        password: cred.initialPassword,
+        email: email,
+        password: newPassword,
         role: role,
       );
-    } catch (e) {
+    } catch (_) {
       if (context.mounted) {
-        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load credentials: $e')),
+          const SnackBar(
+            content:
+                Text('Reset failed: this admin action is not yet available.'),
+          ),
         );
       }
     }

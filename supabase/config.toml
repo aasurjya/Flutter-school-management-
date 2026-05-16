@@ -11,7 +11,7 @@ extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
 [db]
-port = 54322
+port = 54422
 major_version = 15
 
 [studio]
@@ -44,4 +44,4 @@ enable_confirmations = false
 
 [analytics]
 enabled = false
-port = 54327
+port = 54427

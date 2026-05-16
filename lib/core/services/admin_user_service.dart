@@ -33,6 +33,15 @@ class AdminUserCreationException implements Exception {
   String toString() => 'AdminUserCreationException: $message';
 }
 
+/// Thrown when admin-initiated password reset fails.
+class AdminPasswordResetException implements Exception {
+  final String message;
+  const AdminPasswordResetException(this.message);
+
+  @override
+  String toString() => 'AdminPasswordResetException: $message';
+}
+
 /// Service for creating users server-side via the `create-user` Edge Function,
 /// with a client-side fallback using `auth.signUp()` + a SECURITY DEFINER RPC
 /// when the Edge Function is unavailable.
@@ -243,5 +252,51 @@ class AdminUserService {
         'Failed to delete user $userId — manual cleanup required',
       );
     }
+  }
+
+  /// Resets the password for an existing user via the `admin-reset-password`
+  /// Edge Function and returns the one-time plaintext password so the admin
+  /// can relay it. The password is never persisted server-side.
+  ///
+  /// Throws [AdminPasswordResetException] on any failure — the raw server
+  /// response is never surfaced to the UI.
+  Future<String> resetPassword(String userId) async {
+    final FunctionResponse response;
+    try {
+      response = await _client.functions.invoke(
+        'admin-reset-password',
+        body: {'target_user_id': userId},
+      );
+    } on FunctionException catch (e) {
+      // HTTP error from the Edge Function (4xx / 5xx).
+      throw AdminPasswordResetException(
+        'Password reset failed: ${e.details ?? 'server error'}',
+      );
+    } catch (_) {
+      // Network / client error — Edge Function likely unreachable.
+      throw const AdminPasswordResetException(
+        'Password reset unavailable. Check your connection and try again.',
+      );
+    }
+
+    final data = response.data as Map<String, dynamic>?;
+    if (data == null) {
+      throw const AdminPasswordResetException('Empty response from server');
+    }
+
+    final serverError = data['error'] as String?;
+    if (serverError != null) {
+      // Map structured error to generic message — do not propagate raw text.
+      throw const AdminPasswordResetException(
+        'Password reset failed. Please try again or contact support.',
+      );
+    }
+
+    final oneTimePassword = data['one_time_password'] as String?;
+    if (oneTimePassword == null || oneTimePassword.isEmpty) {
+      throw const AdminPasswordResetException('Invalid response structure');
+    }
+
+    return oneTimePassword;
   }
 }

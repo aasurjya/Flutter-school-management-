@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/ai_tutor/presentation/widgets/tutor_chat_overlay.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../router/app_router.dart';
 import '../services/screen_capture_service.dart';
@@ -39,7 +38,6 @@ class _MainShellState extends ConsumerState<MainShell> {
           ],
         ),
       ),
-      floatingActionButton: const _AiTutorFab(),
       bottomNavigationBar: _PremiumBottomNav(role: primaryRole),
     );
   }
@@ -606,35 +604,3 @@ const _calendarItem = _NavItemData(
   label: 'Calendar',
 );
 
-// ─── AI Tutor FAB ─────────────────────────────────────────────────────────────
-
-class _AiTutorFab extends StatelessWidget {
-  const _AiTutorFab();
-
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      heroTag: 'ai_tutor_fab',
-      onPressed: () {
-        showModalBottomSheet<void>(
-          context: context,
-          isScrollControlled: true,
-          useSafeArea: true,
-          backgroundColor: Colors.transparent,
-          builder: (_) => DraggableScrollableSheet(
-            initialChildSize: 0.75,
-            minChildSize: 0.4,
-            maxChildSize: 0.95,
-            expand: false,
-            builder: (_, scrollController) => const TutorChatOverlay(),
-          ),
-        );
-      },
-      backgroundColor: AppColors.primary,
-      foregroundColor: Colors.white,
-      mini: true,
-      tooltip: 'AI Tutor',
-      child: const Icon(Icons.auto_awesome, size: 20),
-    );
-  }
-}

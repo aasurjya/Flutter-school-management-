@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/services/credential_service.dart';
+import '../../../../core/services/admin_user_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../admin/presentation/widgets/credential_display_dialog.dart';
 
 /// Bottom sheet that displays a user's full profile details,
 /// fetched from the [user] map returned by [tenantUsersProvider].
@@ -13,8 +13,6 @@ import '../../../../core/theme/app_colors.dart';
 /// - student  → class/section, DOB, blood group
 /// - parent   → occupation, linked children (if present in data)
 /// - staff    → department, employee ID, designation
-///
-/// Also shows stored login credentials (initial password) for super admin.
 class UserProfileDetailSheet extends StatefulWidget {
   final Map<String, dynamic> user;
 
@@ -36,33 +34,7 @@ class UserProfileDetailSheet extends StatefulWidget {
 }
 
 class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
-  UserCredential? _credential;
-  bool _credentialLoading = true;
-  bool _passwordVisible = false;
-
   Map<String, dynamic> get user => widget.user;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCredentials();
-  }
-
-  Future<void> _loadCredentials() async {
-    final userId = user['id']?.toString();
-    if (userId == null) {
-      setState(() => _credentialLoading = false);
-      return;
-    }
-    final service = CredentialService(Supabase.instance.client);
-    final cred = await service.getCredentials(userId);
-    if (mounted) {
-      setState(() {
-        _credential = cred;
-        _credentialLoading = false;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -199,106 +171,92 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
   }
 
   Widget _buildCredentialsSection() {
-    if (_credentialLoading) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SectionTitle('Login Credentials'),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: SizedBox(
-              height: 16,
-              width: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          ),
-        ],
-      );
-    }
-
-    if (_credential == null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SectionTitle('Login Credentials'),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Text(
-              'No stored credentials',
-              style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color),
-            ),
-          ),
-        ],
-      );
-    }
-
-    final cred = _credential!;
-    final maskedPassword = '*' * cred.initialPassword.length;
-
+    final email = user['email']?.toString() ?? '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle('Login Credentials'),
-        _CopyableInfoRow(
-          icon: Icons.person_outline,
-          label: 'Username',
-          value: cred.email,
-        ),
-        Row(
-          children: [
-            Icon(Icons.lock_outline, size: 16, color: Theme.of(context).textTheme.bodySmall?.color),
-            const SizedBox(width: 10),
-            Text('Password: ',
-                style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color)),
-            Expanded(
-              child: Text(
-                _passwordVisible ? cred.initialPassword : maskedPassword,
-                style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'monospace'),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            SizedBox(
-              width: 32,
-              height: 32,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                iconSize: 16,
-                icon: Icon(
-                  _passwordVisible ? Icons.visibility_off : Icons.visibility,
-                  color: Theme.of(context).textTheme.bodySmall?.color,
+        _SectionTitle('Account'),
+        InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => _resetPassword(user['id']?.toString() ?? '', email),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Icon(Icons.lock_reset,
+                    size: 16,
+                    color: Theme.of(context).textTheme.bodySmall?.color),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Reset Password',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
                 ),
-                tooltip: 'Toggle visibility',
-                onPressed: () =>
-                    setState(() => _passwordVisible = !_passwordVisible),
-              ),
+                Icon(Icons.chevron_right,
+                    size: 16,
+                    color: Theme.of(context).textTheme.bodySmall?.color),
+              ],
             ),
-            SizedBox(
-              width: 32,
-              height: 32,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                iconSize: 16,
-                icon: Icon(Icons.copy, color: Theme.of(context).textTheme.bodySmall?.color),
-                tooltip: 'Copy',
-                onPressed: () {
-                  Clipboard.setData(
-                      ClipboardData(text: cred.initialPassword));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Password copied'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
+          ),
         ),
       ],
     );
+  }
+
+  Future<void> _resetPassword(String userId, String email) async {
+    if (userId.isEmpty) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: Text(
+          'Reset password for $email? They will need to log in again with the new password.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      final service = AdminUserService(Supabase.instance.client);
+      final result = await service.resetPassword(userId);
+      if (!mounted) return;
+      Navigator.pop(context);
+      await CredentialDisplayDialog.show(
+        context,
+        fullName: user['full_name']?.toString() ?? email,
+        email: email,
+        password: result,
+        role: ((user['user_roles'] as List?)?.isNotEmpty == true
+                ? (user['user_roles'] as List).first
+                : <String, dynamic>{}) is Map
+            ? ((user['user_roles'] as List).first
+                    as Map<String, dynamic>)['role']
+                ?.toString() ??
+                'user'
+            : 'user',
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Reset failed: this admin action is not yet available.'),
+        ),
+      );
+    }
   }
 
   Widget _roleSection(String role) {
@@ -441,55 +399,6 @@ class _InfoRow extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 13, fontWeight: FontWeight.w500),
                 overflow: TextOverflow.ellipsis),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CopyableInfoRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  const _CopyableInfoRow(
-      {required this.icon, required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    final secondaryColor = Theme.of(context).textTheme.bodySmall?.color;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: secondaryColor),
-          const SizedBox(width: 10),
-          Text('$label: ',
-              style: TextStyle(fontSize: 13, color: secondaryColor)),
-          Expanded(
-            child: Text(value,
-                style: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w500),
-                overflow: TextOverflow.ellipsis),
-          ),
-          SizedBox(
-            width: 32,
-            height: 32,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              iconSize: 16,
-              icon: Icon(Icons.copy, color: secondaryColor),
-              tooltip: 'Copy',
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: value));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('$label copied'),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
           ),
         ],
       ),

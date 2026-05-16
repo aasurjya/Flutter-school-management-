@@ -223,6 +223,11 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 tooltip: 'Notifications',
                 onPressed: () => context.push(AppRoutes.notifications),
               ),
+              IconButton(
+                icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
+                tooltip: 'Account',
+                onPressed: () => context.go(AppRoutes.account),
+              ),
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: IconButton(

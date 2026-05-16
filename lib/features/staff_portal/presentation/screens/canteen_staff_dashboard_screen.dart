@@ -41,6 +41,11 @@ class CanteenStaffDashboardScreen extends ConsumerWidget {
                 onPressed: () => context.push(AppRoutes.staffIdCard),
               ),
               IconButton(
+                icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
+                tooltip: 'Account',
+                onPressed: () => context.go(AppRoutes.account),
+              ),
+              IconButton(
                 icon: const Icon(Icons.more_vert, color: Colors.white),
                 tooltip: 'More options',
                 onPressed: () => _logout(context, ref),

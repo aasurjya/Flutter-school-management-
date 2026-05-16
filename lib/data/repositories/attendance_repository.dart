@@ -222,7 +222,7 @@ class AttendanceRepository extends BaseRepository {
 
   Future<double> getTodayAttendancePercentage() async {
     final today = DateTime.now().toIso8601String().split('T')[0];
-    
+
     final response = await client
         .from('v_section_daily_attendance')
         .select('attendance_percentage')
@@ -231,12 +231,32 @@ class AttendanceRepository extends BaseRepository {
         .limit(100);
 
     if (response.isEmpty) return 0;
-    
+
     final percentages = (response as List)
         .map((r) => (r['attendance_percentage'] as num?)?.toDouble() ?? 0)
         .toList();
-    
+
     return percentages.reduce((a, b) => a + b) / percentages.length;
+  }
+
+  /// Returns {'present': N, 'total': N} aggregated across all sections today.
+  Future<Map<String, int>> getTodayStudentCounts() async {
+    final today = DateTime.now().toIso8601String().split('T')[0];
+
+    final response = await client
+        .from('v_section_daily_attendance')
+        .select('present_count, total_students')
+        .eq('tenant_id', requireTenantId)
+        .eq('date', today)
+        .limit(200);
+
+    int present = 0;
+    int total = 0;
+    for (final row in (response as List)) {
+      present += (row['present_count'] as num? ?? 0).toInt();
+      total   += (row['total_students'] as num? ?? 0).toInt();
+    }
+    return {'present': present, 'total': total};
   }
 
   RealtimeChannel subscribeToSectionAttendance({

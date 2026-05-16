@@ -62,6 +62,11 @@ class _SuperAdminDashboardScreenState
                   onPressed: _refresh,
                 ),
                 IconButton(
+                  tooltip: 'Account',
+                  icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
+                  onPressed: () => context.go(AppRoutes.account),
+                ),
+                IconButton(
                   tooltip: 'Sign out',
                   icon: const Icon(Icons.logout, color: Colors.white),
                   onPressed: _logout,

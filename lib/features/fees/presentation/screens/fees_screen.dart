@@ -13,6 +13,7 @@ import '../../../../data/models/invoice.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../students/providers/students_provider.dart';
 import '../../providers/fees_provider.dart';
+import '../../utils/fees_pdf_builder.dart';
 
 class FeesScreen extends ConsumerWidget {
   const FeesScreen({super.key});
@@ -74,9 +75,108 @@ class _OverviewTab extends StatelessWidget {
   }
 }
 
-class _AdminOverview extends ConsumerWidget {
+class _AdminOverview extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_AdminOverview> createState() => _AdminOverviewState();
+}
+
+class _AdminOverviewState extends ConsumerState<_AdminOverview> {
+  bool _exportingReport = false;
+
+  Future<void> _sendBulkReminders() async {
+    final repo = ref.read(feeRepositoryProvider);
+    List<Invoice> overdueList;
+    try {
+      overdueList = await repo.getOverdueInvoices();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load overdue invoices: $e')),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+
+    if (overdueList.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No overdue invoices found')),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Send Bulk Reminders'),
+        content: Text(
+          'Send reminders to ${overdueList.length} parent(s) with overdue fees?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Send'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    int sent = 0;
+    for (final inv in overdueList) {
+      try {
+        await repo.logReminderSent(
+          invoiceId: inv.id,
+          studentId: inv.studentId,
+          messageText:
+              'Dear Parent, your fee of ₹${inv.pendingAmount.toStringAsFixed(0)} '
+              'for invoice ${inv.invoiceNumber} is overdue. '
+              'Please arrange payment at the earliest.',
+          riskScore: 0,
+          channel: 'bulk_app',
+        );
+        sent++;
+      } catch (_) {
+        // Continue sending remaining even if one fails
+      }
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Reminders sent to $sent parent(s)'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    }
+  }
+
+  Future<void> _exportReport() async {
+    if (_exportingReport) return;
+    setState(() => _exportingReport = true);
+    try {
+      final repo = ref.read(feeRepositoryProvider);
+      final invoices = await repo.getInvoices();
+      await FeesPdfBuilder.buildAndShare(invoices);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _exportingReport = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final statsAsync = ref.watch(feeCollectionStatsProvider(null));
     final recentPaymentsAsync = ref.watch(
       paymentsProvider(const PaymentsFilter()),
@@ -188,33 +288,21 @@ class _AdminOverview extends ConsumerWidget {
                 icon: Icons.receipt_long,
                 label: 'Generate\nInvoices',
                 color: AppColors.primary,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Invoice generation coming soon')),
-                  );
-                },
+                onTap: () => context.push(AppRoutes.feeManagement),
               ),
               const SizedBox(width: 12),
               _QuickAction(
                 icon: Icons.send,
                 label: 'Send\nReminders',
                 color: AppColors.warning,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Send reminders coming soon')),
-                  );
-                },
+                onTap: _sendBulkReminders,
               ),
               const SizedBox(width: 12),
               _QuickAction(
                 icon: Icons.download,
                 label: 'Export\nReport',
                 color: AppColors.success,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Export report coming soon')),
-                  );
-                },
+                onTap: _exportingReport ? () {} : _exportReport,
               ),
               const SizedBox(width: 12),
               _QuickAction(
@@ -656,9 +744,34 @@ class _InvoicesTabState extends ConsumerState<_InvoicesTab> {
   }
 }
 
-class _CollectionTab extends ConsumerWidget {
+class _CollectionTab extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_CollectionTab> createState() => _CollectionTabState();
+}
+
+class _CollectionTabState extends ConsumerState<_CollectionTab> {
+  bool _exportingCollection = false;
+
+  Future<void> _exportCollectionReport() async {
+    if (_exportingCollection) return;
+    setState(() => _exportingCollection = true);
+    try {
+      final repo = ref.read(feeRepositoryProvider);
+      final invoices = await repo.getInvoices();
+      await FeesPdfBuilder.buildAndShare(invoices);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _exportingCollection = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final statsAsync = ref.watch(feeCollectionStatsProvider(null));
     final summariesAsync = ref.watch(
       feeSummariesProvider(const FeeSummaryFilter()),
@@ -719,11 +832,9 @@ class _CollectionTab extends ConsumerWidget {
                           style: TextStyle(fontWeight: FontWeight.w600),
                         ),
                         TextButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Export collection report coming soon')),
-                            );
-                          },
+                          onPressed: _exportingCollection
+                              ? null
+                              : _exportCollectionReport,
                           child: const Text('Export'),
                         ),
                       ],
@@ -1106,8 +1217,21 @@ class _InvoiceCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Invoice $invoiceNo detail coming soon')),
+                    showModalBottomSheet<void>(
+                      context: context,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      builder: (_) => _InvoiceDetailSheet(
+                        invoiceNo: invoiceNo,
+                        invoiceId: invoiceId,
+                        studentName: studentName,
+                        amount: amount,
+                        dueDate: dueDate,
+                        status: status,
+                        isAdmin: isAdmin,
+                      ),
                     );
                   },
                   child: const Text('View'),
@@ -1138,6 +1262,157 @@ class _InvoiceCard extends StatelessWidget {
     );
   }
 }
+
+// ──────────────────────────────────────────────
+// Invoice Detail Sheet (Fix 5)
+// ──────────────────────────────────────────────
+
+class _InvoiceDetailSheet extends StatelessWidget {
+  final String invoiceNo;
+  final String invoiceId;
+  final String studentName;
+  final String amount;
+  final String dueDate;
+  final String status;
+  final bool isAdmin;
+
+  const _InvoiceDetailSheet({
+    required this.invoiceNo,
+    required this.invoiceId,
+    required this.studentName,
+    required this.amount,
+    required this.dueDate,
+    required this.status,
+    required this.isAdmin,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = status == 'paid'
+        ? AppColors.success
+        : status == 'overdue'
+            ? AppColors.error
+            : AppColors.warning;
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Invoice Detail',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    status.toUpperCase(),
+                    style: TextStyle(
+                      color: statusColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _DetailRow(label: 'Invoice No.', value: invoiceNo),
+            if (isAdmin) _DetailRow(label: 'Student', value: studentName),
+            _DetailRow(label: 'Amount Due', value: amount),
+            _DetailRow(label: 'Due Date', value: dueDate),
+            _DetailRow(label: 'Invoice ID', value: invoiceId),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                if (status != 'paid')
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        context.push(
+                          AppRoutes.paymentCheckout
+                              .replaceFirst(':invoiceId', invoiceId),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                      ),
+                      child: Text(
+                        isAdmin ? 'Record Payment' : 'Pay Now',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                if (status != 'paid') const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _DetailRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Collection Row
+// ──────────────────────────────────────────────
 
 class _CollectionRow extends StatelessWidget {
   final String label;

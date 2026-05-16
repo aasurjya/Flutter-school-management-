@@ -14,11 +14,17 @@ final authStateProvider = StreamProvider<Session?>((ref) {
   return supabase.auth.onAuthStateChange.map((event) => event.session);
 });
 
-/// Current user provider
-final currentUserProvider = StateProvider<AppUser?>((ref) => null);
+/// Current user provider — derived from [authNotifierProvider] so it is
+/// always in sync with the auth state and never holds a stale copy.
+final currentUserProvider = Provider<AppUser?>((ref) {
+  return ref.watch(authNotifierProvider).valueOrNull;
+});
 
-/// Current tenant ID provider
-final currentTenantIdProvider = StateProvider<String?>((ref) => null);
+/// Current tenant ID provider — derived from [authNotifierProvider].
+final currentTenantIdProvider = Provider<String?>((ref) {
+  final user = ref.watch(authNotifierProvider).valueOrNull;
+  return user?.tenantId;
+});
 
 /// Auth repository provider
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -144,6 +150,10 @@ class AuthRepository {
     String? fullName,
     String? phone,
   }) async {
+    // TODO(sprint-2): super_admin promotion moved to edge function — see
+    // SPRINT_PLAN_2026-05-16.md task 2.4. Role is server-enforced via
+    // user_roles table; client-side email-match is kept only as a
+    // provisional bootstrap until the edge function is deployed.
     final isSuperAdmin = AppEnvironment.superAdminEmail != null &&
         email.toLowerCase().trim() == AppEnvironment.superAdminEmail;
 
@@ -229,15 +239,25 @@ class AuthRepository {
 
 /// Auth notifier for managing auth state
 class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
-  final AuthRepository _repository;
-  final Ref _ref;
+  // Nullable so the forTest constructor can omit it without unsafe casts.
+  // All production methods guard via the non-null assertion (!) — this field
+  // is only null when the forTest constructor is used.
+  final AuthRepository? _repository;
 
-  AuthNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
+  AuthNotifier(AuthRepository repository, Ref ref)
+      : _repository = repository,
+        super(const AsyncValue.loading()) {
     _init();
   }
 
+  /// Named constructor that skips [_init]. Used only in tests to inject a
+  /// predetermined [AsyncValue] without touching the network.
+  @visibleForTesting
+  AuthNotifier.forTest(super.initialState)
+      : _repository = null;
+
   Future<void> _init() async {
-    final user = _repository.currentUser;
+    final user = _repository!.currentUser;
     if (user != null) {
       await _loadUserProfile(user.id);
     } else {
@@ -250,7 +270,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
       if (kDebugMode) {
         developer.log('_loadUserProfile: START - fetching profile for userId=$userId', name: 'AuthNotifier');
       }
-      final profile = await _repository.getUserProfile(userId);
+      final profile = await _repository!.getUserProfile(userId);
       if (kDebugMode) {
         developer.log('_loadUserProfile: Raw profile response = $profile', name: 'AuthNotifier');
       }
@@ -272,11 +292,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
       }
 
       state = AsyncValue.data(profile);
-      _ref.read(currentUserProvider.notifier).state = profile;
-
-      if (profile.tenantId != null) {
-        _ref.read(currentTenantIdProvider.notifier).state = profile.tenantId;
-      }
+      // currentUserProvider and currentTenantIdProvider are derived Providers
+      // that watch authNotifierProvider — no manual state assignment needed.
 
       if (kDebugMode) {
         developer.log('_loadUserProfile: SUCCESS - profile loaded and set', name: 'AuthNotifier');
@@ -295,7 +312,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
   }) async {
     state = const AsyncValue.loading();
     try {
-      final response = await _repository.signInWithEmail(
+      final response = await _repository!.signInWithEmail(
         email: email,
         password: password,
       );
@@ -316,13 +333,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
   }) async {
     state = const AsyncValue.loading();
     try {
-      final response = await _repository.signUpWithEmail(
+      final repo = _repository!;
+      final response = await repo.signUpWithEmail(
         email: email,
         password: password,
         fullName: fullName,
       );
       if (response.user != null) {
-        await _repository.createUserWithRole(
+        await repo.createUserWithRole(
           userId: response.user!.id,
           email: email,
           fullName: fullName,
@@ -337,14 +355,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
   }
 
   Future<void> signOut() async {
-    await _repository.signOut();
+    await _repository!.signOut();
     state = const AsyncValue.data(null);
-    _ref.read(currentUserProvider.notifier).state = null;
-    _ref.read(currentTenantIdProvider.notifier).state = null;
+    // currentUserProvider and currentTenantIdProvider derive from this state;
+    // no manual notifier assignment needed.
   }
 
   Future<void> refreshProfile() async {
-    final user = _repository.currentUser;
+    final user = _repository!.currentUser;
     if (user != null) {
       await _loadUserProfile(user.id);
     }
@@ -352,9 +370,10 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
 
   /// Marks the current user's profile as complete and refreshes local state.
   Future<void> markProfileComplete() async {
-    final user = _repository.currentUser;
+    final repo = _repository!;
+    final user = repo.currentUser;
     if (user == null) return;
-    await _repository.markProfileComplete(user.id);
+    await repo.markProfileComplete(user.id);
     await _loadUserProfile(user.id);
   }
 }

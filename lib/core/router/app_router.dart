@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -246,6 +247,9 @@ import '../../features/homework/presentation/screens/homework_dashboard_screen.d
 import '../../features/notice_board/presentation/screens/notice_board_screen.dart';
 import '../../features/notice_board/presentation/screens/notice_detail_screen.dart';
 import '../../features/notice_board/presentation/screens/notice_form_screen.dart';
+import '../../features/profile/presentation/screens/account_settings_screen.dart';
+import '../../features/profile/presentation/screens/edit_profile_screen.dart';
+import '../../features/profile/presentation/screens/change_password_screen.dart';
 import '../../data/models/notice_board.dart' as notice;
 // Student Portfolio
 import '../../features/portfolio/presentation/screens/student_portfolio_screen.dart';
@@ -630,6 +634,11 @@ class AppRoutes {
   // Offline / Sync routes
   static const String syncStatus = '/sync-status';
 
+  // Account / Profile routes
+  static const String account = '/account';
+  static const String accountEdit = '/account/edit';
+  static const String accountChangePassword = '/account/password';
+
   // Parent Engagement routes
   static const String childProgress = '/parent/child-progress/:childId';
   static const String homeworkTracker = '/parent/homework-tracker';
@@ -670,17 +679,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final session = supabase.auth.currentSession;
       final currentUser = ref.read(currentUserProvider);
       final sessionRole = _getSessionRole(session);
-      final isLoggedIn = session != null || currentUser != null;
+      final isLoggedIn = session != null;
       final isLoggingIn = state.matchedLocation == AppRoutes.login;
       final isSplash = state.matchedLocation == AppRoutes.splash;
       final isPublicRoute = isLoggingIn;
 
+      if (kDebugMode) {
       developer.log(
         'Router redirect: location=${state.matchedLocation}, '
         'session=${session != null}, currentUser=${currentUser != null}, '
         'isLoggedIn=$isLoggedIn',
         name: 'AppRouter',
       );
+      }
 
       // If on splash, don't redirect
       if (isSplash) return null;
@@ -705,10 +716,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           !isOnProfileSetup) {
         final setupRoute = _getProfileSetupRoute(currentUser.primaryRole);
         if (setupRoute != null) {
+          if (kDebugMode) {
           developer.log(
             'Router: profileComplete=false, redirecting to $setupRoute',
             name: 'AppRouter',
           );
+          }
           return setupRoute;
         }
       }
@@ -2241,6 +2254,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.teacherMessage,
         builder: (context, state) => const TeacherMessageScreen(),
       ),
+
+      // ==================== ACCOUNT / PROFILE ====================
+      GoRoute(
+        path: AppRoutes.account,
+        name: 'account',
+        builder: (context, state) => const AccountSettingsScreen(),
+        routes: [
+          GoRoute(
+            path: 'edit',
+            name: 'accountEdit',
+            builder: (context, state) => const EditProfileScreen(),
+          ),
+          GoRoute(
+            path: 'password',
+            name: 'accountChangePassword',
+            builder: (context, state) => const ChangePasswordScreen(),
+          ),
+        ],
+      ),
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(
@@ -2255,8 +2287,10 @@ String _getDashboardRoute(Ref ref) {
   final currentUser = ref.read(currentUserProvider);
   final primaryRole = currentUser?.primaryRole;
 
+  if (kDebugMode) {
   developer.log('Getting dashboard route for role: $primaryRole',
       name: 'AppRouter');
+  }
 
   switch (primaryRole) {
     case 'super_admin':
@@ -2283,8 +2317,10 @@ String _getDashboardRoute(Ref ref) {
     case 'receptionist':
       return AppRoutes.receptionistDashboard;
     default:
+      if (kDebugMode) {
       developer.log('No valid role found, redirecting to login',
           name: 'AppRouter', level: 800);
+      }
       return AppRoutes.login;
   }
 }

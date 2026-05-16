@@ -52,6 +52,24 @@ final todayAttendancePercentageProvider = FutureProvider<double>((ref) async {
   return repository.getTodayAttendancePercentage();
 });
 
+/// Aggregated student present/total counts for today across all sections.
+/// Returns {'present': N, 'total': N}.
+final todayStudentAttendanceCountsProvider =
+    FutureProvider<Map<String, int>>((ref) async {
+  final repository = ref.watch(attendanceRepositoryProvider);
+  return repository.getTodayStudentCounts();
+});
+
+/// Staff attendance today — reuses the same student-count query shape.
+/// No dedicated staff-role filter exists in the view yet; surfaces '—'
+/// until a staff-specific view is added (Sprint 1.6).
+final staffAttendanceTodayProvider =
+    FutureProvider<Map<String, int>?>((ref) async {
+  // TODO(sprint-1.6): replace with a staff-scoped query once the DB
+  // exposes a staff-role filter on v_section_daily_attendance.
+  return null;
+});
+
 final sectionDailyAttendanceProvider = FutureProvider.family<Map<String, dynamic>?, SectionDateFilter>(
   (ref, filter) async {
     final repository = ref.watch(attendanceRepositoryProvider);

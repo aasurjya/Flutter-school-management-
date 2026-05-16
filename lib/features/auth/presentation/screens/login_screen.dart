@@ -407,8 +407,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 prefixIcon: Icon(Icons.mail_outline_rounded, size: 20),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) return 'Email is required';
-                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                final email = value?.trim() ?? '';
+                if (email.isEmpty) return 'Email is required';
+                if (!RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,}$').hasMatch(email)) {
                   return 'Enter a valid email address';
                 }
                 return null;

@@ -8,7 +8,7 @@ final libraryRepositoryProvider = Provider<LibraryRepository>((ref) {
 });
 
 // Books providers
-final booksProvider = FutureProvider.family<List<LibraryBook>, BooksFilter>(
+final booksProvider = FutureProvider.autoDispose.family<List<LibraryBook>, BooksFilter>(
   (ref, filter) async {
     final repository = ref.watch(libraryRepositoryProvider);
     return repository.getBooks(
@@ -19,20 +19,20 @@ final booksProvider = FutureProvider.family<List<LibraryBook>, BooksFilter>(
   },
 );
 
-final bookByIdProvider = FutureProvider.family<LibraryBook?, String>(
+final bookByIdProvider = FutureProvider.autoDispose.family<LibraryBook?, String>(
   (ref, bookId) async {
     final repository = ref.watch(libraryRepositoryProvider);
     return repository.getBookById(bookId);
   },
 );
 
-final bookCategoriesProvider = FutureProvider<List<String>>((ref) async {
+final bookCategoriesProvider = FutureProvider.autoDispose<List<String>>((ref) async {
   final repository = ref.watch(libraryRepositoryProvider);
   return repository.getCategories();
 });
 
 // Issues providers
-final bookIssuesProvider = FutureProvider.family<List<BookIssue>, IssuesFilter>(
+final bookIssuesProvider = FutureProvider.autoDispose.family<List<BookIssue>, IssuesFilter>(
   (ref, filter) async {
     final repository = ref.watch(libraryRepositoryProvider);
     return repository.getIssues(
@@ -45,20 +45,20 @@ final bookIssuesProvider = FutureProvider.family<List<BookIssue>, IssuesFilter>(
   },
 );
 
-final myBooksProvider = FutureProvider<List<BookIssue>>((ref) async {
+final myBooksProvider = FutureProvider.autoDispose<List<BookIssue>>((ref) async {
   final repository = ref.watch(libraryRepositoryProvider);
   final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
   if (userId == null) return [];
   return repository.getMyBooks(userId);
 });
 
-final overdueBookssProvider = FutureProvider<List<BookIssue>>((ref) async {
+final overdueBookssProvider = FutureProvider.autoDispose<List<BookIssue>>((ref) async {
   final repository = ref.watch(libraryRepositoryProvider);
   return repository.getOverdueBooks();
 });
 
 // Stats provider
-final libraryStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final libraryStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final repository = ref.watch(libraryRepositoryProvider);
   return repository.getLibraryStats();
 });

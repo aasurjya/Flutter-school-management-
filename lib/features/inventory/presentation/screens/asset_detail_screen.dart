@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/inventory.dart';
 import '../../../../shared/widgets/glass_card.dart';
@@ -96,10 +97,10 @@ class AssetDetailScreen extends ConsumerWidget {
                     style: const TextStyle(fontSize: 16),
                   ),
                   background: asset.imageUrl != null
-                      ? Image.network(
-                          asset.imageUrl!,
+                      ? CachedNetworkImage(
+              imageUrl: asset.imageUrl!,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
+                          errorWidget: (_, __, ___) =>
                               _buildPlaceholder(asset),
                         )
                       : _buildPlaceholder(asset),

@@ -43,8 +43,8 @@ AppUser _makeUser({
 
 /// Stub [AuthNotifier] that skips network init and starts from a fixed state.
 class _StubAuthNotifier extends AuthNotifier {
-  _StubAuthNotifier(AsyncValue<AppUser?> initialState)
-      : super.forTest(initialState);
+  _StubAuthNotifier(super.initialState)
+      : super.forTest();
 }
 
 // ---------------------------------------------------------------------------
@@ -73,8 +73,8 @@ Widget _makeApp({
         ),
       ),
     ],
-    child: MaterialApp(
-      home: const ChangePasswordScreen(),
+    child: const MaterialApp(
+      home: ChangePasswordScreen(),
     ),
   );
 }

@@ -13,7 +13,7 @@ final lmsRepositoryProvider = Provider<LmsRepository>((ref) {
 // ============================================
 
 final lmsCoursesProvider =
-    FutureProvider.family<List<Course>, CourseFilter>((ref, filter) async {
+    FutureProvider.autoDispose.family<List<Course>, CourseFilter>((ref, filter) async {
   final repository = ref.watch(lmsRepositoryProvider);
   return repository.getCourses(
     status: filter.status,
@@ -26,13 +26,13 @@ final lmsCoursesProvider =
   );
 });
 
-final allCoursesProvider = FutureProvider<List<Course>>((ref) async {
+final allCoursesProvider = FutureProvider.autoDispose<List<Course>>((ref) async {
   final repository = ref.watch(lmsRepositoryProvider);
   return repository.getCourses();
 });
 
 final publishedCoursesProvider =
-    FutureProvider.family<List<Course>, CatalogFilter>((ref, filter) async {
+    FutureProvider.autoDispose.family<List<Course>, CatalogFilter>((ref, filter) async {
   final repository = ref.watch(lmsRepositoryProvider);
   return repository.getPublishedCourses(
     classId: filter.classId,
@@ -44,7 +44,7 @@ final publishedCoursesProvider =
 });
 
 final courseByIdProvider =
-    FutureProvider.family<Course?, String>((ref, courseId) async {
+    FutureProvider.autoDispose.family<Course?, String>((ref, courseId) async {
   final repository = ref.watch(lmsRepositoryProvider);
   return repository.getCourseById(courseId);
 });
@@ -54,7 +54,7 @@ final courseByIdProvider =
 // ============================================
 
 final myEnrollmentsProvider =
-    FutureProvider.family<List<CourseEnrollment>, EnrollmentFilter>(
+    FutureProvider.autoDispose.family<List<CourseEnrollment>, EnrollmentFilter>(
   (ref, filter) async {
     final repository = ref.watch(lmsRepositoryProvider);
     return repository.getEnrollments(
@@ -67,20 +67,20 @@ final myEnrollmentsProvider =
 );
 
 final allMyEnrollmentsProvider =
-    FutureProvider<List<CourseEnrollment>>((ref) async {
+    FutureProvider.autoDispose<List<CourseEnrollment>>((ref) async {
   final repository = ref.watch(lmsRepositoryProvider);
   final userId = repository.currentUserId;
   return repository.getEnrollments(studentId: userId);
 });
 
 final courseEnrollmentProvider =
-    FutureProvider.family<CourseEnrollment?, String>((ref, courseId) async {
+    FutureProvider.autoDispose.family<CourseEnrollment?, String>((ref, courseId) async {
   final repository = ref.watch(lmsRepositoryProvider);
   return repository.getMyEnrollment(courseId);
 });
 
 final courseEnrollmentsListProvider =
-    FutureProvider.family<List<CourseEnrollment>, String>(
+    FutureProvider.autoDispose.family<List<CourseEnrollment>, String>(
   (ref, courseId) async {
     final repository = ref.watch(lmsRepositoryProvider);
     return repository.getEnrollments(courseId: courseId);
@@ -92,7 +92,7 @@ final courseEnrollmentsListProvider =
 // ============================================
 
 final contentProgressProvider =
-    FutureProvider.family<List<ContentProgress>, String>(
+    FutureProvider.autoDispose.family<List<ContentProgress>, String>(
   (ref, enrollmentId) async {
     final repository = ref.watch(lmsRepositoryProvider);
     return repository.getContentProgress(enrollmentId);
@@ -104,7 +104,7 @@ final contentProgressProvider =
 // ============================================
 
 final courseModulesProvider =
-    FutureProvider.family<List<CourseModule>, String>((ref, courseId) async {
+    FutureProvider.autoDispose.family<List<CourseModule>, String>((ref, courseId) async {
   final repository = ref.watch(lmsRepositoryProvider);
   return repository.getModules(courseId);
 });
@@ -114,7 +114,7 @@ final courseModulesProvider =
 // ============================================
 
 final courseForumsProvider =
-    FutureProvider.family<List<DiscussionForum>, String>(
+    FutureProvider.autoDispose.family<List<DiscussionForum>, String>(
   (ref, courseId) async {
     final repository = ref.watch(lmsRepositoryProvider);
     return repository.getForums(courseId);
@@ -122,7 +122,7 @@ final courseForumsProvider =
 );
 
 final forumPostsProvider =
-    FutureProvider.family<List<ForumPost>, String>((ref, forumId) async {
+    FutureProvider.autoDispose.family<List<ForumPost>, String>((ref, forumId) async {
   final repository = ref.watch(lmsRepositoryProvider);
   return repository.getForumPosts(forumId);
 });
@@ -132,7 +132,7 @@ final forumPostsProvider =
 // ============================================
 
 final certificateProvider =
-    FutureProvider.family<CourseCertificate?, String>(
+    FutureProvider.autoDispose.family<CourseCertificate?, String>(
   (ref, enrollmentId) async {
     final repository = ref.watch(lmsRepositoryProvider);
     return repository.getCertificate(enrollmentId);
@@ -140,7 +140,7 @@ final certificateProvider =
 );
 
 final myCertificatesProvider =
-    FutureProvider<List<CourseCertificate>>((ref) async {
+    FutureProvider.autoDispose<List<CourseCertificate>>((ref) async {
   final repository = ref.watch(lmsRepositoryProvider);
   return repository.getMyCertificates();
 });
@@ -149,7 +149,7 @@ final myCertificatesProvider =
 // STATS PROVIDER
 // ============================================
 
-final lmsStatsProvider = FutureProvider<LmsStats>((ref) async {
+final lmsStatsProvider = FutureProvider.autoDispose<LmsStats>((ref) async {
   final repository = ref.watch(lmsRepositoryProvider);
   return repository.getStats();
 });
@@ -200,7 +200,7 @@ class CourseNotifier extends StateNotifier<AsyncValue<List<Course>>> {
 }
 
 final courseNotifierProvider =
-    StateNotifierProvider<CourseNotifier, AsyncValue<List<Course>>>((ref) {
+    StateNotifierProvider.autoDispose<CourseNotifier, AsyncValue<List<Course>>>((ref) {
   final repository = ref.watch(lmsRepositoryProvider);
   return CourseNotifier(repository);
 });
@@ -236,7 +236,7 @@ class EnrollmentNotifier
   }
 }
 
-final enrollmentNotifierProvider = StateNotifierProvider<EnrollmentNotifier,
+final enrollmentNotifierProvider = StateNotifierProvider.autoDispose<EnrollmentNotifier,
     AsyncValue<List<CourseEnrollment>>>((ref) {
   final repository = ref.watch(lmsRepositoryProvider);
   return EnrollmentNotifier(repository);

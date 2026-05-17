@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
@@ -164,10 +165,10 @@ class _SchoolLogo extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: logoUrl != null && logoUrl!.isNotEmpty
-          ? Image.network(
-              logoUrl!,
+          ? CachedNetworkImage(
+              imageUrl: logoUrl!,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _LogoFallback(name: schoolName),
+              errorWidget: (_, __, ___) => _LogoFallback(name: schoolName),
             )
           : _LogoFallback(name: schoolName),
     );
@@ -284,10 +285,10 @@ class _PersonAvatar extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: photoUrl != null && photoUrl!.isNotEmpty
-          ? Image.network(
-              photoUrl!,
+          ? CachedNetworkImage(
+              imageUrl: photoUrl!,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _InitialsAvatar(initials: initials),
+              errorWidget: (_, __, ___) => _InitialsAvatar(initials: initials),
             )
           : _InitialsAvatar(initials: initials),
     );

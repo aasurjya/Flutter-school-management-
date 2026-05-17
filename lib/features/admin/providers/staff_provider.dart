@@ -118,7 +118,7 @@ class StaffNotifier extends StateNotifier<StaffListState> {
 // ---------------------------------------------------------------------------
 
 final staffNotifierProvider =
-    StateNotifierProvider.family<StaffNotifier, StaffListState, String>(
+    StateNotifierProvider.autoDispose.family<StaffNotifier, StaffListState, String>(
   (ref, role) {
     final repo = ref.watch(staffRepositoryProvider);
     return StaffNotifier(repo, role);

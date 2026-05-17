@@ -165,7 +165,7 @@ class _AcademicYearsConfig extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (year.isCurrent)
-                    _Badge(label: 'CURRENT', color: AppColors.success)
+                    const _Badge(label: 'CURRENT', color: AppColors.success)
                   else
                     TextButton(
                       onPressed: () => _setCurrentYear(context, ref, year.id),

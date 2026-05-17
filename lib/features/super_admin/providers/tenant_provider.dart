@@ -10,7 +10,7 @@ final tenantRepositoryProvider = Provider<TenantRepository>((ref) {
 });
 
 /// All tenants provider
-final tenantsProvider = FutureProvider.family<List<Tenant>, TenantsFilter>(
+final tenantsProvider = FutureProvider.autoDispose.family<List<Tenant>, TenantsFilter>(
   (ref, filter) async {
     final repository = ref.watch(tenantRepositoryProvider);
     return repository.getAllTenants(
@@ -21,7 +21,7 @@ final tenantsProvider = FutureProvider.family<List<Tenant>, TenantsFilter>(
 );
 
 /// Single tenant provider
-final tenantByIdProvider = FutureProvider.family<Tenant?, String>(
+final tenantByIdProvider = FutureProvider.autoDispose.family<Tenant?, String>(
   (ref, tenantId) async {
     final repository = ref.watch(tenantRepositoryProvider);
     return repository.getTenantById(tenantId);
@@ -29,7 +29,7 @@ final tenantByIdProvider = FutureProvider.family<Tenant?, String>(
 );
 
 /// Tenant statistics provider
-final tenantStatsProvider = FutureProvider.family<Map<String, dynamic>, String>(
+final tenantStatsProvider = FutureProvider.autoDispose.family<Map<String, dynamic>, String>(
   (ref, tenantId) async {
     final repository = ref.watch(tenantRepositoryProvider);
     return repository.getTenantStats(tenantId);
@@ -37,13 +37,13 @@ final tenantStatsProvider = FutureProvider.family<Map<String, dynamic>, String>(
 );
 
 /// Platform statistics provider (Super Admin)
-final platformStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final platformStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final repository = ref.watch(tenantRepositoryProvider);
   return repository.getPlatformStats();
 });
 
 /// Tenant users provider
-final tenantUsersProvider = FutureProvider.family<List<Map<String, dynamic>>, String>(
+final tenantUsersProvider = FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String>(
   (ref, tenantId) async {
     final repository = ref.watch(tenantRepositoryProvider);
     return repository.getTenantUsers(tenantId);
@@ -52,7 +52,7 @@ final tenantUsersProvider = FutureProvider.family<List<Map<String, dynamic>>, St
 
 /// Tenant users filtered by role
 final tenantUsersByRoleProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, ({String tenantId, String role})>(
+    FutureProvider.autoDispose.family<List<Map<String, dynamic>>, ({String tenantId, String role})>(
   (ref, params) async {
     final repository = ref.watch(tenantRepositoryProvider);
     return repository.getTenantUsersByRole(params.tenantId, params.role);
@@ -130,7 +130,7 @@ class TenantsNotifier extends StateNotifier<AsyncValue<List<Tenant>>> {
 
 /// Tenants notifier provider
 final tenantsNotifierProvider =
-    StateNotifierProvider<TenantsNotifier, AsyncValue<List<Tenant>>>((ref) {
+    StateNotifierProvider.autoDispose<TenantsNotifier, AsyncValue<List<Tenant>>>((ref) {
   final repository = ref.watch(tenantRepositoryProvider);
   return TenantsNotifier(repository, ref);
 });

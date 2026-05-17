@@ -177,7 +177,7 @@ class AdminUserService {
 
         // Provide actionable guidance for rate limits
         if (signUpResponse.statusCode == 429 || errorMsg.toLowerCase().contains('rate limit')) {
-          throw AdminUserCreationException(
+          throw const AdminUserCreationException(
             'Email rate limit exceeded. The create-user Edge Function may not '
             'be deployed — deploy it with: supabase functions deploy create-user. '
             'Meanwhile, wait a few minutes before retrying.',

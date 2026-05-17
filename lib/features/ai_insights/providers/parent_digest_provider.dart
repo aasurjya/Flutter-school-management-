@@ -40,7 +40,7 @@ class ParentDigestFilter {
 // --- Providers ---
 
 final parentDigestsProvider =
-    FutureProvider.family<List<ParentDigest>, ParentDigestFilter>(
+    FutureProvider.autoDispose.family<List<ParentDigest>, ParentDigestFilter>(
   (ref, filter) async {
     final repo = ref.watch(parentDigestRepositoryProvider);
     return repo.getDigestsForParent(
@@ -51,7 +51,7 @@ final parentDigestsProvider =
   },
 );
 
-final unreadDigestCountProvider = FutureProvider.family<int, String>(
+final unreadDigestCountProvider = FutureProvider.autoDispose.family<int, String>(
   (ref, parentId) async {
     final repo = ref.watch(parentDigestRepositoryProvider);
     return repo.getUnreadCount(parentId);
@@ -59,7 +59,7 @@ final unreadDigestCountProvider = FutureProvider.family<int, String>(
 );
 
 final digestDetailProvider =
-    FutureProvider.family<ParentDigest?, String>(
+    FutureProvider.autoDispose.family<ParentDigest?, String>(
   (ref, digestId) async {
     final repo = ref.watch(parentDigestRepositoryProvider);
     return repo.getDigestById(digestId);

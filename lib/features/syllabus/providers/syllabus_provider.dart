@@ -14,7 +14,7 @@ final syllabusRepositoryProvider = Provider<SyllabusRepository>((ref) {
 // ==================== TOPIC TREE ====================
 
 final syllabusTreeProvider =
-    FutureProvider.family<List<SyllabusTopic>, SyllabusFilter>(
+    FutureProvider.autoDispose.family<List<SyllabusTopic>, SyllabusFilter>(
   (ref, filter) async {
     final repository = ref.watch(syllabusRepositoryProvider);
     return repository.getTopicTree(
@@ -29,7 +29,7 @@ final syllabusTreeProvider =
 // ==================== COVERAGE SUMMARY ====================
 
 final coverageSummaryProvider =
-    FutureProvider.family<SyllabusCoverageSummary?, SyllabusFilter>(
+    FutureProvider.autoDispose.family<SyllabusCoverageSummary?, SyllabusFilter>(
   (ref, filter) async {
     if (filter.sectionId == null) return null;
     final repository = ref.watch(syllabusRepositoryProvider);
@@ -46,7 +46,7 @@ final coverageSummaryProvider =
 
 /// Returns coverage summaries across all subject assignments for a teacher.
 /// Parameter is a record of (teacherId, academicYearId).
-final teacherCoverageProvider = FutureProvider.family<
+final teacherCoverageProvider = FutureProvider.autoDispose.family<
     List<SyllabusCoverageSummary>, ({String teacherId, String academicYearId})>(
   (ref, params) async {
     final repository = ref.watch(syllabusRepositoryProvider);
@@ -60,7 +60,7 @@ final teacherCoverageProvider = FutureProvider.family<
 // ==================== TOPIC SEARCH ====================
 
 final topicSearchProvider =
-    FutureProvider.family<List<SyllabusTopic>, String>(
+    FutureProvider.autoDispose.family<List<SyllabusTopic>, String>(
   (ref, query) async {
     if (query.length < 2) return [];
     final repository = ref.watch(syllabusRepositoryProvider);
@@ -71,7 +71,7 @@ final topicSearchProvider =
 // ==================== TOPIC DETAIL ====================
 
 final topicDetailProvider =
-    FutureProvider.family<SyllabusTopic?, String>(
+    FutureProvider.autoDispose.family<SyllabusTopic?, String>(
   (ref, topicId) async {
     final repository = ref.watch(syllabusRepositoryProvider);
     return repository.getTopicById(topicId);
@@ -81,7 +81,7 @@ final topicDetailProvider =
 // ==================== TOPIC LINKS ====================
 
 final topicLinksProvider =
-    FutureProvider.family<List<TopicResourceLink>, String>(
+    FutureProvider.autoDispose.family<List<TopicResourceLink>, String>(
   (ref, topicId) async {
     final repository = ref.watch(syllabusRepositoryProvider);
     return repository.getTopicLinks(topicId);
@@ -91,7 +91,7 @@ final topicLinksProvider =
 // ==================== LESSON PLANS ====================
 
 final lessonPlansProvider =
-    FutureProvider.family<List<LessonPlan>, String>(
+    FutureProvider.autoDispose.family<List<LessonPlan>, String>(
   (ref, topicId) async {
     final repository = ref.watch(syllabusRepositoryProvider);
     return repository.getLessonPlans(topicId: topicId);
@@ -99,7 +99,7 @@ final lessonPlansProvider =
 );
 
 final lessonPlanDetailProvider =
-    FutureProvider.family<LessonPlan?, String>(
+    FutureProvider.autoDispose.family<LessonPlan?, String>(
   (ref, planId) async {
     final repository = ref.watch(syllabusRepositoryProvider);
     return repository.getLessonPlanById(planId);

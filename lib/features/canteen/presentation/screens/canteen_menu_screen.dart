@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../data/models/canteen.dart';
 import '../../providers/canteen_provider.dart';
 
@@ -156,10 +157,10 @@ class _MenuItemCard extends ConsumerWidget {
                 fit: StackFit.expand,
                 children: [
                   if (item.imageUrl != null)
-                    Image.network(
-                      item.imageUrl!,
+                    CachedNetworkImage(
+              imageUrl: item.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorWidget: (_, __, ___) => Container(
                         color: theme.colorScheme.surfaceContainerHighest,
                         child: Icon(
                           Icons.fastfood,

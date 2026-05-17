@@ -174,9 +174,9 @@ class StudentDashboardScreen extends ConsumerWidget {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: EdgeInsets.symmetric(horizontal: 24),
               child: _UpcomingExamCard(),
             ),
           ),
@@ -275,12 +275,12 @@ class _AttendanceMetricCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (userId == null) {
-      return _AttendanceMetricDisplay(percentage: null);
+      return const _AttendanceMetricDisplay(percentage: null);
     }
     final statsAsync = ref.watch(attendanceStatsProvider(userId!));
     return statsAsync.when(
-      loading: () => _AttendanceMetricDisplay(percentage: null, loading: true),
-      error: (_, __) => _AttendanceMetricDisplay(percentage: null),
+      loading: () => const _AttendanceMetricDisplay(percentage: null, loading: true),
+      error: (_, __) => const _AttendanceMetricDisplay(percentage: null),
       data: (stats) {
         final present = stats['present'] ?? 0;
         final total = (stats['present'] ?? 0) + (stats['absent'] ?? 0) + (stats['late'] ?? 0);
@@ -337,7 +337,7 @@ class _AttendanceMetricDisplay extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Attendance Health',
                 style: TextStyle(
                   fontSize: 12,
@@ -378,7 +378,7 @@ class _AttendanceMetricDisplay extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 4),
-              Text(
+              const Text(
                 '%',
                 style: TextStyle(
                   fontSize: 24,
@@ -394,7 +394,7 @@ class _AttendanceMetricDisplay extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progressValue,
               backgroundColor: AppColors.grey100,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
               minHeight: 6,
             ),
           ),
@@ -690,11 +690,11 @@ class _TodayScheduleCard extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          Icon(Icons.calendar_today_rounded, size: 32, color: AppColors.grey300),
+          const Icon(Icons.calendar_today_rounded, size: 32, color: AppColors.grey300),
           const SizedBox(height: 12),
           Text(
             message,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 13,
               color: AppColors.grey500,
@@ -750,7 +750,7 @@ class _ClassRow extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 detail,
-                style: TextStyle(fontSize: 12, color: AppColors.grey500),
+                style: const TextStyle(fontSize: 12, color: AppColors.grey500),
               ),
             ],
           ),
@@ -806,11 +806,11 @@ class _HomeworkWidget extends ConsumerWidget {
               children: [
                 Icon(Icons.check_circle_rounded, size: 32, color: AppColors.success.withValues(alpha: 0.5)),
                 const SizedBox(height: 12),
-                Text(
+                const Text(
                   'All caught up!',
                   style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.grey900),
                 ),
-                Text(
+                const Text(
                   'No pending assignments for today.',
                   style: TextStyle(fontSize: 12, color: AppColors.grey500),
                 ),
@@ -874,7 +874,7 @@ class _HomeworkRow extends StatelessWidget {
       ),
       subtitle: Text(
         homework.subjectName ?? 'Curriculum Task',
-        style: TextStyle(fontSize: 12, color: AppColors.grey500),
+        style: const TextStyle(fontSize: 12, color: AppColors.grey500),
       ),
       trailing: isHigh
           ? Container(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/student.dart';
@@ -106,8 +107,8 @@ class StudentIdCardWidget extends StatelessWidget {
                         child: student.photoUrl != null
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  student.photoUrl!,
+                                child: CachedNetworkImage(
+              imageUrl: student.photoUrl!,
                                   fit: BoxFit.cover,
                                 ),
                               )

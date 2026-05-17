@@ -13,7 +13,7 @@ final admissionRepositoryProvider = Provider<AdmissionRepository>((ref) {
 // ============================================
 
 final admissionInquiriesProvider =
-    FutureProvider.family<List<AdmissionInquiry>, InquiryFilter>(
+    FutureProvider.autoDispose.family<List<AdmissionInquiry>, InquiryFilter>(
   (ref, filter) async {
     final repository = ref.watch(admissionRepositoryProvider);
     return repository.getInquiries(
@@ -26,7 +26,7 @@ final admissionInquiriesProvider =
 );
 
 final allInquiriesProvider =
-    FutureProvider<List<AdmissionInquiry>>((ref) async {
+    FutureProvider.autoDispose<List<AdmissionInquiry>>((ref) async {
   final repository = ref.watch(admissionRepositoryProvider);
   return repository.getInquiries();
 });
@@ -36,7 +36,7 @@ final allInquiriesProvider =
 // ============================================
 
 final admissionApplicationsProvider =
-    FutureProvider.family<List<AdmissionApplication>, ApplicationFilter>(
+    FutureProvider.autoDispose.family<List<AdmissionApplication>, ApplicationFilter>(
   (ref, filter) async {
     final repository = ref.watch(admissionRepositoryProvider);
     return repository.getApplications(
@@ -50,13 +50,13 @@ final admissionApplicationsProvider =
 );
 
 final allApplicationsProvider =
-    FutureProvider<List<AdmissionApplication>>((ref) async {
+    FutureProvider.autoDispose<List<AdmissionApplication>>((ref) async {
   final repository = ref.watch(admissionRepositoryProvider);
   return repository.getApplications();
 });
 
 final applicationByIdProvider =
-    FutureProvider.family<AdmissionApplication?, String>(
+    FutureProvider.autoDispose.family<AdmissionApplication?, String>(
   (ref, applicationId) async {
     final repository = ref.watch(admissionRepositoryProvider);
     return repository.getApplicationById(applicationId);
@@ -68,7 +68,7 @@ final applicationByIdProvider =
 // ============================================
 
 final admissionInterviewsProvider =
-    FutureProvider.family<List<AdmissionInterview>, InterviewFilter>(
+    FutureProvider.autoDispose.family<List<AdmissionInterview>, InterviewFilter>(
   (ref, filter) async {
     final repository = ref.watch(admissionRepositoryProvider);
     return repository.getInterviews(
@@ -82,7 +82,7 @@ final admissionInterviewsProvider =
 );
 
 final allInterviewsProvider =
-    FutureProvider<List<AdmissionInterview>>((ref) async {
+    FutureProvider.autoDispose<List<AdmissionInterview>>((ref) async {
   final repository = ref.watch(admissionRepositoryProvider);
   return repository.getInterviews();
 });
@@ -92,7 +92,7 @@ final allInterviewsProvider =
 // ============================================
 
 final admissionSettingsProvider =
-    FutureProvider.family<List<AdmissionSettings>, SettingsFilter>(
+    FutureProvider.autoDispose.family<List<AdmissionSettings>, SettingsFilter>(
   (ref, filter) async {
     final repository = ref.watch(admissionRepositoryProvider);
     return repository.getSettings(
@@ -103,7 +103,7 @@ final admissionSettingsProvider =
 );
 
 final allAdmissionSettingsProvider =
-    FutureProvider<List<AdmissionSettings>>((ref) async {
+    FutureProvider.autoDispose<List<AdmissionSettings>>((ref) async {
   final repository = ref.watch(admissionRepositoryProvider);
   return repository.getSettings();
 });
@@ -113,13 +113,13 @@ final allAdmissionSettingsProvider =
 // ============================================
 
 final admissionStatsProvider =
-    FutureProvider.family<AdmissionStats, String?>((ref, academicYearId) async {
+    FutureProvider.autoDispose.family<AdmissionStats, String?>((ref, academicYearId) async {
   final repository = ref.watch(admissionRepositoryProvider);
   return repository.getAdmissionStats(academicYearId: academicYearId);
 });
 
 final currentAdmissionStatsProvider =
-    FutureProvider<AdmissionStats>((ref) async {
+    FutureProvider.autoDispose<AdmissionStats>((ref) async {
   final repository = ref.watch(admissionRepositoryProvider);
   return repository.getAdmissionStats();
 });
@@ -180,7 +180,7 @@ class AdmissionNotifier
   }
 }
 
-final admissionNotifierProvider = StateNotifierProvider<AdmissionNotifier,
+final admissionNotifierProvider = StateNotifierProvider.autoDispose<AdmissionNotifier,
     AsyncValue<List<AdmissionApplication>>>((ref) {
   final repository = ref.watch(admissionRepositoryProvider);
   return AdmissionNotifier(repository);
@@ -221,7 +221,7 @@ class InquiryNotifier
   }
 }
 
-final inquiryNotifierProvider = StateNotifierProvider<InquiryNotifier,
+final inquiryNotifierProvider = StateNotifierProvider.autoDispose<InquiryNotifier,
     AsyncValue<List<AdmissionInquiry>>>((ref) {
   final repository = ref.watch(admissionRepositoryProvider);
   return InquiryNotifier(repository);

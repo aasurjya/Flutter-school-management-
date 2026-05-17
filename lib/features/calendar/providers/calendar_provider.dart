@@ -13,7 +13,7 @@ final calendarRepositoryProvider = Provider<CalendarRepository>((ref) {
 // ==================== EVENTS BY DATE RANGE ====================
 
 final eventsForRangeProvider =
-    FutureProvider.family<List<SchoolEvent>, CalendarFilter>(
+    FutureProvider.autoDispose.family<List<SchoolEvent>, CalendarFilter>(
   (ref, filter) async {
     final repository = ref.watch(calendarRepositoryProvider);
     return repository.getEvents(
@@ -28,7 +28,7 @@ final eventsForRangeProvider =
 // ==================== UPCOMING EVENTS ====================
 
 final upcomingEventsProvider =
-    FutureProvider.family<List<SchoolEvent>, EventType?>(
+    FutureProvider.autoDispose.family<List<SchoolEvent>, EventType?>(
   (ref, eventType) async {
     final repository = ref.watch(calendarRepositoryProvider);
     return repository.getUpcomingEvents(
@@ -41,7 +41,7 @@ final upcomingEventsProvider =
 // ==================== SINGLE EVENT ====================
 
 final eventDetailProvider =
-    FutureProvider.family<SchoolEvent?, String>(
+    FutureProvider.autoDispose.family<SchoolEvent?, String>(
   (ref, eventId) async {
     final repository = ref.watch(calendarRepositoryProvider);
     return repository.getEventById(eventId);
@@ -51,7 +51,7 @@ final eventDetailProvider =
 // ==================== EVENT ATTENDEES ====================
 
 final eventAttendeesProvider =
-    FutureProvider.family<List<EventAttendee>, String>(
+    FutureProvider.autoDispose.family<List<EventAttendee>, String>(
   (ref, eventId) async {
     final repository = ref.watch(calendarRepositoryProvider);
     return repository.getEventAttendees(eventId);
@@ -61,7 +61,7 @@ final eventAttendeesProvider =
 // ==================== USER RSVP ====================
 
 final userRsvpProvider =
-    FutureProvider.family<EventAttendee?, String>(
+    FutureProvider.autoDispose.family<EventAttendee?, String>(
   (ref, eventId) async {
     final repository = ref.watch(calendarRepositoryProvider);
     return repository.getUserRsvp(eventId);
@@ -71,7 +71,7 @@ final userRsvpProvider =
 // ==================== EVENT REMINDERS ====================
 
 final eventRemindersProvider =
-    FutureProvider.family<List<EventReminder>, String>(
+    FutureProvider.autoDispose.family<List<EventReminder>, String>(
   (ref, eventId) async {
     final repository = ref.watch(calendarRepositoryProvider);
     return repository.getEventReminders(eventId);
@@ -81,7 +81,7 @@ final eventRemindersProvider =
 // ==================== ACADEMIC CALENDAR ====================
 
 final academicCalendarProvider =
-    FutureProvider.family<List<AcademicCalendarItem>, String>(
+    FutureProvider.autoDispose.family<List<AcademicCalendarItem>, String>(
   (ref, academicYearId) async {
     final repository = ref.watch(calendarRepositoryProvider);
     return repository.getAcademicCalendarItems(
@@ -93,7 +93,7 @@ final academicCalendarProvider =
 // ==================== HOLIDAYS ====================
 
 final holidaysProvider =
-    FutureProvider.family<List<Holiday>, String>(
+    FutureProvider.autoDispose.family<List<Holiday>, String>(
   (ref, academicYearId) async {
     final repository = ref.watch(calendarRepositoryProvider);
     return repository.getHolidays(academicYearId: academicYearId);
@@ -103,7 +103,7 @@ final holidaysProvider =
 // ==================== HOLIDAY DATES SET ====================
 
 final holidayDatesProvider =
-    FutureProvider.family<Set<DateTime>, String>(
+    FutureProvider.autoDispose.family<Set<DateTime>, String>(
   (ref, academicYearId) async {
     final repository = ref.watch(calendarRepositoryProvider);
     return repository.getHolidayDates(academicYearId: academicYearId);

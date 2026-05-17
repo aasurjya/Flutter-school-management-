@@ -8,14 +8,14 @@ final transportRepositoryProvider = Provider<TransportRepository>((ref) {
 });
 
 // Routes providers
-final routesProvider = FutureProvider.family<List<TransportRoute>, bool>(
+final routesProvider = FutureProvider.autoDispose.family<List<TransportRoute>, bool>(
   (ref, activeOnly) async {
     final repository = ref.watch(transportRepositoryProvider);
     return repository.getRoutes(activeOnly: activeOnly);
   },
 );
 
-final routeByIdProvider = FutureProvider.family<TransportRoute?, String>(
+final routeByIdProvider = FutureProvider.autoDispose.family<TransportRoute?, String>(
   (ref, routeId) async {
     final repository = ref.watch(transportRepositoryProvider);
     return repository.getRouteById(routeId);
@@ -23,7 +23,7 @@ final routeByIdProvider = FutureProvider.family<TransportRoute?, String>(
 );
 
 // Stops providers
-final stopsProvider = FutureProvider.family<List<TransportStop>, String>(
+final stopsProvider = FutureProvider.autoDispose.family<List<TransportStop>, String>(
   (ref, routeId) async {
     final repository = ref.watch(transportRepositoryProvider);
     return repository.getStops(routeId);
@@ -31,21 +31,21 @@ final stopsProvider = FutureProvider.family<List<TransportStop>, String>(
 );
 
 // Student transport providers
-final studentsByRouteProvider = FutureProvider.family<List<StudentTransport>, String>(
+final studentsByRouteProvider = FutureProvider.autoDispose.family<List<StudentTransport>, String>(
   (ref, routeId) async {
     final repository = ref.watch(transportRepositoryProvider);
     return repository.getStudentsByRoute(routeId);
   },
 );
 
-final studentsByStopProvider = FutureProvider.family<List<StudentTransport>, String>(
+final studentsByStopProvider = FutureProvider.autoDispose.family<List<StudentTransport>, String>(
   (ref, stopId) async {
     final repository = ref.watch(transportRepositoryProvider);
     return repository.getStudentsByStop(stopId);
   },
 );
 
-final myTransportProvider = FutureProvider<StudentTransport?>((ref) async {
+final myTransportProvider = FutureProvider.autoDispose<StudentTransport?>((ref) async {
   final repository = ref.watch(transportRepositoryProvider);
   final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
   if (userId == null) return null;
@@ -53,7 +53,7 @@ final myTransportProvider = FutureProvider<StudentTransport?>((ref) async {
 });
 
 // Stats provider
-final transportStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final transportStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final repository = ref.watch(transportRepositoryProvider);
   return repository.getTransportStats();
 });

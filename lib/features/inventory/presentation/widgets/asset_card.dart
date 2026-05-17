@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/inventory.dart';
 
@@ -64,10 +65,10 @@ class AssetCard extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     if (asset.imageUrl != null)
-                      Image.network(
-                        asset.imageUrl!,
+                      CachedNetworkImage(
+              imageUrl: asset.imageUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
+                        errorWidget: (_, __, ___) =>
                             _AssetPlaceholder(assetCode: asset.assetCode),
                       )
                     else
@@ -233,10 +234,10 @@ class AssetListTile extends StatelessWidget {
           child: asset.imageUrl != null
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    asset.imageUrl!,
+                  child: CachedNetworkImage(
+              imageUrl: asset.imageUrl!,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Icon(
+                    errorWidget: (_, __, ___) => Icon(
                       Icons.inventory_2_outlined,
                       color: statusColor,
                     ),

@@ -350,6 +350,31 @@ class OnlineExamRepository extends BaseRepository {
 
   Future<ExamAttempt> submitExamAttempt(String attemptId,
       {bool autoSubmit = false}) async {
+    // Server-side time verification (migration 00054).
+    // Rejects manual submits that exceed the exam duration + 30s grace —
+    // closes the client-clock-tampering bypass. Auto-submits (timer hit zero
+    // on the client) are always accepted; the RPC also returns the server-
+    // computed elapsed time which we use below instead of trusting the client.
+    final timing = await client.rpc(
+      'verify_exam_attempt_time',
+      params: {
+        'p_attempt_id': attemptId,
+        'p_auto_submit': autoSubmit,
+      },
+    );
+    final timingRow = (timing is List && timing.isNotEmpty)
+        ? timing.first as Map<String, dynamic>
+        : (timing as Map<String, dynamic>?);
+    if (timingRow == null) {
+      throw Exception('Could not verify attempt timing');
+    }
+    final allowed = timingRow['allowed'] == true;
+    final serverElapsed = (timingRow['elapsed_seconds'] as num?)?.toInt() ?? 0;
+    final reason = timingRow['reason']?.toString() ?? 'unknown';
+    if (!allowed) {
+      throw Exception('Exam submission rejected: $reason');
+    }
+
     final attempt = await getAttemptById(attemptId);
     if (attempt == null) throw Exception('Attempt not found');
 
@@ -393,8 +418,11 @@ class OnlineExamRepository extends BaseRepository {
       }
     }
 
-    final timeTaken =
-        DateTime.now().difference(attempt.startedAt).inSeconds;
+    // Use server-computed elapsed time (NOW() - started_at on the DB).
+    // Falls back to client time only if the server value is missing.
+    final timeTaken = serverElapsed > 0
+        ? serverElapsed
+        : DateTime.now().difference(attempt.startedAt).inSeconds;
     final percentage =
         exam.totalMarks > 0 ? (totalObtained / exam.totalMarks) * 100 : 0.0;
 

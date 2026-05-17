@@ -42,7 +42,9 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
         if (_statusFilter == 'active' && !t.isActive) return false;
         if (_statusFilter == 'suspended' && t.isActive) return false;
         if (_statusFilter == 'trial' &&
-            t.subscriptionPlan.toLowerCase() != 'trial') return false;
+            t.subscriptionPlan.toLowerCase() != 'trial') {
+          return false;
+        }
       }
       if (_planFilter != 'all' && t.subscriptionPlan != _planFilter) {
         return false;
@@ -192,7 +194,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _statusFilter,
+                  initialValue: _statusFilter,
                   decoration: InputDecoration(
                     labelText: 'Status',
                     border: OutlineInputBorder(
@@ -220,7 +222,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _planFilter,
+                  initialValue: _planFilter,
                   decoration: InputDecoration(
                     labelText: 'Plan',
                     border: OutlineInputBorder(

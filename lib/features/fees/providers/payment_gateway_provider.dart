@@ -87,7 +87,7 @@ class TransactionsFilter {
   int get hashCode => Object.hash(invoiceId, studentId, status);
 }
 
-final transactionsProvider = FutureProvider.family<List<PaymentTransaction>,
+final transactionsProvider = FutureProvider.autoDispose.family<List<PaymentTransaction>,
     TransactionsFilter>((ref, filter) async {
   final repo = ref.watch(paymentGatewayRepositoryProvider);
   return repo.getTransactions(
@@ -186,7 +186,7 @@ class InitiatePaymentNotifier extends StateNotifier<PaymentFlowData> {
 }
 
 final initiatePaymentProvider =
-    StateNotifierProvider<InitiatePaymentNotifier, PaymentFlowData>((ref) {
+    StateNotifierProvider.autoDispose<InitiatePaymentNotifier, PaymentFlowData>((ref) {
   final repo = ref.watch(paymentGatewayRepositoryProvider);
   return InitiatePaymentNotifier(repo);
 });

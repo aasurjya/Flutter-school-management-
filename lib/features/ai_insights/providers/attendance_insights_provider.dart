@@ -14,7 +14,7 @@ final attendanceInsightsRepositoryProvider =
 // --- Providers ---
 
 final dayPatternsProvider =
-    FutureProvider.family<List<DayPattern>, String>(
+    FutureProvider.autoDispose.family<List<DayPattern>, String>(
   (ref, sectionId) async {
     final repo = ref.watch(attendanceInsightsRepositoryProvider);
     return repo.getDayPatterns(sectionId);
@@ -22,7 +22,7 @@ final dayPatternsProvider =
 );
 
 final chronicAbsenteesProvider =
-    FutureProvider.family<List<ChronicAbsentee>, String>(
+    FutureProvider.autoDispose.family<List<ChronicAbsentee>, String>(
   (ref, sectionId) async {
     final repo = ref.watch(attendanceInsightsRepositoryProvider);
     return repo.getChronicAbsentees(sectionId);
@@ -30,7 +30,7 @@ final chronicAbsenteesProvider =
 );
 
 final attendanceAnomaliesProvider =
-    FutureProvider.family<List<AttendanceAnomaly>, String>(
+    FutureProvider.autoDispose.family<List<AttendanceAnomaly>, String>(
   (ref, sectionId) async {
     final repo = ref.watch(attendanceInsightsRepositoryProvider);
     final history = await repo.getSectionDailyHistory(sectionId);
@@ -39,7 +39,7 @@ final attendanceAnomaliesProvider =
 );
 
 final attendanceStreaksProvider =
-    FutureProvider.family<List<StudentStreak>, String>(
+    FutureProvider.autoDispose.family<List<StudentStreak>, String>(
   (ref, sectionId) async {
     final repo = ref.watch(attendanceInsightsRepositoryProvider);
     return repo.getStudentStreaks(sectionId);
@@ -49,7 +49,7 @@ final attendanceStreaksProvider =
 /// LLM-enhanced attendance narrative for a section.
 /// Non-blocking: returns empty result while loading, never errors in UI.
 final attendanceNarrativeProvider =
-    FutureProvider.family<AITextResult, String>(
+    FutureProvider.autoDispose.family<AITextResult, String>(
   (ref, sectionId) async {
     final aiTextGenerator = ref.watch(aiTextGeneratorProvider);
 

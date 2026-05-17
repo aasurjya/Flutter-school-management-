@@ -4,7 +4,7 @@ import '../../../core/providers/ai_providers.dart';
 import '../../../data/models/message_template.dart';
 
 final messageDraftProvider =
-    FutureProvider.family<MessageDraft, MessageDraftRequest>(
+    FutureProvider.autoDispose.family<MessageDraft, MessageDraftRequest>(
   (ref, request) async {
     final aiTextGenerator = ref.watch(aiTextGeneratorProvider);
     const parentName =

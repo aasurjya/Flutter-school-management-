@@ -15,14 +15,14 @@ final scannedStudentProvider = StateProvider<Student?>((ref) => null);
 
 /// Look up a student by admission number.
 final studentFromAdmissionNumberProvider =
-    FutureProvider.family<Student?, String>((ref, admissionNumber) async {
+    FutureProvider.autoDispose.family<Student?, String>((ref, admissionNumber) async {
   final repository = ref.watch(studentRepositoryProvider);
   return repository.getStudentByAdmissionNumber(admissionNumber);
 });
 
 /// Get check-in log for a student.
 final studentCheckinsProvider =
-    FutureProvider.family<List<StudentCheckin>, String>(
+    FutureProvider.autoDispose.family<List<StudentCheckin>, String>(
         (ref, studentId) async {
   final repository = ref.watch(checkinRepositoryProvider);
   return repository.getStudentCheckins(
@@ -33,7 +33,7 @@ final studentCheckinsProvider =
 
 /// Get check-in log for a section today.
 final sectionCheckinsProvider =
-    FutureProvider.family<List<StudentCheckin>, String>(
+    FutureProvider.autoDispose.family<List<StudentCheckin>, String>(
         (ref, sectionId) async {
   final repository = ref.watch(checkinRepositoryProvider);
   return repository.getSectionCheckins(

@@ -7,7 +7,7 @@ final assignmentRepositoryProvider = Provider<AssignmentRepository>((ref) {
   return AssignmentRepository(ref.watch(supabaseProvider));
 });
 
-final assignmentsProvider = FutureProvider.family<List<Assignment>, AssignmentsFilter>(
+final assignmentsProvider = FutureProvider.autoDispose.family<List<Assignment>, AssignmentsFilter>(
   (ref, filter) async {
     final repository = ref.watch(assignmentRepositoryProvider);
     return repository.getAssignments(
@@ -20,7 +20,7 @@ final assignmentsProvider = FutureProvider.family<List<Assignment>, AssignmentsF
   },
 );
 
-final studentAssignmentsProvider = FutureProvider.family<List<Assignment>, StudentAssignmentsFilter>(
+final studentAssignmentsProvider = FutureProvider.autoDispose.family<List<Assignment>, StudentAssignmentsFilter>(
   (ref, filter) async {
     final repository = ref.watch(assignmentRepositoryProvider);
     return repository.getStudentAssignments(
@@ -30,14 +30,14 @@ final studentAssignmentsProvider = FutureProvider.family<List<Assignment>, Stude
   },
 );
 
-final assignmentByIdProvider = FutureProvider.family<Assignment?, String>(
+final assignmentByIdProvider = FutureProvider.autoDispose.family<Assignment?, String>(
   (ref, assignmentId) async {
     final repository = ref.watch(assignmentRepositoryProvider);
     return repository.getAssignmentById(assignmentId);
   },
 );
 
-final submissionsProvider = FutureProvider.family<List<Submission>, SubmissionsFilter>(
+final submissionsProvider = FutureProvider.autoDispose.family<List<Submission>, SubmissionsFilter>(
   (ref, filter) async {
     final repository = ref.watch(assignmentRepositoryProvider);
     return repository.getSubmissions(
@@ -47,7 +47,7 @@ final submissionsProvider = FutureProvider.family<List<Submission>, SubmissionsF
   },
 );
 
-final studentSubmissionProvider = FutureProvider.family<Submission?, StudentSubmissionFilter>(
+final studentSubmissionProvider = FutureProvider.autoDispose.family<Submission?, StudentSubmissionFilter>(
   (ref, filter) async {
     final repository = ref.watch(assignmentRepositoryProvider);
     return repository.getStudentSubmission(
@@ -57,7 +57,7 @@ final studentSubmissionProvider = FutureProvider.family<Submission?, StudentSubm
   },
 );
 
-final assignmentSummariesProvider = FutureProvider.family<List<AssignmentSummary>, AssignmentSummaryFilter>(
+final assignmentSummariesProvider = FutureProvider.autoDispose.family<List<AssignmentSummary>, AssignmentSummaryFilter>(
   (ref, filter) async {
     final repository = ref.watch(assignmentRepositoryProvider);
     return repository.getAssignmentSummaries(
@@ -232,7 +232,7 @@ class AssignmentsNotifier extends StateNotifier<AsyncValue<List<Assignment>>> {
 }
 
 final assignmentsNotifierProvider =
-    StateNotifierProvider<AssignmentsNotifier, AsyncValue<List<Assignment>>>((ref) {
+    StateNotifierProvider.autoDispose<AssignmentsNotifier, AsyncValue<List<Assignment>>>((ref) {
   final repository = ref.watch(assignmentRepositoryProvider);
   return AssignmentsNotifier(repository);
 });
@@ -302,7 +302,7 @@ class SubmissionNotifier extends StateNotifier<AsyncValue<Submission?>> {
 }
 
 final submissionNotifierProvider =
-    StateNotifierProvider<SubmissionNotifier, AsyncValue<Submission?>>((ref) {
+    StateNotifierProvider.autoDispose<SubmissionNotifier, AsyncValue<Submission?>>((ref) {
   final repository = ref.watch(assignmentRepositoryProvider);
   return SubmissionNotifier(repository);
 });

@@ -124,7 +124,7 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
                   collapseMode: CollapseMode.pin,
                   background: Container(
                     decoration: const BoxDecoration(
-                      gradient: const LinearGradient(
+                      gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
@@ -367,7 +367,7 @@ class _UsersTab extends ConsumerStatefulWidget {
 }
 
 class _UsersTabState extends ConsumerState<_UsersTab> {
-  bool _isCreating = false;
+  final bool _isCreating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -963,11 +963,11 @@ class _CreateUserSheetState extends State<_CreateUserSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  const Row(
                     children: [
-                      const Icon(Icons.warning_amber_rounded, size: 14, color: Colors.amber),
-                      const SizedBox(width: 6),
-                      const Expanded(
+                      Icon(Icons.warning_amber_rounded, size: 14, color: Colors.amber),
+                      SizedBox(width: 6),
+                      Expanded(
                         child: Text(
                           'Save these before creating — password shown here only.',
                           style: TextStyle(fontSize: 11, color: Colors.orange),

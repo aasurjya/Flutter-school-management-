@@ -7,7 +7,7 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return NotificationRepository(ref.watch(supabaseProvider));
 });
 
-final notificationsProvider = FutureProvider.family<List<AppNotification>, NotificationFilter>(
+final notificationsProvider = FutureProvider.autoDispose.family<List<AppNotification>, NotificationFilter>(
   (ref, filter) async {
     final repository = ref.watch(notificationRepositoryProvider);
     return repository.getNotifications(
@@ -19,12 +19,12 @@ final notificationsProvider = FutureProvider.family<List<AppNotification>, Notif
   },
 );
 
-final unreadCountProvider = FutureProvider<int>((ref) async {
+final unreadCountProvider = FutureProvider.autoDispose<int>((ref) async {
   final repository = ref.watch(notificationRepositoryProvider);
   return repository.getUnreadCount();
 });
 
-final notificationByIdProvider = FutureProvider.family<AppNotification?, String>(
+final notificationByIdProvider = FutureProvider.autoDispose.family<AppNotification?, String>(
   (ref, notificationId) async {
     final repository = ref.watch(notificationRepositoryProvider);
     return repository.getNotificationById(notificationId);
@@ -79,7 +79,7 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<AppNotification
 }
 
 final notificationNotifierProvider =
-    StateNotifierProvider<NotificationNotifier, AsyncValue<List<AppNotification>>>((ref) {
+    StateNotifierProvider.autoDispose<NotificationNotifier, AsyncValue<List<AppNotification>>>((ref) {
   final repository = ref.watch(notificationRepositoryProvider);
   return NotificationNotifier(repository, ref);
 });

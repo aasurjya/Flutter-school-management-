@@ -17,7 +17,7 @@ final noticeBoardRepositoryProvider = Provider<NoticeBoardRepository>((ref) {
 // ============================================================
 
 final noticesProvider =
-    FutureProvider.family<List<Notice>, NoticeFilter>((ref, filter) async {
+    FutureProvider.autoDispose.family<List<Notice>, NoticeFilter>((ref, filter) async {
   final repo = ref.watch(noticeBoardRepositoryProvider);
   return repo.getNotices(
     category: filter.category,
@@ -27,13 +27,13 @@ final noticesProvider =
   );
 });
 
-final pinnedNoticesProvider = FutureProvider<List<Notice>>((ref) async {
+final pinnedNoticesProvider = FutureProvider.autoDispose<List<Notice>>((ref) async {
   final repo = ref.watch(noticeBoardRepositoryProvider);
   return repo.getPinnedNotices(limit: 5);
 });
 
 final noticeByIdProvider =
-    FutureProvider.family<Notice?, String>((ref, noticeId) async {
+    FutureProvider.autoDispose.family<Notice?, String>((ref, noticeId) async {
   final repo = ref.watch(noticeBoardRepositoryProvider);
   return repo.getNoticeById(noticeId);
 });

@@ -9,7 +9,7 @@ final attendanceRepositoryProvider = Provider<AttendanceRepository>((ref) {
   return AttendanceRepository(ref.watch(supabaseProvider), syncService);
 });
 
-final sectionAttendanceProvider = FutureProvider.family<List<Attendance>, SectionDateFilter>(
+final sectionAttendanceProvider = FutureProvider.autoDispose.family<List<Attendance>, SectionDateFilter>(
   (ref, filter) async {
     final repository = ref.watch(attendanceRepositoryProvider);
     return repository.getAttendanceBySection(
@@ -19,7 +19,7 @@ final sectionAttendanceProvider = FutureProvider.family<List<Attendance>, Sectio
   },
 );
 
-final studentAttendanceProvider = FutureProvider.family<List<Attendance>, StudentAttendanceFilter>(
+final studentAttendanceProvider = FutureProvider.autoDispose.family<List<Attendance>, StudentAttendanceFilter>(
   (ref, filter) async {
     final repository = ref.watch(attendanceRepositoryProvider);
     return repository.getStudentAttendance(
@@ -30,7 +30,7 @@ final studentAttendanceProvider = FutureProvider.family<List<Attendance>, Studen
   },
 );
 
-final attendanceSummaryProvider = FutureProvider.family<List<Map<String, dynamic>>, AttendanceSummaryFilter>(
+final attendanceSummaryProvider = FutureProvider.autoDispose.family<List<Map<String, dynamic>>, AttendanceSummaryFilter>(
   (ref, filter) async {
     final repository = ref.watch(attendanceRepositoryProvider);
     return repository.getAttendanceSummary(
@@ -40,14 +40,14 @@ final attendanceSummaryProvider = FutureProvider.family<List<Map<String, dynamic
   },
 );
 
-final attendanceStatsProvider = FutureProvider.family<Map<String, int>, String>(
+final attendanceStatsProvider = FutureProvider.autoDispose.family<Map<String, int>, String>(
   (ref, studentId) async {
     final repository = ref.watch(attendanceRepositoryProvider);
     return repository.getAttendanceStats(studentId: studentId);
   },
 );
 
-final todayAttendancePercentageProvider = FutureProvider<double>((ref) async {
+final todayAttendancePercentageProvider = FutureProvider.autoDispose<double>((ref) async {
   final repository = ref.watch(attendanceRepositoryProvider);
   return repository.getTodayAttendancePercentage();
 });
@@ -55,7 +55,7 @@ final todayAttendancePercentageProvider = FutureProvider<double>((ref) async {
 /// Aggregated student present/total counts for today across all sections.
 /// Returns {'present': N, 'total': N}.
 final todayStudentAttendanceCountsProvider =
-    FutureProvider<Map<String, int>>((ref) async {
+    FutureProvider.autoDispose<Map<String, int>>((ref) async {
   final repository = ref.watch(attendanceRepositoryProvider);
   return repository.getTodayStudentCounts();
 });
@@ -64,13 +64,13 @@ final todayStudentAttendanceCountsProvider =
 /// No dedicated staff-role filter exists in the view yet; surfaces '—'
 /// until a staff-specific view is added (Sprint 1.6).
 final staffAttendanceTodayProvider =
-    FutureProvider<Map<String, int>?>((ref) async {
+    FutureProvider.autoDispose<Map<String, int>?>((ref) async {
   // TODO(sprint-1.6): replace with a staff-scoped query once the DB
   // exposes a staff-role filter on v_section_daily_attendance.
   return null;
 });
 
-final sectionDailyAttendanceProvider = FutureProvider.family<Map<String, dynamic>?, SectionDateFilter>(
+final sectionDailyAttendanceProvider = FutureProvider.autoDispose.family<Map<String, dynamic>?, SectionDateFilter>(
   (ref, filter) async {
     final repository = ref.watch(attendanceRepositoryProvider);
     return repository.getSectionDailyAttendance(
@@ -218,7 +218,7 @@ class AttendanceNotifier extends StateNotifier<AsyncValue<List<Attendance>>> {
 }
 
 final attendanceNotifierProvider =
-    StateNotifierProvider<AttendanceNotifier, AsyncValue<List<Attendance>>>((ref) {
+    StateNotifierProvider.autoDispose<AttendanceNotifier, AsyncValue<List<Attendance>>>((ref) {
   final repository = ref.watch(attendanceRepositoryProvider);
   return AttendanceNotifier(repository);
 });

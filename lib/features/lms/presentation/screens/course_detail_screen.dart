@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -50,10 +51,10 @@ class CourseDetailScreen extends ConsumerWidget {
                       gradient: _gradientForCourse(course.title),
                     ),
                     child: course.thumbnailUrl != null
-                        ? Image.network(
-                            course.thumbnailUrl!,
+                        ? CachedNetworkImage(
+              imageUrl: course.thumbnailUrl!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
+                            errorWidget: (_, __, ___) =>
                                 const SizedBox.shrink(),
                           )
                         : null,

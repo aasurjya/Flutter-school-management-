@@ -5,7 +5,7 @@ import '../../../core/services/ai_text_generator.dart';
 
 /// Provides an AI-generated route insight for the transport manager.
 final transportInsightProvider =
-    FutureProvider.family<AITextResult, TransportInsightInput>(
+    FutureProvider.autoDispose.family<AITextResult, TransportInsightInput>(
         (ref, input) async {
   final aiStaff = ref.watch(aiStaffTextGeneratorProvider);
 

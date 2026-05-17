@@ -7,7 +7,7 @@ final studentRepositoryProvider = Provider<StudentRepository>((ref) {
   return StudentRepository(ref.watch(supabaseProvider));
 });
 
-final studentsProvider = FutureProvider.family<List<Student>, StudentsFilter>(
+final studentsProvider = FutureProvider.autoDispose.family<List<Student>, StudentsFilter>(
   (ref, filter) async {
     final repository = ref.watch(studentRepositoryProvider);
     return repository.getStudents(
@@ -19,35 +19,35 @@ final studentsProvider = FutureProvider.family<List<Student>, StudentsFilter>(
   },
 );
 
-final studentByIdProvider = FutureProvider.family<Student?, String>(
+final studentByIdProvider = FutureProvider.autoDispose.family<Student?, String>(
   (ref, studentId) async {
     final repository = ref.watch(studentRepositoryProvider);
     return repository.getStudentById(studentId);
   },
 );
 
-final studentsBySectionProvider = FutureProvider.family<List<Student>, String>(
+final studentsBySectionProvider = FutureProvider.autoDispose.family<List<Student>, String>(
   (ref, sectionId) async {
     final repository = ref.watch(studentRepositoryProvider);
     return repository.getStudentsBySection(sectionId);
   },
 );
 
-final parentChildrenProvider = FutureProvider.family<List<Map<String, dynamic>>, String>(
+final parentChildrenProvider = FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String>(
   (ref, userId) async {
     final repository = ref.watch(studentRepositoryProvider);
     return repository.getParentChildren(userId);
   },
 );
 
-final currentStudentProvider = FutureProvider<Student?>((ref) async {
+final currentStudentProvider = FutureProvider.autoDispose<Student?>((ref) async {
   final repository = ref.watch(studentRepositoryProvider);
   final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
   if (userId == null) return null;
   return repository.getStudentByUserId(userId);
 });
 
-final studentCountProvider = FutureProvider.family<int, String?>(
+final studentCountProvider = FutureProvider.autoDispose.family<int, String?>(
   (ref, sectionId) async {
     final repository = ref.watch(studentRepositoryProvider);
     return repository.getStudentCount(sectionId: sectionId);
@@ -155,7 +155,7 @@ class StudentsNotifier extends StateNotifier<AsyncValue<List<Student>>> {
 }
 
 final studentsNotifierProvider =
-    StateNotifierProvider<StudentsNotifier, AsyncValue<List<Student>>>((ref) {
+    StateNotifierProvider.autoDispose<StudentsNotifier, AsyncValue<List<Student>>>((ref) {
   final repository = ref.watch(studentRepositoryProvider);
   return StudentsNotifier(repository);
 });
@@ -275,7 +275,7 @@ class PaginatedStudentsNotifier
 }
 
 final paginatedStudentsProvider =
-    StateNotifierProvider<PaginatedStudentsNotifier, PaginatedStudentsState>(
+    StateNotifierProvider.autoDispose<PaginatedStudentsNotifier, PaginatedStudentsState>(
   (ref) {
     final repo = ref.watch(studentRepositoryProvider);
     return PaginatedStudentsNotifier(repo);

@@ -13,7 +13,7 @@ final visitorRepositoryProvider = Provider<VisitorRepository>((ref) {
 // ============================================
 
 final visitorsProvider =
-    FutureProvider.family<List<Visitor>, VisitorFilter>(
+    FutureProvider.autoDispose.family<List<Visitor>, VisitorFilter>(
   (ref, filter) async {
     final repository = ref.watch(visitorRepositoryProvider);
     return repository.getVisitors(
@@ -25,12 +25,12 @@ final visitorsProvider =
   },
 );
 
-final allVisitorsProvider = FutureProvider<List<Visitor>>((ref) async {
+final allVisitorsProvider = FutureProvider.autoDispose<List<Visitor>>((ref) async {
   final repository = ref.watch(visitorRepositoryProvider);
   return repository.getVisitors();
 });
 
-final visitorByIdProvider = FutureProvider.family<Visitor?, String>(
+final visitorByIdProvider = FutureProvider.autoDispose.family<Visitor?, String>(
   (ref, visitorId) async {
     final repository = ref.watch(visitorRepositoryProvider);
     return repository.getVisitorById(visitorId);
@@ -42,7 +42,7 @@ final visitorByIdProvider = FutureProvider.family<Visitor?, String>(
 // ============================================
 
 final visitorLogsProvider =
-    FutureProvider.family<List<VisitorLog>, VisitorLogFilter>(
+    FutureProvider.autoDispose.family<List<VisitorLog>, VisitorLogFilter>(
   (ref, filter) async {
     final repository = ref.watch(visitorRepositoryProvider);
     return repository.getVisitorLogs(
@@ -57,12 +57,12 @@ final visitorLogsProvider =
   },
 );
 
-final todayLogsProvider = FutureProvider<List<VisitorLog>>((ref) async {
+final todayLogsProvider = FutureProvider.autoDispose<List<VisitorLog>>((ref) async {
   final repository = ref.watch(visitorRepositoryProvider);
   return repository.getTodayLogs();
 });
 
-final logByIdProvider = FutureProvider.family<VisitorLog?, String>(
+final logByIdProvider = FutureProvider.autoDispose.family<VisitorLog?, String>(
   (ref, logId) async {
     final repository = ref.watch(visitorRepositoryProvider);
     return repository.getLogById(logId);
@@ -74,7 +74,7 @@ final logByIdProvider = FutureProvider.family<VisitorLog?, String>(
 // ============================================
 
 final preRegistrationsProvider =
-    FutureProvider.family<List<VisitorPreRegistration>, PreRegFilter>(
+    FutureProvider.autoDispose.family<List<VisitorPreRegistration>, PreRegFilter>(
   (ref, filter) async {
     final repository = ref.watch(visitorRepositoryProvider);
     return repository.getPreRegistrations(
@@ -88,7 +88,7 @@ final preRegistrationsProvider =
 );
 
 final todayPreRegistrationsProvider =
-    FutureProvider<List<VisitorPreRegistration>>((ref) async {
+    FutureProvider.autoDispose<List<VisitorPreRegistration>>((ref) async {
   final repository = ref.watch(visitorRepositoryProvider);
   return repository.getTodayPreRegistrations();
 });
@@ -97,7 +97,7 @@ final todayPreRegistrationsProvider =
 // STATS PROVIDER
 // ============================================
 
-final visitorStatsProvider = FutureProvider<VisitorStats>((ref) async {
+final visitorStatsProvider = FutureProvider.autoDispose<VisitorStats>((ref) async {
   final repository = ref.watch(visitorRepositoryProvider);
   return repository.getVisitorStats();
 });
@@ -149,7 +149,7 @@ class VisitorNotifier extends StateNotifier<AsyncValue<List<Visitor>>> {
 }
 
 final visitorNotifierProvider =
-    StateNotifierProvider<VisitorNotifier, AsyncValue<List<Visitor>>>(
+    StateNotifierProvider.autoDispose<VisitorNotifier, AsyncValue<List<Visitor>>>(
         (ref) {
   final repository = ref.watch(visitorRepositoryProvider);
   return VisitorNotifier(repository);
@@ -191,7 +191,7 @@ class VisitorLogNotifier
   }
 }
 
-final visitorLogNotifierProvider = StateNotifierProvider<
+final visitorLogNotifierProvider = StateNotifierProvider.autoDispose<
     VisitorLogNotifier, AsyncValue<List<VisitorLog>>>((ref) {
   final repository = ref.watch(visitorRepositoryProvider);
   return VisitorLogNotifier(repository);

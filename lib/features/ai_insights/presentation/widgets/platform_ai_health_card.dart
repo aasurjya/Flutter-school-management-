@@ -49,7 +49,7 @@ class PlatformAIHealthCard extends ConsumerWidget {
     bool isLoading = false,
     bool isLLMGenerated = false,
   }) {
-    final accentColor = const Color(0xFF8B5CF6); // violet for AI features
+    const accentColor = Color(0xFF8B5CF6); // violet for AI features
 
     return GlassCard(
       padding: const EdgeInsets.all(20),
@@ -64,7 +64,7 @@ class PlatformAIHealthCard extends ConsumerWidget {
                   color: accentColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.hub_outlined,
                   color: accentColor,
                   size: 22,
@@ -101,7 +101,7 @@ class PlatformAIHealthCard extends ConsumerWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.auto_awesome,
                         size: 12,
                         color: accentColor,

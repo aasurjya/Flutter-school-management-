@@ -10,7 +10,7 @@ final ptmRepositoryProvider = Provider<PTMRepository>((ref) {
 // ==================== PTM SCHEDULE PROVIDERS ====================
 
 final ptmSchedulesProvider =
-    FutureProvider.family<List<PTMSchedule>, PTMSchedulesFilter>(
+    FutureProvider.autoDispose.family<List<PTMSchedule>, PTMSchedulesFilter>(
   (ref, filter) async {
     final repository = ref.watch(ptmRepositoryProvider);
     return repository.getPTMSchedules(
@@ -20,7 +20,7 @@ final ptmSchedulesProvider =
   },
 );
 
-final ptmScheduleByIdProvider = FutureProvider.family<PTMSchedule?, String>(
+final ptmScheduleByIdProvider = FutureProvider.autoDispose.family<PTMSchedule?, String>(
   (ref, scheduleId) async {
     final repository = ref.watch(ptmRepositoryProvider);
     return repository.getPTMScheduleById(scheduleId);
@@ -28,7 +28,7 @@ final ptmScheduleByIdProvider = FutureProvider.family<PTMSchedule?, String>(
 );
 
 final ptmStatisticsProvider =
-    FutureProvider.family<Map<String, dynamic>, String>(
+    FutureProvider.autoDispose.family<Map<String, dynamic>, String>(
   (ref, scheduleId) async {
     final repository = ref.watch(ptmRepositoryProvider);
     return repository.getPTMStatistics(scheduleId);
@@ -38,7 +38,7 @@ final ptmStatisticsProvider =
 // ==================== TEACHER AVAILABILITY PROVIDERS ====================
 
 final teacherAvailabilityProvider =
-    FutureProvider.family<List<TeacherAvailability>, String>(
+    FutureProvider.autoDispose.family<List<TeacherAvailability>, String>(
   (ref, scheduleId) async {
     final repository = ref.watch(ptmRepositoryProvider);
     return repository.getTeacherAvailability(scheduleId);
@@ -46,7 +46,7 @@ final teacherAvailabilityProvider =
 );
 
 final teachersForParentProvider =
-    FutureProvider.family<List<TeacherAvailability>, TeachersForParentFilter>(
+    FutureProvider.autoDispose.family<List<TeacherAvailability>, TeachersForParentFilter>(
   (ref, filter) async {
     final repository = ref.watch(ptmRepositoryProvider);
     return repository.getTeachersForParent(filter.scheduleId, filter.parentId);
@@ -56,7 +56,7 @@ final teachersForParentProvider =
 // ==================== APPOINTMENT PROVIDERS ====================
 
 final ptmAppointmentsProvider =
-    FutureProvider.family<List<PTMAppointment>, AppointmentsFilter>(
+    FutureProvider.autoDispose.family<List<PTMAppointment>, AppointmentsFilter>(
   (ref, filter) async {
     final repository = ref.watch(ptmRepositoryProvider);
     return repository.getAppointments(
@@ -69,7 +69,7 @@ final ptmAppointmentsProvider =
   },
 );
 
-final appointmentByIdProvider = FutureProvider.family<PTMAppointment?, String>(
+final appointmentByIdProvider = FutureProvider.autoDispose.family<PTMAppointment?, String>(
   (ref, appointmentId) async {
     final repository = ref.watch(ptmRepositoryProvider);
     return repository.getAppointmentById(appointmentId);
@@ -77,7 +77,7 @@ final appointmentByIdProvider = FutureProvider.family<PTMAppointment?, String>(
 );
 
 final bookedSlotsProvider =
-    FutureProvider.family<List<String>, BookedSlotsFilter>(
+    FutureProvider.autoDispose.family<List<String>, BookedSlotsFilter>(
   (ref, filter) async {
     final repository = ref.watch(ptmRepositoryProvider);
     return repository.getBookedSlots(
@@ -285,7 +285,7 @@ class BookingNotifier extends StateNotifier<BookingState> {
 }
 
 final bookingProvider =
-    StateNotifierProvider<BookingNotifier, BookingState>((ref) {
+    StateNotifierProvider.autoDispose<BookingNotifier, BookingState>((ref) {
   final repository = ref.watch(ptmRepositoryProvider);
   return BookingNotifier(repository);
 });

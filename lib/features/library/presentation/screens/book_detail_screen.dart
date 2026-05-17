@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/library_provider.dart';
 
 class BookDetailScreen extends ConsumerWidget {
@@ -47,10 +48,10 @@ class BookDetailScreen extends ConsumerWidget {
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: book.coverUrl != null
-                          ? Image.network(
-                              book.coverUrl!,
+                          ? CachedNetworkImage(
+              imageUrl: book.coverUrl!,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Icon(
+                              errorWidget: (_, __, ___) => Icon(
                                 Icons.book,
                                 size: 48,
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,

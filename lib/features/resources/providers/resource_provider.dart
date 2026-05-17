@@ -9,7 +9,7 @@ final resourceRepositoryProvider = Provider<ResourceRepository>((ref) {
 });
 
 final resourcesProvider =
-    FutureProvider.family<List<StudyResource>, ResourceFilter>(
+    FutureProvider.autoDispose.family<List<StudyResource>, ResourceFilter>(
   (ref, filter) async {
     final repository = ref.watch(resourceRepositoryProvider);
     return repository.getResources(
@@ -27,36 +27,36 @@ final resourcesProvider =
 );
 
 final resourceByIdProvider =
-    FutureProvider.family<StudyResource?, String>((ref, id) async {
+    FutureProvider.autoDispose.family<StudyResource?, String>((ref, id) async {
   final repository = ref.watch(resourceRepositoryProvider);
   return repository.getResourceById(id);
 });
 
 final resourceCategoriesProvider =
-    FutureProvider<List<ResourceCategory>>((ref) async {
+    FutureProvider.autoDispose<List<ResourceCategory>>((ref) async {
   final repository = ref.watch(resourceRepositoryProvider);
   return repository.getResourceCategories();
 });
 
 final recentResourcesProvider =
-    FutureProvider<List<StudyResource>>((ref) async {
+    FutureProvider.autoDispose<List<StudyResource>>((ref) async {
   final repository = ref.watch(resourceRepositoryProvider);
   return repository.getRecentResources(limit: 10);
 });
 
 final popularResourcesProvider =
-    FutureProvider<List<StudyResource>>((ref) async {
+    FutureProvider.autoDispose<List<StudyResource>>((ref) async {
   final repository = ref.watch(resourceRepositoryProvider);
   return repository.getPopularResources(limit: 10);
 });
 
-final myUploadsProvider = FutureProvider<List<StudyResource>>((ref) async {
+final myUploadsProvider = FutureProvider.autoDispose<List<StudyResource>>((ref) async {
   final repository = ref.watch(resourceRepositoryProvider);
   return repository.getMyUploads();
 });
 
 final resourceFoldersProvider =
-    FutureProvider.family<List<ResourceFolder>, String?>((ref, parentId) async {
+    FutureProvider.autoDispose.family<List<ResourceFolder>, String?>((ref, parentId) async {
   final repository = ref.watch(resourceRepositoryProvider);
   return repository.getFolders(parentId: parentId);
 });
@@ -72,7 +72,7 @@ final selectedClassProvider = StateProvider<String?>((ref) => null);
 
 // Filtered resources based on search and filters
 final filteredResourcesProvider =
-    FutureProvider<List<StudyResource>>((ref) async {
+    FutureProvider.autoDispose<List<StudyResource>>((ref) async {
   final searchQuery = ref.watch(resourceSearchQueryProvider);
   final resourceType = ref.watch(resourceTypeFilterProvider);
   final subjectId = ref.watch(selectedSubjectProvider);
@@ -192,7 +192,7 @@ class UploadNotifier extends StateNotifier<UploadState> {
 }
 
 final uploadNotifierProvider =
-    StateNotifierProvider<UploadNotifier, UploadState>((ref) {
+    StateNotifierProvider.autoDispose<UploadNotifier, UploadState>((ref) {
   final repository = ref.watch(resourceRepositoryProvider);
   return UploadNotifier(repository);
 });

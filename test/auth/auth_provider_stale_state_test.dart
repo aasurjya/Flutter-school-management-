@@ -26,8 +26,8 @@ AppUser _makeUser({required String role, String id = 'user-1'}) {
 /// starts directly from a given [AsyncValue]. Uses the
 /// [AuthNotifier.forTest] constructor so no network or Supabase is touched.
 class _StubAuthNotifier extends AuthNotifier {
-  _StubAuthNotifier(AsyncValue<AppUser?> initialState)
-      : super.forTest(initialState);
+  _StubAuthNotifier(super.initialState)
+      : super.forTest();
 }
 
 /// Builds a [ProviderContainer] whose [authNotifierProvider] is stubbed to

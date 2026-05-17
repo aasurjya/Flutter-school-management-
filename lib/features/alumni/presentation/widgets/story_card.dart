@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/alumni.dart';
 import '../../../../shared/widgets/glass_card.dart';
@@ -28,12 +29,12 @@ class StoryCard extends StatelessWidget {
             ClipRRect(
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(20)),
-              child: Image.network(
-                story.imageUrl!,
+              child: CachedNetworkImage(
+              imageUrl: story.imageUrl!,
                 height: 160,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
+                errorWidget: (context, error, stackTrace) => Container(
                   height: 120,
                   color: AppColors.primary.withValues(alpha: 0.08),
                   child: const Center(

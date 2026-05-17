@@ -4,6 +4,7 @@
 /// Flags stub features (data layer exists, no UI).
 ///
 /// Run: flutter test test/audit/feature_completeness_test.dart
+library;
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -14,17 +15,17 @@ void main() {
 
     // Known stub features: repository exists, zero or minimal screens
     final featureChecks = <String, _FeatureCheck>{
-      'Assignments': _FeatureCheck(
+      'Assignments': const _FeatureCheck(
         repository: 'lib/data/repositories/assignment_repository.dart',
         screenDir: 'lib/features/assignments/presentation/screens',
         expectedScreens: 1,
       ),
-      'Timetable': _FeatureCheck(
+      'Timetable': const _FeatureCheck(
         repository: 'lib/data/repositories/timetable_repository.dart',
         screenDir: 'lib/features/timetable/presentation/screens',
         expectedScreens: 1,
       ),
-      'Announcements': _FeatureCheck(
+      'Announcements': const _FeatureCheck(
         repository: 'lib/data/repositories/announcement_repository.dart',
         screenDir: 'lib/features/announcements/presentation/screens',
         expectedScreens: 1,

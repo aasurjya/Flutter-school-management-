@@ -7,7 +7,7 @@
 ///   flutter test integration_test/agents/agent_parent_test.dart \
 ///     --dart-define=TEST_SUPABASE_URL=... \
 ///     --dart-define=TEST_SUPABASE_ANON_KEY=...
-import 'package:flutter/material.dart';
+library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_management/main.dart' as app;
 

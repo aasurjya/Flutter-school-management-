@@ -8,7 +8,7 @@ final healthRepositoryProvider = Provider<HealthRepository>((ref) {
 });
 
 // Health record providers
-final healthRecordProvider = FutureProvider.family<StudentHealthRecord?, String>(
+final healthRecordProvider = FutureProvider.autoDispose.family<StudentHealthRecord?, String>(
   (ref, studentId) async {
     final repository = ref.watch(healthRepositoryProvider);
     return repository.getHealthRecord(studentId);
@@ -16,19 +16,19 @@ final healthRecordProvider = FutureProvider.family<StudentHealthRecord?, String>
 );
 
 final studentsWithAllergiesProvider =
-    FutureProvider<List<StudentHealthRecord>>((ref) async {
+    FutureProvider.autoDispose<List<StudentHealthRecord>>((ref) async {
   final repository = ref.watch(healthRepositoryProvider);
   return repository.getHealthRecordsWithAllergies();
 });
 
 final studentsWithConditionsProvider =
-    FutureProvider<List<StudentHealthRecord>>((ref) async {
+    FutureProvider.autoDispose<List<StudentHealthRecord>>((ref) async {
   final repository = ref.watch(healthRepositoryProvider);
   return repository.getHealthRecordsWithConditions();
 });
 
 // Incident providers
-final incidentsProvider = FutureProvider.family<List<HealthIncident>, IncidentFilter>(
+final incidentsProvider = FutureProvider.autoDispose.family<List<HealthIncident>, IncidentFilter>(
   (ref, filter) async {
     final repository = ref.watch(healthRepositoryProvider);
     return repository.getIncidents(
@@ -41,20 +41,20 @@ final incidentsProvider = FutureProvider.family<List<HealthIncident>, IncidentFi
   },
 );
 
-final incidentByIdProvider = FutureProvider.family<HealthIncident?, String>(
+final incidentByIdProvider = FutureProvider.autoDispose.family<HealthIncident?, String>(
   (ref, incidentId) async {
     final repository = ref.watch(healthRepositoryProvider);
     return repository.getIncidentById(incidentId);
   },
 );
 
-final pendingFollowUpsProvider = FutureProvider<List<HealthIncident>>((ref) async {
+final pendingFollowUpsProvider = FutureProvider.autoDispose<List<HealthIncident>>((ref) async {
   final repository = ref.watch(healthRepositoryProvider);
   return repository.getIncidents(pendingFollowUp: true);
 });
 
 // Stats provider
-final healthStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final healthStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final repository = ref.watch(healthRepositoryProvider);
   return repository.getHealthStats();
 });

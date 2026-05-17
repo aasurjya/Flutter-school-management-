@@ -239,7 +239,7 @@ class OfflineAttendanceNotifier extends StateNotifier<OfflineAttendanceState> {
 
 /// Provider for [OfflineAttendanceNotifier].
 final offlineAttendanceProvider =
-    StateNotifierProvider<OfflineAttendanceNotifier, OfflineAttendanceState>(
+    StateNotifierProvider.autoDispose<OfflineAttendanceNotifier, OfflineAttendanceState>(
   (ref) {
     final syncService = ref.watch(offlineSyncServiceProvider);
     return OfflineAttendanceNotifier(syncService, ref);

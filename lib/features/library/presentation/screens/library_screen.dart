@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/library.dart';
 import '../../providers/library_provider.dart';
@@ -298,10 +299,10 @@ class _BookCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   if (book.coverUrl != null)
-                    Image.network(
-                      book.coverUrl!,
+                    CachedNetworkImage(
+              imageUrl: book.coverUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _BookPlaceholder(),
+                      errorWidget: (_, __, ___) => _BookPlaceholder(),
                     )
                   else
                     _BookPlaceholder(),
@@ -382,10 +383,10 @@ class _BookListTile extends StatelessWidget {
           ),
           clipBehavior: Clip.antiAlias,
           child: book.coverUrl != null
-              ? Image.network(
-                  book.coverUrl!,
+              ? CachedNetworkImage(
+              imageUrl: book.coverUrl!,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Icon(
+                  errorWidget: (_, __, ___) => Icon(
                     Icons.book,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

@@ -4,6 +4,7 @@
 /// hardcoded currency amounts, and placeholder percentages.
 ///
 /// Run: flutter test test/audit/hardcoded_data_test.dart
+library;
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';

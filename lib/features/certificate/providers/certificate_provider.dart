@@ -14,7 +14,7 @@ final certificateRepositoryProvider =
 // ============================================
 
 final certificateTemplatesProvider =
-    FutureProvider.family<List<CertificateTemplate>, TemplateFilter>(
+    FutureProvider.autoDispose.family<List<CertificateTemplate>, TemplateFilter>(
   (ref, filter) async {
     final repository = ref.watch(certificateRepositoryProvider);
     return repository.getTemplates(
@@ -27,13 +27,13 @@ final certificateTemplatesProvider =
 );
 
 final allTemplatesProvider =
-    FutureProvider<List<CertificateTemplate>>((ref) async {
+    FutureProvider.autoDispose<List<CertificateTemplate>>((ref) async {
   final repository = ref.watch(certificateRepositoryProvider);
   return repository.getTemplates(isActive: true);
 });
 
 final templateByIdProvider =
-    FutureProvider.family<CertificateTemplate?, String>(
+    FutureProvider.autoDispose.family<CertificateTemplate?, String>(
   (ref, templateId) async {
     final repository = ref.watch(certificateRepositoryProvider);
     return repository.getTemplateById(templateId);
@@ -45,7 +45,7 @@ final templateByIdProvider =
 // ============================================
 
 final issuedCertificatesProvider =
-    FutureProvider.family<List<IssuedCertificate>, CertificateFilter>(
+    FutureProvider.autoDispose.family<List<IssuedCertificate>, CertificateFilter>(
   (ref, filter) async {
     final repository = ref.watch(certificateRepositoryProvider);
     return repository.getIssuedCertificates(
@@ -61,13 +61,13 @@ final issuedCertificatesProvider =
 );
 
 final allIssuedCertificatesProvider =
-    FutureProvider<List<IssuedCertificate>>((ref) async {
+    FutureProvider.autoDispose<List<IssuedCertificate>>((ref) async {
   final repository = ref.watch(certificateRepositoryProvider);
   return repository.getIssuedCertificates();
 });
 
 final certificateByIdProvider =
-    FutureProvider.family<IssuedCertificate?, String>(
+    FutureProvider.autoDispose.family<IssuedCertificate?, String>(
   (ref, certId) async {
     final repository = ref.watch(certificateRepositoryProvider);
     return repository.getCertificateById(certId);
@@ -75,7 +75,7 @@ final certificateByIdProvider =
 );
 
 final verifyCertificateProvider =
-    FutureProvider.family<IssuedCertificate?, String>(
+    FutureProvider.autoDispose.family<IssuedCertificate?, String>(
   (ref, certNumber) async {
     final repository = ref.watch(certificateRepositoryProvider);
     return repository.verifyCertificate(certNumber);
@@ -87,7 +87,7 @@ final verifyCertificateProvider =
 // ============================================
 
 final certificateStatsProvider =
-    FutureProvider<CertificateStats>((ref) async {
+    FutureProvider.autoDispose<CertificateStats>((ref) async {
   final repository = ref.watch(certificateRepositoryProvider);
   return repository.getCertificateStats();
 });
@@ -134,7 +134,7 @@ class CertificateTemplateNotifier
   }
 }
 
-final templateNotifierProvider = StateNotifierProvider<
+final templateNotifierProvider = StateNotifierProvider.autoDispose<
     CertificateTemplateNotifier,
     AsyncValue<List<CertificateTemplate>>>((ref) {
   final repository = ref.watch(certificateRepositoryProvider);
@@ -191,7 +191,7 @@ class IssuedCertificateNotifier
   }
 }
 
-final issuedCertificateNotifierProvider = StateNotifierProvider<
+final issuedCertificateNotifierProvider = StateNotifierProvider.autoDispose<
     IssuedCertificateNotifier,
     AsyncValue<List<IssuedCertificate>>>((ref) {
   final repository = ref.watch(certificateRepositoryProvider);

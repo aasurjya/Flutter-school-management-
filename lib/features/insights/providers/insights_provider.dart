@@ -8,7 +8,7 @@ final insightsRepositoryProvider = Provider<InsightsRepository>((ref) {
 });
 
 /// Provider for student insights
-final studentInsightsProvider = FutureProvider.family<StudentInsights, String>(
+final studentInsightsProvider = FutureProvider.autoDispose.family<StudentInsights, String>(
   (ref, studentId) async {
     final repository = ref.watch(insightsRepositoryProvider);
     return repository.getStudentInsights(studentId);
@@ -17,7 +17,7 @@ final studentInsightsProvider = FutureProvider.family<StudentInsights, String>(
 
 /// Provider for monthly attendance data
 final monthlyAttendanceProvider =
-    FutureProvider.family<List<MonthlyAttendanceSummary>, MonthlyAttendanceFilter>(
+    FutureProvider.autoDispose.family<List<MonthlyAttendanceSummary>, MonthlyAttendanceFilter>(
   (ref, filter) async {
     final repository = ref.watch(insightsRepositoryProvider);
     return repository.getMonthlyAttendance(
@@ -29,7 +29,7 @@ final monthlyAttendanceProvider =
 
 /// Provider for subject comparison data
 final subjectComparisonProvider =
-    FutureProvider.family<List<SubjectComparison>, SubjectComparisonFilter>(
+    FutureProvider.autoDispose.family<List<SubjectComparison>, SubjectComparisonFilter>(
   (ref, filter) async {
     final repository = ref.watch(insightsRepositoryProvider);
     return repository.getSubjectComparison(
@@ -41,7 +41,7 @@ final subjectComparisonProvider =
 
 /// Provider for parent's children list
 final parentChildrenProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, String>(
+    FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String>(
   (ref, parentId) async {
     final repository = ref.watch(insightsRepositoryProvider);
     return repository.getParentChildren(parentId);

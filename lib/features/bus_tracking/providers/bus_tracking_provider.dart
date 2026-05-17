@@ -16,13 +16,13 @@ final busTrackingRepositoryProvider = Provider<BusTrackingRepository>((ref) {
 // ==================== VEHICLES ====================
 
 final busVehiclesProvider =
-    FutureProvider.family<List<BusVehicle>, bool>((ref, activeOnly) async {
+    FutureProvider.autoDispose.family<List<BusVehicle>, bool>((ref, activeOnly) async {
   final repo = ref.watch(busTrackingRepositoryProvider);
   return repo.getVehicles(activeOnly: activeOnly);
 });
 
 final busVehicleByIdProvider =
-    FutureProvider.family<BusVehicle?, String>((ref, vehicleId) async {
+    FutureProvider.autoDispose.family<BusVehicle?, String>((ref, vehicleId) async {
   final repo = ref.watch(busTrackingRepositoryProvider);
   return repo.getVehicleById(vehicleId);
 });
@@ -30,7 +30,7 @@ final busVehicleByIdProvider =
 // ==================== LIVE LOCATIONS ====================
 
 final busLatestLocationsProvider =
-    FutureProvider<List<BusLatestLocation>>((ref) async {
+    FutureProvider.autoDispose<List<BusLatestLocation>>((ref) async {
   final repo = ref.watch(busTrackingRepositoryProvider);
   return repo.getAllLatestLocations();
 });
@@ -77,7 +77,7 @@ class LiveLocationNotifier extends StateNotifier<Map<String, BusLatestLocation>>
 }
 
 final liveLocationProvider =
-    StateNotifierProvider<LiveLocationNotifier, Map<String, BusLatestLocation>>(
+    StateNotifierProvider.autoDispose<LiveLocationNotifier, Map<String, BusLatestLocation>>(
         (ref) {
   final repo = ref.watch(busTrackingRepositoryProvider);
   return LiveLocationNotifier(repo);
@@ -86,13 +86,13 @@ final liveLocationProvider =
 // ==================== GEOFENCES ====================
 
 final busGeofencesProvider =
-    FutureProvider.family<List<BusGeofence>, bool>((ref, activeOnly) async {
+    FutureProvider.autoDispose.family<List<BusGeofence>, bool>((ref, activeOnly) async {
   final repo = ref.watch(busTrackingRepositoryProvider);
   return repo.getGeofences(activeOnly: activeOnly);
 });
 
 final busGeofenceEventsProvider =
-    FutureProvider.family<List<BusGeofenceEvent>, String?>(
+    FutureProvider.autoDispose.family<List<BusGeofenceEvent>, String?>(
         (ref, vehicleId) async {
   final repo = ref.watch(busTrackingRepositoryProvider);
   return repo.getGeofenceEvents(vehicleId: vehicleId);
@@ -100,13 +100,13 @@ final busGeofenceEventsProvider =
 
 // ==================== TRIPS ====================
 
-final busTripsProvider = FutureProvider.family<List<BusTrip>, String?>(
+final busTripsProvider = FutureProvider.autoDispose.family<List<BusTrip>, String?>(
     (ref, vehicleId) async {
   final repo = ref.watch(busTrackingRepositoryProvider);
   return repo.getTrips(vehicleId: vehicleId);
 });
 
-final activeTripsProvider = FutureProvider<List<BusTrip>>((ref) async {
+final activeTripsProvider = FutureProvider.autoDispose<List<BusTrip>>((ref) async {
   final repo = ref.watch(busTrackingRepositoryProvider);
   return repo.getTrips(status: 'in_progress');
 });
@@ -114,7 +114,7 @@ final activeTripsProvider = FutureProvider<List<BusTrip>>((ref) async {
 // ==================== LOCATION HISTORY ====================
 
 final locationHistoryProvider =
-    FutureProvider.family<List<BusLocationPing>, String>(
+    FutureProvider.autoDispose.family<List<BusLocationPing>, String>(
         (ref, vehicleId) async {
   final repo = ref.watch(busTrackingRepositoryProvider);
   return repo.getLocationHistory(
@@ -126,7 +126,7 @@ final locationHistoryProvider =
 // ==================== PARENT SUBSCRIPTIONS ====================
 
 final parentTrackingSubscriptionsProvider =
-    FutureProvider<List<BusTrackingSubscription>>((ref) async {
+    FutureProvider.autoDispose<List<BusTrackingSubscription>>((ref) async {
   final repo = ref.watch(busTrackingRepositoryProvider);
   final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
   if (userId == null) return [];
@@ -136,7 +136,7 @@ final parentTrackingSubscriptionsProvider =
 // ==================== STATS ====================
 
 final busTrackingStatsProvider =
-    FutureProvider<Map<String, dynamic>>((ref) async {
+    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final repo = ref.watch(busTrackingRepositoryProvider);
   return repo.getTrackingStats();
 });

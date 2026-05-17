@@ -8,7 +8,7 @@ final leaveRepositoryProvider = Provider<LeaveRepository>((ref) {
 });
 
 final leaveApplicationsProvider =
-    FutureProvider.family<List<LeaveApplication>, LeaveFilter>(
+    FutureProvider.autoDispose.family<List<LeaveApplication>, LeaveFilter>(
   (ref, filter) async {
     final repository = ref.watch(leaveRepositoryProvider);
     return repository.getLeaveApplications(
@@ -21,7 +21,7 @@ final leaveApplicationsProvider =
 );
 
 final leaveApplicationByIdProvider =
-    FutureProvider.family<LeaveApplication?, String>(
+    FutureProvider.autoDispose.family<LeaveApplication?, String>(
   (ref, id) async {
     final repository = ref.watch(leaveRepositoryProvider);
     return repository.getLeaveApplicationById(id);
@@ -29,7 +29,7 @@ final leaveApplicationByIdProvider =
 );
 
 final leaveBalanceProvider =
-    FutureProvider.family<List<LeaveBalance>, String>(
+    FutureProvider.autoDispose.family<List<LeaveBalance>, String>(
   (ref, userId) async {
     final repository = ref.watch(leaveRepositoryProvider);
     return repository.getLeaveBalance(userId);

@@ -163,7 +163,7 @@ class _ParentProfileSetupScreenState
 
               // Relation
               DropdownButtonFormField<String>(
-                value: _relation,
+                initialValue: _relation,
                 decoration: const InputDecoration(
                   labelText: 'Relationship to Child',
                   prefixIcon: Icon(Icons.family_restroom_outlined),

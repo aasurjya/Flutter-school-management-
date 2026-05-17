@@ -7,7 +7,7 @@ final emergencyRepositoryProvider = Provider<EmergencyRepository>((ref) {
   return EmergencyRepository(ref.watch(supabaseProvider));
 });
 
-final alertsProvider = FutureProvider.family<List<EmergencyAlert>, AlertsFilter>(
+final alertsProvider = FutureProvider.autoDispose.family<List<EmergencyAlert>, AlertsFilter>(
   (ref, filter) async {
     final repository = ref.watch(emergencyRepositoryProvider);
     return repository.getAlerts(
@@ -18,20 +18,20 @@ final alertsProvider = FutureProvider.family<List<EmergencyAlert>, AlertsFilter>
   },
 );
 
-final alertByIdProvider = FutureProvider.family<EmergencyAlert?, String>(
+final alertByIdProvider = FutureProvider.autoDispose.family<EmergencyAlert?, String>(
   (ref, alertId) async {
     final repository = ref.watch(emergencyRepositoryProvider);
     return repository.getAlertById(alertId);
   },
 );
 
-final activeAlertProvider = FutureProvider<EmergencyAlert?>((ref) async {
+final activeAlertProvider = FutureProvider.autoDispose<EmergencyAlert?>((ref) async {
   final repository = ref.watch(emergencyRepositoryProvider);
   return repository.getActiveAlert();
 });
 
 final alertResponsesProvider =
-    FutureProvider.family<List<EmergencyResponse>, String>(
+    FutureProvider.autoDispose.family<List<EmergencyResponse>, String>(
   (ref, alertId) async {
     final repository = ref.watch(emergencyRepositoryProvider);
     return repository.getAlertResponses(alertId);
@@ -39,7 +39,7 @@ final alertResponsesProvider =
 );
 
 final responseStatsProvider =
-    FutureProvider.family<Map<String, int>, String>(
+    FutureProvider.autoDispose.family<Map<String, int>, String>(
   (ref, alertId) async {
     final repository = ref.watch(emergencyRepositoryProvider);
     return repository.getResponseStats(alertId);
@@ -47,7 +47,7 @@ final responseStatsProvider =
 );
 
 final emergencyContactsProvider =
-    FutureProvider.family<List<EmergencyContact>, ContactsFilter>(
+    FutureProvider.autoDispose.family<List<EmergencyContact>, ContactsFilter>(
   (ref, filter) async {
     final repository = ref.watch(emergencyRepositoryProvider);
     return repository.getEmergencyContacts(

@@ -7,7 +7,7 @@ import '../../auth/providers/auth_provider.dart';
 
 /// Provider for the current user's tenant (school) data.
 /// Used by ID cards to show school name, logo, and contact info.
-final currentTenantProvider = FutureProvider<Tenant?>((ref) async {
+final currentTenantProvider = FutureProvider.autoDispose<Tenant?>((ref) async {
   final tenantId = ref.watch(currentTenantIdProvider);
   if (tenantId == null) return null;
 
@@ -19,7 +19,7 @@ final currentTenantProvider = FutureProvider<Tenant?>((ref) async {
 /// Provider to fetch staff record for the current user.
 /// Returns employee_id, designation, department, join_date.
 final currentStaffRecordProvider =
-    FutureProvider<Map<String, dynamic>?>((ref) async {
+    FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return null;
 
@@ -35,7 +35,7 @@ final currentStaffRecordProvider =
 
 /// Provider to fetch a specific staff member's record by user ID.
 final staffRecordByUserIdProvider =
-    FutureProvider.family<Map<String, dynamic>?, String>((ref, userId) async {
+    FutureProvider.autoDispose.family<Map<String, dynamic>?, String>((ref, userId) async {
   final client = ref.watch(supabaseProvider);
   final response = await client
       .from('staff')

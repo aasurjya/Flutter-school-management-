@@ -32,7 +32,7 @@ final classIntelligenceRepositoryProvider =
 });
 
 final classIntelligenceProvider =
-    FutureProvider.family<ClassIntelligence, SectionYearFilter>(
+    FutureProvider.autoDispose.family<ClassIntelligence, SectionYearFilter>(
   (ref, filter) async {
     final repo = ref.watch(classIntelligenceRepositoryProvider);
     return repo.getClassIntelligence(
@@ -43,7 +43,7 @@ final classIntelligenceProvider =
 );
 
 final enrichedClassIntelligenceProvider =
-    FutureProvider.family<ClassIntelligence, SectionYearFilter>(
+    FutureProvider.autoDispose.family<ClassIntelligence, SectionYearFilter>(
   (ref, filter) async {
     final intelligence =
         await ref.watch(classIntelligenceProvider(filter).future);

@@ -13,14 +13,14 @@ final disciplineRepositoryProvider = Provider<DisciplineRepository>((ref) {
 // ─── Categories ─────────────────────────────────────────────
 
 final behaviorCategoriesProvider =
-    FutureProvider.family<List<BehaviorCategory>, BehaviorCategoryType?>(
+    FutureProvider.autoDispose.family<List<BehaviorCategory>, BehaviorCategoryType?>(
   (ref, type) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getCategories(type: type);
   },
 );
 
-final allCategoriesProvider = FutureProvider<List<BehaviorCategory>>(
+final allCategoriesProvider = FutureProvider.autoDispose<List<BehaviorCategory>>(
   (ref) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getCategories(activeOnly: false);
@@ -30,7 +30,7 @@ final allCategoriesProvider = FutureProvider<List<BehaviorCategory>>(
 // ─── Incidents ──────────────────────────────────────────────
 
 final behaviorIncidentsProvider =
-    FutureProvider.family<List<BehaviorIncident>, IncidentFilter>(
+    FutureProvider.autoDispose.family<List<BehaviorIncident>, IncidentFilter>(
   (ref, filter) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getIncidents(filter: filter);
@@ -38,14 +38,14 @@ final behaviorIncidentsProvider =
 );
 
 final incidentDetailProvider =
-    FutureProvider.family<BehaviorIncident, String>(
+    FutureProvider.autoDispose.family<BehaviorIncident, String>(
   (ref, id) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getIncidentById(id);
   },
 );
 
-final recentIncidentsProvider = FutureProvider<List<BehaviorIncident>>(
+final recentIncidentsProvider = FutureProvider.autoDispose<List<BehaviorIncident>>(
   (ref) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getIncidents(
@@ -57,7 +57,7 @@ final recentIncidentsProvider = FutureProvider<List<BehaviorIncident>>(
 // ─── Student Behavior ───────────────────────────────────────
 
 final studentBehaviorHistoryProvider =
-    FutureProvider.family<List<BehaviorIncident>, String>(
+    FutureProvider.autoDispose.family<List<BehaviorIncident>, String>(
   (ref, studentId) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getStudentBehaviorHistory(studentId);
@@ -65,7 +65,7 @@ final studentBehaviorHistoryProvider =
 );
 
 final studentBehaviorScoreProvider =
-    FutureProvider.family<BehaviorScore, String>(
+    FutureProvider.autoDispose.family<BehaviorScore, String>(
   (ref, studentId) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getStudentBehaviorScore(studentId);
@@ -75,14 +75,14 @@ final studentBehaviorScoreProvider =
 // ─── Behavior Plans ─────────────────────────────────────────
 
 final behaviorPlansProvider =
-    FutureProvider.family<List<BehaviorPlan>, String?>(
+    FutureProvider.autoDispose.family<List<BehaviorPlan>, String?>(
   (ref, studentId) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getPlans(studentId: studentId);
   },
 );
 
-final activePlansProvider = FutureProvider<List<BehaviorPlan>>(
+final activePlansProvider = FutureProvider.autoDispose<List<BehaviorPlan>>(
   (ref) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getPlans(status: BehaviorPlanStatus.active);
@@ -90,7 +90,7 @@ final activePlansProvider = FutureProvider<List<BehaviorPlan>>(
 );
 
 final planDetailProvider =
-    FutureProvider.family<BehaviorPlan, String>(
+    FutureProvider.autoDispose.family<BehaviorPlan, String>(
   (ref, id) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getPlanById(id);
@@ -100,7 +100,7 @@ final planDetailProvider =
 // ─── Positive Recognitions ──────────────────────────────────
 
 final positiveRecognitionsProvider =
-    FutureProvider.family<List<PositiveRecognition>, String?>(
+    FutureProvider.autoDispose.family<List<PositiveRecognition>, String?>(
   (ref, studentId) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getRecognitions(studentId: studentId);
@@ -108,7 +108,7 @@ final positiveRecognitionsProvider =
 );
 
 final publicRecognitionsProvider =
-    FutureProvider<List<PositiveRecognition>>(
+    FutureProvider.autoDispose<List<PositiveRecognition>>(
   (ref) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getRecognitions(publicOnly: true, limit: 20);
@@ -118,7 +118,7 @@ final publicRecognitionsProvider =
 // ─── Stats / Dashboard ─────────────────────────────────────
 
 final behaviorStatsProvider =
-    FutureProvider.family<BehaviorStats, DateRangeFilter>(
+    FutureProvider.autoDispose.family<BehaviorStats, DateRangeFilter>(
   (ref, filter) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getBehaviorStats(
@@ -128,7 +128,7 @@ final behaviorStatsProvider =
   },
 );
 
-final defaultBehaviorStatsProvider = FutureProvider<BehaviorStats>(
+final defaultBehaviorStatsProvider = FutureProvider.autoDispose<BehaviorStats>(
   (ref) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getBehaviorStats();
@@ -136,7 +136,7 @@ final defaultBehaviorStatsProvider = FutureProvider<BehaviorStats>(
 );
 
 final topPositiveStudentsProvider =
-    FutureProvider<List<Map<String, dynamic>>>(
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>(
   (ref) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getTopPositiveStudents();
@@ -146,7 +146,7 @@ final topPositiveStudentsProvider =
 // ─── Detention ──────────────────────────────────────────────
 
 final detentionSchedulesProvider =
-    FutureProvider<List<DetentionSchedule>>(
+    FutureProvider.autoDispose<List<DetentionSchedule>>(
   (ref) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getDetentionSchedules();
@@ -154,7 +154,7 @@ final detentionSchedulesProvider =
 );
 
 final detentionAssignmentsProvider =
-    FutureProvider.family<List<DetentionAssignment>, DateTime?>(
+    FutureProvider.autoDispose.family<List<DetentionAssignment>, DateTime?>(
   (ref, date) async {
     final repo = ref.watch(disciplineRepositoryProvider);
     return repo.getDetentionAssignments(date: date);

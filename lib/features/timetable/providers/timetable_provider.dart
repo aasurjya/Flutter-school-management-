@@ -7,12 +7,12 @@ final timetableRepositoryProvider = Provider<TimetableRepository>((ref) {
   return TimetableRepository(ref.watch(supabaseProvider));
 });
 
-final timetableSlotsProvider = FutureProvider<List<TimetableSlot>>((ref) async {
+final timetableSlotsProvider = FutureProvider.autoDispose<List<TimetableSlot>>((ref) async {
   final repository = ref.watch(timetableRepositoryProvider);
   return repository.getTimetableSlots();
 });
 
-final sectionTimetableProvider = FutureProvider.family<List<Timetable>, SectionTimetableFilter>(
+final sectionTimetableProvider = FutureProvider.autoDispose.family<List<Timetable>, SectionTimetableFilter>(
   (ref, filter) async {
     final repository = ref.watch(timetableRepositoryProvider);
     return repository.getTimetables(
@@ -23,7 +23,7 @@ final sectionTimetableProvider = FutureProvider.family<List<Timetable>, SectionT
   },
 );
 
-final weeklyTimetableProvider = FutureProvider.family<WeeklyTimetable, WeeklyTimetableFilter>(
+final weeklyTimetableProvider = FutureProvider.autoDispose.family<WeeklyTimetable, WeeklyTimetableFilter>(
   (ref, filter) async {
     final repository = ref.watch(timetableRepositoryProvider);
     return repository.getWeeklyTimetable(
@@ -33,7 +33,7 @@ final weeklyTimetableProvider = FutureProvider.family<WeeklyTimetable, WeeklyTim
   },
 );
 
-final todayTimetableProvider = FutureProvider.family<List<TimetableEntry>, TodayTimetableFilter>(
+final todayTimetableProvider = FutureProvider.autoDispose.family<List<TimetableEntry>, TodayTimetableFilter>(
   (ref, filter) async {
     final repository = ref.watch(timetableRepositoryProvider);
     return repository.getTodayTimetable(
@@ -43,7 +43,7 @@ final todayTimetableProvider = FutureProvider.family<List<TimetableEntry>, Today
   },
 );
 
-final teacherTimetableProvider = FutureProvider.family<List<Timetable>, TeacherTimetableFilter>(
+final teacherTimetableProvider = FutureProvider.autoDispose.family<List<Timetable>, TeacherTimetableFilter>(
   (ref, filter) async {
     final repository = ref.watch(timetableRepositoryProvider);
     return repository.getTeacherTimetable(
@@ -189,7 +189,7 @@ class TimetableNotifier extends StateNotifier<AsyncValue<WeeklyTimetable?>> {
 }
 
 final timetableNotifierProvider =
-    StateNotifierProvider<TimetableNotifier, AsyncValue<WeeklyTimetable?>>((ref) {
+    StateNotifierProvider.autoDispose<TimetableNotifier, AsyncValue<WeeklyTimetable?>>((ref) {
   final repository = ref.watch(timetableRepositoryProvider);
   return TimetableNotifier(repository);
 });
@@ -197,7 +197,7 @@ final timetableNotifierProvider =
 final selectedDayProvider = StateProvider<int>((ref) => DateTime.now().weekday);
 
 /// Provider for teacher's assigned classes (for My Classes screen)
-final teacherClassesProvider = FutureProvider.family<List<TeacherClassInfo>, String>(
+final teacherClassesProvider = FutureProvider.autoDispose.family<List<TeacherClassInfo>, String>(
   (ref, teacherId) async {
     final repository = ref.watch(timetableRepositoryProvider);
     return repository.getTeacherClasses(teacherId);

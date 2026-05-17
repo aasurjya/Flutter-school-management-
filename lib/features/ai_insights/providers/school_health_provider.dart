@@ -10,7 +10,7 @@ import '../../attendance/providers/attendance_provider.dart';
 /// Fetches today's attendance percentage and uses the AI context builder
 /// to enrich with real school data (student count, fee collection rate, etc.)
 /// instead of hardcoded placeholder zeroes.
-final schoolHealthNarrativeProvider = FutureProvider<AITextResult>((ref) async {
+final schoolHealthNarrativeProvider = FutureProvider.autoDispose<AITextResult>((ref) async {
   final aiTextGenerator = ref.watch(aiTextGeneratorProvider);
   final contextBuilder = ref.watch(aiContextBuilderProvider);
 

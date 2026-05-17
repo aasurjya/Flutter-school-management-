@@ -10,7 +10,7 @@ final assessmentRepositoryProvider = Provider<AssessmentRepository>((ref) {
 
 // ==================== QUIZ PROVIDERS ====================
 
-final quizzesProvider = FutureProvider.family<List<Quiz>, QuizzesFilter>(
+final quizzesProvider = FutureProvider.autoDispose.family<List<Quiz>, QuizzesFilter>(
   (ref, filter) async {
     final repository = ref.watch(assessmentRepositoryProvider);
     return repository.getQuizzes(
@@ -22,14 +22,14 @@ final quizzesProvider = FutureProvider.family<List<Quiz>, QuizzesFilter>(
   },
 );
 
-final quizByIdProvider = FutureProvider.family<Quiz?, String>(
+final quizByIdProvider = FutureProvider.autoDispose.family<Quiz?, String>(
   (ref, quizId) async {
     final repository = ref.watch(assessmentRepositoryProvider);
     return repository.getQuizById(quizId);
   },
 );
 
-final quizQuestionsProvider = FutureProvider.family<List<QuizQuestion>, String>(
+final quizQuestionsProvider = FutureProvider.autoDispose.family<List<QuizQuestion>, String>(
   (ref, quizId) async {
     final repository = ref.watch(assessmentRepositoryProvider);
     return repository.getQuizQuestions(quizId);
@@ -37,7 +37,7 @@ final quizQuestionsProvider = FutureProvider.family<List<QuizQuestion>, String>(
 );
 
 final quizStatisticsProvider =
-    FutureProvider.family<Map<String, dynamic>, String>(
+    FutureProvider.autoDispose.family<Map<String, dynamic>, String>(
   (ref, quizId) async {
     final repository = ref.watch(assessmentRepositoryProvider);
     return repository.getQuizStatistics(quizId);
@@ -47,7 +47,7 @@ final quizStatisticsProvider =
 // ==================== QUESTION BANK PROVIDERS ====================
 
 final questionBankProvider =
-    FutureProvider.family<List<QuestionBank>, QuestionBankFilter>(
+    FutureProvider.autoDispose.family<List<QuestionBank>, QuestionBankFilter>(
   (ref, filter) async {
     final repository = ref.watch(assessmentRepositoryProvider);
     return repository.getQuestionBank(
@@ -60,7 +60,7 @@ final questionBankProvider =
   },
 );
 
-final questionByIdProvider = FutureProvider.family<QuestionBank?, String>(
+final questionByIdProvider = FutureProvider.autoDispose.family<QuestionBank?, String>(
   (ref, questionId) async {
     final repository = ref.watch(assessmentRepositoryProvider);
     return repository.getQuestionById(questionId);
@@ -70,7 +70,7 @@ final questionByIdProvider = FutureProvider.family<QuestionBank?, String>(
 // ==================== ATTEMPT PROVIDERS ====================
 
 final quizAttemptsProvider =
-    FutureProvider.family<List<QuizAttempt>, AttemptsFilter>(
+    FutureProvider.autoDispose.family<List<QuizAttempt>, AttemptsFilter>(
   (ref, filter) async {
     final repository = ref.watch(assessmentRepositoryProvider);
     return repository.getQuizAttempts(
@@ -81,7 +81,7 @@ final quizAttemptsProvider =
   },
 );
 
-final attemptByIdProvider = FutureProvider.family<QuizAttempt?, String>(
+final attemptByIdProvider = FutureProvider.autoDispose.family<QuizAttempt?, String>(
   (ref, attemptId) async {
     final repository = ref.watch(assessmentRepositoryProvider);
     return repository.getAttemptById(attemptId);
@@ -89,7 +89,7 @@ final attemptByIdProvider = FutureProvider.family<QuizAttempt?, String>(
 );
 
 final studentAvailableQuizzesProvider =
-    FutureProvider.family<List<Quiz>, String>(
+    FutureProvider.autoDispose.family<List<Quiz>, String>(
   (ref, studentId) async {
     final repository = ref.watch(assessmentRepositoryProvider);
     return repository.getStudentAvailableQuizzes(studentId);
@@ -324,7 +324,7 @@ class QuizSessionNotifier extends StateNotifier<AsyncValue<QuizSession?>> {
 }
 
 final quizSessionProvider =
-    StateNotifierProvider<QuizSessionNotifier, AsyncValue<QuizSession?>>((ref) {
+    StateNotifierProvider.autoDispose<QuizSessionNotifier, AsyncValue<QuizSession?>>((ref) {
   final repository = ref.watch(assessmentRepositoryProvider);
   return QuizSessionNotifier(repository);
 });
@@ -520,7 +520,7 @@ class QuizBuilderNotifier extends StateNotifier<QuizBuilderState> {
 }
 
 final quizBuilderProvider =
-    StateNotifierProvider<QuizBuilderNotifier, QuizBuilderState>((ref) {
+    StateNotifierProvider.autoDispose<QuizBuilderNotifier, QuizBuilderState>((ref) {
   final repository = ref.watch(assessmentRepositoryProvider);
   return QuizBuilderNotifier(repository);
 });

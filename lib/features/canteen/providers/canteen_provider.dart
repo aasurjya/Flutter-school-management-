@@ -8,34 +8,34 @@ final canteenRepositoryProvider = Provider<CanteenRepository>((ref) {
 });
 
 // Menu providers
-final menuItemsProvider = FutureProvider.family<List<CanteenItem>, String?>(
+final menuItemsProvider = FutureProvider.autoDispose.family<List<CanteenItem>, String?>(
   (ref, category) async {
     final repository = ref.watch(canteenRepositoryProvider);
     return repository.getMenuItems(category: category);
   },
 );
 
-final categoriesProvider = FutureProvider<List<String>>((ref) async {
+final categoriesProvider = FutureProvider.autoDispose<List<String>>((ref) async {
   final repository = ref.watch(canteenRepositoryProvider);
   return repository.getCategories();
 });
 
 // Wallet providers
-final walletProvider = FutureProvider.family<Wallet?, WalletFilter>(
+final walletProvider = FutureProvider.autoDispose.family<Wallet?, WalletFilter>(
   (ref, filter) async {
     final repository = ref.watch(canteenRepositoryProvider);
     return repository.getWallet(userId: filter.userId, studentId: filter.studentId);
   },
 );
 
-final currentUserWalletProvider = FutureProvider<Wallet?>((ref) async {
+final currentUserWalletProvider = FutureProvider.autoDispose<Wallet?>((ref) async {
   final repository = ref.watch(canteenRepositoryProvider);
   final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
   if (userId == null) return null;
   return repository.getOrCreateWallet(userId: userId);
 });
 
-final walletTransactionsProvider = FutureProvider.family<List<WalletTransaction>, String>(
+final walletTransactionsProvider = FutureProvider.autoDispose.family<List<WalletTransaction>, String>(
   (ref, walletId) async {
     final repository = ref.watch(canteenRepositoryProvider);
     return repository.getTransactions(walletId);
@@ -43,7 +43,7 @@ final walletTransactionsProvider = FutureProvider.family<List<WalletTransaction>
 );
 
 // Order providers
-final ordersProvider = FutureProvider.family<List<CanteenOrder>, OrdersFilter>(
+final ordersProvider = FutureProvider.autoDispose.family<List<CanteenOrder>, OrdersFilter>(
   (ref, filter) async {
     final repository = ref.watch(canteenRepositoryProvider);
     return repository.getOrders(
@@ -53,7 +53,7 @@ final ordersProvider = FutureProvider.family<List<CanteenOrder>, OrdersFilter>(
   },
 );
 
-final orderByIdProvider = FutureProvider.family<CanteenOrder?, String>(
+final orderByIdProvider = FutureProvider.autoDispose.family<CanteenOrder?, String>(
   (ref, orderId) async {
     final repository = ref.watch(canteenRepositoryProvider);
     return repository.getOrderById(orderId);
@@ -61,7 +61,7 @@ final orderByIdProvider = FutureProvider.family<CanteenOrder?, String>(
 );
 
 // Daily stats provider (for canteen staff)
-final dailyStatsProvider = FutureProvider.family<Map<String, dynamic>, DateTime>(
+final dailyStatsProvider = FutureProvider.autoDispose.family<Map<String, dynamic>, DateTime>(
   (ref, date) async {
     final repository = ref.watch(canteenRepositoryProvider);
     return repository.getDailyStats(date);
@@ -113,7 +113,7 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
   int get itemCount => state.fold<int>(0, (sum, item) => sum + item.quantity);
 }
 
-final cartProvider = StateNotifierProvider<CartNotifier, List<CartItem>>((ref) {
+final cartProvider = StateNotifierProvider.autoDispose<CartNotifier, List<CartItem>>((ref) {
   return CartNotifier();
 });
 

@@ -324,7 +324,7 @@ class SyllabusAINotifier extends StateNotifier<SyllabusAIState> {
 // ============================================================
 
 final syllabusAIProvider =
-    StateNotifierProvider<SyllabusAINotifier, SyllabusAIState>((ref) {
+    StateNotifierProvider.autoDispose<SyllabusAINotifier, SyllabusAIState>((ref) {
   return SyllabusAINotifier(ref);
 });
 
@@ -425,6 +425,6 @@ class LessonPlanAINotifier extends StateNotifier<LessonPlanAIState> {
 }
 
 final lessonPlanAIProvider =
-    StateNotifierProvider<LessonPlanAINotifier, LessonPlanAIState>((ref) {
+    StateNotifierProvider.autoDispose<LessonPlanAINotifier, LessonPlanAIState>((ref) {
   return LessonPlanAINotifier(ref);
 });

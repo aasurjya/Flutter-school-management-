@@ -172,7 +172,7 @@ class _StudentProfileSetupScreenState
 
               // Gender
               DropdownButtonFormField<String>(
-                value: _gender,
+                initialValue: _gender,
                 decoration: const InputDecoration(
                   labelText: 'Gender',
                   prefixIcon: Icon(Icons.person_outline),
@@ -188,7 +188,7 @@ class _StudentProfileSetupScreenState
 
               // Blood Group
               DropdownButtonFormField<String>(
-                value: _bloodGroup,
+                initialValue: _bloodGroup,
                 decoration: const InputDecoration(
                   labelText: 'Blood Group',
                   prefixIcon: Icon(Icons.bloodtype_outlined),

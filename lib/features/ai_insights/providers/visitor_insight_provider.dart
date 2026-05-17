@@ -5,7 +5,7 @@ import '../../../core/services/ai_text_generator.dart';
 
 /// Provides an AI-generated visitor insight for the receptionist.
 final visitorInsightProvider =
-    FutureProvider.family<AITextResult, VisitorInsightInput>(
+    FutureProvider.autoDispose.family<AITextResult, VisitorInsightInput>(
         (ref, input) async {
   final aiStaff = ref.watch(aiStaffTextGeneratorProvider);
 

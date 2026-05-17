@@ -245,6 +245,87 @@ This project is licensed under the MIT License.
 
 Contributions are welcome! Please read our contributing guidelines before submitting PRs.
 
+---
 
-Email: superadmin@schoolsaas.com
-Password: SuperAdmin@123
+## 🔐 Demo Login Credentials
+
+> ⚠️ **TEST/DEV ONLY.** These accounts seed the demo tenant. Do **not** use in production — rotate before any public deployment. Full setup instructions live in [`LOGIN_CREDENTIALS.md`](./LOGIN_CREDENTIALS.md).
+
+**Default password for every account below:** `Demo@2026`
+
+### Production Super Admin
+| Role | Email | Password |
+|------|-------|----------|
+| Super Admin (prod seed) | `superadmin@schoolsaas.com` | `SuperAdmin@123` |
+
+### Demo Tenant — All 15 Accounts
+
+#### Administration
+| Role | Name | Email | Password |
+|------|------|-------|----------|
+| Super Admin | — | `superadmin@demoschool.edu` | `Demo@2026` |
+| Tenant Admin | — | `admin@demoschool.edu` | `Demo@2026` |
+| Principal | Dr. Principal Smith | `principal@demoschool.edu` | `Demo@2026` |
+
+#### Teachers
+| Name | Subject | Employee ID | Email | Password |
+|------|---------|-------------|-------|----------|
+| John Teacher | Mathematics | EMP001 | `teacher1@demoschool.edu` | `Demo@2026` |
+| Mary Teacher | English | EMP002 | `teacher2@demoschool.edu` | `Demo@2026` |
+| Bob Teacher | Science | EMP003 | `teacher3@demoschool.edu` | `Demo@2026` |
+
+#### Finance
+| Name | Role | Employee ID | Email | Password |
+|------|------|-------------|-------|----------|
+| Alice Accountant | Accountant | EMP010 | `accountant@demoschool.edu` | `Demo@2026` |
+
+#### Students
+| Name | Grade / Section | Admission # | Email | Password |
+|------|-----------------|-------------|-------|----------|
+| Emma Student | Grade 1 / A | ADM2025001 | `student1@demoschool.edu` | `Demo@2026` |
+| Liam Student | Grade 1 / A | ADM2025002 | `student2@demoschool.edu` | `Demo@2026` |
+| Olivia Student | Grade 2 / A | ADM2025003 | `student3@demoschool.edu` | `Demo@2026` |
+| Noah Student¹ | Grade 10 / A | ADM2025004 | `student4@demoschool.edu` | `Demo@2026` |
+| Ava Student | Grade 10 / A | ADM2025005 | `student5@demoschool.edu` | `Demo@2026` |
+
+¹ *Noah has a seeded AI prediction flagging high dropout risk — useful for testing risk dashboards.*
+
+#### Parents
+| Name | Occupation | Children | Email | Password |
+|------|------------|----------|-------|----------|
+| Robert Parent | Engineer | Emma, Liam | `parent1@demoschool.edu` | `Demo@2026` |
+| Sarah Parent | Doctor | Olivia | `parent2@demoschool.edu` | `Demo@2026` |
+| Michael Parent | Lawyer | Noah, Ava | `parent3@demoschool.edu` | `Demo@2026` |
+
+### Account Summary
+| Role | Count |
+|------|------:|
+| Super Admin | 1 |
+| Tenant Admin | 1 |
+| Principal | 1 |
+| Teachers | 3 |
+| Accountant | 1 |
+| Students | 5 |
+| Parents | 3 |
+| **Total** | **15** |
+
+### Quick Login Snippet
+```dart
+final response = await supabase.auth.signInWithPassword(
+  email: 'admin@demoschool.edu',
+  password: 'Demo@2026',
+);
+```
+
+### Local Endpoints (when running `supabase start`)
+| Service | URL / Value |
+|---------|-------------|
+| Supabase Studio | `http://localhost:54323` |
+| API URL | `http://localhost:54321` |
+| Postgres host | `localhost:54322` (user `postgres`, password `postgres`, db `postgres`) |
+
+### Security Notes
+- Password `Demo@2026` is for development only — enforce a strong policy and rotate before production.
+- All tables enforce RLS; users must have correct `tenant_id` + `roles` in `app_metadata` to see data.
+- Consider enabling MFA for `super_admin` / `tenant_admin` in production.
+- Login attempts are recorded in the `login_audit` table.

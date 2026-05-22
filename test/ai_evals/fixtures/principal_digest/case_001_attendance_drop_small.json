@@ -1,0 +1,23 @@
+{
+  "feature_type": "principal_digest",
+  "input": {
+    "tenant_id": "demo",
+    "week_of": "2026-05-19",
+    "metrics": {
+      "attendance_pct_this_week": 92.5,
+      "attendance_pct_last_week": 94.0,
+      "students_at_risk": 4,
+      "students_at_risk_delta": 1,
+      "fee_collection_pct": 88
+    }
+  },
+  "assertions": [
+    { "kind": "contains_phrase", "value": "attendance" },
+    { "kind": "not_contains_phrase", "value": "sharply" },
+    { "kind": "not_contains_phrase", "value": "plummeted" },
+    { "kind": "not_contains_phrase", "value": "collapse" },
+    { "kind": "max_words", "value": 120 },
+    { "kind": "mentions_number_within", "value": 92, "tolerance": 2 }
+  ],
+  "notes": "Attendance dropped only 1.5 percentage points week-over-week (94 → 92.5). The prompt must NOT use dramatic language. Word cap keeps the digest scannable on parent phones."
+}

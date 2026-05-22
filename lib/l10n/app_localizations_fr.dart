@@ -271,4 +271,44 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get systemDefault => 'Par défaut du système';
+
+  @override
+  String get aiBadgeSummary => 'AI summary';
+
+  @override
+  String get aiBadgeCached => 'AI · cached';
+
+  @override
+  String get aiBadgeTileMessage => 'AI-generated — verify before acting on it.';
+
+  @override
+  String get aiDisclosureTitle => 'About this AI summary';
+
+  @override
+  String get aiDisclosureBuiltFrom => 'Built from';
+
+  @override
+  String get aiDisclosureHowItWorks => 'How it works';
+
+  @override
+  String get aiDisclosureHowItWorksBody =>
+      'A language model writes a short narrative from the data above. It can make small mistakes, mis-state numbers, or miss context.';
+
+  @override
+  String get aiDisclosureFreshness => 'Freshness';
+
+  @override
+  String get aiDisclosureFreshnessCached =>
+      'Reused from cache for speed and cost — the source numbers may be a few minutes stale.';
+
+  @override
+  String get aiDisclosureFreshnessLive =>
+      'Generated just now from the current data.';
+
+  @override
+  String get aiDisclosureUseItAs => 'Use it as';
+
+  @override
+  String get aiDisclosureUseItAsBody =>
+      'A starting point — not a substitute for reviewing the underlying student records yourself.';
 }

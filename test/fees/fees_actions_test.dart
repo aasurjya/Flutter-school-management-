@@ -290,7 +290,11 @@ void main() {
       final exportBtn = find.text('Export\nReport');
       expect(exportBtn, findsOneWidget,
           reason: 'Export Report quick-action must be visible');
-      await tester.tap(exportBtn);
+      // The button sits below the fold on the CI default 800x600 viewport.
+      // Scroll it into view before tapping so the hit-test resolves on all sizes.
+      await tester.ensureVisible(exportBtn);
+      await tester.pumpAndSettle();
+      await tester.tap(exportBtn, warnIfMissed: false);
       await tester.pumpAndSettle();
 
       // After tapping, either a snackbar with "exported" text appears

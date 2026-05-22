@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/alumni.dart';
@@ -43,10 +44,10 @@ class EventDetailScreen extends ConsumerWidget {
                     style: const TextStyle(fontSize: 16),
                   ),
                   background: event.imageUrl != null
-                      ? Image.network(
-                          event.imageUrl!,
+                      ? CachedNetworkImage(
+              imageUrl: event.imageUrl!,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorWidget: (_, __, ___) => Container(
                             decoration: const BoxDecoration(
                               gradient: AppColors.primaryGradient,
                             ),

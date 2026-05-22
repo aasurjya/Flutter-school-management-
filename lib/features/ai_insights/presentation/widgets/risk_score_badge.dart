@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 
 import '../../../../data/models/student_risk_score.dart';
+import 'risk_score_explanation.dart';
 
 class RiskScoreBadge extends StatelessWidget {
   final StudentRiskScore riskScore;
   final bool showLabel;
   final double? fontSize;
 
+  /// When true (default), tapping the badge opens the "How is this
+  /// calculated?" disclosure sheet — making the deterministic SQL breakdown
+  /// visible so users know this score isn't a black-box AI guess.
+  final bool tappable;
+
   const RiskScoreBadge({
     super.key,
     required this.riskScore,
     this.showLabel = true,
     this.fontSize,
+    this.tappable = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final pill = Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: riskScore.riskColor.withValues(alpha: 0.15),
@@ -46,9 +53,21 @@ class RiskScoreBadge extends StatelessWidget {
                 fontSize: fontSize ?? 12,
               ),
             ),
+            if (tappable) ...[
+              const SizedBox(width: 4),
+              Icon(Icons.info_outline,
+                  size: (fontSize ?? 12) + 2,
+                  color: riskScore.riskColor),
+            ],
           ],
         ],
       ),
+    );
+    if (!tappable) return pill;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => showRiskExplanation(context, riskScore),
+      child: pill,
     );
   }
 }

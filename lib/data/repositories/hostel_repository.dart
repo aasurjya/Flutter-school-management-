@@ -147,7 +147,6 @@ class HostelRepository extends BaseRepository {
       throw Exception('Room is not available');
     }
 
-    // Create allocation
     final response = await client
         .from('room_allocations')
         .insert({
@@ -160,24 +159,14 @@ class HostelRepository extends BaseRepository {
         .select()
         .single();
 
-    // Update room occupied count
-    await client
-        .from('hostel_rooms')
-        .update({'occupied': room.occupied + 1})
-        .eq('id', roomId);
+    // hostel_rooms.occupied is maintained by trg_hostel_room_occupancy
+    // (migration 00048). No application-side counter update — would race
+    // the trigger and double-count.
 
     return RoomAllocation.fromJson(response);
   }
 
   Future<void> vacateRoom(String allocationId) async {
-    // Get allocation details
-    final allocationResponse = await client
-        .from('room_allocations')
-        .select('room_id')
-        .eq('id', allocationId)
-        .single();
-
-    // Update allocation
     await client
         .from('room_allocations')
         .update({
@@ -186,14 +175,7 @@ class HostelRepository extends BaseRepository {
         })
         .eq('id', allocationId);
 
-    // Update room occupied count
-    final room = await getRoomById(allocationResponse['room_id']);
-    if (room != null) {
-      await client
-          .from('hostel_rooms')
-          .update({'occupied': room.occupied - 1})
-          .eq('id', room.id);
-    }
+    // hostel_rooms.occupied decremented by trg_hostel_room_occupancy trigger.
   }
 
   Future<List<RoomAllocation>> getAllocations({

@@ -14,7 +14,7 @@ final trendPredictionRepositoryProvider =
 // --- Providers ---
 
 final studentExamPredictionProvider =
-    FutureProvider.family<TrendPrediction, String>(
+    FutureProvider.autoDispose.family<TrendPrediction, String>(
   (ref, studentId) async {
     final repo = ref.watch(trendPredictionRepositoryProvider);
     return repo.buildStudentExamPrediction(studentId);
@@ -22,7 +22,7 @@ final studentExamPredictionProvider =
 );
 
 final sectionAttendancePredictionProvider =
-    FutureProvider.family<TrendPrediction, String>(
+    FutureProvider.autoDispose.family<TrendPrediction, String>(
   (ref, sectionId) async {
     final repo = ref.watch(trendPredictionRepositoryProvider);
     return repo.buildSectionAttendancePrediction(sectionId);
@@ -43,7 +43,7 @@ AITextResult _buildTrendFallback(TrendPrediction p) {
 }
 
 final studentExamNarrativeProvider =
-    FutureProvider.family<AITextResult, String>(
+    FutureProvider.autoDispose.family<AITextResult, String>(
   (ref, studentId) async {
     final prediction =
         await ref.watch(studentExamPredictionProvider(studentId).future);
@@ -69,7 +69,7 @@ final studentExamNarrativeProvider =
 );
 
 final sectionAttendanceNarrativeProvider =
-    FutureProvider.family<AITextResult, String>(
+    FutureProvider.autoDispose.family<AITextResult, String>(
   (ref, sectionId) async {
     final prediction =
         await ref.watch(sectionAttendancePredictionProvider(sectionId).future);

@@ -8,7 +8,7 @@ import '../../../core/services/ai_text_generator.dart';
 /// Uses tenant and user counts to generate a platform-wide summary.
 /// Falls back to a template when LLM is unavailable.
 final platformHealthNarrativeProvider =
-    FutureProvider.family<AITextResult, PlatformStats>((ref, stats) async {
+    FutureProvider.autoDispose.family<AITextResult, PlatformStats>((ref, stats) async {
   final aiTextGenerator = ref.watch(aiTextGeneratorProvider);
 
   final fallback = 'The platform serves ${stats.tenantCount} active '

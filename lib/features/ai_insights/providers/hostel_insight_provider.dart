@@ -5,7 +5,7 @@ import '../../../core/services/ai_text_generator.dart';
 
 /// Provides an AI-generated hostel insight for the hostel warden.
 final hostelInsightProvider =
-    FutureProvider.family<AITextResult, HostelInsightInput>(
+    FutureProvider.autoDispose.family<AITextResult, HostelInsightInput>(
         (ref, input) async {
   final aiStaff = ref.watch(aiStaffTextGeneratorProvider);
 

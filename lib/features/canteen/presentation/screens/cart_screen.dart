@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../data/models/canteen.dart';
 import '../../providers/canteen_provider.dart';
 
@@ -212,10 +213,10 @@ class _CartItemTile extends ConsumerWidget {
               ),
               clipBehavior: Clip.antiAlias,
               child: cartItem.item.imageUrl != null
-                  ? Image.network(
-                      cartItem.item.imageUrl!,
+                  ? CachedNetworkImage(
+              imageUrl: cartItem.item.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Icon(
+                      errorWidget: (_, __, ___) => Icon(
                         Icons.fastfood,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

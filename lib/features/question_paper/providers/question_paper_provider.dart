@@ -37,7 +37,7 @@ class QuestionPaperFilter {
 }
 
 final questionPapersProvider =
-    FutureProvider.family<List<QuestionPaper>, QuestionPaperFilter>(
+    FutureProvider.autoDispose.family<List<QuestionPaper>, QuestionPaperFilter>(
   (ref, filter) async {
     final repo = ref.watch(questionPaperRepositoryProvider);
     return repo.getQuestionPapers(
@@ -51,7 +51,7 @@ final questionPapersProvider =
 // ==================== DETAIL ====================
 
 final questionPaperDetailProvider =
-    FutureProvider.family<QuestionPaper, String>(
+    FutureProvider.autoDispose.family<QuestionPaper, String>(
   (ref, paperId) async {
     final repo = ref.watch(questionPaperRepositoryProvider);
     return repo.getQuestionPaper(paperId);
@@ -343,7 +343,7 @@ class QuestionPaperGeneratorNotifier
   }
 }
 
-final questionPaperGeneratorProvider = StateNotifierProvider.family<
+final questionPaperGeneratorProvider = StateNotifierProvider.autoDispose.family<
     QuestionPaperGeneratorNotifier,
     GeneratorState,
     QuestionPaperConfig>(

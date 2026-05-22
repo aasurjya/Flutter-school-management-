@@ -4,6 +4,7 @@
 /// handlers. Reports file:line for each occurrence.
 ///
 /// Run: flutter test test/audit/dead_buttons_test.dart
+library;
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';

@@ -8,14 +8,14 @@ final gamificationRepositoryProvider = Provider<GamificationRepository>((ref) {
 });
 
 // Achievements providers
-final achievementsProvider = FutureProvider.family<List<Achievement>, String?>(
+final achievementsProvider = FutureProvider.autoDispose.family<List<Achievement>, String?>(
   (ref, category) async {
     final repository = ref.watch(gamificationRepositoryProvider);
     return repository.getAchievements(category: category);
   },
 );
 
-final achievementByIdProvider = FutureProvider.family<Achievement?, String>(
+final achievementByIdProvider = FutureProvider.autoDispose.family<Achievement?, String>(
   (ref, achievementId) async {
     final repository = ref.watch(gamificationRepositoryProvider);
     return repository.getAchievementById(achievementId);
@@ -24,7 +24,7 @@ final achievementByIdProvider = FutureProvider.family<Achievement?, String>(
 
 // Student achievements providers
 final studentAchievementsProvider =
-    FutureProvider.family<List<StudentAchievement>, String>(
+    FutureProvider.autoDispose.family<List<StudentAchievement>, String>(
   (ref, studentId) async {
     final repository = ref.watch(gamificationRepositoryProvider);
     return repository.getStudentAchievements(studentId);
@@ -32,14 +32,14 @@ final studentAchievementsProvider =
 );
 
 // Points providers
-final studentPointsProvider = FutureProvider.family<List<StudentPoints>, String>(
+final studentPointsProvider = FutureProvider.autoDispose.family<List<StudentPoints>, String>(
   (ref, studentId) async {
     final repository = ref.watch(gamificationRepositoryProvider);
     return repository.getStudentPoints(studentId);
   },
 );
 
-final totalPointsProvider = FutureProvider.family<int, String>(
+final totalPointsProvider = FutureProvider.autoDispose.family<int, String>(
   (ref, studentId) async {
     final repository = ref.watch(gamificationRepositoryProvider);
     return repository.getTotalPoints(studentId);
@@ -47,7 +47,7 @@ final totalPointsProvider = FutureProvider.family<int, String>(
 );
 
 final pointTransactionsProvider =
-    FutureProvider.family<List<PointTransaction>, String>(
+    FutureProvider.autoDispose.family<List<PointTransaction>, String>(
   (ref, studentId) async {
     final repository = ref.watch(gamificationRepositoryProvider);
     return repository.getPointTransactions(studentId);
@@ -56,14 +56,14 @@ final pointTransactionsProvider =
 
 // Leaderboard providers
 final leaderboardProvider =
-    FutureProvider.family<List<LeaderboardEntry>, String?>(
+    FutureProvider.autoDispose.family<List<LeaderboardEntry>, String?>(
   (ref, sectionId) async {
     final repository = ref.watch(gamificationRepositoryProvider);
     return repository.getLeaderboard(sectionId: sectionId);
   },
 );
 
-final studentRankProvider = FutureProvider.family<LeaderboardEntry?, String>(
+final studentRankProvider = FutureProvider.autoDispose.family<LeaderboardEntry?, String>(
   (ref, studentId) async {
     final repository = ref.watch(gamificationRepositoryProvider);
     return repository.getStudentRank(studentId);
@@ -72,7 +72,7 @@ final studentRankProvider = FutureProvider.family<LeaderboardEntry?, String>(
 
 // Stats provider
 final gamificationStatsProvider =
-    FutureProvider<Map<String, dynamic>>((ref) async {
+    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final repository = ref.watch(gamificationRepositoryProvider);
   return repository.getGamificationStats();
 });

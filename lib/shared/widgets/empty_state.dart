@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 /// A "no data" placeholder widget with an icon, message, and optional
 /// action button.
@@ -57,7 +58,8 @@ class EmptyState extends StatelessWidget {
           children: [
             if (imagePath != null)
               imagePath!.startsWith('http')
-                  ? Image.network(imagePath!, height: imageHeight, fit: BoxFit.contain)
+                  ? CachedNetworkImage(
+              imageUrl: imagePath!, height: imageHeight, fit: BoxFit.contain)
                   : Image.asset(imagePath!, height: imageHeight, fit: BoxFit.contain)
             else if (icon != null)
               Icon(

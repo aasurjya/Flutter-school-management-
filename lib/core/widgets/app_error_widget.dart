@@ -1,12 +1,61 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
+/// Normalizes raw exception/error objects into user-friendly copy.
+/// Catches the two most common StateErrors that leak into screens:
+/// - "tenantId is null" → likely stale session / super_admin on tenant route
+/// - "currentUserId is null" → mid-logout race
+/// Falls back to a generic message; never surfaces stack traces.
+({String title, String message, bool sessionInvalid}) describeAppError(
+    Object? error) {
+  final raw = error?.toString() ?? '';
+  if (raw.contains('tenantId is null')) {
+    return (
+      title: 'Session expired',
+      message: 'Please sign in again to continue.',
+      sessionInvalid: true,
+    );
+  }
+  if (raw.contains('currentUserId is null')) {
+    return (
+      title: 'Not signed in',
+      message: 'Please sign in to continue.',
+      sessionInvalid: true,
+    );
+  }
+  return (
+    title: 'Something went wrong',
+    message: 'Please try again. If the problem persists, contact support.',
+    sessionInvalid: false,
+  );
+}
+
 /// Standard error state widget used across all screens
 class AppErrorWidget extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
 
-  const AppErrorWidget({super.key, required this.message, this.onRetry});
+  const AppErrorWidget({super.key, required this.message, this.onRetry})
+      : title = null;
+
+  const AppErrorWidget._titled({
+    required this.title,
+    required this.message,
+    this.onRetry,
+  });
+
+  /// Build from a raw exception object — normalizes Dart [StateError]s for
+  /// "tenantId is null" / "currentUserId is null" into friendly copy.
+  factory AppErrorWidget.fromError(Object? error, {VoidCallback? onRetry}) {
+    final d = describeAppError(error);
+    return AppErrorWidget._titled(
+      title: d.title,
+      message: d.message,
+      onRetry: onRetry,
+    );
+  }
+
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +76,7 @@ class AppErrorWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Something went wrong',
+              title ?? 'Something went wrong',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: AppColors.grey900,

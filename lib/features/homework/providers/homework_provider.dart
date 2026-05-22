@@ -16,7 +16,7 @@ final homeworkRepositoryProvider = Provider<HomeworkRepository>((ref) {
 // ============================================================
 
 final homeworkDashboardStatsProvider =
-    FutureProvider.family<HomeworkDashboardStats, String?>(
+    FutureProvider.autoDispose.family<HomeworkDashboardStats, String?>(
   (ref, sectionId) async {
     final repo = ref.watch(homeworkRepositoryProvider);
     return repo.getDashboardStats(sectionId: sectionId);
@@ -28,7 +28,7 @@ final homeworkDashboardStatsProvider =
 // ============================================================
 
 final homeworkListProvider =
-    FutureProvider.family<List<Homework>, HomeworkListFilter>(
+    FutureProvider.autoDispose.family<List<Homework>, HomeworkListFilter>(
   (ref, filter) async {
     final repo = ref.watch(homeworkRepositoryProvider);
     return repo.getHomeworkList(
@@ -40,7 +40,7 @@ final homeworkListProvider =
   },
 );
 
-final homeworkByIdProvider = FutureProvider.family<Homework?, String>(
+final homeworkByIdProvider = FutureProvider.autoDispose.family<Homework?, String>(
   (ref, id) async {
     final repo = ref.watch(homeworkRepositoryProvider);
     return repo.getHomeworkById(id);
@@ -52,7 +52,7 @@ final homeworkByIdProvider = FutureProvider.family<Homework?, String>(
 // ============================================================
 
 final studentHomeworkProvider =
-    FutureProvider.family<List<Homework>, String>(
+    FutureProvider.autoDispose.family<List<Homework>, String>(
   (ref, studentId) async {
     final repo = ref.watch(homeworkRepositoryProvider);
     return repo.getStudentHomework(studentId: studentId);
@@ -64,7 +64,7 @@ final studentHomeworkProvider =
 // ============================================================
 
 final homeworkSubmissionsProvider =
-    FutureProvider.family<List<HomeworkSubmission>, String>(
+    FutureProvider.autoDispose.family<List<HomeworkSubmission>, String>(
   (ref, homeworkId) async {
     final repo = ref.watch(homeworkRepositoryProvider);
     return repo.getSubmissions(homeworkId);
@@ -72,7 +72,7 @@ final homeworkSubmissionsProvider =
 );
 
 final studentSubmissionProvider =
-    FutureProvider.family<HomeworkSubmission?, StudentSubmissionParams>(
+    FutureProvider.autoDispose.family<HomeworkSubmission?, StudentSubmissionParams>(
   (ref, params) async {
     final repo = ref.watch(homeworkRepositoryProvider);
     return repo.getStudentSubmission(params.homeworkId, params.studentId);
@@ -137,7 +137,7 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<Homework>>> {
 }
 
 final homeworkNotifierProvider =
-    StateNotifierProvider<HomeworkNotifier, AsyncValue<List<Homework>>>((ref) {
+    StateNotifierProvider.autoDispose<HomeworkNotifier, AsyncValue<List<Homework>>>((ref) {
   final repo = ref.watch(homeworkRepositoryProvider);
   return HomeworkNotifier(repo);
 });
@@ -191,7 +191,7 @@ class SubmissionsNotifier
   }
 }
 
-final submissionsNotifierProvider = StateNotifierProvider.family<
+final submissionsNotifierProvider = StateNotifierProvider.autoDispose.family<
     SubmissionsNotifier, AsyncValue<List<HomeworkSubmission>>, String>(
   (ref, homeworkId) {
     final repo = ref.watch(homeworkRepositoryProvider);

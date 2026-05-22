@@ -13,7 +13,7 @@ final alumniRepositoryProvider = Provider<AlumniRepository>((ref) {
 // ============================================
 
 final alumniProfilesProvider =
-    FutureProvider.family<List<AlumniProfile>, AlumniFilter>(
+    FutureProvider.autoDispose.family<List<AlumniProfile>, AlumniFilter>(
   (ref, filter) async {
     final repository = ref.watch(alumniRepositoryProvider);
     return repository.getProfiles(
@@ -29,13 +29,13 @@ final alumniProfilesProvider =
 );
 
 final allAlumniProfilesProvider =
-    FutureProvider<List<AlumniProfile>>((ref) async {
+    FutureProvider.autoDispose<List<AlumniProfile>>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   return repository.getProfiles();
 });
 
 final alumniProfileByIdProvider =
-    FutureProvider.family<AlumniProfile?, String>(
+    FutureProvider.autoDispose.family<AlumniProfile?, String>(
   (ref, profileId) async {
     final repository = ref.watch(alumniRepositoryProvider);
     return repository.getProfileById(profileId);
@@ -43,20 +43,20 @@ final alumniProfileByIdProvider =
 );
 
 final myAlumniProfileProvider =
-    FutureProvider<AlumniProfile?>((ref) async {
+    FutureProvider.autoDispose<AlumniProfile?>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   final userId = repository.currentUserId;
   if (userId == null) return null;
   return repository.getProfileByUserId(userId);
 });
 
-final alumniIndustriesProvider = FutureProvider<List<String>>((ref) async {
+final alumniIndustriesProvider = FutureProvider.autoDispose<List<String>>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   return repository.getDistinctIndustries();
 });
 
 final alumniGraduationYearsProvider =
-    FutureProvider<List<int>>((ref) async {
+    FutureProvider.autoDispose<List<int>>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   return repository.getDistinctGraduationYears();
 });
@@ -66,7 +66,7 @@ final alumniGraduationYearsProvider =
 // ============================================
 
 final alumniEventsProvider =
-    FutureProvider.family<List<AlumniEvent>, AlumniEventFilter>(
+    FutureProvider.autoDispose.family<List<AlumniEvent>, AlumniEventFilter>(
   (ref, filter) async {
     final repository = ref.watch(alumniRepositoryProvider);
     return repository.getEvents(
@@ -79,19 +79,19 @@ final alumniEventsProvider =
 );
 
 final allAlumniEventsProvider =
-    FutureProvider<List<AlumniEvent>>((ref) async {
+    FutureProvider.autoDispose<List<AlumniEvent>>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   return repository.getEvents();
 });
 
 final upcomingAlumniEventsProvider =
-    FutureProvider<List<AlumniEvent>>((ref) async {
+    FutureProvider.autoDispose<List<AlumniEvent>>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   return repository.getEvents(status: 'upcoming');
 });
 
 final alumniEventByIdProvider =
-    FutureProvider.family<AlumniEvent?, String>(
+    FutureProvider.autoDispose.family<AlumniEvent?, String>(
   (ref, eventId) async {
     final repository = ref.watch(alumniRepositoryProvider);
     return repository.getEventById(eventId);
@@ -99,7 +99,7 @@ final alumniEventByIdProvider =
 );
 
 final eventRegistrationsProvider =
-    FutureProvider.family<List<AlumniEventRegistration>, String>(
+    FutureProvider.autoDispose.family<List<AlumniEventRegistration>, String>(
   (ref, eventId) async {
     final repository = ref.watch(alumniRepositoryProvider);
     return repository.getEventRegistrations(eventId);
@@ -111,7 +111,7 @@ final eventRegistrationsProvider =
 // ============================================
 
 final alumniDonationsProvider =
-    FutureProvider.family<List<AlumniDonation>, AlumniDonationFilter>(
+    FutureProvider.autoDispose.family<List<AlumniDonation>, AlumniDonationFilter>(
   (ref, filter) async {
     final repository = ref.watch(alumniRepositoryProvider);
     return repository.getDonations(
@@ -125,13 +125,13 @@ final alumniDonationsProvider =
 );
 
 final allAlumniDonationsProvider =
-    FutureProvider<List<AlumniDonation>>((ref) async {
+    FutureProvider.autoDispose<List<AlumniDonation>>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   return repository.getDonations();
 });
 
 final donationSummaryProvider =
-    FutureProvider<Map<String, double>>((ref) async {
+    FutureProvider.autoDispose<Map<String, double>>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   return repository.getDonationSummary();
 });
@@ -141,7 +141,7 @@ final donationSummaryProvider =
 // ============================================
 
 final mentorshipProgramsProvider =
-    FutureProvider.family<List<MentorshipProgram>, MentorshipFilter>(
+    FutureProvider.autoDispose.family<List<MentorshipProgram>, MentorshipFilter>(
   (ref, filter) async {
     final repository = ref.watch(alumniRepositoryProvider);
     return repository.getMentorshipPrograms(
@@ -154,19 +154,19 @@ final mentorshipProgramsProvider =
 );
 
 final allMentorshipProgramsProvider =
-    FutureProvider<List<MentorshipProgram>>((ref) async {
+    FutureProvider.autoDispose<List<MentorshipProgram>>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   return repository.getMentorshipPrograms();
 });
 
 final openMentorshipProgramsProvider =
-    FutureProvider<List<MentorshipProgram>>((ref) async {
+    FutureProvider.autoDispose<List<MentorshipProgram>>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   return repository.getMentorshipPrograms(status: 'open');
 });
 
 final mentorshipRequestsProvider =
-    FutureProvider.family<List<MentorshipRequest>, MentorshipRequestFilter>(
+    FutureProvider.autoDispose.family<List<MentorshipRequest>, MentorshipRequestFilter>(
   (ref, filter) async {
     final repository = ref.watch(alumniRepositoryProvider);
     return repository.getMentorshipRequests(
@@ -182,7 +182,7 @@ final mentorshipRequestsProvider =
 // ============================================
 
 final alumniSuccessStoriesProvider =
-    FutureProvider.family<List<AlumniSuccessStory>, AlumniStoryFilter>(
+    FutureProvider.autoDispose.family<List<AlumniSuccessStory>, AlumniStoryFilter>(
   (ref, filter) async {
     final repository = ref.watch(alumniRepositoryProvider);
     return repository.getSuccessStories(
@@ -195,13 +195,13 @@ final alumniSuccessStoriesProvider =
 );
 
 final publishedStoriesProvider =
-    FutureProvider<List<AlumniSuccessStory>>((ref) async {
+    FutureProvider.autoDispose<List<AlumniSuccessStory>>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   return repository.getSuccessStories(status: 'published');
 });
 
 final featuredStoriesProvider =
-    FutureProvider<List<AlumniSuccessStory>>((ref) async {
+    FutureProvider.autoDispose<List<AlumniSuccessStory>>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   return repository.getSuccessStories(status: 'published', isFeatured: true);
 });
@@ -210,7 +210,7 @@ final featuredStoriesProvider =
 // STATS PROVIDER
 // ============================================
 
-final alumniStatsProvider = FutureProvider<AlumniStats>((ref) async {
+final alumniStatsProvider = FutureProvider.autoDispose<AlumniStats>((ref) async {
   final repository = ref.watch(alumniRepositoryProvider);
   return repository.getAlumniStats();
 });
@@ -267,7 +267,7 @@ class AlumniProfileNotifier
   }
 }
 
-final alumniProfileNotifierProvider = StateNotifierProvider<
+final alumniProfileNotifierProvider = StateNotifierProvider.autoDispose<
     AlumniProfileNotifier, AsyncValue<List<AlumniProfile>>>((ref) {
   final repository = ref.watch(alumniRepositoryProvider);
   return AlumniProfileNotifier(repository);
@@ -309,7 +309,7 @@ class AlumniEventNotifier
   }
 }
 
-final alumniEventNotifierProvider = StateNotifierProvider<
+final alumniEventNotifierProvider = StateNotifierProvider.autoDispose<
     AlumniEventNotifier, AsyncValue<List<AlumniEvent>>>((ref) {
   final repository = ref.watch(alumniRepositoryProvider);
   return AlumniEventNotifier(repository);

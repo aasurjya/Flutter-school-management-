@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../data/models/library.dart';
 import '../../providers/library_provider.dart';
 
@@ -90,10 +91,10 @@ class _BorrowedBookCard extends StatelessWidget {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: book?.coverUrl != null
-                    ? Image.network(
-                        book!.coverUrl!,
+                    ? CachedNetworkImage(
+              imageUrl: book!.coverUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Icon(
+                        errorWidget: (_, __, ___) => Icon(
                           Icons.book,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),

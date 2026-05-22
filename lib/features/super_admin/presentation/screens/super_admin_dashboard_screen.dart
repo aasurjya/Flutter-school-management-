@@ -622,7 +622,7 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accentColor = const Color(0xFF6366F1);
+    const accentColor = Color(0xFF6366F1);
 
     return GlassCard(
       padding: EdgeInsets.zero,

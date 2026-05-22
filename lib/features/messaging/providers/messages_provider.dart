@@ -8,19 +8,19 @@ final messageRepositoryProvider = Provider<MessageRepository>((ref) {
   return MessageRepository(ref.watch(supabaseProvider));
 });
 
-final threadsProvider = FutureProvider<List<Thread>>((ref) async {
+final threadsProvider = FutureProvider.autoDispose<List<Thread>>((ref) async {
   final repository = ref.watch(messageRepositoryProvider);
   return repository.getThreads();
 });
 
-final threadByIdProvider = FutureProvider.family<Thread?, String>(
+final threadByIdProvider = FutureProvider.autoDispose.family<Thread?, String>(
   (ref, threadId) async {
     final repository = ref.watch(messageRepositoryProvider);
     return repository.getThreadById(threadId);
   },
 );
 
-final messagesProvider = FutureProvider.family<List<Message>, MessagesFilter>(
+final messagesProvider = FutureProvider.autoDispose.family<List<Message>, MessagesFilter>(
   (ref, filter) async {
     final repository = ref.watch(messageRepositoryProvider);
     return repository.getMessages(
@@ -31,19 +31,19 @@ final messagesProvider = FutureProvider.family<List<Message>, MessagesFilter>(
   },
 );
 
-final unreadCountProvider = FutureProvider<int>((ref) async {
+final unreadCountProvider = FutureProvider.autoDispose<int>((ref) async {
   final repository = ref.watch(messageRepositoryProvider);
   return repository.getUnreadCount();
 });
 
-final announcementsProvider = FutureProvider.family<List<Announcement>, bool>(
+final announcementsProvider = FutureProvider.autoDispose.family<List<Announcement>, bool>(
   (ref, activeOnly) async {
     final repository = ref.watch(messageRepositoryProvider);
     return repository.getAnnouncements(activeOnly: activeOnly);
   },
 );
 
-final announcementByIdProvider = FutureProvider.family<Announcement?, String>(
+final announcementByIdProvider = FutureProvider.autoDispose.family<Announcement?, String>(
   (ref, announcementId) async {
     final repository = ref.watch(messageRepositoryProvider);
     return repository.getAnnouncementById(announcementId);
@@ -122,7 +122,7 @@ class ThreadsNotifier extends StateNotifier<AsyncValue<List<Thread>>> {
 }
 
 final threadsNotifierProvider =
-    StateNotifierProvider<ThreadsNotifier, AsyncValue<List<Thread>>>((ref) {
+    StateNotifierProvider.autoDispose<ThreadsNotifier, AsyncValue<List<Thread>>>((ref) {
   final repository = ref.watch(messageRepositoryProvider);
   return ThreadsNotifier(repository);
 });
@@ -210,7 +210,7 @@ class MessagesNotifier extends StateNotifier<AsyncValue<List<Message>>> {
 }
 
 final messagesNotifierProvider =
-    StateNotifierProvider<MessagesNotifier, AsyncValue<List<Message>>>((ref) {
+    StateNotifierProvider.autoDispose<MessagesNotifier, AsyncValue<List<Message>>>((ref) {
   final repository = ref.watch(messageRepositoryProvider);
   return MessagesNotifier(repository);
 });
@@ -257,7 +257,7 @@ class AnnouncementsNotifier extends StateNotifier<AsyncValue<List<Announcement>>
 }
 
 final announcementsNotifierProvider =
-    StateNotifierProvider<AnnouncementsNotifier, AsyncValue<List<Announcement>>>((ref) {
+    StateNotifierProvider.autoDispose<AnnouncementsNotifier, AsyncValue<List<Announcement>>>((ref) {
   final repository = ref.watch(messageRepositoryProvider);
   return AnnouncementsNotifier(repository);
 });

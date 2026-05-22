@@ -181,7 +181,7 @@ class _TeacherProfileSetupScreenState
 
               // Gender
               DropdownButtonFormField<String>(
-                value: _gender,
+                initialValue: _gender,
                 decoration: const InputDecoration(
                   labelText: 'Gender',
                   prefixIcon: Icon(Icons.person_outline),

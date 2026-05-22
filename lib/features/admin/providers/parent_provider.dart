@@ -10,7 +10,7 @@ final parentRepositoryProvider = Provider<ParentRepository>((ref) {
 
 /// Provides all parents linked to a given [studentId].
 final parentsByStudentProvider =
-    FutureProvider.family<List<StudentParentLink>, String>(
+    FutureProvider.autoDispose.family<List<StudentParentLink>, String>(
   (ref, studentId) async {
     final repo = ref.watch(parentRepositoryProvider);
     return repo.getParentsByStudent(studentId);
@@ -41,6 +41,6 @@ class ParentSearchNotifier extends StateNotifier<AsyncValue<List<Parent>>> {
 }
 
 final parentSearchProvider =
-    StateNotifierProvider<ParentSearchNotifier, AsyncValue<List<Parent>>>(
+    StateNotifierProvider.autoDispose<ParentSearchNotifier, AsyncValue<List<Parent>>>(
   (ref) => ParentSearchNotifier(ref.watch(parentRepositoryProvider)),
 );

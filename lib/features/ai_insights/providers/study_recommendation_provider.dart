@@ -13,7 +13,7 @@ import '../../students/providers/students_provider.dart';
 /// generate recommendations via the LLM. Falls back to curated templates
 /// if data or LLM is unavailable.
 final studyRecommendationsProvider =
-    FutureProvider.family<StudyRecommendation, String>(
+    FutureProvider.autoDispose.family<StudyRecommendation, String>(
   (ref, studentId) async {
     final aiTextGenerator = ref.watch(aiTextGeneratorProvider);
 

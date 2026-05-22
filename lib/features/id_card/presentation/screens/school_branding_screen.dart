@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../core/providers/supabase_provider.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -327,10 +328,10 @@ class _LogoSection extends StatelessWidget {
             child: uploading
                 ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
                 : logoUrl != null && logoUrl!.isNotEmpty
-                    ? Image.network(
-                        logoUrl!,
+                    ? CachedNetworkImage(
+              imageUrl: logoUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
+                        errorWidget: (_, __, ___) =>
                             _LogoPlaceholder(name: schoolName),
                       )
                     : _LogoPlaceholder(name: schoolName),

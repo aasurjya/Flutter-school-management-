@@ -24,7 +24,7 @@ class SectionExamFilter {
 }
 
 final generateSectionRemarksProvider =
-    FutureProvider.family<List<ReportCommentary>, SectionExamFilter>(
+    FutureProvider.autoDispose.family<List<ReportCommentary>, SectionExamFilter>(
   (ref, filter) async {
     final aiTextGenerator = ref.watch(aiTextGeneratorProvider);
     final studentRepo = ref.watch(studentRepositoryProvider);
@@ -140,6 +140,6 @@ class RemarksNotifier extends StateNotifier<List<ReportCommentary>> {
 }
 
 final remarksNotifierProvider =
-    StateNotifierProvider<RemarksNotifier, List<ReportCommentary>>(
+    StateNotifierProvider.autoDispose<RemarksNotifier, List<ReportCommentary>>(
   (ref) => RemarksNotifier(),
 );

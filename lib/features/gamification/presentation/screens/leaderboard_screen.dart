@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/achievement.dart';
 import '../../providers/gamification_provider.dart';
@@ -158,10 +159,10 @@ class _PodiumItem extends StatelessWidget {
               backgroundColor: color,
               child: entry.photoUrl != null
                   ? ClipOval(
-                      child: Image.network(
-                        entry.photoUrl!,
+                      child: CachedNetworkImage(
+              imageUrl: entry.photoUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Text(
+                        errorWidget: (_, __, ___) => Text(
                           entry.initials,
                           style: TextStyle(
                             color: AppColors.background,
@@ -267,10 +268,10 @@ class _LeaderboardTile extends StatelessWidget {
               backgroundColor: theme.colorScheme.primaryContainer,
               child: entry.photoUrl != null
                   ? ClipOval(
-                      child: Image.network(
-                        entry.photoUrl!,
+                      child: CachedNetworkImage(
+              imageUrl: entry.photoUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Text(
+                        errorWidget: (_, __, ___) => Text(
                           entry.initials,
                           style: TextStyle(
                             color: theme.colorScheme.onPrimaryContainer,

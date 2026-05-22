@@ -46,7 +46,7 @@ final whatsappConfigProvider =
 // ============================================================
 
 final notificationLogsProvider =
-    FutureProvider<List<NotificationLog>>((ref) async {
+    FutureProvider.autoDispose<List<NotificationLog>>((ref) async {
   final repo = ref.watch(whatsappRepositoryProvider);
   return repo.getLogs(limit: 100);
 });
@@ -56,7 +56,7 @@ final notificationLogsProvider =
 // ============================================================
 
 final deliveryStatsProvider =
-    FutureProvider<Map<String, int>>((ref) async {
+    FutureProvider.autoDispose<Map<String, int>>((ref) async {
   final repo = ref.watch(whatsappRepositoryProvider);
   return repo.getDeliveryStats();
 });

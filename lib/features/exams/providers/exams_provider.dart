@@ -7,7 +7,7 @@ final examRepositoryProvider = Provider<ExamRepository>((ref) {
   return ExamRepository(ref.watch(supabaseProvider));
 });
 
-final examsProvider = FutureProvider.family<List<Exam>, ExamsFilter>(
+final examsProvider = FutureProvider.autoDispose.family<List<Exam>, ExamsFilter>(
   (ref, filter) async {
     final repository = ref.watch(examRepositoryProvider);
     return repository.getExams(
@@ -18,21 +18,21 @@ final examsProvider = FutureProvider.family<List<Exam>, ExamsFilter>(
   },
 );
 
-final examByIdProvider = FutureProvider.family<Exam?, String>(
+final examByIdProvider = FutureProvider.autoDispose.family<Exam?, String>(
   (ref, examId) async {
     final repository = ref.watch(examRepositoryProvider);
     return repository.getExamById(examId);
   },
 );
 
-final examSubjectsProvider = FutureProvider.family<List<ExamSubject>, String>(
+final examSubjectsProvider = FutureProvider.autoDispose.family<List<ExamSubject>, String>(
   (ref, examId) async {
     final repository = ref.watch(examRepositoryProvider);
     return repository.getExamSubjects(examId);
   },
 );
 
-final marksProvider = FutureProvider.family<List<Mark>, MarksFilter>(
+final marksProvider = FutureProvider.autoDispose.family<List<Mark>, MarksFilter>(
   (ref, filter) async {
     final repository = ref.watch(examRepositoryProvider);
     return repository.getMarks(
@@ -42,7 +42,7 @@ final marksProvider = FutureProvider.family<List<Mark>, MarksFilter>(
   },
 );
 
-final studentPerformanceProvider = FutureProvider.family<List<StudentPerformance>, StudentPerformanceFilter>(
+final studentPerformanceProvider = FutureProvider.autoDispose.family<List<StudentPerformance>, StudentPerformanceFilter>(
   (ref, filter) async {
     final repository = ref.watch(examRepositoryProvider);
     return repository.getStudentPerformance(
@@ -53,7 +53,7 @@ final studentPerformanceProvider = FutureProvider.family<List<StudentPerformance
   },
 );
 
-final studentRanksProvider = FutureProvider.family<List<StudentRank>, StudentRankFilter>(
+final studentRanksProvider = FutureProvider.autoDispose.family<List<StudentRank>, StudentRankFilter>(
   (ref, filter) async {
     final repository = ref.watch(examRepositoryProvider);
     return repository.getStudentRanks(
@@ -63,7 +63,7 @@ final studentRanksProvider = FutureProvider.family<List<StudentRank>, StudentRan
   },
 );
 
-final studentOverallRankProvider = FutureProvider.family<StudentOverallRank?, StudentExamFilter>(
+final studentOverallRankProvider = FutureProvider.autoDispose.family<StudentOverallRank?, StudentExamFilter>(
   (ref, filter) async {
     final repository = ref.watch(examRepositoryProvider);
     return repository.getStudentOverallRank(
@@ -73,7 +73,7 @@ final studentOverallRankProvider = FutureProvider.family<StudentOverallRank?, St
   },
 );
 
-final classExamStatsProvider = FutureProvider.family<List<ClassExamStats>, ClassStatsFilter>(
+final classExamStatsProvider = FutureProvider.autoDispose.family<List<ClassExamStats>, ClassStatsFilter>(
   (ref, filter) async {
     final repository = ref.watch(examRepositoryProvider);
     return repository.getClassExamStats(
@@ -84,12 +84,12 @@ final classExamStatsProvider = FutureProvider.family<List<ClassExamStats>, Class
   },
 );
 
-final gradeScalesProvider = FutureProvider<List<GradeScale>>((ref) async {
+final gradeScalesProvider = FutureProvider.autoDispose<List<GradeScale>>((ref) async {
   final repository = ref.watch(examRepositoryProvider);
   return repository.getGradeScales();
 });
 
-final examToppersProvider = FutureProvider.family<List<StudentOverallRank>, ExamToppersFilter>(
+final examToppersProvider = FutureProvider.autoDispose.family<List<StudentOverallRank>, ExamToppersFilter>(
   (ref, filter) async {
     final repository = ref.watch(examRepositoryProvider);
     return repository.getExamToppers(
@@ -294,7 +294,7 @@ class ExamsNotifier extends StateNotifier<AsyncValue<List<Exam>>> {
 }
 
 final examsNotifierProvider =
-    StateNotifierProvider<ExamsNotifier, AsyncValue<List<Exam>>>((ref) {
+    StateNotifierProvider.autoDispose<ExamsNotifier, AsyncValue<List<Exam>>>((ref) {
   final repository = ref.watch(examRepositoryProvider);
   return ExamsNotifier(repository);
 });
@@ -340,7 +340,7 @@ class MarksEntryNotifier extends StateNotifier<AsyncValue<List<Mark>>> {
 }
 
 final marksEntryNotifierProvider =
-    StateNotifierProvider<MarksEntryNotifier, AsyncValue<List<Mark>>>((ref) {
+    StateNotifierProvider.autoDispose<MarksEntryNotifier, AsyncValue<List<Mark>>>((ref) {
   final repository = ref.watch(examRepositoryProvider);
   return MarksEntryNotifier(repository);
 });

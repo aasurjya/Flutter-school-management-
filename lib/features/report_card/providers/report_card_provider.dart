@@ -13,7 +13,7 @@ final rcFullRepositoryProvider = Provider<ReportCardFullRepository>((ref) {
 // ---------------------------------------------------------------------------
 // Grading Scales
 // ---------------------------------------------------------------------------
-final gradingScalesProvider = FutureProvider<List<GradingScale>>((ref) async {
+final gradingScalesProvider = FutureProvider.autoDispose<List<GradingScale>>((ref) async {
   final repo = ref.watch(rcFullRepositoryProvider);
   return repo.getGradingScales();
 });
@@ -22,19 +22,19 @@ final gradingScalesProvider = FutureProvider<List<GradingScale>>((ref) async {
 // Templates
 // ---------------------------------------------------------------------------
 final rcTemplatesProvider =
-    FutureProvider<List<ReportCardTemplateFull>>((ref) async {
+    FutureProvider.autoDispose<List<ReportCardTemplateFull>>((ref) async {
   final repo = ref.watch(rcFullRepositoryProvider);
   return repo.getTemplates();
 });
 
 final rcTemplateByIdProvider =
-    FutureProvider.family<ReportCardTemplateFull?, String>((ref, id) async {
+    FutureProvider.autoDispose.family<ReportCardTemplateFull?, String>((ref, id) async {
   final repo = ref.watch(rcFullRepositoryProvider);
   return repo.getTemplateById(id);
 });
 
 final rcDefaultTemplateProvider =
-    FutureProvider<ReportCardTemplateFull?>((ref) async {
+    FutureProvider.autoDispose<ReportCardTemplateFull?>((ref) async {
   final repo = ref.watch(rcFullRepositoryProvider);
   return repo.getDefaultTemplate();
 });
@@ -43,7 +43,7 @@ final rcDefaultTemplateProvider =
 // Report Cards
 // ---------------------------------------------------------------------------
 final rcListProvider =
-    FutureProvider.family<List<ReportCardFull>, ReportCardFullFilter>(
+    FutureProvider.autoDispose.family<List<ReportCardFull>, ReportCardFullFilter>(
   (ref, filter) async {
     final repo = ref.watch(rcFullRepositoryProvider);
     return repo.getReportCards(filter);
@@ -51,13 +51,13 @@ final rcListProvider =
 );
 
 final rcByIdProvider =
-    FutureProvider.family<ReportCardFull?, String>((ref, id) async {
+    FutureProvider.autoDispose.family<ReportCardFull?, String>((ref, id) async {
   final repo = ref.watch(rcFullRepositoryProvider);
   return repo.getReportCardById(id);
 });
 
 final rcStudentProvider =
-    FutureProvider.family<List<ReportCardFull>, String>((ref, studentId) async {
+    FutureProvider.autoDispose.family<List<ReportCardFull>, String>((ref, studentId) async {
   final repo = ref.watch(rcFullRepositoryProvider);
   return repo.getStudentReportCards(studentId);
 });
@@ -66,7 +66,7 @@ final rcStudentProvider =
 // Dashboard Summary
 // ---------------------------------------------------------------------------
 final rcDashboardSummaryProvider =
-    FutureProvider.family<List<ReportCardSummary>, RCDashboardParams>(
+    FutureProvider.autoDispose.family<List<ReportCardSummary>, RCDashboardParams>(
   (ref, params) async {
     final repo = ref.watch(rcFullRepositoryProvider);
     return repo.getDashboardSummary(
@@ -213,7 +213,7 @@ class RCGenerationNotifier extends StateNotifier<RCGenerationState> {
 }
 
 final rcGenerationProvider =
-    StateNotifierProvider<RCGenerationNotifier, RCGenerationState>((ref) {
+    StateNotifierProvider.autoDispose<RCGenerationNotifier, RCGenerationState>((ref) {
   final repo = ref.watch(rcFullRepositoryProvider);
   return RCGenerationNotifier(repo);
 });

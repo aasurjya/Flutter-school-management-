@@ -15,7 +15,7 @@ final hrRepositoryProvider = Provider<HRRepository>((ref) {
 // Dashboard
 // ==========================================================================
 
-final hrStatsProvider = FutureProvider<HRDashboardStats>((ref) async {
+final hrStatsProvider = FutureProvider.autoDispose<HRDashboardStats>((ref) async {
   final repository = ref.watch(hrRepositoryProvider);
   return repository.getHRDashboardStats();
 });
@@ -24,12 +24,12 @@ final hrStatsProvider = FutureProvider<HRDashboardStats>((ref) async {
 // Departments
 // ==========================================================================
 
-final departmentsProvider = FutureProvider<List<Department>>((ref) async {
+final departmentsProvider = FutureProvider.autoDispose<List<Department>>((ref) async {
   final repository = ref.watch(hrRepositoryProvider);
   return repository.getDepartments();
 });
 
-final departmentByIdProvider = FutureProvider.family<Department, String>(
+final departmentByIdProvider = FutureProvider.autoDispose.family<Department, String>(
   (ref, id) async {
     final repository = ref.watch(hrRepositoryProvider);
     return repository.getDepartmentById(id);
@@ -41,7 +41,7 @@ final departmentByIdProvider = FutureProvider.family<Department, String>(
 // ==========================================================================
 
 final designationsProvider =
-    FutureProvider.family<List<Designation>, String?>(
+    FutureProvider.autoDispose.family<List<Designation>, String?>(
   (ref, departmentId) async {
     final repository = ref.watch(hrRepositoryProvider);
     return repository.getDesignations(departmentId: departmentId);
@@ -53,7 +53,7 @@ final designationsProvider =
 // ==========================================================================
 
 final staffContractsProvider =
-    FutureProvider.family<List<StaffContract>, StaffContractFilter>(
+    FutureProvider.autoDispose.family<List<StaffContract>, StaffContractFilter>(
   (ref, filter) async {
     final repository = ref.watch(hrRepositoryProvider);
     return repository.getStaffContracts(
@@ -65,14 +65,14 @@ final staffContractsProvider =
 );
 
 final activeContractProvider =
-    FutureProvider.family<StaffContract?, String>(
+    FutureProvider.autoDispose.family<StaffContract?, String>(
   (ref, staffId) async {
     final repository = ref.watch(hrRepositoryProvider);
     return repository.getActiveContract(staffId);
   },
 );
 
-final expiringContractsProvider = FutureProvider<List<StaffContract>>((ref) async {
+final expiringContractsProvider = FutureProvider.autoDispose<List<StaffContract>>((ref) async {
   final repository = ref.watch(hrRepositoryProvider);
   return repository.getStaffContracts(expiringOnly: true);
 });
@@ -82,7 +82,7 @@ final expiringContractsProvider = FutureProvider<List<StaffContract>>((ref) asyn
 // ==========================================================================
 
 final payrollRunsProvider =
-    FutureProvider.family<List<PayrollRun>, int?>(
+    FutureProvider.autoDispose.family<List<PayrollRun>, int?>(
   (ref, year) async {
     final repository = ref.watch(hrRepositoryProvider);
     return repository.getPayrollRuns(year: year);
@@ -90,7 +90,7 @@ final payrollRunsProvider =
 );
 
 final payrollRunByIdProvider =
-    FutureProvider.family<PayrollRun?, String>(
+    FutureProvider.autoDispose.family<PayrollRun?, String>(
   (ref, id) async {
     final repository = ref.watch(hrRepositoryProvider);
     return repository.getPayrollRunById(id);
@@ -102,7 +102,7 @@ final payrollRunByIdProvider =
 // ==========================================================================
 
 final staffAttendanceProvider =
-    FutureProvider.family<List<StaffAttendanceDaily>, DateTime>(
+    FutureProvider.autoDispose.family<List<StaffAttendanceDaily>, DateTime>(
   (ref, date) async {
     final repository = ref.watch(hrRepositoryProvider);
     return repository.getStaffAttendance(date: date);
@@ -110,7 +110,7 @@ final staffAttendanceProvider =
 );
 
 final staffAttendanceSummaryProvider =
-    FutureProvider.family<Map<String, int>, StaffAttendanceSummaryFilter>(
+    FutureProvider.autoDispose.family<Map<String, int>, StaffAttendanceSummaryFilter>(
   (ref, filter) async {
     final repository = ref.watch(hrRepositoryProvider);
     return repository.getStaffAttendanceSummary(
@@ -126,7 +126,7 @@ final staffAttendanceSummaryProvider =
 // ==========================================================================
 
 final taxDeclarationsProvider =
-    FutureProvider.family<List<TaxDeclaration>, TaxDeclarationFilter>(
+    FutureProvider.autoDispose.family<List<TaxDeclaration>, TaxDeclarationFilter>(
   (ref, filter) async {
     final repository = ref.watch(hrRepositoryProvider);
     return repository.getTaxDeclarations(
@@ -142,7 +142,7 @@ final taxDeclarationsProvider =
 // ==========================================================================
 
 final salaryStructuresProvider =
-    FutureProvider<List<SalaryStructure>>((ref) async {
+    FutureProvider.autoDispose<List<SalaryStructure>>((ref) async {
   final repository = ref.watch(hrRepositoryProvider);
   return repository.getSalaryStructures();
 });
@@ -152,7 +152,7 @@ final salaryStructuresProvider =
 // ==========================================================================
 
 final staffDocumentsProvider =
-    FutureProvider.family<List<StaffDocument>, String>(
+    FutureProvider.autoDispose.family<List<StaffDocument>, String>(
   (ref, staffId) async {
     final repository = ref.watch(hrRepositoryProvider);
     return repository.getStaffDocuments(staffId);
@@ -164,7 +164,7 @@ final staffDocumentsProvider =
 // ==========================================================================
 
 final salarySlipsProvider =
-    FutureProvider.family<List<SalarySlip>, String?>(
+    FutureProvider.autoDispose.family<List<SalarySlip>, String?>(
   (ref, staffId) async {
     final repository = ref.watch(hrRepositoryProvider);
     return repository.getSalarySlips(staffId: staffId);
@@ -288,7 +288,7 @@ class HRNotifier extends StateNotifier<AsyncValue<void>> {
 }
 
 final hrNotifierProvider =
-    StateNotifierProvider<HRNotifier, AsyncValue<void>>((ref) {
+    StateNotifierProvider.autoDispose<HRNotifier, AsyncValue<void>>((ref) {
   final repository = ref.watch(hrRepositoryProvider);
   return HRNotifier(repository);
 });

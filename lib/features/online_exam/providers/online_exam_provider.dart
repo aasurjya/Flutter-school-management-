@@ -13,7 +13,7 @@ final onlineExamRepositoryProvider = Provider<OnlineExamRepository>((ref) {
 // ==================== EXAM LIST PROVIDERS ====================
 
 final onlineExamsProvider =
-    FutureProvider.family<List<OnlineExam>, OnlineExamFilter>(
+    FutureProvider.autoDispose.family<List<OnlineExam>, OnlineExamFilter>(
   (ref, filter) async {
     final repo = ref.watch(onlineExamRepositoryProvider);
     return repo.getExams(
@@ -25,7 +25,7 @@ final onlineExamsProvider =
   },
 );
 
-final onlineExamByIdProvider = FutureProvider.family<OnlineExam?, String>(
+final onlineExamByIdProvider = FutureProvider.autoDispose.family<OnlineExam?, String>(
   (ref, examId) async {
     final repo = ref.watch(onlineExamRepositoryProvider);
     return repo.getExamById(examId);
@@ -33,7 +33,7 @@ final onlineExamByIdProvider = FutureProvider.family<OnlineExam?, String>(
 );
 
 final studentExamsProvider =
-    FutureProvider.family<List<OnlineExam>, String>(
+    FutureProvider.autoDispose.family<List<OnlineExam>, String>(
   (ref, sectionId) async {
     final repo = ref.watch(onlineExamRepositoryProvider);
     return repo.getStudentExams(sectionId);
@@ -43,7 +43,7 @@ final studentExamsProvider =
 // ==================== ATTEMPT PROVIDERS ====================
 
 final examAttemptsProvider =
-    FutureProvider.family<List<ExamAttempt>, ExamAttemptsFilter>(
+    FutureProvider.autoDispose.family<List<ExamAttempt>, ExamAttemptsFilter>(
   (ref, filter) async {
     final repo = ref.watch(onlineExamRepositoryProvider);
     return repo.getExamAttempts(
@@ -54,7 +54,7 @@ final examAttemptsProvider =
   },
 );
 
-final examAttemptByIdProvider = FutureProvider.family<ExamAttempt?, String>(
+final examAttemptByIdProvider = FutureProvider.autoDispose.family<ExamAttempt?, String>(
   (ref, attemptId) async {
     final repo = ref.watch(onlineExamRepositoryProvider);
     return repo.getAttemptById(attemptId);
@@ -64,7 +64,7 @@ final examAttemptByIdProvider = FutureProvider.family<ExamAttempt?, String>(
 // ==================== ANALYTICS PROVIDERS ====================
 
 final examAnalyticsProvider =
-    FutureProvider.family<ExamAnalytics?, String>(
+    FutureProvider.autoDispose.family<ExamAnalytics?, String>(
   (ref, examId) async {
     final repo = ref.watch(onlineExamRepositoryProvider);
     return repo.getExamAnalytics(examId);
@@ -72,7 +72,7 @@ final examAnalyticsProvider =
 );
 
 final examQuestionAnalyticsProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, String>(
+    FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String>(
   (ref, examId) async {
     final repo = ref.watch(onlineExamRepositoryProvider);
     return repo.getQuestionAnalytics(examId);
@@ -80,7 +80,7 @@ final examQuestionAnalyticsProvider =
 );
 
 final examScoreDistributionProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, String>(
+    FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String>(
   (ref, examId) async {
     final repo = ref.watch(onlineExamRepositoryProvider);
     return repo.getScoreDistribution(examId);
@@ -397,7 +397,7 @@ class ExamSessionNotifier
   }
 }
 
-final examSessionProvider = StateNotifierProvider<ExamSessionNotifier,
+final examSessionProvider = StateNotifierProvider.autoDispose<ExamSessionNotifier,
     AsyncValue<OnlineExamSession?>>((ref) {
   final repo = ref.watch(onlineExamRepositoryProvider);
   return ExamSessionNotifier(repo);
@@ -622,7 +622,7 @@ class ExamBuilderNotifier extends StateNotifier<ExamBuilderState> {
 }
 
 final examBuilderProvider =
-    StateNotifierProvider<ExamBuilderNotifier, ExamBuilderState>((ref) {
+    StateNotifierProvider.autoDispose<ExamBuilderNotifier, ExamBuilderState>((ref) {
   final repo = ref.watch(onlineExamRepositoryProvider);
   return ExamBuilderNotifier(repo);
 });
@@ -736,7 +736,7 @@ class GradingNotifier extends StateNotifier<GradingState> {
 }
 
 final gradingProvider =
-    StateNotifierProvider<GradingNotifier, GradingState>((ref) {
+    StateNotifierProvider.autoDispose<GradingNotifier, GradingState>((ref) {
   final repo = ref.watch(onlineExamRepositoryProvider);
   return GradingNotifier(repo);
 });

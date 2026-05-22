@@ -93,7 +93,7 @@ class TeacherContact {
 
 /// Fetch basic child progress summary (attendance %, average %, points).
 final childProgressSummaryProvider =
-    FutureProvider.family<ChildProgressSummary, String>(
+    FutureProvider.autoDispose.family<ChildProgressSummary, String>(
   (ref, studentId) async {
     final client = ref.watch(supabaseProvider);
 
@@ -202,7 +202,7 @@ ChildProgressSummary _demoProgressSummary(String studentId) {
 
 /// Subject marks for a given student (latest exam).
 final childSubjectMarksProvider =
-    FutureProvider.family<List<SubjectMark>, String>(
+    FutureProvider.autoDispose.family<List<SubjectMark>, String>(
   (ref, studentId) async {
     final client = ref.watch(supabaseProvider);
     try {
@@ -251,7 +251,7 @@ List<SubjectMark> _demoSubjectMarks() {
 
 /// Attendance records for the given student (last 60 days).
 final childAttendanceProvider =
-    FutureProvider.family<List<AttendanceDay>, String>(
+    FutureProvider.autoDispose.family<List<AttendanceDay>, String>(
   (ref, studentId) async {
     final client = ref.watch(supabaseProvider);
     try {
@@ -304,7 +304,7 @@ List<AttendanceDay> _demoAttendance() {
 
 /// Behaviour records (gamification points / incidents) for a student.
 final childBehaviourProvider =
-    FutureProvider.family<List<BehaviourRecord>, String>(
+    FutureProvider.autoDispose.family<List<BehaviourRecord>, String>(
   (ref, studentId) async {
     final client = ref.watch(supabaseProvider);
     try {
@@ -346,7 +346,7 @@ List<BehaviourRecord> _demoBehaviour() {
 
 /// Teachers for the child's section.
 final childTeachersProvider =
-    FutureProvider.family<List<TeacherContact>, String>(
+    FutureProvider.autoDispose.family<List<TeacherContact>, String>(
   (ref, studentId) async {
     final client = ref.watch(supabaseProvider);
     try {

@@ -5,7 +5,7 @@ import '../../../core/services/ai_text_generator.dart';
 
 /// Provides an AI-generated fee collection insight for the accountant.
 final feeInsightProvider =
-    FutureProvider.family<AITextResult, FeeInsightInput>((ref, input) async {
+    FutureProvider.autoDispose.family<AITextResult, FeeInsightInput>((ref, input) async {
   final aiStaff = ref.watch(aiStaffTextGeneratorProvider);
 
   final rate = input.totalBilled > 0

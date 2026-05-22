@@ -5,7 +5,7 @@ import '../../../core/services/ai_text_generator.dart';
 
 /// Provides an AI-generated book recommendation for the librarian.
 final libraryInsightProvider =
-    FutureProvider.family<AITextResult, LibraryInsightInput>(
+    FutureProvider.autoDispose.family<AITextResult, LibraryInsightInput>(
         (ref, input) async {
   final aiStaff = ref.watch(aiStaffTextGeneratorProvider);
 

@@ -8,7 +8,7 @@ import '../../../core/services/ai_text_generator.dart';
 /// Uses the fee collection insight generator repurposed for canteen revenue,
 /// since canteen has similar financial metrics (orders = invoices).
 final canteenInsightProvider =
-    FutureProvider.family<AITextResult, CanteenInsightInput>(
+    FutureProvider.autoDispose.family<AITextResult, CanteenInsightInput>(
         (ref, input) async {
   final aiStaff = ref.watch(aiStaffTextGeneratorProvider);
 

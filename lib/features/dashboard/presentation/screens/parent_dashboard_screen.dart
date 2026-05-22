@@ -188,7 +188,7 @@ class ParentDashboardScreen extends ConsumerWidget {
                 const SizedBox(height: 32),
 
                 // Weekly Attendance (real data)
-                _buildSectionHeader(context, "Attendance Insights", "View Details",
+                _buildSectionHeader(context, 'Attendance Insights', 'View Details',
                     () => context.push(AppRoutes.attendance)),
                 const SizedBox(height: 16),
                 const _WeeklyAttendanceSection(),
@@ -342,10 +342,10 @@ class _QuickStatsSection extends ConsumerWidget {
     final studentId = selectedChild?['student_id'] as String?;
 
     if (studentId == null) {
-      return Row(
+      return const Row(
         children: [
           _ParentStatTile(label: 'Attendance', value: '--', icon: Icons.calendar_today_rounded, color: AppColors.grey400),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           _ParentStatTile(label: 'Class Rank', value: '--', icon: Icons.leaderboard_rounded, color: AppColors.grey400),
         ],
       );
@@ -354,17 +354,17 @@ class _QuickStatsSection extends ConsumerWidget {
     final statsAsync = ref.watch(attendanceStatsProvider(studentId));
 
     return statsAsync.when(
-      loading: () => Row(
+      loading: () => const Row(
         children: [
           _ParentStatTile(label: 'Attendance', value: '...', icon: Icons.calendar_today_rounded, color: AppColors.grey400),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           _ParentStatTile(label: 'Class Rank', value: '...', icon: Icons.leaderboard_rounded, color: AppColors.grey400),
         ],
       ),
-      error: (_, __) => Row(
+      error: (_, __) => const Row(
         children: [
           _ParentStatTile(label: 'Attendance', value: '--', icon: Icons.calendar_today_rounded, color: AppColors.error),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           _ParentStatTile(label: 'Class Rank', value: '--', icon: Icons.leaderboard_rounded, color: AppColors.grey400),
         ],
       ),
@@ -386,7 +386,7 @@ class _QuickStatsSection extends ConsumerWidget {
                       : AppColors.error,
             ),
             const SizedBox(width: 12),
-            _ParentStatTile(
+            const _ParentStatTile(
               label: 'Class Rank',
               value: '--',
               icon: Icons.leaderboard_rounded,
@@ -466,7 +466,7 @@ class _WeeklyAttendanceSection extends ConsumerWidget {
             children: [
               Text(
                 days[index],
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppColors.grey400,
@@ -550,7 +550,7 @@ class _FeeSummarySection extends ConsumerWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Outstanding Balance',
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.grey500),
                       ),
@@ -974,7 +974,7 @@ class _ParentStatTile extends StatelessWidget {
             ),
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
                 color: AppColors.grey500,
                 fontWeight: FontWeight.w600,

@@ -50,7 +50,7 @@ class AlertsFilter {
 
 /// Fetches a paginated, optionally filtered list of early warning alerts.
 final alertsProvider =
-    FutureProvider.family<List<EarlyWarningAlert>, AlertsFilter>(
+    FutureProvider.autoDispose.family<List<EarlyWarningAlert>, AlertsFilter>(
   (ref, filter) async {
     final repo = ref.watch(earlyWarningRepositoryProvider);
     return repo.getAlerts(
@@ -63,7 +63,7 @@ final alertsProvider =
 );
 
 /// Returns the total count of unresolved alerts (new + acknowledged + in_progress).
-final unresolvedAlertCountProvider = FutureProvider<int>(
+final unresolvedAlertCountProvider = FutureProvider.autoDispose<int>(
   (ref) async {
     final repo = ref.watch(earlyWarningRepositoryProvider);
     return repo.getUnresolvedCount();
@@ -72,7 +72,7 @@ final unresolvedAlertCountProvider = FutureProvider<int>(
 
 /// Fetches a single alert by its ID, including joined student data.
 final alertDetailProvider =
-    FutureProvider.family<EarlyWarningAlert?, String>(
+    FutureProvider.autoDispose.family<EarlyWarningAlert?, String>(
   (ref, alertId) async {
     final repo = ref.watch(earlyWarningRepositoryProvider);
     return repo.getAlertById(alertId);
@@ -80,7 +80,7 @@ final alertDetailProvider =
 );
 
 /// Fetches all alert rules for the current tenant.
-final alertRulesProvider = FutureProvider<List<AlertRule>>(
+final alertRulesProvider = FutureProvider.autoDispose<List<AlertRule>>(
   (ref) async {
     final repo = ref.watch(earlyWarningRepositoryProvider);
     return repo.getAlertRules();
@@ -93,7 +93,7 @@ final alertRulesProvider = FutureProvider<List<AlertRule>>(
 /// generator to produce a human-readable explanation. Falls back to the
 /// un-enriched alert if the LLM is unavailable.
 final enrichedAlertDetailProvider =
-    FutureProvider.family<EarlyWarningAlert?, String>(
+    FutureProvider.autoDispose.family<EarlyWarningAlert?, String>(
   (ref, alertId) async {
     final alert = await ref.watch(alertDetailProvider(alertId).future);
     if (alert == null) return null;

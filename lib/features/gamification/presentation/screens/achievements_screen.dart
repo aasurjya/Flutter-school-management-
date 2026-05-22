@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../data/models/achievement.dart';
 import '../../providers/gamification_provider.dart';
 
@@ -416,12 +417,12 @@ class _AchievementBadge extends StatelessWidget {
         );
       } else {
         // Network URL
-        imageWidget = Image.network(
-          iconUrl,
+        imageWidget = CachedNetworkImage(
+              imageUrl: iconUrl,
           width: size,
           height: size,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildFallbackCircle(size, iconSize),
+          errorWidget: (_, __, ___) => _buildFallbackCircle(size, iconSize),
         );
       }
 

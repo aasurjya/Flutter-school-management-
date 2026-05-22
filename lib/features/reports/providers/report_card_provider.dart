@@ -8,7 +8,7 @@ final reportCardRepositoryProvider = Provider<ReportCardRepository>((ref) {
 });
 
 final reportCardsProvider =
-    FutureProvider.family<List<ReportCard>, ReportCardFilter>(
+    FutureProvider.autoDispose.family<List<ReportCard>, ReportCardFilter>(
   (ref, filter) async {
     final repository = ref.watch(reportCardRepositoryProvider);
     return repository.getReportCards(
@@ -23,13 +23,13 @@ final reportCardsProvider =
 );
 
 final reportCardByIdProvider =
-    FutureProvider.family<ReportCard?, String>((ref, id) async {
+    FutureProvider.autoDispose.family<ReportCard?, String>((ref, id) async {
   final repository = ref.watch(reportCardRepositoryProvider);
   return repository.getReportCardById(id);
 });
 
 final studentReportCardProvider =
-    FutureProvider.family<ReportCard?, StudentReportCardParams>(
+    FutureProvider.autoDispose.family<ReportCard?, StudentReportCardParams>(
   (ref, params) async {
     final repository = ref.watch(reportCardRepositoryProvider);
     return repository.getStudentReportCard(
@@ -41,7 +41,7 @@ final studentReportCardProvider =
 );
 
 final reportCardDataProvider =
-    FutureProvider.family<ReportCardData, StudentReportCardParams>(
+    FutureProvider.autoDispose.family<ReportCardData, StudentReportCardParams>(
   (ref, params) async {
     final repository = ref.watch(reportCardRepositoryProvider);
     return repository.generateReportCardData(
@@ -53,13 +53,13 @@ final reportCardDataProvider =
 );
 
 final reportCardTemplatesProvider =
-    FutureProvider<List<ReportCardTemplate>>((ref) async {
+    FutureProvider.autoDispose<List<ReportCardTemplate>>((ref) async {
   final repository = ref.watch(reportCardRepositoryProvider);
   return repository.getTemplates();
 });
 
 final defaultTemplateProvider =
-    FutureProvider<ReportCardTemplate?>((ref) async {
+    FutureProvider.autoDispose<ReportCardTemplate?>((ref) async {
   final repository = ref.watch(reportCardRepositoryProvider);
   return repository.getDefaultTemplate();
 });
@@ -191,7 +191,7 @@ class ReportGenerationNotifier extends StateNotifier<ReportGenerationState> {
 }
 
 final reportGenerationProvider =
-    StateNotifierProvider<ReportGenerationNotifier, ReportGenerationState>(
+    StateNotifierProvider.autoDispose<ReportGenerationNotifier, ReportGenerationState>(
   (ref) {
     final repository = ref.watch(reportCardRepositoryProvider);
     return ReportGenerationNotifier(repository);

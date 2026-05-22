@@ -304,7 +304,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Enrollment Strength',
                 style: TextStyle(
                   fontSize: 12,
@@ -324,7 +324,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
+              const Text(
                 'Total students active this term',
                 style: TextStyle(
                   fontSize: 14,
@@ -495,7 +495,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             color: AppColors.warning,
           ),
           const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
-          _SummaryItem(
+          const _SummaryItem(
             icon: Icons.calendar_today_rounded,
             label: 'Scheduled Events',
             // TODO(sprint-1.6): wire to eventsProvider when built
@@ -644,7 +644,7 @@ class _MetricCard extends StatelessWidget {
           ),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               color: AppColors.grey500,
               fontWeight: FontWeight.w600,
@@ -802,7 +802,7 @@ class _SummaryItem extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 color: AppColors.grey600,
                 fontWeight: FontWeight.w500,
@@ -880,7 +880,7 @@ class _ActivityTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   data.subtitle,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.grey500,
                   ),
@@ -891,7 +891,7 @@ class _ActivityTile extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             data.time,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.grey400,
               fontSize: 12,
               fontWeight: FontWeight.w600,

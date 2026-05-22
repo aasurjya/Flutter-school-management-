@@ -18,7 +18,7 @@ final studentPortfolioRepositoryProvider =
 // ============================================================
 
 final portfolioSummaryProvider =
-    FutureProvider.family<PortfolioSummary, String>((ref, studentId) async {
+    FutureProvider.autoDispose.family<PortfolioSummary, String>((ref, studentId) async {
   final repo = ref.watch(studentPortfolioRepositoryProvider);
   return repo.getPortfolioSummary(studentId);
 });
@@ -28,7 +28,7 @@ final portfolioSummaryProvider =
 // ============================================================
 
 final portfolioWorkProvider =
-    FutureProvider.family<List<PortfolioWork>, String>((ref, studentId) async {
+    FutureProvider.autoDispose.family<List<PortfolioWork>, String>((ref, studentId) async {
   final repo = ref.watch(studentPortfolioRepositoryProvider);
   return repo.getPortfolioWork(studentId);
 });

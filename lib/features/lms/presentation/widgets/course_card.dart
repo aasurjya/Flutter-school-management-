@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/lms.dart';
 import '../../../../shared/widgets/glass_card.dart';
@@ -44,12 +45,12 @@ class CourseCard extends StatelessWidget {
                   ClipRRect(
                     borderRadius:
                         const BorderRadius.vertical(top: Radius.circular(20)),
-                    child: Image.network(
-                      course.thumbnailUrl!,
+                    child: CachedNetworkImage(
+              imageUrl: course.thumbnailUrl!,
                       width: double.infinity,
                       height: 120,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                      errorWidget: (_, __, ___) => const SizedBox.shrink(),
                     ),
                   ),
                 // Status badge

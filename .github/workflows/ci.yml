@@ -6,33 +6,40 @@ on:
   pull_request:
     branches: [main]
 
+# Separated jobs so a Supabase token rotation can't fail the test gate.
+# `test` is the PR status check. `db-push` runs only on main pushes and
+# self-skips if Supabase secrets are missing.
+
 jobs:
+  # ===========================================================
+  # TEST — analyzer + unit + widget tests
+  # ===========================================================
   test:
-    name: Flutter Analyze + Unit + Widget + DB Push + Integration
+    name: Analyze + Unit + Widget Tests
     runs-on: ubuntu-latest
 
     steps:
-      # -------------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # -------------------------------------------------------
       - name: Set up Flutter (stable)
         uses: subosito/flutter-action@v2
         with:
           channel: stable
 
-      # -------------------------------------------------------
-      - name: Set up Supabase CLI
-        uses: supabase/setup-cli@v1
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
         with:
-          version: latest
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
 
-      # -------------------------------------------------------
       - name: Install Flutter dependencies
         run: flutter pub get
 
-      # -------------------------------------------------------
       - name: Create .env for dotenv asset bundling
         run: |
           cat <<'EOF' > .env
@@ -44,52 +51,80 @@ jobs:
           EOF
           sed -i 's/^ *//' .env
 
-      # -------------------------------------------------------
       - name: flutter analyze (zero errors gate)
-        # Only fail on actual errors; warnings/infos are allowed
         run: |
           flutter analyze --no-pub 2>&1 | tee /tmp/analyze.txt || true
           if grep -qE "^   error " /tmp/analyze.txt; then
+            echo "::error::Analyzer errors found:"
             grep -E "^   error " /tmp/analyze.txt
             exit 1
           fi
 
-      # -------------------------------------------------------
-      - name: Unit + widget tests
-        run: flutter test test/ --reporter=github
+      - name: Design-token discipline (ratchet)
+        # Fails the build when new Color(0xFF…) or fontSize: literals are
+        # added to lib/features/. Existing violations are pinned in
+        # tool/design_token_lint_baseline.json — remove some, then run
+        # `dart run tool/design_token_lint.dart --update-baseline` to lock in.
+        run: dart run tool/design_token_lint.dart
 
-      # -------------------------------------------------------
+      - name: Unit + widget tests (parallel)
+        run: flutter test test/ --reporter=github --concurrency=4
+
+  # ===========================================================
+  # DB PUSH — Supabase migrations (only on main, tolerant of missing secrets)
+  # ===========================================================
+  db-push:
+    name: Push Supabase Migrations
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Check Supabase secrets are configured
+        id: secrets_check
+        run: |
+          if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ] || [ -z "${{ secrets.SUPABASE_PROJECT_REF }}" ]; then
+            echo "::warning::SUPABASE_ACCESS_TOKEN or SUPABASE_PROJECT_REF not set — skipping DB push. Rotate token in repo settings to re-enable."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Link Supabase project
+        if: steps.secrets_check.outputs.skip == 'false'
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          if ! supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}; then
+            echo "::warning::supabase link failed (token expired or project ref wrong). Rotate SUPABASE_ACCESS_TOKEN."
+            exit 0
+          fi
 
-      # -------------------------------------------------------
       - name: Push database migrations
+        if: steps.secrets_check.outputs.skip == 'false'
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: supabase db push --include-all
+        run: |
+          if ! supabase db push --include-all; then
+            echo "::warning::supabase db push failed. Inspect migrations and re-run manually."
+            exit 0
+          fi
 
-      # -------------------------------------------------------
-      # Integration tests — disabled until integration_test/ directory exists
-      # - name: Integration tests (against remote DB, headless Chrome)
-      #   run: |
-      #     flutter test integration_test/ \
-      #       -d chrome \
-      #       --dart-define=TEST_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-      #       --dart-define=TEST_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
-      #       --dart-define=TEST_ADMIN_EMAIL=${{ secrets.TEST_ADMIN_EMAIL }} \
-      #       --dart-define=TEST_ADMIN_PASSWORD=${{ secrets.TEST_ADMIN_PASSWORD }} \
-      #       --reporter=github
-
-  # -----------------------------------------------------------
-  # Deploy job — only runs on main branch after tests pass
-  # -----------------------------------------------------------
+  # ===========================================================
+  # DEPLOY — Flutter Web → GitHub Pages
+  # ===========================================================
   deploy:
     name: Deploy Flutter Web to GitHub Pages
     needs: test
     runs-on: ubuntu-latest
-    # Only deploy on direct pushes to main (not PRs)
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     permissions:
@@ -114,6 +149,16 @@ jobs:
         with:
           channel: stable
 
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
       - name: Install Flutter dependencies
         run: flutter pub get
 
@@ -128,8 +173,8 @@ jobs:
           EOF
           sed -i 's/^ *//' .env
 
-      - name: Build Flutter web
-        run: flutter build web --release --base-href /Flutter-school-management-/
+      - name: Build Flutter web (release, tree-shake icons)
+        run: flutter build web --release --base-href /Flutter-school-management-/ --tree-shake-icons
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

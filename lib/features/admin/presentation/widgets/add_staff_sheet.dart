@@ -262,12 +262,12 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          const Row(
                             children: [
-                              const Icon(Icons.warning_amber_rounded,
+                              Icon(Icons.warning_amber_rounded,
                                   size: 14, color: Colors.amber),
-                              const SizedBox(width: 6),
-                              const Expanded(
+                              SizedBox(width: 6),
+                              Expanded(
                                 child: Text(
                                   'Save these before creating — password shown here only.',
                                   style: TextStyle(

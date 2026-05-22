@@ -152,7 +152,7 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
                 ),
 
               // Contact section
-              _SectionTitle('Contact'),
+              const _SectionTitle('Contact'),
               _InfoRow(Icons.email_outlined, 'Email', email),
               if (phone != null)
                 _InfoRow(Icons.phone_outlined, 'Phone', phone),
@@ -175,7 +175,7 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle('Account'),
+        const _SectionTitle('Account'),
         InkWell(
           borderRadius: BorderRadius.circular(8),
           onTap: () => _resetPassword(user['id']?.toString() ?? '', email),
@@ -282,7 +282,7 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        _SectionTitle('Professional Details'),
+        const _SectionTitle('Professional Details'),
         if (staff['designation'] != null)
           _InfoRow(Icons.badge_outlined, 'Designation',
               staff['designation'].toString()),
@@ -311,7 +311,7 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        _SectionTitle('Student Details'),
+        const _SectionTitle('Student Details'),
         if (user['gender'] != null)
           _InfoRow(Icons.person_outline, 'Gender', user['gender'].toString()),
         if (dob != null) _InfoRow(Icons.cake_outlined, 'Date of Birth', dob),
@@ -326,7 +326,7 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        _SectionTitle('Parent Details'),
+        const _SectionTitle('Parent Details'),
         if (user['address'] != null)
           _InfoRow(
               Icons.home_outlined, 'Address', user['address'].toString()),
@@ -344,7 +344,7 @@ class _UserProfileDetailSheetState extends State<UserProfileDetailSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        _SectionTitle('Staff Details'),
+        const _SectionTitle('Staff Details'),
         if (staff['designation'] != null)
           _InfoRow(Icons.badge_outlined, 'Designation',
               staff['designation'].toString()),

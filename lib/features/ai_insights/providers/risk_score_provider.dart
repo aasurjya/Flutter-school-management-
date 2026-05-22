@@ -97,7 +97,7 @@ class RiskDistributionFilter {
 // --- Providers ---
 
 final sectionRiskScoresProvider =
-    FutureProvider.family<List<StudentRiskScore>, SectionRiskFilter>(
+    FutureProvider.autoDispose.family<List<StudentRiskScore>, SectionRiskFilter>(
   (ref, filter) async {
     final repo = ref.watch(riskScoreRepositoryProvider);
     return repo.getSectionRiskScores(filter.sectionId, filter.academicYearId);
@@ -105,7 +105,7 @@ final sectionRiskScoresProvider =
 );
 
 final studentRiskScoreProvider =
-    FutureProvider.family<StudentRiskScore?, StudentRiskFilter>(
+    FutureProvider.autoDispose.family<StudentRiskScore?, StudentRiskFilter>(
   (ref, filter) async {
     final repo = ref.watch(riskScoreRepositoryProvider);
     return repo.getStudentRiskScore(filter.studentId, filter.academicYearId);
@@ -113,7 +113,7 @@ final studentRiskScoreProvider =
 );
 
 final atRiskStudentsProvider =
-    FutureProvider.family<List<StudentRiskScore>, AtRiskFilter>(
+    FutureProvider.autoDispose.family<List<StudentRiskScore>, AtRiskFilter>(
   (ref, filter) async {
     final repo = ref.watch(riskScoreRepositoryProvider);
     return repo.getAtRiskStudents(
@@ -125,7 +125,7 @@ final atRiskStudentsProvider =
 );
 
 final riskDistributionProvider =
-    FutureProvider.family<Map<String, int>, RiskDistributionFilter>(
+    FutureProvider.autoDispose.family<Map<String, int>, RiskDistributionFilter>(
   (ref, filter) async {
     final repo = ref.watch(riskScoreRepositoryProvider);
     return repo.getRiskDistribution(
@@ -138,7 +138,7 @@ final riskDistributionProvider =
 /// Enriches the base risk score with an LLM-generated explanation.
 /// Falls back to null explanation if LLM is unavailable.
 final enrichedStudentRiskProvider =
-    FutureProvider.family<StudentRiskScore?, StudentRiskFilter>(
+    FutureProvider.autoDispose.family<StudentRiskScore?, StudentRiskFilter>(
   (ref, filter) async {
     final risk = await ref.watch(studentRiskScoreProvider(filter).future);
     if (risk == null) return null;

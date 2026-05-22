@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/alumni.dart';
 import '../../providers/alumni_provider.dart';
@@ -138,12 +139,12 @@ class _SuccessStoriesScreenState extends ConsumerState<SuccessStoriesScreen> {
                 if (story.imageUrl != null) ...[
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: Image.network(
-                      story.imageUrl!,
+                    child: CachedNetworkImage(
+              imageUrl: story.imageUrl!,
                       height: 200,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
+                      errorWidget: (_, __, ___) =>
                           const SizedBox.shrink(),
                     ),
                   ),

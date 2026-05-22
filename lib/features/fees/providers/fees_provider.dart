@@ -8,12 +8,12 @@ final feeRepositoryProvider = Provider<FeeRepository>((ref) {
   return FeeRepository(ref.watch(supabaseProvider));
 });
 
-final feeHeadsProvider = FutureProvider<List<FeeHead>>((ref) async {
+final feeHeadsProvider = FutureProvider.autoDispose<List<FeeHead>>((ref) async {
   final repository = ref.watch(feeRepositoryProvider);
   return repository.getFeeHeads();
 });
 
-final feeStructuresProvider = FutureProvider.family<List<FeeStructure>, FeeStructureFilter>(
+final feeStructuresProvider = FutureProvider.autoDispose.family<List<FeeStructure>, FeeStructureFilter>(
   (ref, filter) async {
     final repository = ref.watch(feeRepositoryProvider);
     return repository.getFeeStructures(
@@ -24,7 +24,7 @@ final feeStructuresProvider = FutureProvider.family<List<FeeStructure>, FeeStruc
   },
 );
 
-final invoicesProvider = FutureProvider.family<List<Invoice>, InvoicesFilter>(
+final invoicesProvider = FutureProvider.autoDispose.family<List<Invoice>, InvoicesFilter>(
   (ref, filter) async {
     final repository = ref.watch(feeRepositoryProvider);
     return repository.getInvoices(
@@ -35,14 +35,14 @@ final invoicesProvider = FutureProvider.family<List<Invoice>, InvoicesFilter>(
   },
 );
 
-final invoiceByIdProvider = FutureProvider.family<Invoice?, String>(
+final invoiceByIdProvider = FutureProvider.autoDispose.family<Invoice?, String>(
   (ref, invoiceId) async {
     final repository = ref.watch(feeRepositoryProvider);
     return repository.getInvoiceById(invoiceId);
   },
 );
 
-final studentFeeSummaryProvider = FutureProvider.family<FeeSummary?, StudentFeeFilter>(
+final studentFeeSummaryProvider = FutureProvider.autoDispose.family<FeeSummary?, StudentFeeFilter>(
   (ref, filter) async {
     final repository = ref.watch(feeRepositoryProvider);
     return repository.getStudentFeeSummary(
@@ -52,7 +52,7 @@ final studentFeeSummaryProvider = FutureProvider.family<FeeSummary?, StudentFeeF
   },
 );
 
-final feeSummariesProvider = FutureProvider.family<List<FeeSummary>, FeeSummaryFilter>(
+final feeSummariesProvider = FutureProvider.autoDispose.family<List<FeeSummary>, FeeSummaryFilter>(
   (ref, filter) async {
     final repository = ref.watch(feeRepositoryProvider);
     return repository.getFeeSummaries(
@@ -63,26 +63,26 @@ final feeSummariesProvider = FutureProvider.family<List<FeeSummary>, FeeSummaryF
   },
 );
 
-final feeCollectionStatsProvider = FutureProvider.family<Map<String, double>, String?>(
+final feeCollectionStatsProvider = FutureProvider.autoDispose.family<Map<String, double>, String?>(
   (ref, academicYearId) async {
     final repository = ref.watch(feeRepositoryProvider);
     return repository.getFeeCollectionStats(academicYearId: academicYearId);
   },
 );
 
-final overdueInvoicesProvider = FutureProvider<List<Invoice>>((ref) async {
+final overdueInvoicesProvider = FutureProvider.autoDispose<List<Invoice>>((ref) async {
   final repository = ref.watch(feeRepositoryProvider);
   return repository.getOverdueInvoices();
 });
 
 /// Predictive fee collection — calls predict_fee_defaults() RPC.
 final feeDefaultPredictionsProvider =
-    FutureProvider<List<FeeDefaultPrediction>>((ref) async {
+    FutureProvider.autoDispose<List<FeeDefaultPrediction>>((ref) async {
   final repository = ref.watch(feeRepositoryProvider);
   return repository.getFeeDefaultPredictions();
 });
 
-final paymentsProvider = FutureProvider.family<List<Payment>, PaymentsFilter>(
+final paymentsProvider = FutureProvider.autoDispose.family<List<Payment>, PaymentsFilter>(
   (ref, filter) async {
     final repository = ref.watch(feeRepositoryProvider);
     return repository.getPayments(
@@ -266,7 +266,7 @@ class FeesNotifier extends StateNotifier<AsyncValue<List<Invoice>>> {
 }
 
 final feesNotifierProvider =
-    StateNotifierProvider<FeesNotifier, AsyncValue<List<Invoice>>>((ref) {
+    StateNotifierProvider.autoDispose<FeesNotifier, AsyncValue<List<Invoice>>>((ref) {
   final repository = ref.watch(feeRepositoryProvider);
   return FeesNotifier(repository);
 });
@@ -294,7 +294,7 @@ class FeeHeadsNotifier extends StateNotifier<AsyncValue<List<FeeHead>>> {
 }
 
 final feeHeadsNotifierProvider =
-    StateNotifierProvider<FeeHeadsNotifier, AsyncValue<List<FeeHead>>>((ref) {
+    StateNotifierProvider.autoDispose<FeeHeadsNotifier, AsyncValue<List<FeeHead>>>((ref) {
   final repository = ref.watch(feeRepositoryProvider);
   return FeeHeadsNotifier(repository);
 });

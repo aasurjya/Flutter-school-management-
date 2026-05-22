@@ -12,13 +12,13 @@ final inventoryRepositoryProvider = Provider<InventoryRepository>((ref) {
 // ==================== CATEGORIES ====================
 
 final assetCategoriesProvider =
-    FutureProvider<List<AssetCategory>>((ref) async {
+    FutureProvider.autoDispose<List<AssetCategory>>((ref) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getCategories();
 });
 
 final flatCategoriesProvider =
-    FutureProvider<List<AssetCategory>>((ref) async {
+    FutureProvider.autoDispose<List<AssetCategory>>((ref) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getFlatCategories();
 });
@@ -26,7 +26,7 @@ final flatCategoriesProvider =
 // ==================== ASSETS ====================
 
 final assetsProvider =
-    FutureProvider.family<List<Asset>, AssetFilter>((ref, filter) async {
+    FutureProvider.autoDispose.family<List<Asset>, AssetFilter>((ref, filter) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getAssets(
     categoryId: filter.categoryId,
@@ -37,18 +37,18 @@ final assetsProvider =
 });
 
 final assetByIdProvider =
-    FutureProvider.family<Asset?, String>((ref, id) async {
+    FutureProvider.autoDispose.family<Asset?, String>((ref, id) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getAssetById(id);
 });
 
 final assetByQrProvider =
-    FutureProvider.family<Asset?, String>((ref, qrData) async {
+    FutureProvider.autoDispose.family<Asset?, String>((ref, qrData) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getAssetByQrCode(qrData);
 });
 
-final assetLocationsProvider = FutureProvider<List<String>>((ref) async {
+final assetLocationsProvider = FutureProvider.autoDispose<List<String>>((ref) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getAssetLocations();
 });
@@ -56,14 +56,14 @@ final assetLocationsProvider = FutureProvider<List<String>>((ref) async {
 // ==================== ASSIGNMENTS ====================
 
 final assetAssignmentHistoryProvider =
-    FutureProvider.family<List<AssetAssignment>, String>(
+    FutureProvider.autoDispose.family<List<AssetAssignment>, String>(
         (ref, assetId) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getAssignmentHistory(assetId);
 });
 
 final activeAssignmentsProvider =
-    FutureProvider<List<AssetAssignment>>((ref) async {
+    FutureProvider.autoDispose<List<AssetAssignment>>((ref) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getActiveAssignments();
 });
@@ -71,7 +71,7 @@ final activeAssignmentsProvider =
 // ==================== MAINTENANCE ====================
 
 final maintenanceRecordsProvider =
-    FutureProvider.family<List<AssetMaintenance>, MaintenanceFilter>(
+    FutureProvider.autoDispose.family<List<AssetMaintenance>, MaintenanceFilter>(
         (ref, filter) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getMaintenanceRecords(
@@ -81,7 +81,7 @@ final maintenanceRecordsProvider =
 });
 
 final maintenanceDueProvider =
-    FutureProvider<List<AssetMaintenance>>((ref) async {
+    FutureProvider.autoDispose<List<AssetMaintenance>>((ref) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getMaintenanceDue();
 });
@@ -89,7 +89,7 @@ final maintenanceDueProvider =
 // ==================== INVENTORY ITEMS ====================
 
 final inventoryItemsProvider =
-    FutureProvider.family<List<InventoryItem>, InventoryFilter>(
+    FutureProvider.autoDispose.family<List<InventoryItem>, InventoryFilter>(
         (ref, filter) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getInventoryItems(
@@ -100,20 +100,20 @@ final inventoryItemsProvider =
 });
 
 final inventoryItemByIdProvider =
-    FutureProvider.family<InventoryItem?, String>((ref, id) async {
+    FutureProvider.autoDispose.family<InventoryItem?, String>((ref, id) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getInventoryItemById(id);
 });
 
 final lowStockItemsProvider =
-    FutureProvider<List<InventoryItem>>((ref) async {
+    FutureProvider.autoDispose<List<InventoryItem>>((ref) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getLowStockItems();
 });
 
 // ==================== TRANSACTIONS ====================
 
-final transactionHistoryProvider = FutureProvider.family<
+final transactionHistoryProvider = FutureProvider.autoDispose.family<
     List<InventoryTransaction>, TransactionFilter>((ref, filter) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getTransactionHistory(
@@ -127,21 +127,21 @@ final transactionHistoryProvider = FutureProvider.family<
 // ==================== PURCHASE REQUESTS ====================
 
 final purchaseRequestsProvider =
-    FutureProvider.family<List<PurchaseRequest>, String?>(
+    FutureProvider.autoDispose.family<List<PurchaseRequest>, String?>(
         (ref, status) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getPurchaseRequests(status: status);
 });
 
 final purchaseRequestByIdProvider =
-    FutureProvider.family<PurchaseRequest?, String>((ref, id) async {
+    FutureProvider.autoDispose.family<PurchaseRequest?, String>((ref, id) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getPurchaseRequestById(id);
 });
 
 // ==================== AUDITS ====================
 
-final assetAuditsProvider = FutureProvider<List<AssetAudit>>((ref) async {
+final assetAuditsProvider = FutureProvider.autoDispose<List<AssetAudit>>((ref) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getAudits();
 });
@@ -149,13 +149,13 @@ final assetAuditsProvider = FutureProvider<List<AssetAudit>>((ref) async {
 // ==================== STATISTICS ====================
 
 final inventoryStatsProvider =
-    FutureProvider<Map<String, dynamic>>((ref) async {
+    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getInventoryStats();
 });
 
 final assetDepreciationProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, String>(
+    FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String>(
         (ref, assetId) async {
   final repository = ref.watch(inventoryRepositoryProvider);
   return repository.getAssetDepreciation(assetId);

@@ -13,7 +13,7 @@ final gradebookRepositoryProvider = Provider<GradebookRepository>((ref) {
 // ─── Categories ─────────────────────────────────────────────────────────────
 
 final gradingCategoriesProvider =
-    FutureProvider.family<List<GradingCategory>, String>(
+    FutureProvider.autoDispose.family<List<GradingCategory>, String>(
   (ref, classSubjectId) async {
     final repo = ref.watch(gradebookRepositoryProvider);
     return repo.getCategories(classSubjectId);
@@ -23,7 +23,7 @@ final gradingCategoriesProvider =
 // ─── Grade Entries ───────────────────────────────────────────────────────────
 
 final gradeEntriesProvider =
-    FutureProvider.family<List<GradeEntry>, GradeEntriesParams>(
+    FutureProvider.autoDispose.family<List<GradeEntry>, GradeEntriesParams>(
   (ref, params) async {
     final repo = ref.watch(gradebookRepositoryProvider);
     return repo.getGradeEntries(params.categoryId, studentId: params.studentId);
@@ -33,7 +33,7 @@ final gradeEntriesProvider =
 // ─── Class Grades ────────────────────────────────────────────────────────────
 
 final classGradesProvider =
-    FutureProvider.family<List<StudentGrade>, ClassGradesParams>(
+    FutureProvider.autoDispose.family<List<StudentGrade>, ClassGradesParams>(
   (ref, params) async {
     final repo = ref.watch(gradebookRepositoryProvider);
     return repo.getClassGrades(params.classSubjectId, params.students);
@@ -43,7 +43,7 @@ final classGradesProvider =
 // ─── Single Student Grade ─────────────────────────────────────────────────────
 
 final studentGradeProvider =
-    FutureProvider.family<StudentGrade, StudentGradeParams>(
+    FutureProvider.autoDispose.family<StudentGrade, StudentGradeParams>(
   (ref, params) async {
     final repo = ref.watch(gradebookRepositoryProvider);
     return repo.getStudentGrades(

@@ -254,8 +254,8 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 // Today's Schedule - Elevated
                 _buildSectionHeader(
                   context,
-                  "Academic Schedule",
-                  "See Timeline",
+                  'Academic Schedule',
+                  'See Timeline',
                   onAction: () => context.push(AppRoutes.teacherTimetable),
                 ),
                 const SizedBox(height: 16),
@@ -392,8 +392,8 @@ class TeacherDashboardScreen extends ConsumerWidget {
         const SizedBox(height: 32),
         _buildSectionHeader(
           context,
-          "Student Insights",
-          "Analytics",
+          'Student Insights',
+          'Analytics',
           onAction: () => context.push(AppRoutes.classIntelligence.replaceFirst(':sectionId', 'default')),
         ),
         const SizedBox(height: 16),
@@ -505,7 +505,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 ),
                 subtitle: Text(
                   task['desc'] as String,
-                  style: TextStyle(fontSize: 12, color: AppColors.grey500, fontWeight: FontWeight.w500),
+                  style: const TextStyle(fontSize: 12, color: AppColors.grey500, fontWeight: FontWeight.w500),
                 ),
                 trailing: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -592,7 +592,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              Text(
+                              const Text(
                                 'My Class',
                                 style: TextStyle(
                                   color: AppColors.grey500,
@@ -603,7 +603,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        Icon(Icons.arrow_forward_ios_rounded, color: AppColors.grey300, size: 16),
+                        const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.grey300, size: 16),
                       ],
                     ),
                   ),
@@ -769,7 +769,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
                                   ),
                                   Text(
                                     'Risk Score: ${student.overallRiskScore}',
-                                    style: TextStyle(fontSize: 12, color: AppColors.error, fontWeight: FontWeight.w600),
+                                    style: const TextStyle(fontSize: 12, color: AppColors.error, fontWeight: FontWeight.w600),
                                   ),
                                 ],
                               ),
@@ -844,14 +844,14 @@ class TeacherDashboardScreen extends ConsumerWidget {
                               ),
                               Text(
                                 alert.title,
-                                style: TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                                style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
                         ),
-                        Icon(Icons.chevron_right_rounded, color: AppColors.grey300),
+                        const Icon(Icons.chevron_right_rounded, color: AppColors.grey300),
                       ],
                     ),
                   ),
@@ -1045,7 +1045,7 @@ class _TeacherStatTile extends StatelessWidget {
             ),
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
                 color: AppColors.grey500,
                 fontWeight: FontWeight.w600,

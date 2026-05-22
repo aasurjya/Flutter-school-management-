@@ -10,13 +10,13 @@ final announcementRepositoryProvider = Provider<AnnouncementRepository>((ref) {
 });
 
 /// All announcements provider (for admin)
-final announcementsProvider = FutureProvider<List<Announcement>>((ref) async {
+final announcementsProvider = FutureProvider.autoDispose<List<Announcement>>((ref) async {
   final repository = ref.watch(announcementRepositoryProvider);
   return repository.getAnnouncements();
 });
 
 /// Published announcements for a specific role
-final publishedAnnouncementsProvider = FutureProvider.family<List<Announcement>, String>(
+final publishedAnnouncementsProvider = FutureProvider.autoDispose.family<List<Announcement>, String>(
   (ref, targetRole) async {
     final repository = ref.watch(announcementRepositoryProvider);
     return repository.getPublishedAnnouncements(targetRole: targetRole);
@@ -24,7 +24,7 @@ final publishedAnnouncementsProvider = FutureProvider.family<List<Announcement>,
 );
 
 /// Single announcement by ID
-final announcementByIdProvider = FutureProvider.family<Announcement?, String>(
+final announcementByIdProvider = FutureProvider.autoDispose.family<Announcement?, String>(
   (ref, id) async {
     final repository = ref.watch(announcementRepositoryProvider);
     return repository.getAnnouncementById(id);
@@ -103,7 +103,7 @@ class AnnouncementsNotifier extends StateNotifier<AsyncValue<List<Announcement>>
 }
 
 final announcementsNotifierProvider =
-    StateNotifierProvider<AnnouncementsNotifier, AsyncValue<List<Announcement>>>((ref) {
+    StateNotifierProvider.autoDispose<AnnouncementsNotifier, AsyncValue<List<Announcement>>>((ref) {
   final repository = ref.watch(announcementRepositoryProvider);
   return AnnouncementsNotifier(repository);
 });

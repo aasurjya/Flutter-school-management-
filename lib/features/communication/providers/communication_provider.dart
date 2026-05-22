@@ -17,7 +17,7 @@ final communicationRepositoryProvider =
 // ============================================================
 
 final communicationDashboardStatsProvider =
-    FutureProvider<CommunicationDashboardStats>((ref) async {
+    FutureProvider.autoDispose<CommunicationDashboardStats>((ref) async {
   final repo = ref.watch(communicationRepositoryProvider);
   return repo.getDashboardStats();
 });
@@ -27,7 +27,7 @@ final communicationDashboardStatsProvider =
 // ============================================================
 
 final templatesProvider =
-    FutureProvider.family<List<CommunicationTemplate>, TemplateCategory?>(
+    FutureProvider.autoDispose.family<List<CommunicationTemplate>, TemplateCategory?>(
   (ref, category) async {
     final repo = ref.watch(communicationRepositoryProvider);
     return repo.getTemplates(category: category);
@@ -35,19 +35,19 @@ final templatesProvider =
 );
 
 final allTemplatesProvider =
-    FutureProvider<List<CommunicationTemplate>>((ref) async {
+    FutureProvider.autoDispose<List<CommunicationTemplate>>((ref) async {
   final repo = ref.watch(communicationRepositoryProvider);
   return repo.getTemplates();
 });
 
 final activeTemplatesProvider =
-    FutureProvider<List<CommunicationTemplate>>((ref) async {
+    FutureProvider.autoDispose<List<CommunicationTemplate>>((ref) async {
   final repo = ref.watch(communicationRepositoryProvider);
   return repo.getTemplates(activeOnly: true);
 });
 
 final templateByIdProvider =
-    FutureProvider.family<CommunicationTemplate?, String>(
+    FutureProvider.autoDispose.family<CommunicationTemplate?, String>(
   (ref, id) async {
     final repo = ref.watch(communicationRepositoryProvider);
     return repo.getTemplateById(id);
@@ -98,7 +98,7 @@ class TemplatesNotifier
   }
 }
 
-final templatesNotifierProvider = StateNotifierProvider<TemplatesNotifier,
+final templatesNotifierProvider = StateNotifierProvider.autoDispose<TemplatesNotifier,
     AsyncValue<List<CommunicationTemplate>>>((ref) {
   final repo = ref.watch(communicationRepositoryProvider);
   return TemplatesNotifier(repo);
@@ -109,7 +109,7 @@ final templatesNotifierProvider = StateNotifierProvider<TemplatesNotifier,
 // ============================================================
 
 final campaignsProvider =
-    FutureProvider.family<List<CommunicationCampaign>, CampaignStatus?>(
+    FutureProvider.autoDispose.family<List<CommunicationCampaign>, CampaignStatus?>(
   (ref, status) async {
     final repo = ref.watch(communicationRepositoryProvider);
     return repo.getCampaigns(status: status);
@@ -117,13 +117,13 @@ final campaignsProvider =
 );
 
 final allCampaignsProvider =
-    FutureProvider<List<CommunicationCampaign>>((ref) async {
+    FutureProvider.autoDispose<List<CommunicationCampaign>>((ref) async {
   final repo = ref.watch(communicationRepositoryProvider);
   return repo.getCampaigns();
 });
 
 final campaignByIdProvider =
-    FutureProvider.family<CommunicationCampaign?, String>(
+    FutureProvider.autoDispose.family<CommunicationCampaign?, String>(
   (ref, id) async {
     final repo = ref.watch(communicationRepositoryProvider);
     return repo.getCampaignById(id);
@@ -131,7 +131,7 @@ final campaignByIdProvider =
 );
 
 final campaignRecipientsProvider =
-    FutureProvider.family<List<CampaignRecipient>, String>(
+    FutureProvider.autoDispose.family<List<CampaignRecipient>, String>(
   (ref, campaignId) async {
     final repo = ref.watch(communicationRepositoryProvider);
     return repo.getCampaignRecipients(campaignId);
@@ -139,7 +139,7 @@ final campaignRecipientsProvider =
 );
 
 final campaignStatsProvider =
-    FutureProvider.family<CampaignStats, String>(
+    FutureProvider.autoDispose.family<CampaignStats, String>(
   (ref, campaignId) async {
     final repo = ref.watch(communicationRepositoryProvider);
     return repo.getCampaignStats(campaignId);
@@ -209,7 +209,7 @@ class CampaignsNotifier
   }
 }
 
-final campaignsNotifierProvider = StateNotifierProvider<CampaignsNotifier,
+final campaignsNotifierProvider = StateNotifierProvider.autoDispose<CampaignsNotifier,
     AsyncValue<List<CommunicationCampaign>>>((ref) {
   final repo = ref.watch(communicationRepositoryProvider);
   return CampaignsNotifier(repo);
@@ -220,7 +220,7 @@ final campaignsNotifierProvider = StateNotifierProvider<CampaignsNotifier,
 // ============================================================
 
 final communicationLogProvider =
-    FutureProvider.family<List<CommunicationLog>, CommunicationLogFilter>(
+    FutureProvider.autoDispose.family<List<CommunicationLog>, CommunicationLogFilter>(
   (ref, filter) async {
     final repo = ref.watch(communicationRepositoryProvider);
     return repo.getCommunicationLog(filter);
@@ -232,13 +232,13 @@ final communicationLogProvider =
 // ============================================================
 
 final autoRulesProvider =
-    FutureProvider<List<AutoNotificationRule>>((ref) async {
+    FutureProvider.autoDispose<List<AutoNotificationRule>>((ref) async {
   final repo = ref.watch(communicationRepositoryProvider);
   return repo.getAutoRules();
 });
 
 final activeAutoRulesProvider =
-    FutureProvider<List<AutoNotificationRule>>((ref) async {
+    FutureProvider.autoDispose<List<AutoNotificationRule>>((ref) async {
   final repo = ref.watch(communicationRepositoryProvider);
   return repo.getAutoRules(activeOnly: true);
 });
@@ -283,7 +283,7 @@ class AutoRulesNotifier
   }
 }
 
-final autoRulesNotifierProvider = StateNotifierProvider<AutoRulesNotifier,
+final autoRulesNotifierProvider = StateNotifierProvider.autoDispose<AutoRulesNotifier,
     AsyncValue<List<AutoNotificationRule>>>((ref) {
   final repo = ref.watch(communicationRepositoryProvider);
   return AutoRulesNotifier(repo);
@@ -293,12 +293,12 @@ final autoRulesNotifierProvider = StateNotifierProvider<AutoRulesNotifier,
 // SMS & Email Config
 // ============================================================
 
-final smsConfigProvider = FutureProvider<SmsConfig?>((ref) async {
+final smsConfigProvider = FutureProvider.autoDispose<SmsConfig?>((ref) async {
   final repo = ref.watch(communicationRepositoryProvider);
   return repo.getSmsConfig();
 });
 
-final emailConfigProvider = FutureProvider<EmailConfig?>((ref) async {
+final emailConfigProvider = FutureProvider.autoDispose<EmailConfig?>((ref) async {
   final repo = ref.watch(communicationRepositoryProvider);
   return repo.getEmailConfig();
 });

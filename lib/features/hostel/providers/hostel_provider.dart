@@ -8,14 +8,14 @@ final hostelRepositoryProvider = Provider<HostelRepository>((ref) {
 });
 
 // Hostels providers
-final hostelsProvider = FutureProvider.family<List<Hostel>, bool>(
+final hostelsProvider = FutureProvider.autoDispose.family<List<Hostel>, bool>(
   (ref, activeOnly) async {
     final repository = ref.watch(hostelRepositoryProvider);
     return repository.getHostels(activeOnly: activeOnly);
   },
 );
 
-final hostelByIdProvider = FutureProvider.family<Hostel?, String>(
+final hostelByIdProvider = FutureProvider.autoDispose.family<Hostel?, String>(
   (ref, hostelId) async {
     final repository = ref.watch(hostelRepositoryProvider);
     return repository.getHostelById(hostelId);
@@ -23,7 +23,7 @@ final hostelByIdProvider = FutureProvider.family<Hostel?, String>(
 );
 
 // Rooms providers
-final roomsProvider = FutureProvider.family<List<HostelRoom>, RoomsFilter>(
+final roomsProvider = FutureProvider.autoDispose.family<List<HostelRoom>, RoomsFilter>(
   (ref, filter) async {
     final repository = ref.watch(hostelRepositoryProvider);
     return repository.getRooms(
@@ -33,7 +33,7 @@ final roomsProvider = FutureProvider.family<List<HostelRoom>, RoomsFilter>(
   },
 );
 
-final roomByIdProvider = FutureProvider.family<HostelRoom?, String>(
+final roomByIdProvider = FutureProvider.autoDispose.family<HostelRoom?, String>(
   (ref, roomId) async {
     final repository = ref.watch(hostelRepositoryProvider);
     return repository.getRoomById(roomId);
@@ -41,7 +41,7 @@ final roomByIdProvider = FutureProvider.family<HostelRoom?, String>(
 );
 
 // Allocations providers
-final allocationsProvider = FutureProvider.family<List<RoomAllocation>, AllocationsFilter>(
+final allocationsProvider = FutureProvider.autoDispose.family<List<RoomAllocation>, AllocationsFilter>(
   (ref, filter) async {
     final repository = ref.watch(hostelRepositoryProvider);
     return repository.getAllocations(
@@ -53,7 +53,7 @@ final allocationsProvider = FutureProvider.family<List<RoomAllocation>, Allocati
   },
 );
 
-final myHostelProvider = FutureProvider<RoomAllocation?>((ref) async {
+final myHostelProvider = FutureProvider.autoDispose<RoomAllocation?>((ref) async {
   final repository = ref.watch(hostelRepositoryProvider);
   final userId = ref.watch(supabaseProvider).auth.currentUser?.id;
   if (userId == null) return null;
@@ -61,7 +61,7 @@ final myHostelProvider = FutureProvider<RoomAllocation?>((ref) async {
 });
 
 // Stats provider
-final hostelStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final hostelStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final repository = ref.watch(hostelRepositoryProvider);
   return repository.getHostelStats();
 });

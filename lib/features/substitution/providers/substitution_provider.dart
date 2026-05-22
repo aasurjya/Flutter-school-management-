@@ -14,7 +14,7 @@ final substitutionRepositoryProvider =
 // ==================== ABSENCES FOR DATE ====================
 
 final teacherAbsencesForDateProvider =
-    FutureProvider.family<List<TeacherAbsence>, DateTime>(
+    FutureProvider.autoDispose.family<List<TeacherAbsence>, DateTime>(
   (ref, date) async {
     final repo = ref.watch(substitutionRepositoryProvider);
     return repo.getAbsencesByDate(date);
@@ -24,7 +24,7 @@ final teacherAbsencesForDateProvider =
 // ==================== MY ABSENCES ====================
 
 final myAbsencesProvider =
-    FutureProvider.family<List<TeacherAbsence>, String>(
+    FutureProvider.autoDispose.family<List<TeacherAbsence>, String>(
   (ref, teacherId) async {
     final repo = ref.watch(substitutionRepositoryProvider);
     return repo.getMyAbsences(teacherId);
@@ -54,7 +54,7 @@ class SuggestionParams {
 }
 
 final substituteSuggestionsProvider =
-    FutureProvider.family<List<SubstitutePeriod>, SuggestionParams>(
+    FutureProvider.autoDispose.family<List<SubstitutePeriod>, SuggestionParams>(
   (ref, params) async {
     final repo = ref.watch(substitutionRepositoryProvider);
     return repo.getSuggestedSubstitutes(
@@ -67,7 +67,7 @@ final substituteSuggestionsProvider =
 // ==================== ASSIGNMENTS FOR DATE ====================
 
 final substitutionAssignmentsProvider =
-    FutureProvider.family<List<SubstitutionAssignment>, DateTime>(
+    FutureProvider.autoDispose.family<List<SubstitutionAssignment>, DateTime>(
   (ref, date) async {
     final repo = ref.watch(substitutionRepositoryProvider);
     return repo.getAssignmentsByDate(date);
@@ -77,7 +77,7 @@ final substitutionAssignmentsProvider =
 // ==================== MY SUBSTITUTE DUTIES ====================
 
 final mySubstituteDutiesProvider =
-    FutureProvider.family<List<SubstitutionAssignment>, String>(
+    FutureProvider.autoDispose.family<List<SubstitutionAssignment>, String>(
   (ref, teacherId) async {
     final repo = ref.watch(substitutionRepositoryProvider);
     return repo.getMySubstituteDuties(teacherId);
@@ -129,7 +129,7 @@ class AssignSubstituteNotifier extends StateNotifier<AsyncValue<void>> {
 }
 
 final assignSubstituteProvider =
-    StateNotifierProvider<AssignSubstituteNotifier, AsyncValue<void>>((ref) {
+    StateNotifierProvider.autoDispose<AssignSubstituteNotifier, AsyncValue<void>>((ref) {
   final repo = ref.watch(substitutionRepositoryProvider);
   return AssignSubstituteNotifier(repo, ref);
 });

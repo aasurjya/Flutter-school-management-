@@ -7,6 +7,7 @@
 ///   flutter test integration_test/coordinator/cross_role_sync_test.dart \
 ///     --dart-define=TEST_SUPABASE_URL=... \
 ///     --dart-define=TEST_SUPABASE_ANON_KEY=...
+library;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/data_factory.dart';

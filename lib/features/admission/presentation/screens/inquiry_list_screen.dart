@@ -9,6 +9,7 @@ import '../../../../data/models/admission.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/admission_provider.dart';
 import '../widgets/application_status_badge.dart';
+import '../widgets/lead_score_badge.dart';
 
 class InquiryListScreen extends ConsumerStatefulWidget {
   const InquiryListScreen({super.key});
@@ -211,6 +212,8 @@ class _InquiryListScreenState extends ConsumerState<InquiryListScreen> {
                   ],
                 ),
               ),
+              LeadScoreBadge(inquiryId: inquiry.id, compact: true),
+              const SizedBox(width: 8),
               InquiryStatusBadge(status: inquiry.status),
             ],
           ),

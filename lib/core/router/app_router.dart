@@ -54,6 +54,9 @@ import '../../features/super_admin/presentation/screens/super_admin_dashboard_sc
 import '../../features/super_admin/presentation/screens/tenants_list_screen.dart';
 import '../../features/super_admin/presentation/screens/create_tenant_screen.dart';
 import '../../features/super_admin/presentation/screens/tenant_detail_screen.dart';
+import '../../features/super_admin/presentation/screens/tenant_ai_settings_screen.dart';
+import '../../features/super_admin/presentation/screens/ai_usage_dashboard_screen.dart';
+import '../../features/admission/presentation/screens/admission_chat_screen.dart';
 import '../../features/qr_scan/presentation/screens/qr_scanner_screen.dart';
 import '../../features/qr_scan/presentation/screens/student_id_card_screen.dart';
 import '../../features/teacher/presentation/screens/class_teacher_dashboard_screen.dart';
@@ -436,6 +439,9 @@ class AppRoutes {
   static const String tenantsList = '/super-admin/tenants';
   static const String createTenant = '/super-admin/tenants/create';
   static const String tenantDetail = '/super-admin/tenants/:tenantId';
+  static const String tenantAiSettings = '/super-admin/tenants/:tenantId/ai-settings';
+  static const String aiUsageDashboard = '/super-admin/ai-usage';
+  static const String admissionChat = '/admissions/chat';
 
   // AI Insights routes
   static const String riskDashboard = '/ai/risk-dashboard';
@@ -794,6 +800,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => TenantDetailScreen(
           tenantId: state.pathParameters['tenantId']!,
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.tenantAiSettings,
+        builder: (context, state) => TenantAiSettingsScreen(
+          tenantId: state.pathParameters['tenantId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.aiUsageDashboard,
+        builder: (context, state) => const AiUsageDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.admissionChat,
+        builder: (context, state) {
+          final tenantId = state.uri.queryParameters['tenantId'] ?? '';
+          final schoolName = state.uri.queryParameters['school'];
+          return AdmissionChatScreen(
+            tenantId: tenantId,
+            schoolName: schoolName,
+          );
+        },
       ),
 
       // Profile Setup Routes (first-login, outside shell so no bottom nav)

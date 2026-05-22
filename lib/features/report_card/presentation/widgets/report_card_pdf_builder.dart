@@ -1,10 +1,36 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../../data/models/report_card.dart';
 import '../../../../data/models/report_card_full.dart';
+
+// Argument bundle for the isolate entry function. compute() requires a single
+// argument, and all fields here are plain Dart data — safely SendPort-able.
+class _ReportCardPayload {
+  const _ReportCardPayload({
+    required this.data,
+    required this.comments,
+    required this.skills,
+    required this.activities,
+    required this.headerConfig,
+  });
+  final ReportCardData data;
+  final List<ReportCardComment> comments;
+  final List<ReportCardSkill> skills;
+  final List<ReportCardActivity> activities;
+  final Map<String, dynamic>? headerConfig;
+}
+
+@pragma('vm:entry-point')
+Future<Uint8List> _buildReportCardPdfInIsolate(_ReportCardPayload p) =>
+    ReportCardPdfBuilder.buildSync(
+      data: p.data,
+      comments: p.comments,
+      skills: p.skills,
+      activities: p.activities,
+      headerConfig: p.headerConfig,
+    );
 
 /// Professional multi-page PDF report card builder.
 /// Produces output comparable to PowerSchool / ManageBac.
@@ -23,7 +49,32 @@ class ReportCardPdfBuilder {
   static const _bgLight = PdfColor.fromInt(0xFFF8FAFC);
 
   /// Main build entry point. Returns PDF bytes.
+  ///
+  /// On native platforms, the heavy PDF assembly runs on a background isolate
+  /// via [compute] so the UI thread stays at 60fps even when generating a
+  /// class of 40 report cards in a loop. On web the call is inline (web
+  /// has no real isolates yet — [compute] becomes synchronous there).
   static Future<Uint8List> build({
+    required ReportCardData data,
+    List<ReportCardComment> comments = const [],
+    List<ReportCardSkill> skills = const [],
+    List<ReportCardActivity> activities = const [],
+    Map<String, dynamic>? headerConfig,
+  }) {
+    final payload = _ReportCardPayload(
+      data: data,
+      comments: comments,
+      skills: skills,
+      activities: activities,
+      headerConfig: headerConfig,
+    );
+    if (kIsWeb) return _buildReportCardPdfInIsolate(payload);
+    return compute(_buildReportCardPdfInIsolate, payload);
+  }
+
+  /// Synchronous (same-isolate) builder. Public so the isolate entry function
+  /// can reach it. Prefer [build] from app code.
+  static Future<Uint8List> buildSync({
     required ReportCardData data,
     List<ReportCardComment> comments = const [],
     List<ReportCardSkill> skills = const [],

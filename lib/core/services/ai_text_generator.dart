@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import '../ai/ai_gateway_client.dart';
 import '../ai/ai_router.dart';
 import 'deepseek_service.dart';
 
@@ -16,21 +17,30 @@ class AITextResult {
 }
 
 class AITextGenerator {
+  final AiGatewayClient? _gateway;
   final DeepSeekService? _service;
   final AIRouter? _router;
 
   const AITextGenerator({
+    AiGatewayClient? gateway,
     DeepSeekService? service,
     AIRouter? router,
-  })  : _service = service,
+  })  : _gateway = gateway,
+        _service = service,
         _router = router;
 
   // ---------------------------------------------------------------------------
-  // Generic orchestrator: try AIRouter first, fall back to direct service,
-  // catch ALL errors, return fallback
+  // Generic orchestrator (preference order):
+  //   1. AiGatewayClient — production path; server enforces quota/cost/keys
+  //   2. AIRouter        — debug / local-dev path with direct adapters
+  //   3. DeepSeekService — legacy direct path
+  //   4. Fallback string — graceful degradation
+  // featureType MUST match a key in the gateway's FEATURE_ROUTES table
+  // (see supabase/functions/ai-gateway/index.ts).
   // ---------------------------------------------------------------------------
 
   Future<AITextResult> _generate({
+    required String featureType,
     required String systemPrompt,
     required String userPrompt,
     required String fallback,
@@ -38,8 +48,45 @@ class AITextGenerator {
     int maxTokens = 300,
     bool skipCache = false,
     Duration? cacheTtl,
+    String? responseFormat,
   }) async {
-    // Prefer the new AIRouter when available.
+    // Primary: gateway. On any quota block or transport error, fall through.
+    if (_gateway != null) {
+      try {
+        final res = await _gateway.complete(
+          featureType: featureType,
+          systemPrompt: systemPrompt,
+          userPrompt: userPrompt,
+          temperature: temperature,
+          maxTokens: maxTokens,
+          responseFormat: responseFormat ?? 'text',
+          skipCache: skipCache,
+        );
+        return AITextResult(
+          text: res.text,
+          isLLMGenerated: true,
+          isFromCache: res.cached,
+        );
+      } on AiGatewayQuotaException catch (e) {
+        // Quota blocked — surface fallback string; banner is already raised
+        // via the QuotaController stream. Don't fall back to direct adapters
+        // (that would defeat the purpose of the quota gate).
+        developer.log(
+          'ai-gateway blocked: ${e.reason}',
+          name: 'AITextGenerator',
+        );
+        return AITextResult(text: fallback);
+      } catch (e) {
+        developer.log(
+          'ai-gateway transport failed, trying local adapters',
+          name: 'AITextGenerator',
+          error: e,
+        );
+        // Fall through to debug paths.
+      }
+    }
+
+    // Debug / local-dev fallback: direct AIRouter.
     if (_router != null) {
       try {
         final response = await _router.generateText(
@@ -61,7 +108,6 @@ class AITextGenerator {
           name: 'AITextGenerator',
           error: e,
         );
-        // Fall through to legacy path.
       }
     }
 
@@ -118,6 +164,7 @@ class AITextGenerator {
           'Write a warm 3-5 sentence parent digest summary for this week.');
 
     return _generate(
+      featureType: 'parent_digest',
       systemPrompt: _digestSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -160,6 +207,7 @@ class AITextGenerator {
       ..writeln('Explain why this student is flagged and suggest 2 actions.');
 
     return _generate(
+      featureType: 'risk_explanation',
       systemPrompt: _riskSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -194,6 +242,7 @@ class AITextGenerator {
           'Summarize the key attendance patterns and suggest one improvement.');
 
     return _generate(
+      featureType: 'attendance_narrative',
       systemPrompt: _attendanceSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -231,6 +280,7 @@ class AITextGenerator {
         'Explain what is concerning and suggest 2 specific actions.');
 
     return _generate(
+      featureType: 'early_warning_alert',
       systemPrompt: _alertSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -268,6 +318,7 @@ class AITextGenerator {
         'Create 3-4 specific, actionable study recommendations.');
 
     return _generate(
+      featureType: 'study_recommendation',
       systemPrompt: _studyPlanSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -302,6 +353,7 @@ class AITextGenerator {
           'Write a personalized 3-5 sentence report card remark.');
 
     return _generate(
+      featureType: 'report_card_remark',
       systemPrompt: _reportRemarkSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -341,6 +393,7 @@ class AITextGenerator {
         'Write a professional parent message for this purpose.');
 
     return _generate(
+      featureType: 'parent_message',
       systemPrompt: _parentMessageSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -382,6 +435,7 @@ class AITextGenerator {
           'Write a 5-7 sentence class performance analysis with one recommendation.');
 
     return _generate(
+      featureType: 'class_performance',
       systemPrompt: _classNarrativeSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -426,6 +480,7 @@ class AITextGenerator {
         'Generate a complete syllabus structure as a JSON array of units.');
 
     return _generate(
+      featureType: 'syllabus_structure',
       systemPrompt: _syllabusSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -470,6 +525,7 @@ class AITextGenerator {
         'Create a detailed lesson plan as JSON.');
 
     return _generate(
+      featureType: 'lesson_plan_json',
       systemPrompt: _lessonPlanSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -547,6 +603,7 @@ class AITextGenerator {
         'Generate a complete question paper as a JSON object with sections array.');
 
     return _generate(
+      featureType: 'question_paper_json',
       systemPrompt: _questionPaperSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -605,6 +662,7 @@ class AITextGenerator {
         'Write a $urgency fee reminder message (under 100 words) to this parent.');
 
     return _generate(
+      featureType: 'fee_reminder',
       systemPrompt: _feeReminderSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -651,6 +709,7 @@ class AITextGenerator {
       ..writeln('Interpret this trend in 2-4 plain-language sentences.');
 
     return _generate(
+      featureType: 'trend_narrative',
       systemPrompt: _trendSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -691,6 +750,7 @@ class AITextGenerator {
           'Write a 3-5 sentence school health summary with one suggestion.');
 
     return _generate(
+      featureType: 'school_health',
       systemPrompt: _schoolHealthSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
@@ -727,11 +787,130 @@ class AITextGenerator {
           'Write a 3-5 sentence platform health summary with one suggestion.');
 
     return _generate(
+      featureType: 'platform_health',
       systemPrompt: _platformHealthSystemPrompt,
       userPrompt: userPrompt.toString(),
       fallback: fallback,
       temperature: 0.5,
       maxTokens: 350,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 16. Pre-PTM Brief (Sprint 1.1)
+  // ---------------------------------------------------------------------------
+  // Teacher opens a scheduled appointment → AI produces 6 bullets so they
+  // walk in prepared. Pulls structured context (attendance, recent marks,
+  // risk score, behavior incidents, achievements) and asks for talking
+  // points. Routes through gateway as feature_type = 'ptm_brief'.
+
+  static const _ptmBriefSystemPrompt =
+      'You are a teacher prep assistant. Given a student profile and recent '
+      'history, produce a Parent-Teacher Meeting brief as EXACTLY SIX BULLETS '
+      'in this order: '
+      '(1) one-line academic summary, '
+      '(2) one-line attendance & engagement summary, '
+      '(3) one-line behavior summary, '
+      '(4) the single biggest strength to praise, '
+      '(5) the single most important concern to raise, '
+      '(6) one concrete suggested action for the parent. '
+      'Each bullet starts with "- " and is one sentence, no markdown bold, no '
+      'preamble, no closing remarks. Use the student\'s first name. Be warm '
+      'but specific. Never invent data — if a field is "n/a", reflect that.';
+
+  Future<AITextResult> generatePtmBrief({
+    required String studentName,
+    required String className,
+    int? attendancePercent,
+    List<String> recentMarks = const [],
+    String? riskLevel,
+    int? recentIncidentCount,
+    String? mostSevereRecentIncident,
+    List<String> achievements = const [],
+    required String fallback,
+  }) {
+    final firstName = studentName.split(' ').first;
+    final att = attendancePercent != null ? '$attendancePercent%' : 'n/a';
+    final marks =
+        recentMarks.isNotEmpty ? recentMarks.join('; ') : 'n/a';
+    final risk = riskLevel ?? 'n/a';
+    final behavior = (recentIncidentCount ?? 0) > 0
+        ? '${recentIncidentCount ?? 0} incident(s) in last 30 days'
+            '${mostSevereRecentIncident != null ? " (most severe: $mostSevereRecentIncident)" : ""}'
+        : 'No incidents in last 30 days';
+    final wins =
+        achievements.isNotEmpty ? achievements.join('; ') : 'n/a';
+
+    final userPrompt = StringBuffer()
+      ..writeln('Student: $firstName')
+      ..writeln('Class: $className')
+      ..writeln('Attendance this term: $att')
+      ..writeln('Recent marks: $marks')
+      ..writeln('Risk level: $risk')
+      ..writeln('Behavior: $behavior')
+      ..writeln('Achievements / recognitions: $wins')
+      ..writeln('Produce the 6-bullet PTM brief now.');
+
+    return _generate(
+      featureType: 'ptm_brief',
+      systemPrompt: _ptmBriefSystemPrompt,
+      userPrompt: userPrompt.toString(),
+      fallback: fallback,
+      temperature: 0.6,
+      maxTokens: 400,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 17. Principal Weekly Digest (Sprint 1.2)
+  // ---------------------------------------------------------------------------
+  // Friday in-app card narrating the school week. Distinct from parent
+  // digest — audience is the principal, tone is executive briefing.
+
+  static const _principalDigestSystemPrompt =
+      'You are an executive-briefing AI assistant for a school principal. '
+      'Given week-level KPIs, write a concise 5-7 sentence digest. '
+      'Lead with the most important data point. Quantify where possible. '
+      'Surface ONE actionable recommendation at the end (start it with '
+      '"Recommended action: "). No markdown, no bullets, plain prose. '
+      'Avoid hype words. Be honest about declines.';
+
+  Future<AITextResult> generatePrincipalDigest({
+    required String schoolName,
+    required String weekStartDate,
+    required int attendancePercent,
+    required int attendanceDeltaPct,
+    required int feeCollectionPercent,
+    required int feeCollectionDeltaPct,
+    required int incidentsThisWeek,
+    required int incidentsDeltaCount,
+    required int escalatingStudents,
+    required int atRiskStudents,
+    required String fallback,
+  }) {
+    String sign(int v) =>
+        v > 0 ? '+$v' : v < 0 ? '$v' : '±0';
+
+    final userPrompt = StringBuffer()
+      ..writeln('School: $schoolName')
+      ..writeln('Week beginning: $weekStartDate')
+      ..writeln(
+          'Attendance: $attendancePercent% (${sign(attendanceDeltaPct)} pts vs prior week)')
+      ..writeln(
+          'Fee collection: $feeCollectionPercent% (${sign(feeCollectionDeltaPct)} pts vs prior week)')
+      ..writeln(
+          'Discipline incidents: $incidentsThisWeek (${sign(incidentsDeltaCount)} vs prior week)')
+      ..writeln('Escalating students this fortnight: $escalatingStudents')
+      ..writeln('Students flagged at-risk: $atRiskStudents')
+      ..writeln('Write the digest now.');
+
+    return _generate(
+      featureType: 'principal_digest',
+      systemPrompt: _principalDigestSystemPrompt,
+      userPrompt: userPrompt.toString(),
+      fallback: fallback,
+      temperature: 0.5,
+      maxTokens: 400,
     );
   }
 }

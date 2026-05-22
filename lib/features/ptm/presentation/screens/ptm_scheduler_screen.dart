@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/ptm.dart';
+import '../../../auth/providers/auth_provider.dart';
 import '../../providers/ptm_provider.dart';
+import '../widgets/ptm_brief_sheet.dart';
 
 class PTMSchedulerScreen extends ConsumerStatefulWidget {
   const PTMSchedulerScreen({super.key});
@@ -420,11 +422,18 @@ class _AppointmentCard extends ConsumerWidget {
                 ],
               ],
             ),
-            if (appointment.isPending) ...[
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (appointment.studentId.isNotEmpty)
+                  TextButton.icon(
+                    icon: const Icon(Icons.auto_awesome_rounded, size: 18),
+                    label: const Text('Generate brief'),
+                    onPressed: () => _openBriefSheet(context, ref),
+                  ),
+                if (appointment.isPending) ...[
+                  const SizedBox(width: 8),
                   OutlinedButton(
                     onPressed: () => _cancelAppointment(context, ref),
                     style: OutlinedButton.styleFrom(
@@ -433,8 +442,8 @@ class _AppointmentCard extends ConsumerWidget {
                     child: const Text('Cancel'),
                   ),
                 ],
-              ),
-            ],
+              ],
+            ),
           ],
         ),
       ),
@@ -469,6 +478,22 @@ class _AppointmentCard extends ConsumerWidget {
       default:
         return Icons.help;
     }
+  }
+
+  void _openBriefSheet(BuildContext context, WidgetRef ref) {
+    final tenantId = ref.read(currentTenantIdProvider);
+    if (tenantId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sign in required to generate a brief.')),
+      );
+      return;
+    }
+    PtmBriefSheet.show(
+      context,
+      studentId: appointment.studentId,
+      tenantId: tenantId,
+      studentName: appointment.studentName ?? 'Student',
+    );
   }
 
   void _cancelAppointment(BuildContext context, WidgetRef ref) {

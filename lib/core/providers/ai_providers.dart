@@ -12,6 +12,7 @@ import '../ai/agents/tools/fetch_fee_status_tool.dart';
 import '../ai/agents/tools/fetch_marks_tool.dart';
 import '../ai/agents/tools/fetch_risk_score_tool.dart';
 import '../ai/agents/tools/fetch_student_tool.dart';
+import '../ai/ai_gateway_client.dart';
 import '../ai/ai_router.dart';
 import '../ai/cache/ai_cache.dart';
 import '../ai/context/ai_context_builder.dart';
@@ -135,9 +136,18 @@ final aiRouterProvider = Provider<AIRouter?>((ref) {
 // =============================================================================
 
 final aiTextGeneratorProvider = Provider<AITextGenerator>((ref) {
+  // Production path: gateway-only. Direct adapters stay as a debug fallback
+  // for local development if the gateway is unreachable (e.g. no internet,
+  // edge function not deployed locally). API keys never leave Supabase
+  // function secrets in production builds.
+  final gateway = ref.watch(aiGatewayClientProvider);
   final router = ref.watch(aiRouterProvider);
   final legacyService = ref.watch(deepSeekServiceProvider);
-  return AITextGenerator(service: legacyService, router: router);
+  return AITextGenerator(
+    gateway: gateway,
+    router: router,
+    service: legacyService,
+  );
 });
 
 final aiStaffTextGeneratorProvider = Provider<AIStaffTextGenerator>((ref) {

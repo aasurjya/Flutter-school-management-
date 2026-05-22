@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -5,6 +6,26 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import '../../../data/models/invoice.dart';
+
+class _FeesPayload {
+  const _FeesPayload({
+    required this.invoices,
+    required this.regularFontBytes,
+    required this.boldFontBytes,
+  });
+  final List<Invoice> invoices;
+  // Pre-loaded on the main isolate; rootBundle/CDN are not isolate-safe.
+  final Uint8List? regularFontBytes;
+  final Uint8List? boldFontBytes;
+}
+
+@pragma('vm:entry-point')
+Future<Uint8List> _buildFeesPdfInIsolate(_FeesPayload p) =>
+    FeesPdfBuilder.buildBytesSync(
+      p.invoices,
+      regularFontBytes: p.regularFontBytes,
+      boldFontBytes: p.boldFontBytes,
+    );
 
 /// Builds and shares a PDF report of all invoices.
 ///
@@ -20,35 +41,46 @@ class FeesPdfBuilder {
   static const _border = PdfColor.fromInt(0xFFE2E8F0);
 
   /// Builds PDF bytes for [invoices] and shares them via the OS share sheet.
+  /// Fonts are loaded on the main isolate (rootBundle is not isolate-safe),
+  /// then the PDF assembly runs on a background isolate.
   static Future<void> buildAndShare(List<Invoice> invoices) async {
-    final bytes = await _buildBytes(invoices);
+    final regularBytes = await _loadFontBytes('assets/fonts/NotoSans-Regular.ttf');
+    final boldBytes = await _loadFontBytes('assets/fonts/NotoSans-Bold.ttf');
+    final payload = _FeesPayload(
+      invoices: invoices,
+      regularFontBytes: regularBytes,
+      boldFontBytes: boldBytes,
+    );
+    final bytes = kIsWeb
+        ? await _buildFeesPdfInIsolate(payload)
+        : await compute(_buildFeesPdfInIsolate, payload);
     final date = DateFormat('yyyy-MM-dd').format(DateTime.now());
     await Printing.sharePdf(bytes: bytes, filename: 'fees-report-$date.pdf');
   }
 
-  /// Loads Noto Sans fonts: bundled asset first, Google Fonts CDN as fallback.
-  static Future<pw.Font> _loadFont(
-    String assetPath,
-    Future<pw.Font> Function() cdnLoader,
-  ) async {
+  /// Reads a bundled font as bytes. Returns null if not found — the isolate
+  /// will fall back to the bundled Helvetica.
+  static Future<Uint8List?> _loadFontBytes(String assetPath) async {
     try {
       final data = await rootBundle.load(assetPath);
-      return pw.Font.ttf(data);
+      return data.buffer.asUint8List();
     } catch (_) {
-      return cdnLoader();
+      return null;
     }
   }
 
-  /// Returns raw PDF bytes. Exposed for testing.
-  static Future<Uint8List> _buildBytes(List<Invoice> invoices) async {
-    final regular = await _loadFont(
-      'assets/fonts/NotoSans-Regular.ttf',
-      PdfGoogleFonts.notoSansRegular,
-    );
-    final bold = await _loadFont(
-      'assets/fonts/NotoSans-Bold.ttf',
-      PdfGoogleFonts.notoSansBold,
-    );
+  /// Same-isolate builder. Public for the isolate entry function.
+  static Future<Uint8List> buildBytesSync(
+    List<Invoice> invoices, {
+    Uint8List? regularFontBytes,
+    Uint8List? boldFontBytes,
+  }) async {
+    final regular = regularFontBytes != null
+        ? pw.Font.ttf(regularFontBytes.buffer.asByteData())
+        : await PdfGoogleFonts.notoSansRegular();
+    final bold = boldFontBytes != null
+        ? pw.Font.ttf(boldFontBytes.buffer.asByteData())
+        : await PdfGoogleFonts.notoSansBold();
     final theme = pw.ThemeData.withFont(
       base: regular,
       bold: bold,

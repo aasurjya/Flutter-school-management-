@@ -112,6 +112,7 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
                     icon: const Icon(Icons.more_vert),
                     onSelected: (a) => _handleAction(a, tenant.isActive),
                     itemBuilder: (_) => [
+                      const PopupMenuItem(value: 'ai_settings', child: Row(children: [Icon(Icons.auto_awesome_rounded, size: 18), SizedBox(width: 8), Text('AI Governance')])),
                       if (tenant.isActive)
                         const PopupMenuItem(value: 'suspend', child: Row(children: [Icon(Icons.block, size: 18, color: AppColors.warning), SizedBox(width: 8), Text('Suspend')]))
                       else
@@ -214,6 +215,8 @@ class _TenantDetailScreenState extends ConsumerState<TenantDetailScreen>
 
   void _handleAction(String action, bool isActive) {
     switch (action) {
+      case 'ai_settings':
+        context.push('/super-admin/tenants/${widget.tenantId}/ai-settings');
       case 'suspend':
         _confirm('Suspend Tenant', 'Users will not be able to log in.', AppColors.warning, () async {
           await ref.read(tenantsNotifierProvider.notifier).suspendTenant(widget.tenantId);

@@ -8,6 +8,7 @@ import '../../../../data/models/lms.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/lms_provider.dart';
 import '../widgets/course_card.dart';
+import '../widgets/lesson_plan_quick_draft_sheet.dart';
 
 class LmsDashboardScreen extends ConsumerWidget {
   const LmsDashboardScreen({super.key});
@@ -178,10 +179,24 @@ class LmsDashboardScreen extends ConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(AppRoutes.lmsCourseBuilder),
-        icon: const Icon(Icons.add),
-        label: const Text('Create Course'),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.small(
+            heroTag: 'lms-quick-ai',
+            tooltip: 'AI lesson plan',
+            onPressed: () => LessonPlanQuickDraftSheet.show(context),
+            child: const Icon(Icons.auto_awesome_rounded),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.extended(
+            heroTag: 'lms-create-course',
+            onPressed: () => context.push(AppRoutes.lmsCourseBuilder),
+            icon: const Icon(Icons.add),
+            label: const Text('Create Course'),
+          ),
+        ],
       ),
     );
   }

@@ -1,16 +1,60 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../../data/models/certificate.dart';
 
+class _CertificatePayload {
+  const _CertificatePayload({
+    required this.certificate,
+    required this.template,
+    required this.schoolName,
+    required this.schoolAddress,
+    required this.schoolLogo,
+  });
+  final IssuedCertificate certificate;
+  final CertificateTemplate template;
+  final String? schoolName;
+  final String? schoolAddress;
+  final String? schoolLogo;
+}
+
+@pragma('vm:entry-point')
+Future<Uint8List> _buildCertificatePdfInIsolate(_CertificatePayload p) =>
+    CertificatePdfBuilder.buildCertificatePdfSync(
+      certificate: p.certificate,
+      template: p.template,
+      schoolName: p.schoolName,
+      schoolAddress: p.schoolAddress,
+      schoolLogo: p.schoolLogo,
+    );
+
 /// Builds professional PDF certificates
 class CertificatePdfBuilder {
   CertificatePdfBuilder._();
 
-  /// Generate a certificate PDF
+  /// Generate a certificate PDF — runs off the main isolate on native.
   static Future<Uint8List> buildCertificatePdf({
+    required IssuedCertificate certificate,
+    required CertificateTemplate template,
+    String? schoolName,
+    String? schoolAddress,
+    String? schoolLogo,
+  }) {
+    final payload = _CertificatePayload(
+      certificate: certificate,
+      template: template,
+      schoolName: schoolName,
+      schoolAddress: schoolAddress,
+      schoolLogo: schoolLogo,
+    );
+    if (kIsWeb) return _buildCertificatePdfInIsolate(payload);
+    return compute(_buildCertificatePdfInIsolate, payload);
+  }
+
+  /// Same-isolate builder. Public for the isolate entry function; prefer
+  /// [buildCertificatePdf] from app code.
+  static Future<Uint8List> buildCertificatePdfSync({
     required IssuedCertificate certificate,
     required CertificateTemplate template,
     String? schoolName,

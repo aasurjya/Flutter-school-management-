@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/discipline_provider.dart';
+import '../widgets/behavior_escalation_tile.dart';
 import '../widgets/behavior_trend_chart.dart';
 import '../widgets/incident_card.dart';
 import '../widgets/recognition_card.dart';
@@ -77,6 +78,10 @@ class DisciplineDashboardScreen extends ConsumerWidget {
 
               // ── Quick Actions ──
               _buildQuickActions(context),
+              const SizedBox(height: 24),
+
+              // ── Escalating Students (Sprint 1.4) ──
+              const BehaviorEscalationTile(),
               const SizedBox(height: 24),
 
               // ── Recent Incidents ──

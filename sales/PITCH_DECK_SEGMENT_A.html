@@ -1,0 +1,1171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EduMaster Pro — Pitch Deck (For Schools)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #161616;
+    --surface-2: #1d1d1d;
+    --border: #262626;
+    --border-strong: #383838;
+    --text: #f5f5f5;
+    --text-muted: #a3a3a3;
+    --text-dim: #6b6b6b;
+    --accent: #ff6a00;
+    --accent-soft: rgba(255, 106, 0, 0.12);
+    --accent-border: rgba(255, 106, 0, 0.32);
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+  }
+
+  /* ─── Nav ─── */
+  .nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(10, 10, 10, 0.78);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 15px; letter-spacing: -0.01em;
+  }
+  .brand-dot {
+    width: 10px; height: 10px; border-radius: 3px;
+    background: var(--accent);
+    box-shadow: 0 0 16px var(--accent);
+  }
+  .brand-sub {
+    font-weight: 400; color: var(--text-muted); font-size: 13px;
+  }
+  .nav-chips {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    max-width: 60%;
+  }
+  .chip {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chip:hover { border-color: var(--accent-border); color: var(--text); }
+  .chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+  }
+  .nav-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .nav-counter b { color: var(--text); font-weight: 600; }
+
+  /* ─── Slide shell ─── */
+  .slide {
+    min-height: 100vh;
+    padding: 120px 80px 100px;
+    scroll-snap-align: start;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .slide-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .slide h1 {
+    font-size: clamp(36px, 4.8vw, 64px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin-bottom: 18px;
+    max-width: 1100px;
+  }
+  .slide h1 .accent { color: var(--accent); }
+  .slide h1 .strike { text-decoration: line-through; text-decoration-color: var(--accent); text-decoration-thickness: 4px; color: var(--text-muted); }
+  .slide h2 {
+    font-size: clamp(22px, 2.2vw, 30px);
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+    max-width: 900px;
+    margin-bottom: 48px;
+  }
+  .slide p { line-height: 1.6; color: var(--text-muted); max-width: 760px; }
+
+  /* ─── Speaker notes (hover-reveal) ─── */
+  .notes {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    max-width: 360px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .notes::before {
+    content: "SPEAKER NOTES";
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    margin-bottom: 6px;
+  }
+  .slide:hover .notes { opacity: 1; transform: translateY(0); }
+
+  /* ─── Media slot (for GIF / video uploads later) ─── */
+  .media-slot {
+    margin-top: 36px;
+    border: 1.5px dashed var(--border-strong);
+    border-radius: 16px;
+    background:
+      linear-gradient(135deg, var(--accent-soft) 0%, transparent 70%),
+      var(--surface);
+    padding: 36px 28px;
+    text-align: center;
+    transition: border-color 0.2s ease;
+    max-width: 880px;
+  }
+  .media-slot:hover { border-color: var(--accent-border); }
+  .media-slot .media-play {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    border: 1.5px solid var(--accent-border);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin: 0 auto 14px;
+  }
+  .media-slot .media-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+  }
+  .media-slot .media-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .media-slot .media-brief {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.55;
+    max-width: 620px;
+    margin: 0 auto 14px;
+  }
+  .media-slot .media-storyboard {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 14px auto 0;
+    max-width: 640px;
+    text-align: left;
+  }
+  .media-slot .media-storyboard h5 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.14em;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .media-slot .media-storyboard ol {
+    list-style: none;
+    counter-reset: shot;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .media-slot .media-storyboard li {
+    counter-increment: shot;
+    font-size: 12.5px;
+    color: var(--text);
+    line-height: 1.5;
+    padding-left: 22px;
+    position: relative;
+  }
+  .media-slot .media-storyboard li::before {
+    content: counter(shot, decimal-leading-zero);
+    position: absolute;
+    left: 0; top: 0;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  /* ─── Bullets ─── */
+  .bullets { list-style: none; display: flex; flex-direction: column; gap: 14px; max-width: 560px; margin-top: 8px; }
+  .bullets li {
+    display: flex; gap: 14px; align-items: flex-start;
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .bullets li::before {
+    content: "";
+    flex-shrink: 0;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 10px;
+    box-shadow: 0 0 8px var(--accent-soft);
+  }
+  .bullets li b { font-weight: 600; }
+  .bullets li small { display: block; font-size: 12px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; margin-top: 3px; }
+
+  /* ─── Grid / two-column ─── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  .four-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 880px; }
+  .three-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+  /* ─── Cards ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .card:hover { border-color: var(--accent-border); transform: translateY(-2px); }
+  .card-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+  .card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .card p { font-size: 14px; color: var(--text-muted); line-height: 1.55; }
+
+  /* ─── Big numbers (cost / time) ─── */
+  .big-number {
+    font-size: clamp(60px, 8vw, 112px);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--accent);
+    font-feature-settings: 'tnum';
+  }
+  .big-number.good { color: var(--success); }
+  .big-number-label {
+    margin-top: 14px;
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ─── Pain tiles ─── */
+  .pain-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .pain-tile .pain-emoji { font-size: 28px; opacity: 0.85; }
+  .pain-tile h4 { font-size: 16px; font-weight: 600; }
+  .pain-tile p { font-size: 13px; color: var(--text-muted); }
+
+  /* ─── Speech bubbles ─── */
+  .bubble {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    position: relative;
+  }
+  .bubble .q {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+  .bubble .a {
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.45;
+  }
+  .bubble .a b { color: var(--accent); font-weight: 600; }
+
+  /* ─── Pricing table ─── */
+  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 24px; }
+  .price-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 32px 28px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .price-card.featured { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 20px 60px -20px var(--accent-soft); }
+  .price-card .tier { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 500; }
+  .price-card .amount { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; }
+  .price-card .amount small { font-size: 14px; color: var(--text-muted); font-weight: 400; }
+  .price-card ul { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .price-card ul li { font-size: 14px; color: var(--text); display: flex; gap: 10px; align-items: flex-start; line-height: 1.4; }
+  .price-card ul li::before { content: "✓"; color: var(--accent); font-weight: 700; }
+
+  /* ─── Timeline ─── */
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-top: 32px;
+    position: relative;
+  }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    top: 24px;
+    left: 12.5%;
+    right: 12.5%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-soft) 100%);
+    z-index: 0;
+  }
+  .step { position: relative; z-index: 1; }
+  .step-dot {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  .step h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .step p { font-size: 13px; color: var(--text-muted); line-height: 1.45; }
+
+  /* ─── Roadmap card (Slide 12) ─── */
+  .roadmap-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+  }
+  .roadmap-card .badge {
+    align-self: flex-start;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.12em;
+  }
+  .roadmap-card h4 { font-size: 17px; font-weight: 600; }
+  .roadmap-card p { font-size: 13.5px; color: var(--text-muted); line-height: 1.5; }
+  .roadmap-card .eta {
+    margin-top: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+
+  /* ─── CTA ─── */
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+    padding: 16px 28px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+    margin-top: 32px;
+  }
+  .cta:hover { transform: translateY(-1px); box-shadow: 0 12px 32px -8px var(--accent); }
+  .cta-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    margin-left: 12px;
+  }
+  .cta-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ─── Footer reassurance bar ─── */
+  .reassurance {
+    display: flex; gap: 28px; margin-top: 40px; flex-wrap: wrap;
+    font-size: 13px; color: var(--text-muted);
+  }
+  .reassurance span { display: flex; align-items: center; gap: 8px; }
+  .reassurance .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+
+  /* ─── Print ─── */
+  @media print {
+    body { scroll-snap-type: none; }
+    .nav { display: none; }
+    .notes { display: none; }
+    .slide { page-break-after: always; min-height: auto; padding: 60px 50px; border: none; }
+  }
+
+  @media (max-width: 900px) {
+    .slide { padding: 110px 32px 80px; }
+    .two-col, .four-grid, .three-grid, .price-grid, .timeline { grid-template-columns: 1fr; }
+    .nav-chips { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── Navigation ─── -->
+<nav class="nav">
+  <div class="brand">
+    <span class="brand-dot"></span>
+    <span>EduMaster Pro</span>
+    <span class="brand-sub">· For Schools · v1.0</span>
+  </div>
+  <div class="nav-chips" id="navChips"></div>
+  <div class="nav-counter"><b id="current">01</b> / 15</div>
+</nav>
+
+<!-- ─── SLIDE 1 — HOOK ─── -->
+<section class="slide" id="slide-1">
+  <div class="slide-tag">01 · Start here</div>
+  <h1>Stop running your school on <span class="strike">Excel</span> and <span class="strike">WhatsApp groups.</span></h1>
+  <h2>One app for your teachers, parents, students, and office staff. Built for Indian schools. Made simple on purpose.</h2>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">01_intro_hook.mp4</div>
+    <div class="media-title">15-second opener</div>
+    <div class="media-brief">A fast cut of the app across 4 screens — principal dashboard, teacher attendance, parent view, student ID card. Ends with the app logo and the line "Built for Indian schools."</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Phone in hand opening the app. Login screen → role pills.</li>
+        <li>Principal dashboard with today's attendance and fee counters.</li>
+        <li>Teacher marks a full class present in one tap.</li>
+        <li>Parent sees marks and bus location.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="notes">Don't read the headline. Pause. Let it land. Most principals run the school on Excel + WhatsApp — they know it's painful. The job here is permission to talk for 15 minutes.</div>
+</section>
+
+<!-- ─── SLIDE 2 — THE PAIN ─── -->
+<section class="slide" id="slide-2">
+  <div class="slide-tag">02 · The pain you live with</div>
+  <h1>Your morning shouldn't look like <span class="accent">this.</span></h1>
+  <h2>Four hours of your day go to chasing things that should already be in one place.</h2>
+
+  <div class="four-grid" style="margin-top: 24px;">
+    <div class="pain-tile">
+      <span class="pain-emoji">📋</span>
+      <h4>Paper attendance registers</h4>
+      <p>Marked in class. Re-typed by office. Lost when the file goes missing.</p>
+    </div>
+    <div class="pain-tile">
+      <span class="pain-emoji">📞</span>
+      <h4>"Where is my child?" calls</h4>
+      <p>Office phone rings all day. Same questions. No way to answer at scale.</p>
+    </div>
+    <div class="pain-tile">
+      <span class="pain-emoji">📊</span>
+      <h4>Marks in 12 Excel sheets</h4>
+      <p>Each teacher has their own format. Report card takes a week to make.</p>
+    </div>
+    <div class="pain-tile">
+      <span class="pain-emoji">🧾</span>
+      <h4>TC takes 3 days</h4>
+      <p>Parent comes back four times. Office hunts for old records. Embarrassing.</p>
+    </div>
+  </div>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">02_pain_montage.gif</div>
+    <div class="media-title">8-second pain montage</div>
+    <div class="media-brief">Quick cuts showing the old way — a paper register, an Excel file with 200 names, a phone ringing on a busy office desk, a parent waiting at the counter. No app. Just chaos.</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Close-up of a paper attendance register being marked.</li>
+        <li>Excel sheet of student marks, scrolling.</li>
+        <li>Office phone ringing, two more lines on hold.</li>
+        <li>Parent at counter, watch on wrist, looking tired.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="notes">Don't sell yet. Mirror their world back. Every line in the grid is something they live with this week.</div>
+</section>
+
+<!-- ─── SLIDE 3 — ONE APP, EVERYONE ─── -->
+<section class="slide" id="slide-3">
+  <div class="slide-tag">03 · What we built</div>
+  <h1>One app. <span class="accent">Every role.</span> One login.</h1>
+  <h2>Principal, teacher, parent, student, accountant, librarian, bus driver — same app, different view.</h2>
+
+  <ul class="bullets">
+    <li><b>12 roles in one app.</b> Principal, teacher, student, parent, accountant, librarian, hostel warden, transport in-charge, canteen, receptionist, admin, super-admin.</li>
+    <li><b>One login, the right screen.</b> The app knows who you are and shows only what you need.</li>
+    <li><b>Your school is locked to your school.</b> No other school sees your data. Ever.</li>
+    <li><b>Add a new staff member in 30 seconds.</b> Email + role. Done.</li>
+  </ul>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">03_role_switching.mp4</div>
+    <div class="media-title">Same app, four roles — 25 seconds</div>
+    <div class="media-brief">Log out and log in as four different roles in a row. Show how the screen changes for each. The principal sees totals. The teacher sees their class. The parent sees their child. The student sees their homework.</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Login as principal — dashboard with school-wide numbers.</li>
+        <li>Login as teacher — only their classes show.</li>
+        <li>Login as parent — only their child's info shows.</li>
+        <li>Login as student — homework, marks, ID card.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="notes">This is the "one platform" promise made visible. Don't list features — show the role switch. It is the single most convincing thing in the demo.</div>
+</section>
+
+<!-- ─── SLIDE 4 — ATTENDANCE ─── -->
+<section class="slide" id="slide-4">
+  <div class="slide-tag">04 · Attendance</div>
+  <h1>Take attendance in <span class="accent">30 seconds.</span> Even when the internet is down.</h1>
+  <h2>Tap the whole class present. Mark absentees with one tap each. Works on a ₹6,000 phone, on Jio, in a village campus.</h2>
+
+  <ul class="bullets">
+    <li><b>One-tap "all present"</b> — most days, that's the whole job.</li>
+    <li><b>Works offline.</b> No network? The app saves it on the phone and uploads when Wi-Fi comes back.</li>
+    <li><b>QR code attendance.</b> Print one card per student. Scan and done.</li>
+    <li><b>Principal sees the % present</b> for the whole school by 9:15 AM.</li>
+  </ul>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">04_attendance_bulk_mark.gif</div>
+    <div class="media-title">Bulk-mark attendance — 12 seconds</div>
+    <div class="media-brief">Teacher opens their class. Taps "Mark all present." Then taps two students to mark absent. Hits save. The principal's dashboard updates live in the next shot.</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Teacher selects class 8-B from the list.</li>
+        <li>Big "Mark all present" button — one tap.</li>
+        <li>Tap two student names to flip them to absent.</li>
+        <li>Save button. Quick success animation.</li>
+        <li>Cut to principal dashboard — class 8-B is now green.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">04_offline_sync.mp4</div>
+    <div class="media-title">Works without internet — 15 seconds</div>
+    <div class="media-brief">Show the phone in airplane mode. Teacher takes attendance anyway. App shows a small "saved offline" pill. Switch internet back on. The pill changes to "uploaded." This is the moment that wins village schools.</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Phone status bar shows airplane mode on.</li>
+        <li>Teacher marks attendance like nothing happened.</li>
+        <li>Small orange pill: "Saved offline — 1 record."</li>
+        <li>Switch off airplane mode. Pill becomes green: "Uploaded."</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="notes">Lean hard on the offline part for rural / Jio schools. It is the single biggest objection killer for Indian schools outside metros.</div>
+</section>
+
+<!-- ─── SLIDE 5 — REPORT CARDS ─── -->
+<section class="slide" id="slide-5">
+  <div class="slide-tag">05 · Report cards</div>
+  <h1>Report cards in <span class="accent">one click.</span> A clean PDF, ready to print.</h1>
+  <h2>Pick the class. Pick the term. The app builds the report card for every student. Send to parents on the same screen.</h2>
+
+  <ul class="bullets">
+    <li><b>One template for the whole school.</b> Change once, applies everywhere.</li>
+    <li><b>Marks, grade, attendance, remarks</b> — all on one page.</li>
+    <li><b>PDF download for the office. PDF share for the parent.</b></li>
+    <li><b>Grade scale you choose.</b> A+ to F, 10-point, percentage. Your call.</li>
+  </ul>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">05_report_card_generate.mp4</div>
+    <div class="media-title">From "0 report cards" to "40 report cards" — 20 seconds</div>
+    <div class="media-brief">Teacher picks class 7-A and term "Mid-term 1." Hits generate. Progress bar runs once for the whole class. Then a list of student names with PDF icons. Tap one — the report card opens in a clean preview.</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Select class + term from two dropdowns.</li>
+        <li>Big orange "Generate report cards" button.</li>
+        <li>Quick progress bar — "40 of 40 done."</li>
+        <li>List of 40 students, each with a PDF icon.</li>
+        <li>Tap a student — clean, printable report card on screen.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="notes">Marks → report card today takes 3 to 7 days at most schools. Show this once and the principal will lean forward. Don't claim AI here — we don't generate remarks yet; show the manual flow.</div>
+</section>
+
+<!-- ─── SLIDE 6 — CERTIFICATES + ID CARD ─── -->
+<section class="slide" id="slide-6">
+  <div class="slide-tag">06 · Certificates & ID cards</div>
+  <h1>TC, bonafide, ID card. Printed in <span class="accent">10 seconds.</span></h1>
+  <h2>Parents stop coming back four times. Your office stops digging through old files.</h2>
+
+  <ul class="bullets">
+    <li><b>Transfer Certificate</b> — pick student, pick date, generate PDF.</li>
+    <li><b>Bonafide letters</b> — same flow.</li>
+    <li><b>Student ID cards with QR code</b> — print on PVC card or paper.</li>
+    <li><b>Every certificate is saved.</b> If a parent loses it, reissue in 5 seconds.</li>
+  </ul>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">06_certificate_generate.gif</div>
+    <div class="media-title">TC in 10 seconds — 15-second clip</div>
+    <div class="media-brief">Office staff searches the student name. Picks "Transfer Certificate" from a dropdown. Hits "Issue." A neat PDF appears with the school's letterhead. Print button is the last frame.</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Search bar — type a student's name. Match shows up.</li>
+        <li>Open student page. Tap "Issue certificate."</li>
+        <li>Pick "Transfer Certificate" from a list of templates.</li>
+        <li>PDF preview appears with school letterhead.</li>
+        <li>Print button is highlighted.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">06_id_card_print.gif</div>
+    <div class="media-title">Bulk ID cards — 10 seconds</div>
+    <div class="media-brief">Admin selects "Class 1-A" from the list. Picks "ID card." Generates a printable PDF of 30 ID cards in a 4-per-page grid, each with the student's name, photo, and QR code.</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Select class 1-A.</li>
+        <li>Tap "Generate ID cards."</li>
+        <li>PDF preview — 4 cards per A4 page, with QR codes.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="notes">For Indian schools, TC speed is a magic moment. Most schools take 3 days minimum. The principal will use this to make their office look good to angry parents.</div>
+</section>
+
+<!-- ─── SLIDE 7 — PARENT APP + BUS ─── -->
+<section class="slide" id="slide-7">
+  <div class="slide-tag">07 · Parents</div>
+  <h1>Parents see the bus. Parents see the marks. <span class="accent">You stop getting calls.</span></h1>
+  <h2>The parent app is in their pocket all day. Most of the questions they call you about — they can see for themselves.</h2>
+
+  <ul class="bullets">
+    <li><b>Live bus on a map.</b> Parent sees where the bus is, right now.</li>
+    <li><b>Today's attendance.</b> Parent sees if their child was marked present.</li>
+    <li><b>Marks and report cards.</b> The moment teachers publish, parents see them.</li>
+    <li><b>Homework and notices.</b> All in one feed. No more lost photocopies.</li>
+  </ul>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">07_parent_app_walkthrough.mp4</div>
+    <div class="media-title">A parent's morning — 30 seconds</div>
+    <div class="media-brief">Open the parent app. Scroll through the dashboard — "Riya was marked present at 8:42 AM," "Maths mid-term: A," "Bus 12 will reach your stop in 6 min," "Notice: Sports Day on Friday." Smooth, calm, like checking WhatsApp.</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Parent opens app on a phone.</li>
+        <li>Dashboard card: "Riya present today — 8:42 AM."</li>
+        <li>Scroll down: report card snippet — "Maths: A."</li>
+        <li>Scroll down: bus card with mini map and ETA.</li>
+        <li>Scroll down: notice card from school.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">07_bus_live_map.gif</div>
+    <div class="media-title">Live bus on a map — 8 seconds</div>
+    <div class="media-brief">Full-screen map. A bus icon moves along the road. A pin shows the parent's stop. The bus icon gets closer. The card at the bottom updates the ETA.</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Map opens — bus icon visible.</li>
+        <li>Bus icon moves along the road (use a 4–6 sec speed-up).</li>
+        <li>ETA card updates: "Arrives in 4 min."</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="notes">For Indian schools, "where is my child" is the #1 phone call. Live bus + attendance solves 70% of those calls. The office staff feels this within a week.</div>
+</section>
+
+<!-- ─── SLIDE 8 — GAMIFICATION ─── -->
+<section class="slide" id="slide-8">
+  <div class="slide-tag">08 · Reward the good ones</div>
+  <h1>Top students get <span class="accent">badges and points.</span> Parents see the leaderboard.</h1>
+  <h2>Soft pressure that works. Students try harder. Parents brag in their WhatsApp groups — free marketing for your school.</h2>
+
+  <ul class="bullets">
+    <li><b>Badges for attendance, marks, homework on time.</b></li>
+    <li><b>Class leaderboard, school leaderboard.</b></li>
+    <li><b>Parents see their child's rank</b> — gentle, visible competition.</li>
+    <li><b>Teacher gives points for kindness, effort, lab work.</b> Not just marks.</li>
+  </ul>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">08_gamification_leaderboard.gif</div>
+    <div class="media-title">Leaderboard reveal — 10 seconds</div>
+    <div class="media-brief">Student opens the gamification screen. Shows their badges. Scroll down to the class leaderboard. Their name is highlighted at rank 4. A small confetti animation when a new badge is unlocked.</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Student dashboard with a row of unlocked badges.</li>
+        <li>Tap "Leaderboard."</li>
+        <li>List of top 10 — their name at #4, highlighted.</li>
+        <li>Confetti on a "new badge unlocked" toast.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="notes">Parents in India love rank. This turns gamification into a marketing tool — the WhatsApp screenshot of "my daughter is #2 in class" sells more than any ad.</div>
+</section>
+
+<!-- ─── SLIDE 9 — DISCIPLINE ─── -->
+<section class="slide" id="slide-9">
+  <div class="slide-tag">09 · Track every incident</div>
+  <h1>Report a student incident in <span class="accent">20 seconds.</span> Track it to closure.</h1>
+  <h2>No more "he said, she said." Every bullying complaint, every late-coming, every parent meeting — logged with date, person, action.</h2>
+
+  <ul class="bullets">
+    <li><b>Teacher logs an incident from their phone.</b></li>
+    <li><b>Counsellor or principal picks it up</b> from a single list.</li>
+    <li><b>Track status</b> — open, under review, resolved.</li>
+    <li><b>Print a clean record</b> for any board or parent meeting.</li>
+  </ul>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">09_discipline_incident_log.mp4</div>
+    <div class="media-title">From incident to record — 20 seconds</div>
+    <div class="media-brief">Teacher taps "Report incident." Picks the student. Types one line. Picks "Bullying" from a tag list. Saves. Next shot: principal sees the new incident on top of a list and changes status to "Under review."</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Teacher screen: tap "Report incident."</li>
+        <li>Pick student from a quick search.</li>
+        <li>Type one short line + pick a tag.</li>
+        <li>Save. Toast: "Logged."</li>
+        <li>Principal view: incident appears in the list.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="notes">Audit trails matter when there's a parent dispute. This is the slide that makes the principal feel safe — every complaint is now documented, not lost in a notebook.</div>
+</section>
+
+<!-- ─── SLIDE 10 — LOCALIZATION + JIO ─── -->
+<section class="slide" id="slide-10">
+  <div class="slide-tag">10 · Works for everyone</div>
+  <h1>Works in <span class="accent">Hindi.</span> Works in French. Works in Arabic. Works on Jio.</h1>
+  <h2>Your peon, your office aunty, your village campus on a slow connection — everyone gets the same app.</h2>
+
+  <ul class="bullets">
+    <li><b>App language: English, Hindi, French, Arabic.</b> Switch in one tap.</li>
+    <li><b>Light on data.</b> Most screens use under 1 MB.</li>
+    <li><b>Works on a ₹6,000 phone.</b> Android 7 or higher.</li>
+    <li><b>No training needed for parents.</b> If they use WhatsApp, they can use this.</li>
+  </ul>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">10_language_switch.gif</div>
+    <div class="media-title">English → Hindi in one tap — 6 seconds</div>
+    <div class="media-brief">Open settings. Tap "Language." Pick "हिन्दी." The whole app re-labels. Same screen, same buttons, Hindi text.</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>App in English — dashboard visible.</li>
+        <li>Open settings → language.</li>
+        <li>Tap "हिन्दी." App refreshes.</li>
+        <li>Same dashboard now in Hindi.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="notes">For Tier-2 and Tier-3 schools, Hindi-first is non-negotiable. Show the language switch live — it removes the "my staff can't read English" objection in 6 seconds.</div>
+</section>
+
+<!-- ─── SLIDE 11 — DATA SAFE ─── -->
+<section class="slide" id="slide-11">
+  <div class="slide-tag">11 · Your data is safe</div>
+  <h1>Your school. Your logo. <span class="accent">Your data — locked to you.</span></h1>
+  <h2>No other school sees your data. No staff at our company can peek. Daily backups. Export anytime.</h2>
+
+  <div class="three-grid" style="margin-top: 32px;">
+    <div class="card">
+      <div class="card-icon">🔒</div>
+      <h3>One school, one box</h3>
+      <p>Each school's data is locked to that school. The database itself enforces it — not just the app.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📥</div>
+      <h3>Daily backup</h3>
+      <p>We back up your data every day. If anything ever goes wrong, we can restore in hours.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📤</div>
+      <h3>Yours to leave with</h3>
+      <p>If you ever want to leave, you take your data with you. CSV download, anytime. No lock-in.</p>
+    </div>
+  </div>
+
+  <div class="media-slot">
+    <div class="media-play">▶</div>
+    <div class="media-name">11_tenant_isolation.png</div>
+    <div class="media-title">Diagram: one school, one box</div>
+    <div class="media-brief">A simple diagram showing 3 boxes side-by-side, each labeled "School A," "School B," "School C." Each box has its own data inside. Arrows show that School A cannot see into School B's box. No tech terms — just boxes and lines.</div>
+    <div class="media-storyboard">
+      <h5>Suggested shots</h5>
+      <ol>
+        <li>Static image, no animation needed.</li>
+        <li>3 boxes labelled with school names; data icons inside each.</li>
+        <li>Big lock between the boxes.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="notes">Most school owners care about "is my data safe from other schools" more than they care about encryption. Pitch the boundary, not the cryptography.</div>
+</section>
+
+<!-- ─── SLIDE 12 — WHAT'S COMING NEXT (integrity slide) ─── -->
+<section class="slide" id="slide-12">
+  <div class="slide-tag">12 · What we are adding next</div>
+  <h1>We don't pretend. <span class="accent">Here is what's coming.</span></h1>
+  <h2>The things below are not in v1 yet. They are being built. We will tell you when they ship — and your subscription gets them free.</h2>
+
+  <div class="four-grid" style="margin-top: 24px;">
+    <div class="roadmap-card">
+      <span class="badge">v1.1 · 1–2 weeks</span>
+      <h4>Online fee payment</h4>
+      <p>Parents pay fees by UPI, card, or net banking from inside the app. GST receipt auto-generated.</p>
+      <div class="eta">Razorpay + UPI</div>
+    </div>
+    <div class="roadmap-card">
+      <span class="badge">v1.1 · 1–2 weeks</span>
+      <h4>WhatsApp + SMS alerts</h4>
+      <p>Automatic fee reminders, attendance alerts, and report-card delivery on WhatsApp.</p>
+      <div class="eta">WhatsApp Business API</div>
+    </div>
+    <div class="roadmap-card">
+      <span class="badge">v1.1 · 1–2 weeks</span>
+      <h4>CBSE / ICSE report card preset</h4>
+      <p>Pre-made templates that match the format your board wants. Pick and use.</p>
+      <div class="eta">Board templates</div>
+    </div>
+    <div class="roadmap-card">
+      <span class="badge">v1.5 · 3–4 weeks</span>
+      <h4>Push notifications</h4>
+      <p>Parent gets a phone buzz the moment attendance is marked or the bus is 5 min away.</p>
+      <div class="eta">Firebase push</div>
+    </div>
+    <div class="roadmap-card">
+      <span class="badge">v2.0 · 6–8 weeks</span>
+      <h4>AI: students at risk</h4>
+      <p>The app flags students likely to drop out or fail before it happens. Your counsellor steps in early.</p>
+      <div class="eta">Dropout-risk model</div>
+    </div>
+    <div class="roadmap-card">
+      <span class="badge">v2.0 · 6–8 weeks</span>
+      <h4>AI: report-card remarks</h4>
+      <p>The app writes a draft remark for every student. Teacher edits in seconds, not hours.</p>
+      <div class="eta">LLM-assisted</div>
+    </div>
+    <div class="roadmap-card">
+      <span class="badge">v2.5 · later</span>
+      <h4>White-label branding</h4>
+      <p>Your logo, your colours, your name on the app. The parents see your school, not us.</p>
+      <div class="eta">Per-school theme</div>
+    </div>
+    <div class="roadmap-card">
+      <span class="badge">v2.5 · later</span>
+      <h4>Hostel management</h4>
+      <p>Room allocation, mess billing, waitlist. Built for boarding schools.</p>
+      <div class="eta">Allocation engine</div>
+    </div>
+  </div>
+
+  <div class="notes">This is the integrity slide. Do not skip it. Schools have been burned by every other vendor over-promising — when you say "here is what is NOT in yet, and here is when it's coming," they trust you more, not less.</div>
+</section>
+
+<!-- ─── SLIDE 13 — PRICING ─── -->
+<section class="slide" id="slide-13">
+  <div class="slide-tag">13 · Pricing</div>
+  <h1>Start free. <span class="accent">Pay only when you see it working.</span></h1>
+  <h2>No card needed to start. No long contract. Cancel anytime. Your data is always yours.</h2>
+
+  <div class="price-grid">
+    <div class="price-card">
+      <span class="tier">Free</span>
+      <div class="amount">₹0</div>
+      <ul>
+        <li>Up to 100 students</li>
+        <li>Attendance, report cards, certificates</li>
+        <li>Parent app, bus tracking, gamification</li>
+        <li>Email support</li>
+      </ul>
+    </div>
+    <div class="price-card featured">
+      <span class="tier">Pro · most schools pick this</span>
+      <div class="amount">₹8,000<small> / month</small></div>
+      <ul>
+        <li>Up to 500 students</li>
+        <li>Everything in Free</li>
+        <li>Bulk PDF report cards</li>
+        <li>Priority WhatsApp support</li>
+        <li>Add online fees + WhatsApp when v1.1 ships — free</li>
+      </ul>
+    </div>
+    <div class="price-card">
+      <span class="tier">Pro+</span>
+      <div class="amount">₹15,000<small> / month</small></div>
+      <ul>
+        <li>Up to 1,500 students</li>
+        <li>Everything in Pro</li>
+        <li>Phone support</li>
+        <li>Setup and training included</li>
+      </ul>
+    </div>
+  </div>
+
+  <p style="margin-top: 32px; font-size: 15px;">A 500-student school spends about <b style="color: var(--text);">₹16 per student per month</b>. One late fee chase costs more than that.</p>
+
+  <div class="notes">Anchor on cost-per-student. Indian principals think in per-student costs already (they price their own fees that way). Don't lead with the monthly number.</div>
+</section>
+
+<!-- ─── SLIDE 14 — FAQ ─── -->
+<section class="slide" id="slide-14">
+  <div class="slide-tag">14 · Your questions</div>
+  <h1>Yes, it works on Jio. Yes, your peon can use it. <span class="accent">Yes, your data is safe.</span></h1>
+
+  <div class="four-grid" style="margin-top: 32px;">
+    <div class="bubble">
+      <div class="q">"What if our internet is slow?"</div>
+      <div class="a">Attendance works <b>offline</b>. The rest of the app loads even on a 3G signal.</div>
+    </div>
+    <div class="bubble">
+      <div class="q">"Will my office staff understand it?"</div>
+      <div class="a">If they can use WhatsApp, they can use this. <b>One hour</b> of training is enough.</div>
+    </div>
+    <div class="bubble">
+      <div class="q">"What if we want to leave later?"</div>
+      <div class="a">You take your data with you. <b>CSV export, anytime.</b> No lock-in.</div>
+    </div>
+    <div class="bubble">
+      <div class="q">"Can it match our board's report card?"</div>
+      <div class="a">Yes for the basic format today. CBSE and ICSE presets are <b>coming in v1.1</b>.</div>
+    </div>
+    <div class="bubble">
+      <div class="q">"Where is the WhatsApp integration?"</div>
+      <div class="a">Coming in <b>v1.1</b>. Today: in-app messages and push are live; SMS and WhatsApp are 1–2 weeks out.</div>
+    </div>
+    <div class="bubble">
+      <div class="q">"Online fees with UPI?"</div>
+      <div class="a">Coming in <b>v1.1</b>. Today: you can record offline fee payments and print receipts.</div>
+    </div>
+  </div>
+
+  <div class="notes">Address objections head-on. Especially the "v1.1" lines — schools have been lied to before. Being honest here builds trust faster than any feature.</div>
+</section>
+
+<!-- ─── SLIDE 15 — CTA ─── -->
+<section class="slide" id="slide-15">
+  <div class="slide-tag">15 · Next step</div>
+  <h1>Book a <span class="accent">30-minute walk-through.</span> We set up your school in a week.</h1>
+  <h2>No card. No commitment. We do the data import for free. If your teachers don't use it daily, we walk away.</h2>
+
+  <div class="timeline">
+    <div class="step">
+      <div class="step-dot">01</div>
+      <h4>Day 1</h4>
+      <p>Demo call. We listen to your school's specific pains.</p>
+    </div>
+    <div class="step">
+      <div class="step-dot">02</div>
+      <h4>Day 2–3</h4>
+      <p>We import your student + staff list from your Excel.</p>
+    </div>
+    <div class="step">
+      <div class="step-dot">03</div>
+      <h4>Day 4–5</h4>
+      <p>One-hour training for your teachers and office.</p>
+    </div>
+    <div class="step">
+      <div class="step-dot">04</div>
+      <h4>Day 6–7</h4>
+      <p>Soft launch with one class. Then the whole school.</p>
+    </div>
+  </div>
+
+  <div style="margin-top: 40px;">
+    <a href="#" class="cta">Book a 30-day pilot →</a>
+    <a href="#" class="cta cta-secondary">Schedule a live demo</a>
+  </div>
+
+  <div class="reassurance" style="margin-top: 32px;">
+    <span><span class="dot"></span>No card required</span>
+    <span><span class="dot"></span>Cancel anytime</span>
+    <span><span class="dot"></span>CSV export on demand</span>
+    <span><span class="dot"></span>7-day go-live</span>
+  </div>
+
+  <div class="notes">The close. Two options, both low-friction. Pitch the pilot, not the price. The pilot makes "yes" easy and "no" expensive — they would have to refuse free.</div>
+</section>
+
+<!-- ─── Script: nav + keyboard ─── -->
+<script>
+  const TOTAL = 15;
+  const chipsEl = document.getElementById('navChips');
+  const currentEl = document.getElementById('current');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+
+  // Build chips
+  for (let i = 1; i <= TOTAL; i++) {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.textContent = String(i).padStart(2, '0');
+    chip.dataset.slide = i;
+    chip.addEventListener('click', () => {
+      document.getElementById('slide-' + i).scrollIntoView({ behavior: 'smooth' });
+    });
+    chipsEl.appendChild(chip);
+  }
+  const chips = Array.from(chipsEl.querySelectorAll('.chip'));
+
+  function setActive(idx) {
+    chips.forEach((c, i) => c.classList.toggle('active', i === idx));
+    currentEl.textContent = String(idx + 1).padStart(2, '0');
+  }
+  setActive(0);
+
+  // Observe slides
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && e.intersectionRatio > 0.5) {
+        const idx = slides.indexOf(e.target);
+        if (idx >= 0) setActive(idx);
+      }
+    });
+  }, { threshold: [0.5] });
+  slides.forEach(s => io.observe(s));
+
+  // Keyboard nav
+  let currentIdx = 0;
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+      e.preventDefault();
+      currentIdx = Math.min(TOTAL - 1, getCurrentIdx() + 1);
+      slides[currentIdx].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+      e.preventDefault();
+      currentIdx = Math.max(0, getCurrentIdx() - 1);
+      slides[currentIdx].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      slides[0].scrollIntoView({ behavior: 'smooth' });
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      slides[TOTAL - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  function getCurrentIdx() {
+    const active = chipsEl.querySelector('.chip.active');
+    return active ? parseInt(active.dataset.slide) - 1 : 0;
+  }
+</script>
+
+</body>
+</html>

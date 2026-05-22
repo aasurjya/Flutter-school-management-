@@ -1,8 +1,9 @@
-name: Deploy Flutter Web to GitHub Pages
+name: Deploy Flutter Web (manual)
+
+# Manual / on-demand deploy. The default deploy lives in ci.yml and is
+# gated by tests passing. This workflow exists as an escape hatch.
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -27,6 +28,16 @@ jobs:
         with:
           channel: stable
 
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -42,7 +53,7 @@ jobs:
           sed -i 's/^ *//' .env
 
       - name: Build Flutter web
-        run: flutter build web --release --base-href /Flutter-school-management-/
+        run: flutter build web --release --base-href /Flutter-school-management-/ --tree-shake-icons
 
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3

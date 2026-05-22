@@ -298,6 +298,12 @@ class _SuperAdminDashboardScreenState
             ),
           ],
         ),
+        const SizedBox(height: 12),
+        _ActionCard(
+          icon: Icons.insights_rounded,
+          label: 'AI Usage & Spend',
+          onTap: () => context.push(AppRoutes.aiUsageDashboard),
+        ),
       ],
     );
   }

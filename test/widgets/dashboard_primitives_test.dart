@@ -1,10 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:school_management/features/dashboard/widgets/dashboard_section.dart';
 import 'package:school_management/features/dashboard/widgets/role_hero_app_bar.dart';
 import 'package:school_management/features/dashboard/widgets/role_settings_sheet.dart';
 import 'package:school_management/core/widgets/ai_content_badge.dart';
+import 'package:school_management/l10n/app_localizations.dart';
+
+/// MaterialApp wrapper with the same localization delegates the app uses, so
+/// widgets that read `context.l10n` work in tests.
+Widget _l10nApp({required Widget home}) {
+  return MaterialApp(
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: const [Locale('en')],
+    home: home,
+  );
+}
 
 void main() {
   group('RoleHeroAppBar', () {
@@ -128,8 +145,8 @@ void main() {
   group('AiContentBadge', () {
     testWidgets('inline chip shows "AI summary" and opens disclosure on tap',
         (tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
+      await tester.pumpWidget(_l10nApp(
+        home: const Scaffold(
           body: AiContentBadge.inline(
             sourceSummary: 'Built from last 30 days of attendance + grades.',
           ),
@@ -143,8 +160,8 @@ void main() {
     });
 
     testWidgets('cached variant shows "AI · cached"', (tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
+      await tester.pumpWidget(_l10nApp(
+        home: const Scaffold(
           body: AiContentBadge.inline(
             sourceSummary: 'Cached digest',
             isCached: true,
@@ -155,8 +172,8 @@ void main() {
     });
 
     testWidgets('wrap variant renders chip above child', (tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
+      await tester.pumpWidget(_l10nApp(
+        home: const Scaffold(
           body: AiContentBadge.wrap(
             sourceSummary: 'Source',
             child: Text('BODY'),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../extensions/build_context_l10n.dart';
 import '../theme/app_colors.dart';
 
 /// Truthful-labeling badge for AI-generated content.
@@ -95,6 +96,7 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l = context.l10n;
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,
@@ -118,7 +120,7 @@ class _Chip extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              isCached ? 'AI · cached' : 'AI summary',
+              isCached ? l.aiBadgeCached : l.aiBadgeSummary,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: AppColors.info,
                 fontWeight: FontWeight.w700,
@@ -167,7 +169,7 @@ class _Tile extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'AI-generated — verify before acting on it.',
+                context.l10n.aiBadgeTileMessage,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: AppColors.info,
                   fontWeight: FontWeight.w600,
@@ -195,6 +197,7 @@ class _DisclosureSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l = context.l10n;
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
@@ -213,42 +216,37 @@ class _DisclosureSheet extends StatelessWidget {
                 ),
               ),
             ),
-            Text('About this AI summary',
+            Text(l.aiDisclosureTitle,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 )),
             const SizedBox(height: 12),
             _Row(
               icon: Icons.source_outlined,
-              title: 'Built from',
+              title: l.aiDisclosureBuiltFrom,
               body: sourceSummary,
             ),
             const SizedBox(height: 16),
-            const _Row(
+            _Row(
               icon: Icons.psychology_alt_outlined,
-              title: 'How it works',
-              body:
-                  'A language model writes a short narrative from the data above. '
-                  'It can make small mistakes, mis-state numbers, or miss context.',
+              title: l.aiDisclosureHowItWorks,
+              body: l.aiDisclosureHowItWorksBody,
             ),
             const SizedBox(height: 16),
             _Row(
               icon: isCached
                   ? Icons.bolt_outlined
                   : Icons.fact_check_outlined,
-              title: 'Freshness',
+              title: l.aiDisclosureFreshness,
               body: isCached
-                  ? 'Reused from cache for speed and cost — the source numbers '
-                      'may be a few minutes stale.'
-                  : 'Generated just now from the current data.',
+                  ? l.aiDisclosureFreshnessCached
+                  : l.aiDisclosureFreshnessLive,
             ),
             const SizedBox(height: 16),
-            const _Row(
+            _Row(
               icon: Icons.shield_outlined,
-              title: 'Use it as',
-              body:
-                  'A starting point — not a substitute for reviewing the '
-                  'underlying student records yourself.',
+              title: l.aiDisclosureUseItAs,
+              body: l.aiDisclosureUseItAsBody,
             ),
           ],
         ),

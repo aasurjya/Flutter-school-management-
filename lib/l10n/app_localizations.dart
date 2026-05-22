@@ -629,6 +629,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'System Default'**
   String get systemDefault;
+
+  /// Chip label on AI-generated content blocks
+  ///
+  /// In en, this message translates to:
+  /// **'AI summary'**
+  String get aiBadgeSummary;
+
+  /// Chip label when the AI output is reused from cache
+  ///
+  /// In en, this message translates to:
+  /// **'AI · cached'**
+  String get aiBadgeCached;
+
+  /// Banner shown above AI-generated content blocks
+  ///
+  /// In en, this message translates to:
+  /// **'AI-generated — verify before acting on it.'**
+  String get aiBadgeTileMessage;
+
+  /// Title of the AI content disclosure bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'About this AI summary'**
+  String get aiDisclosureTitle;
+
+  /// Section header — the data sources used to produce the AI summary
+  ///
+  /// In en, this message translates to:
+  /// **'Built from'**
+  String get aiDisclosureBuiltFrom;
+
+  /// Section header for the AI mechanism explanation
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get aiDisclosureHowItWorks;
+
+  /// Body text explaining how the AI summary is produced
+  ///
+  /// In en, this message translates to:
+  /// **'A language model writes a short narrative from the data above. It can make small mistakes, mis-state numbers, or miss context.'**
+  String get aiDisclosureHowItWorksBody;
+
+  /// Section header for the freshness disclosure
+  ///
+  /// In en, this message translates to:
+  /// **'Freshness'**
+  String get aiDisclosureFreshness;
+
+  /// Body shown when the AI output came from cache
+  ///
+  /// In en, this message translates to:
+  /// **'Reused from cache for speed and cost — the source numbers may be a few minutes stale.'**
+  String get aiDisclosureFreshnessCached;
+
+  /// Body shown when the AI output is freshly generated
+  ///
+  /// In en, this message translates to:
+  /// **'Generated just now from the current data.'**
+  String get aiDisclosureFreshnessLive;
+
+  /// Section header for guidance on how to use the AI summary
+  ///
+  /// In en, this message translates to:
+  /// **'Use it as'**
+  String get aiDisclosureUseItAs;
+
+  /// Body explaining that AI output supplements rather than replaces human review
+  ///
+  /// In en, this message translates to:
+  /// **'A starting point — not a substitute for reviewing the underlying student records yourself.'**
+  String get aiDisclosureUseItAsBody;
 }
 
 class _AppLocalizationsDelegate

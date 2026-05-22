@@ -30,6 +30,34 @@ class AITextGenerator {
   // catch ALL errors, return fallback
   // ---------------------------------------------------------------------------
 
+  /// Generic text-generation entry — the public version of the orchestrator.
+  ///
+  /// The 17 specialized methods on this class (generateDigestSummary,
+  /// generateRiskExplanation, …) all funnel into [_generate]. Prefer this
+  /// public entry for new code; pass the same system/user prompt the
+  /// specialized version would have built. The specialized methods stay for
+  /// backward-compat with existing call sites and will be removed once all
+  /// providers migrate to [generate] via [aiInsightProvider].
+  Future<AITextResult> generate({
+    required String systemPrompt,
+    required String userPrompt,
+    required String fallback,
+    double temperature = 0.7,
+    int maxTokens = 300,
+    bool skipCache = false,
+    Duration? cacheTtl,
+  }) {
+    return _generate(
+      systemPrompt: systemPrompt,
+      userPrompt: userPrompt,
+      fallback: fallback,
+      temperature: temperature,
+      maxTokens: maxTokens,
+      skipCache: skipCache,
+      cacheTtl: cacheTtl,
+    );
+  }
+
   Future<AITextResult> _generate({
     required String systemPrompt,
     required String userPrompt,

@@ -87,5 +87,54 @@
   "theme": "Theme",
   "darkMode": "Dark Mode",
   "lightMode": "Light Mode",
-  "systemDefault": "System Default"
+  "systemDefault": "System Default",
+
+  "aiBadgeSummary": "AI summary",
+  "@aiBadgeSummary": {
+    "description": "Chip label on AI-generated content blocks"
+  },
+  "aiBadgeCached": "AI · cached",
+  "@aiBadgeCached": {
+    "description": "Chip label when the AI output is reused from cache"
+  },
+  "aiBadgeTileMessage": "AI-generated — verify before acting on it.",
+  "@aiBadgeTileMessage": {
+    "description": "Banner shown above AI-generated content blocks"
+  },
+  "aiDisclosureTitle": "About this AI summary",
+  "@aiDisclosureTitle": {
+    "description": "Title of the AI content disclosure bottom sheet"
+  },
+  "aiDisclosureBuiltFrom": "Built from",
+  "@aiDisclosureBuiltFrom": {
+    "description": "Section header — the data sources used to produce the AI summary"
+  },
+  "aiDisclosureHowItWorks": "How it works",
+  "@aiDisclosureHowItWorks": {
+    "description": "Section header for the AI mechanism explanation"
+  },
+  "aiDisclosureHowItWorksBody": "A language model writes a short narrative from the data above. It can make small mistakes, mis-state numbers, or miss context.",
+  "@aiDisclosureHowItWorksBody": {
+    "description": "Body text explaining how the AI summary is produced"
+  },
+  "aiDisclosureFreshness": "Freshness",
+  "@aiDisclosureFreshness": {
+    "description": "Section header for the freshness disclosure"
+  },
+  "aiDisclosureFreshnessCached": "Reused from cache for speed and cost — the source numbers may be a few minutes stale.",
+  "@aiDisclosureFreshnessCached": {
+    "description": "Body shown when the AI output came from cache"
+  },
+  "aiDisclosureFreshnessLive": "Generated just now from the current data.",
+  "@aiDisclosureFreshnessLive": {
+    "description": "Body shown when the AI output is freshly generated"
+  },
+  "aiDisclosureUseItAs": "Use it as",
+  "@aiDisclosureUseItAs": {
+    "description": "Section header for guidance on how to use the AI summary"
+  },
+  "aiDisclosureUseItAsBody": "A starting point — not a substitute for reviewing the underlying student records yourself.",
+  "@aiDisclosureUseItAsBody": {
+    "description": "Body explaining that AI output supplements rather than replaces human review"
+  }
 }

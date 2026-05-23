@@ -5,6 +5,7 @@ import '../ai/adapters/ai_adapter.dart';
 import '../ai/adapters/claude_adapter.dart';
 import '../ai/adapters/deepseek_adapter.dart';
 import '../ai/adapters/openrouter_adapter.dart';
+import '../ai/ai_gateway_client.dart';
 import '../ai/agents/ai_agent.dart';
 import '../ai/agents/tools/compose_message_tool.dart';
 import '../ai/agents/tools/fetch_attendance_tool.dart';
@@ -134,10 +135,24 @@ final aiRouterProvider = Provider<AIRouter?>((ref) {
 // Text generators — now route through AIRouter with fallback to direct service
 // =============================================================================
 
+/// Process-wide [AiGatewayClient]. Talks the `ai-gateway` Supabase edge
+/// function. Auto-injects the current session's Bearer token. Disposed
+/// with the provider scope.
+final aiGatewayClientProvider = Provider<AiGatewayClient>((ref) {
+  final client = AiGatewayClient.fromSupabase(supabase: Supabase.instance.client);
+  ref.onDispose(client.dispose);
+  return client;
+});
+
 final aiTextGeneratorProvider = Provider<AITextGenerator>((ref) {
   final router = ref.watch(aiRouterProvider);
   final legacyService = ref.watch(deepSeekServiceProvider);
-  return AITextGenerator(service: legacyService, router: router);
+  // Gateway-first waterfall: gateway → AIRouter → legacy DeepSeek service.
+  return AITextGenerator(
+    gateway: ref.watch(aiGatewayClientProvider),
+    service: legacyService,
+    router: router,
+  );
 });
 
 final aiStaffTextGeneratorProvider = Provider<AIStaffTextGenerator>((ref) {

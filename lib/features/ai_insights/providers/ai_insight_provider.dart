@@ -55,6 +55,9 @@ AutoDisposeFutureProviderFamily<AITextResult, T> aiInsightProvider<T>({
           maxTokens: maxTokens,
           skipCache: skipCache,
           cacheTtl: cacheTtl,
+          // Routes through the ai-gateway edge function when configured;
+          // server-side picks the model chain for this feature_type.
+          featureType: featureType,
         );
       } catch (_) {
         return AITextResult(text: fallback);

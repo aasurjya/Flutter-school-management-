@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/pagination/paginated_notifier.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/message.dart';
 import '../../../data/models/announcement.dart';
@@ -8,9 +9,40 @@ final messageRepositoryProvider = Provider<MessageRepository>((ref) {
   return MessageRepository(ref.watch(supabaseProvider));
 });
 
+/// Eager fetch of all threads. Prefer [paginatedThreadsProvider] for screens
+/// that render long lists — at 100+ threads this becomes the most user-felt
+/// latency complaint in the app.
 final threadsProvider = FutureProvider.autoDispose<List<Thread>>((ref) async {
   final repository = ref.watch(messageRepositoryProvider);
   return repository.getThreads();
+});
+
+/// Infinite-scroll threads list (Stage 3 / S3.18). Uses the generic
+/// [PaginatedNotifier] from Stage 1.
+///
+/// Wire from a screen with:
+///
+/// ```dart
+/// final scroll = ScrollController();
+/// final state = ref.watch(paginatedThreadsProvider);
+/// PaginationScrollListener(
+///   controller: scroll,
+///   onLoadMore: () =>
+///       ref.read(paginatedThreadsProvider.notifier).loadMore(),
+/// );
+/// // First-render kick:
+/// useEffect(() {
+///   ref.read(paginatedThreadsProvider.notifier).loadInitial();
+///   return null;
+/// }, const []);
+/// ```
+final paginatedThreadsProvider = StateNotifierProvider.autoDispose<
+    PaginatedNotifier<Thread>, PaginatedState<Thread>>((ref) {
+  final repository = ref.watch(messageRepositoryProvider);
+  return PaginatedNotifier<Thread>(
+    fetcher: ({required offset, required limit}) =>
+        repository.getThreads(offset: offset, limit: limit),
+  );
 });
 
 final threadByIdProvider = FutureProvider.autoDispose.family<Thread?, String>(

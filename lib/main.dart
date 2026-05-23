@@ -8,6 +8,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/app_config.dart';
 import 'core/config/app_environment.dart';
 import 'core/config/supabase_config.dart';
+import 'core/killswitch/killswitch.dart';
+import 'core/killswitch/maintenance_screen.dart';
 import 'core/providers/connectivity_provider.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/router/app_router.dart';
@@ -32,6 +34,15 @@ void main() async {
     url: SupabaseConfig.url,
     anonKey: SupabaseConfig.anonKey,
   );
+
+  // Killswitch gate — if maintenance is engaged on the server, render the
+  // maintenance screen and skip the rest of boot. A failed/slow check falls
+  // through to [KillswitchState.off] so this is never a launch blocker.
+  final killswitch = await readKillswitchAtBoot(Supabase.instance.client);
+  if (killswitch.maintenance) {
+    runApp(MaintenanceApp(state: killswitch));
+    return;
+  }
 
   // Initialize local storage (Isar)
   await LocalStorageService.initialize();

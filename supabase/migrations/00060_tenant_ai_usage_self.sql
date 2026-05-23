@@ -13,6 +13,28 @@
 -- Super_admins call get_ai_usage_by_tenant(...) for the cross-tenant view.
 -- ============================================================================
 
+-- Conditional install: the function depends on tenant_ai_usage +
+-- tenant_ai_credits which live in the parked AI-governance migration set
+-- (00055..00059). If those tables aren't present yet, skip the function so
+-- this migration replays cleanly on a fresh DB. The function will install
+-- the next time `supabase db push` runs after the dependency migrations land.
+--
+-- Dollar-quote tags are intentionally distinct ($do$ / $func$ / $body$) so
+-- the nested CREATE FUNCTION inside the DO block parses correctly.
+DO $do$
+BEGIN
+  IF NOT (
+    EXISTS (SELECT 1 FROM information_schema.tables
+            WHERE table_schema='public' AND table_name='tenant_ai_usage')
+    AND EXISTS (SELECT 1 FROM information_schema.tables
+            WHERE table_schema='public' AND table_name='tenant_ai_credits')
+  ) THEN
+    RAISE NOTICE 'tenant_ai_usage/tenant_ai_credits not present; '
+                 'skipping get_my_tenant_ai_usage() install';
+    RETURN;
+  END IF;
+
+  EXECUTE $func$
 CREATE OR REPLACE FUNCTION public.get_my_tenant_ai_usage()
 RETURNS TABLE (
   tenant_id          UUID,
@@ -27,12 +49,10 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public AS $$
+SET search_path = public AS $body$
 DECLARE
   v_tenant_id UUID;
 BEGIN
-  -- Caller's tenant from JWT app_metadata. NULL means super_admin / no tenant
-  -- context — they should use the super_admin endpoints instead.
   v_tenant_id := NULLIF(
     current_setting('request.jwt.claims', true)::jsonb
       -> 'app_metadata' ->> 'tenant_id',
@@ -73,11 +93,17 @@ BEGIN
     usage.last_at
   FROM tenant_ai_credits c, usage
   WHERE c.tenant_id = v_tenant_id;
-END $$;
+END
+$body$;
+$func$;
 
-REVOKE EXECUTE ON FUNCTION public.get_my_tenant_ai_usage() FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION public.get_my_tenant_ai_usage() TO authenticated;
+  EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_my_tenant_ai_usage() FROM PUBLIC';
+  EXECUTE 'GRANT  EXECUTE ON FUNCTION public.get_my_tenant_ai_usage() TO authenticated';
 
+  EXECUTE $cmt$
 COMMENT ON FUNCTION public.get_my_tenant_ai_usage() IS
   'Returns MTD AI usage for the caller''s tenant (from JWT app_metadata).'
-  ' Used by the tenant_admin/principal AI usage card on the admin dashboard.';
+  ' Used by the tenant_admin/principal AI usage card on the admin dashboard.'
+$cmt$;
+END
+$do$;

@@ -35,6 +35,17 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+
+            // R8 full mode + resource shrinking (Stage 2 / S2.11).
+            // Cuts another 15-25% off the release APK by removing unused
+            // Dart-side classes/methods/resources. Pair this with the
+            // `--obfuscate --split-debug-info=...` flags on `flutter build`.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }

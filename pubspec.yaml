@@ -63,6 +63,10 @@ dependencies:
   # Error tracking (Stage 1 / S1.1). Free tier: 5k errors/month.
   sentry_flutter: ^8.13.0
 
+  # Product analytics (Stage 2 / S2.12). Free tier: 1M events/month.
+  # Disabled at runtime if POSTHOG_API_KEY is not in .env.
+  posthog_flutter: ^4.10.1
+
   freezed_annotation: any
 dev_dependencies:
   flutter_test:
@@ -87,16 +91,13 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/animations/
+    # NotoSans stays — required by lib/features/fees/utils/fees_pdf_builder.dart
+    # for ₹ + Devanagari + Tamil/Bengali Unicode rendering in PDF exports.
+    # Do NOT remove unless the PDF builder switches font.
     - assets/fonts/NotoSans-Regular.ttf
     - assets/fonts/NotoSans-Bold.ttf
-  
-  fonts:
-    - family: Poppins
-      fonts:
-        - asset: assets/fonts/Poppins-Regular.ttf
-        - asset: assets/fonts/Poppins-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Poppins-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Poppins-Bold.ttf
-          weight: 700
+
+  # NOTE: Poppins TTFs removed 2026-05-23 — were bundled (632KB) but never
+  # loaded. The theme uses google_fonts package (GoogleFonts.inter), so the
+  # bundled Poppins was dead weight. If you want bundled fonts again, use
+  # GoogleFonts.config to disable runtime download and add Inter TTFs here.

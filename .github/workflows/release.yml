@@ -1,0 +1,123 @@
+name: Release — Mobile builds with symbols
+
+# Triggered on:
+#   • Tag push `v*` → production release
+#   • Manual workflow_dispatch → ad-hoc builds for testing
+#
+# Produces:
+#   • app-release.apk (universal, R8-minified, obfuscated, tree-shaken)
+#   • symbols/* (debug-info needed to symbolicate Sentry stacks)
+#   • mapping.txt (R8 deobfuscation map)
+#
+# Outputs are uploaded as workflow artifacts so a human can attach them to
+# the GitHub Release and to Sentry's release-artifact uploader.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'release track (just for the artifact label)'
+        required: false
+        default: 'manual'
+
+jobs:
+  android:
+    name: Build Android release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+            ~/.gradle/caches
+          key: ${{ runner.os }}-release-${{ hashFiles('pubspec.lock', 'android/**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-release-
+
+      - name: Install deps
+        run: flutter pub get
+
+      - name: Create .env (production secrets)
+        run: |
+          cat <<'EOF' > .env
+          SUPABASE_URL=${{ secrets.PROD_SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.PROD_SUPABASE_ANON_KEY }}
+          APP_ENV=production
+          SHOW_DEMO_CREDENTIALS=false
+          SUPER_ADMIN_EMAIL=${{ secrets.SUPER_ADMIN_EMAIL }}
+          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          SENTRY_TRACES_SAMPLE_RATE=0.1
+          EOF
+          sed -i 's/^ *//' .env
+
+      # All three flags together: --split-debug-info ships symbols separately,
+      # --obfuscate hides Dart class names in the APK, --tree-shake-icons drops
+      # unused Material Icons glyphs. R8 (configured in build.gradle.kts) does
+      # the Java/Kotlin-side shrinking.
+      - name: Build APK (release, obfuscated, split-debug-info, tree-shake)
+        run: |
+          mkdir -p build/symbols
+          flutter build apk --release \
+            --split-debug-info=build/symbols \
+            --obfuscate \
+            --tree-shake-icons
+
+      - name: Report APK size
+        run: |
+          ls -lh build/app/outputs/flutter-apk/app-release.apk
+          unzip -l build/app/outputs/flutter-apk/app-release.apk | tail -3
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-${{ github.ref_name }}-${{ github.run_id }}
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      - name: Upload symbols (Dart obfuscation map)
+        uses: actions/upload-artifact@v4
+        with:
+          name: symbols-${{ github.ref_name }}-${{ github.run_id }}
+          path: build/symbols/
+          retention-days: 90
+
+      - name: Upload R8 mapping
+        uses: actions/upload-artifact@v4
+        with:
+          name: r8-mapping-${{ github.ref_name }}-${{ github.run_id }}
+          path: build/app/outputs/mapping/release/mapping.txt
+          retention-days: 90
+          if-no-files-found: warn
+
+      # Push to Sentry so the next stack-trace this app emits in prod is
+      # symbolicated. Skips when SENTRY_AUTH_TOKEN isn't available
+      # (e.g. forked-PR builds).
+      - name: Upload symbols to Sentry
+        if: ${{ env.SENTRY_AUTH_TOKEN != '' }}
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        run: |
+          curl -sL https://sentry.io/get-cli/ | bash
+          sentry-cli debug-files upload build/symbols/
+          sentry-cli debug-files upload build/app/outputs/mapping/release/mapping.txt

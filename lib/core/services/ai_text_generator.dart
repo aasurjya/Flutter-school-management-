@@ -202,6 +202,7 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.7,
       maxTokens: 300,
+      featureType: 'parent_communication',
     );
   }
 
@@ -281,6 +282,7 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.6,
       maxTokens: 350,
+      featureType: 'attendance_analytics',
     );
   }
 
@@ -318,6 +320,7 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.5,
       maxTokens: 350,
+      featureType: 'notifications',
     );
   }
 
@@ -355,6 +358,7 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.7,
       maxTokens: 400,
+      featureType: 'student_analytics',
     );
   }
 
@@ -473,6 +477,7 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.5,
       maxTokens: 500,
+      featureType: 'student_analytics',
     );
   }
 
@@ -517,6 +522,7 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.3,
       maxTokens: 2000,
+      featureType: 'grade_calculation',
     );
   }
 
@@ -561,6 +567,7 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.5,
       maxTokens: 800,
+      featureType: 'grade_calculation',
     );
   }
 
@@ -638,6 +645,7 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.4,
       maxTokens: 4000,
+      featureType: 'exam_paper_generation',
     );
   }
 
@@ -746,6 +754,7 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.5,
       maxTokens: 300,
+      featureType: 'student_analytics',
     );
   }
 
@@ -786,6 +795,7 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.5,
       maxTokens: 350,
+      featureType: 'student_analytics',
     );
   }
 
@@ -822,6 +832,7 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.5,
       maxTokens: 350,
+      featureType: 'student_analytics',
     );
   }
 }

@@ -12,6 +12,8 @@ during an incident is not the time to figure out the restore process.
 | [feature-flags.md](./feature-flags.md) | Need to dark-launch / staged-rollout / disable a feature. |
 | [idempotency.md](./idempotency.md)  | Adding a new write path that users can retry.        |
 | [environments.md](./environments.md) | Setting up / drilling staging vs production.        |
+| [observability-setup.md](./observability-setup.md) | Sign up for Sentry + PostHog, wire DSN / API key. ~10 min total. |
+| [pitch-deck-audit.md](./pitch-deck-audit.md) | Claims vs reality for the sales deck.               |
 
 ## Conventions
 

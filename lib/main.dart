@@ -10,6 +10,7 @@ import 'core/config/app_environment.dart';
 import 'core/config/supabase_config.dart';
 import 'core/killswitch/killswitch.dart';
 import 'core/killswitch/maintenance_screen.dart';
+import 'core/observability/sentry_init.dart';
 import 'core/providers/connectivity_provider.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/router/app_router.dart';
@@ -26,38 +27,42 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Initialize environment configuration first
+  // Initialize environment configuration first — Sentry needs the DSN.
   await AppEnvironment.initialize();
 
-  // Initialize Supabase with environment-based credentials
-  await Supabase.initialize(
-    url: SupabaseConfig.url,
-    anonKey: SupabaseConfig.anonKey,
-  );
+  // Sentry wraps the entire app lifecycle. If SENTRY_DSN is absent the
+  // wrapper degrades to a plain `await bootstrap()` — no behaviour change.
+  await runWithSentry(() async {
+    // Initialize Supabase with environment-based credentials
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      anonKey: SupabaseConfig.anonKey,
+    );
 
-  // Killswitch gate — if maintenance is engaged on the server, render the
-  // maintenance screen and skip the rest of boot. A failed/slow check falls
-  // through to [KillswitchState.off] so this is never a launch blocker.
-  final killswitch = await readKillswitchAtBoot(Supabase.instance.client);
-  if (killswitch.maintenance) {
-    runApp(MaintenanceApp(state: killswitch));
-    return;
-  }
+    // Killswitch gate — if maintenance is engaged on the server, render the
+    // maintenance screen and skip the rest of boot. A failed/slow check
+    // falls through to [KillswitchState.off] so this is never a launch blocker.
+    final killswitch = await readKillswitchAtBoot(Supabase.instance.client);
+    if (killswitch.maintenance) {
+      runApp(MaintenanceApp(state: killswitch));
+      return;
+    }
 
-  // Initialize local storage (Isar)
-  await LocalStorageService.initialize();
+    // Initialize local storage (Isar)
+    await LocalStorageService.initialize();
 
-  // Initialize SharedPreferences for offline sync
-  final sharedPrefs = await SharedPreferences.getInstance();
+    // Initialize SharedPreferences for offline sync
+    final sharedPrefs = await SharedPreferences.getInstance();
 
-  runApp(
-    ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(sharedPrefs),
-      ],
-      child: const SchoolManagementApp(),
-    ),
-  );
+    runApp(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(sharedPrefs),
+        ],
+        child: const SchoolManagementApp(),
+      ),
+    );
+  });
 }
 
 class SchoolManagementApp extends ConsumerWidget {

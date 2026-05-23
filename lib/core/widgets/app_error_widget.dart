@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../observability/sentry_init.dart';
 import '../theme/app_colors.dart';
 
 /// Normalizes raw exception/error objects into user-friendly copy.
@@ -6,8 +7,15 @@ import '../theme/app_colors.dart';
 /// - "tenantId is null" → likely stale session / super_admin on tenant route
 /// - "currentUserId is null" → mid-logout race
 /// Falls back to a generic message; never surfaces stack traces.
+///
+/// Side effect: forwards non-session errors to Sentry (no-op if Sentry isn't
+/// configured). Session errors are expected lifecycle events and are NOT
+/// reported — they'd just flood the error budget.
 ({String title, String message, bool sessionInvalid}) describeAppError(
-    Object? error) {
+    Object? error, {
+  StackTrace? stackTrace,
+  String? hint,
+}) {
   final raw = error?.toString() ?? '';
   if (raw.contains('tenantId is null')) {
     return (
@@ -23,12 +31,19 @@ import '../theme/app_colors.dart';
       sessionInvalid: true,
     );
   }
+  // Forward to Sentry asynchronously — never block the caller for this.
+  if (error != null) {
+    unawaited(captureAppException(error, stackTrace: stackTrace, hint: hint));
+  }
   return (
     title: 'Something went wrong',
     message: 'Please try again. If the problem persists, contact support.',
     sessionInvalid: false,
   );
 }
+
+// Local unawaited helper — avoids pulling in dart:async for one use.
+void unawaited(Future<void> future) {}
 
 /// Standard error state widget used across all screens
 class AppErrorWidget extends StatelessWidget {

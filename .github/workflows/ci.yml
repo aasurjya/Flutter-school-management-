@@ -67,6 +67,12 @@ jobs:
         # `dart run tool/design_token_lint.dart --update-baseline` to lock in.
         run: dart run tool/design_token_lint.dart
 
+      - name: Migration linter (Squawk)
+        # Blocks dangerous schema changes before they reach prod:
+        # ADD COLUMN NOT NULL without default, DROP COLUMN, missing
+        # CONCURRENTLY on indexes, etc. See docs/runbooks/migrations.md.
+        run: bash tool/squawk_lint.sh
+
       - name: Unit + widget tests (parallel)
         run: flutter test test/ --reporter=github --concurrency=4
 

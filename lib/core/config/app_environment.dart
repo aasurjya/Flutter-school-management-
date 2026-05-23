@@ -77,6 +77,22 @@ class AppEnvironment {
     return show.toLowerCase() == 'true';
   }
 
+  /// Sentry DSN (optional — error tracking, not required).
+  /// When null/empty, Sentry init becomes a no-op and the app runs normally.
+  /// Free tier: 5k errors/month, set per environment in .env.
+  static String? get sentryDsn {
+    final dsn = dotenv.env['SENTRY_DSN'];
+    return (dsn != null && dsn.isNotEmpty) ? dsn : null;
+  }
+
+  /// Sentry sample rate for performance traces (0.0 to 1.0). Default 0.1 in
+  /// production (10% of transactions), 1.0 in dev/staging for debugging.
+  static double get sentryTracesSampleRate {
+    final raw = dotenv.env['SENTRY_TRACES_SAMPLE_RATE'];
+    final parsed = raw == null ? null : double.tryParse(raw);
+    return parsed ?? (isProduction ? 0.1 : 1.0);
+  }
+
   /// DeepSeek API key (optional — LLM enhancement, not required)
   static String? get deepSeekApiKey {
     final key = dotenv.env['Deepseek_API'];

@@ -60,6 +60,9 @@ dependencies:
   mobile_scanner: ^4.0.0
   cached_network_image: ^3.4.1
 
+  # Error tracking (Stage 1 / S1.1). Free tier: 5k errors/month.
+  sentry_flutter: ^8.13.0
+
   freezed_annotation: any
 dev_dependencies:
   flutter_test:

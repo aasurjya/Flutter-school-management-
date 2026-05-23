@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/cache/request_cache.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/student.dart';
 import '../../../data/repositories/student_repository.dart';
@@ -47,10 +48,26 @@ final currentStudentProvider = FutureProvider.autoDispose<Student?>((ref) async 
   return repository.getStudentByUserId(userId);
 });
 
+/// Student count — hot read. Every admin dashboard tab opens calls this;
+/// pull-to-refresh on the dashboard calls it again. With the Stage 3 cache
+/// layer it now reuses the prior result for 30 s — so tabbing in/out is
+/// free, and the dashboard refresh only roundtrips for staler data.
+///
+/// Invalidate via `ref.read(requestCacheProvider).invalidatePrefix('students.count')`
+/// after a student is created / deleted (StudentsNotifier already calls
+/// loadStudents() which triggers a different provider — wire the cache
+/// invalidation into that mutation flow when it lands).
 final studentCountProvider = FutureProvider.autoDispose.family<int, String?>(
   (ref, sectionId) async {
     final repository = ref.watch(studentRepositoryProvider);
-    return repository.getStudentCount(sectionId: sectionId);
+    return cachedLoad<int>(
+      ref,
+      namespace: 'students.count',
+      tenantId: repository.tenantIdOrNull,
+      params: {'section_id': sectionId},
+      ttl: const Duration(seconds: 30),
+      load: () => repository.getStudentCount(sectionId: sectionId),
+    );
   },
 );
 

@@ -93,6 +93,20 @@ class AppEnvironment {
     return parsed ?? (isProduction ? 0.1 : 1.0);
   }
 
+  /// PostHog API key (optional — product analytics, free 1M events/month).
+  /// When null/empty, PostHog init is a no-op and `capture()` calls become
+  /// no-ops too — analytics-free local dev keeps working.
+  static String? get posthogApiKey {
+    final key = dotenv.env['POSTHOG_API_KEY'];
+    return (key != null && key.isNotEmpty) ? key : null;
+  }
+
+  /// PostHog host. Defaults to the US cloud. Set to https://eu.posthog.com
+  /// or a self-hosted URL if needed.
+  static String get posthogHost {
+    return dotenv.env['POSTHOG_HOST'] ?? 'https://app.posthog.com';
+  }
+
   /// DeepSeek API key (optional — LLM enhancement, not required)
   static String? get deepSeekApiKey {
     final key = dotenv.env['Deepseek_API'];

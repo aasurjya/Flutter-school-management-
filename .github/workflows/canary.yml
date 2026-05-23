@@ -1,0 +1,111 @@
+name: Canary — Synthetic Traffic
+
+# Hourly health probe against the staging Supabase project. Fails loud (via
+# Sentry alert or workflow notification) when a critical path breaks.
+#
+# 5 critical paths covered today:
+#   1. anonymous: GET /rest/v1/app_killswitch?key=eq.maintenance      → 200
+#   2. anonymous: POST /auth/v1/token (with canary-bot credentials)   → 200
+#   3. authed:    GET /rest/v1/students?limit=1                       → 200 (RLS)
+#   4. authed:    GET /rest/v1/invoices?status=eq.overdue&limit=1     → 200 (RLS)
+#   5. authed:    GET /rest/v1/feature_flags?select=key&limit=10      → 200
+#
+# Self-skips with a workflow-level notice if STAGING secrets aren't wired,
+# so a credential rotation can't fail the gate forever.
+
+on:
+  schedule:
+    - cron: '17 * * * *'   # 17 minutes past every hour — offset from GH peak
+  workflow_dispatch:        # manual trigger button in the Actions UI
+
+jobs:
+  probe:
+    name: Hit 5 critical paths
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check staging secrets are wired
+        id: secrets
+        run: |
+          if [ -z "${{ secrets.STAGING_SUPABASE_URL }}" ] \
+            || [ -z "${{ secrets.STAGING_SUPABASE_ANON_KEY }}" ] \
+            || [ -z "${{ secrets.CANARY_USER_EMAIL }}" ] \
+            || [ -z "${{ secrets.CANARY_USER_PASSWORD }}" ]; then
+            echo "::warning::STAGING_* or CANARY_USER_* secrets missing — skipping canary"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Path 1 — anon read of killswitch
+        if: steps.secrets.outputs.skip == 'false'
+        run: |
+          set -e
+          code=$(curl -s -o /tmp/r1.json -w "%{http_code}" \
+            -H "apikey: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}" \
+            "${{ secrets.STAGING_SUPABASE_URL }}/rest/v1/app_killswitch?select=enabled,message&key=eq.maintenance")
+          echo "killswitch HTTP $code"
+          test "$code" = "200"
+
+      - name: Path 2 — login as canary user
+        id: login
+        if: steps.secrets.outputs.skip == 'false'
+        run: |
+          set -e
+          resp=$(curl -s -X POST \
+            -H "apikey: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"email\":\"${{ secrets.CANARY_USER_EMAIL }}\",\"password\":\"${{ secrets.CANARY_USER_PASSWORD }}\"}" \
+            "${{ secrets.STAGING_SUPABASE_URL }}/auth/v1/token?grant_type=password")
+          token=$(echo "$resp" | jq -r .access_token)
+          if [ "$token" = "null" ] || [ -z "$token" ]; then
+            echo "::error::canary login failed: $resp"
+            exit 1
+          fi
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Path 3 — students list (RLS-scoped)
+        if: steps.secrets.outputs.skip == 'false'
+        run: |
+          set -e
+          code=$(curl -s -o /tmp/r3.json -w "%{http_code}" \
+            -H "apikey: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ steps.login.outputs.token }}" \
+            "${{ secrets.STAGING_SUPABASE_URL }}/rest/v1/students?select=id&limit=1")
+          echo "students HTTP $code"
+          test "$code" = "200"
+
+      - name: Path 4 — invoices overdue (RLS-scoped)
+        if: steps.secrets.outputs.skip == 'false'
+        run: |
+          set -e
+          code=$(curl -s -o /tmp/r4.json -w "%{http_code}" \
+            -H "apikey: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ steps.login.outputs.token }}" \
+            "${{ secrets.STAGING_SUPABASE_URL }}/rest/v1/invoices?select=id&status=eq.overdue&limit=1")
+          echo "invoices HTTP $code"
+          test "$code" = "200"
+
+      - name: Path 5 — feature_flags read
+        if: steps.secrets.outputs.skip == 'false'
+        run: |
+          set -e
+          code=$(curl -s -o /tmp/r5.json -w "%{http_code}" \
+            -H "apikey: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ steps.login.outputs.token }}" \
+            "${{ secrets.STAGING_SUPABASE_URL }}/rest/v1/feature_flags?select=key&limit=10")
+          echo "feature_flags HTTP $code"
+          test "$code" = "200"
+
+      - name: Notify Sentry on failure
+        if: failure() && steps.secrets.outputs.skip == 'false'
+        run: |
+          if [ -z "${{ secrets.SENTRY_DSN_CANARY }}" ]; then
+            echo "::notice::SENTRY_DSN_CANARY not set — skipping Sentry event"
+            exit 0
+          fi
+          curl -s -X POST "${{ secrets.SENTRY_DSN_CANARY }}/api/store/" \
+            -H "Content-Type: application/json" \
+            -d "{\"message\":\"canary failed at $(date -Iseconds)\",\"level\":\"error\",\"tags\":{\"workflow\":\"canary\",\"run_id\":\"${{ github.run_id }}\"}}" \
+            || true

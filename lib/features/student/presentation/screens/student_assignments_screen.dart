@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/pagination/paginated_notifier.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/assignment.dart';
 import '../../../../shared/extensions/context_extensions.dart';
@@ -92,7 +93,7 @@ class _StudentAssignmentsScreenState extends ConsumerState<StudentAssignmentsScr
   }
 }
 
-class _AssignmentsList extends ConsumerWidget {
+class _AssignmentsList extends ConsumerStatefulWidget {
   final String sectionId;
   final String studentId;
   final String filter;
@@ -104,53 +105,118 @@ class _AssignmentsList extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final assignmentsAsync = ref.watch(studentAssignmentsProvider(
-      StudentAssignmentsFilter(
-        sectionId: sectionId,
-        pendingOnly: filter == 'pending',
-      ),
-    ));
+  ConsumerState<_AssignmentsList> createState() => _AssignmentsListState();
+}
 
-    return assignmentsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
-      data: (assignments) {
-        if (assignments.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.assignment_outlined,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  filter == 'pending'
-                      ? 'No pending assignments'
-                      : 'No assignments found',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-              ],
+class _AssignmentsListState extends ConsumerState<_AssignmentsList> {
+  final _scrollController = ScrollController();
+  PaginationScrollListener? _scrollListener;
+  late StudentAssignmentsFilter _filter;
+
+  @override
+  void initState() {
+    super.initState();
+    _filter = StudentAssignmentsFilter(
+      sectionId: widget.sectionId,
+      pendingOnly: widget.filter == 'pending',
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(paginatedStudentAssignmentsProvider(_filter).notifier)
+          .loadInitial();
+    });
+    _scrollListener = PaginationScrollListener(
+      controller: _scrollController,
+      onLoadMore: () => ref
+          .read(paginatedStudentAssignmentsProvider(_filter).notifier)
+          .loadMore(),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _AssignmentsList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Tab-switching changes the `filter` prop. Re-seed the paginated
+    // notifier under the new family key on the next frame.
+    if (oldWidget.filter != widget.filter ||
+        oldWidget.sectionId != widget.sectionId) {
+      _filter = StudentAssignmentsFilter(
+        sectionId: widget.sectionId,
+        pendingOnly: widget.filter == 'pending',
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(paginatedStudentAssignmentsProvider(_filter).notifier)
+            .loadInitial();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollListener?.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state =
+        ref.watch(paginatedStudentAssignmentsProvider(_filter));
+
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state.error != null) {
+      return Center(child: Text('Error: ${state.error}'));
+    }
+    if (state.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.assignment_outlined,
+              size: 64,
+              color: Colors.grey[400],
             ),
-          );
-        }
+            const SizedBox(height: 16),
+            Text(
+              widget.filter == 'pending'
+                  ? 'No pending assignments'
+                  : 'No assignments found',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      );
+    }
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: assignments.length,
-          itemBuilder: (context, index) {
-            final assignment = assignments[index];
-            return _AssignmentCard(
-              assignment: assignment,
-              studentId: studentId,
-              onTap: () => _showAssignmentDetail(context, ref, assignment, studentId),
+    final assignments = state.items;
+    return RefreshIndicator(
+      onRefresh: () => ref
+          .read(paginatedStudentAssignmentsProvider(_filter).notifier)
+          .refresh(),
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(16),
+        itemCount: assignments.length + (state.hasMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index >= assignments.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: CircularProgressIndicator()),
             );
-          },
-        );
-      },
+          }
+          final assignment = assignments[index];
+          return _AssignmentCard(
+            assignment: assignment,
+            studentId: widget.studentId,
+            onTap: () =>
+                _showAssignmentDetail(context, ref, assignment, widget.studentId),
+          );
+        },
+      ),
     );
   }
 

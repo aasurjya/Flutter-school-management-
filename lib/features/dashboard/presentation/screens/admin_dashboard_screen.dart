@@ -13,6 +13,7 @@ import '../../../ai_insights/providers/early_warning_provider.dart';
 import '../../../attendance/providers/attendance_provider.dart';
 import '../../../fees/providers/fees_provider.dart';
 import '../../../students/providers/students_provider.dart';
+import '../../widgets/mv_backed_kpi_strip.dart';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const _bg    = AppColors.background;
@@ -153,6 +154,15 @@ class AdminDashboardScreen extends ConsumerWidget {
                 ),
               ),
             ],
+          ),
+
+          // MV-backed school snapshot (auto-hides when migration 00064
+          // hasn't been applied or when there's no tenant row in
+          // v_my_admin_kpis yet). Reads ONE pre-aggregated row instead of
+          // the 5 ad-hoc aggregations the metrics grid below fires.
+          const SliverPadding(
+            padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
+            sliver: SliverToBoxAdapter(child: MvBackedKpiStrip()),
           ),
 
           // Main Metrics Grid

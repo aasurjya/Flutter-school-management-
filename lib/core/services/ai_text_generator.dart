@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import '../ai/ai_gateway_client.dart';
 import '../ai/ai_router.dart';
 import 'deepseek_service.dart';
 
@@ -7,22 +8,27 @@ class AITextResult {
   final String text;
   final bool isLLMGenerated;
   final bool isFromCache;
+  final String? model;
 
   const AITextResult({
     required this.text,
     this.isLLMGenerated = false,
     this.isFromCache = false,
+    this.model,
   });
 }
 
 class AITextGenerator {
+  final AiGatewayClient? _gateway;
   final DeepSeekService? _service;
   final AIRouter? _router;
 
   const AITextGenerator({
+    AiGatewayClient? gateway,
     DeepSeekService? service,
     AIRouter? router,
-  })  : _service = service,
+  })  : _gateway = gateway,
+        _service = service,
         _router = router;
 
   // ---------------------------------------------------------------------------
@@ -32,12 +38,16 @@ class AITextGenerator {
 
   /// Generic text-generation entry — the public version of the orchestrator.
   ///
-  /// The 17 specialized methods on this class (generateDigestSummary,
-  /// generateRiskExplanation, …) all funnel into [_generate]. Prefer this
-  /// public entry for new code; pass the same system/user prompt the
-  /// specialized version would have built. The specialized methods stay for
-  /// backward-compat with existing call sites and will be removed once all
-  /// providers migrate to [generate] via [aiInsightProvider].
+  /// **Waterfall:** [AiGatewayClient] (server-routed, multi-model, quota-gated)
+  /// → [AIRouter] (legacy local routing) → [DeepSeekService] (direct) →
+  /// fallback string. The 17 specialized methods on this class
+  /// (generateDigestSummary, generateRiskExplanation, …) all funnel into
+  /// [_generate]; new code should call this public [generate] with a
+  /// [featureType] so the gateway path activates.
+  ///
+  /// [featureType] is the key in `feature_routes` (e.g. 'parent_communication',
+  /// 'fee_invoicing'). When null, the gateway is bypassed — useful for tests
+  /// and for code paths not yet migrated to the gateway.
   Future<AITextResult> generate({
     required String systemPrompt,
     required String userPrompt,
@@ -46,6 +56,7 @@ class AITextGenerator {
     int maxTokens = 300,
     bool skipCache = false,
     Duration? cacheTtl,
+    String? featureType,
   }) {
     return _generate(
       systemPrompt: systemPrompt,
@@ -55,6 +66,7 @@ class AITextGenerator {
       maxTokens: maxTokens,
       skipCache: skipCache,
       cacheTtl: cacheTtl,
+      featureType: featureType,
     );
   }
 
@@ -66,8 +78,47 @@ class AITextGenerator {
     int maxTokens = 300,
     bool skipCache = false,
     Duration? cacheTtl,
+    String? featureType,
   }) async {
-    // Prefer the new AIRouter when available.
+    // 1. Gateway (preferred) — server picks the model chain, enforces
+    //    quota, dedupes idempotency, logs to tenant_ai_usage. Skipped when
+    //    no featureType (caller hasn't migrated yet) or the gateway client
+    //    isn't injected.
+    if (_gateway != null && featureType != null) {
+      try {
+        final r = await _gateway.complete(
+          featureType: featureType,
+          systemPrompt: systemPrompt,
+          userPrompt: userPrompt,
+          maxTokens: maxTokens,
+          temperature: temperature,
+        );
+        return AITextResult(
+          text: r.text.isNotEmpty ? r.text : fallback,
+          isLLMGenerated: r.isLLMGenerated,
+          isFromCache: r.isFromCache,
+          model: r.model,
+        );
+      } on AiGatewayQuotaException {
+        // Quota is a deliberate signal — do NOT walk fallback paths
+        // (that would just hit the same OpenRouter key the gateway shields).
+        // Caller surfaces the friendly "daily limit reached" copy.
+        return AITextResult(text: fallback);
+      } on AiGatewayExhaustedException {
+        // Every model in the chain failed. Return fallback; legacy paths
+        // would also fail since OpenRouter is genuinely degraded.
+        return AITextResult(text: fallback);
+      } catch (e) {
+        developer.log(
+          'gateway transport failed; trying legacy paths',
+          name: 'AITextGenerator',
+          error: e,
+        );
+        // Fall through to AIRouter / DeepSeek legacy.
+      }
+    }
+
+    // 2. AIRouter (legacy capability-keyed local routing).
     if (_router != null) {
       try {
         final response = await _router.generateText(

@@ -53,6 +53,28 @@ final studentAssignmentsProvider = FutureProvider.autoDispose.family<List<Assign
   },
 );
 
+/// Infinite-scroll student-side assignments list (Stage 3 / S3.18 close-out).
+/// Same shape as [paginatedAssignmentsProvider] but keyed on
+/// [StudentAssignmentsFilter] since the repo method is different.
+final paginatedStudentAssignmentsProvider =
+    StateNotifierProvider.autoDispose.family<
+        PaginatedNotifier<Assignment>,
+        PaginatedState<Assignment>,
+        StudentAssignmentsFilter>(
+  (ref, filter) {
+    final repository = ref.watch(assignmentRepositoryProvider);
+    return PaginatedNotifier<Assignment>(
+      fetcher: ({required offset, required limit}) =>
+          repository.getStudentAssignments(
+        sectionId: filter.sectionId,
+        pendingOnly: filter.pendingOnly,
+        offset: offset,
+        limit: limit,
+      ),
+    );
+  },
+);
+
 final assignmentByIdProvider = FutureProvider.autoDispose.family<Assignment?, String>(
   (ref, assignmentId) async {
     final repository = ref.watch(assignmentRepositoryProvider);

@@ -244,6 +244,9 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.5,
       maxTokens: 400,
+      // Route via gateway → `student_analytics` chain.
+      // Demo-day promoted feature: "AI: students at risk."
+      featureType: 'student_analytics',
     );
   }
 
@@ -386,6 +389,9 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.7,
       maxTokens: 300,
+      // Route via gateway → `grade_calculation` chain.
+      // Demo-day promoted feature: "AI: report-card remarks."
+      featureType: 'grade_calculation',
     );
   }
 
@@ -425,6 +431,7 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.6,
       maxTokens: 400,
+      featureType: 'parent_communication',
     );
   }
 
@@ -689,6 +696,10 @@ class AITextGenerator {
       fallback: fallback,
       temperature: 0.6,
       maxTokens: 200,
+      // Route via gateway → `parent_communication` chain (fee reminders
+      // are a parent-comm subtype; deliberately not 'fee_invoicing' which
+      // is structured JSON for invoice generation).
+      featureType: 'parent_communication',
     );
   }
 

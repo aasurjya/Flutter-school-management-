@@ -187,9 +187,11 @@ class OfflineAttendanceNotifier extends StateNotifier<OfflineAttendanceState> {
     final supabase = _ref.read(supabaseProvider);
     final currentUserId = supabase.auth.currentUser?.id;
 
+    // .fresh stamps each record with a stable client_request_id +
+    // enqueued_at — see offline_sync_service for retry / age semantics.
     final pending = records
         .map(
-          (r) => PendingAttendanceRecord(
+          (r) => PendingAttendanceRecord.fresh(
             studentId: r['student_id'] as String,
             sectionId: sectionId,
             date: dateStr,

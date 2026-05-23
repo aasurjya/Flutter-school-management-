@@ -9,28 +9,30 @@ class AttendanceRepository extends BaseRepository {
   final OfflineSyncService? _syncService;
 
   AttendanceRepository(super.client, [this._syncService]) {
-    // Wire sync callback so queued records get upserted on reconnect
+    // Wire per-record sync callback (Stage 3 / S3.21). One record at a
+    // time so one bad row doesn't block the rest of the queue; the
+    // sync service handles retry counting and dead-letter on its side.
     if (_syncService != null) {
-      _syncService.onSync = (records) => _syncRecords(records);
+      _syncService.onSyncOne = _syncOne;
     }
   }
 
-  Future<void> _syncRecords(List<PendingAttendanceRecord> records) async {
-    final upsertRecords = records
-        .map((r) => {
-              'tenant_id': tenantId,
-              'student_id': r.studentId,
-              'section_id': r.sectionId,
-              'date': r.date,
-              'status': r.status,
-              'remarks': r.remarks,
-              'marked_by': r.markedBy,
-              'marked_at': r.markedAt,
-            })
-        .toList();
-
+  Future<void> _syncOne(PendingAttendanceRecord r) async {
     await client.from('attendance').upsert(
-      upsertRecords,
+      {
+        'tenant_id': tenantId,
+        'student_id': r.studentId,
+        'section_id': r.sectionId,
+        'date': r.date,
+        'status': r.status,
+        'remarks': r.remarks,
+        'marked_by': r.markedBy,
+        'marked_at': r.markedAt,
+        // The same key the record was enqueued with. Server-side
+        // UNIQUE(tenant_id, client_request_id) dedupes a retried-after-
+        // success write into a no-op.
+        'client_request_id': r.clientRequestId,
+      },
       onConflict: 'student_id,date',
     );
   }
@@ -157,10 +159,12 @@ class AttendanceRepository extends BaseRepository {
     final dateStr = date.toIso8601String().split('T')[0];
     final now = DateTime.now().toIso8601String();
 
-    // If offline and sync service available, queue for later
+    // If offline and sync service available, queue for later.
+    // `.fresh` stamps each record with a stable client_request_id +
+    // enqueued_at — see offline_sync_service for the retry/age semantics.
     if (_syncService != null && !_syncService.isOnline) {
       final pending = attendanceRecords
-          .map((record) => PendingAttendanceRecord(
+          .map((record) => PendingAttendanceRecord.fresh(
                 studentId: record['student_id'],
                 sectionId: sectionId,
                 date: dateStr,

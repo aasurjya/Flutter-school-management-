@@ -245,32 +245,62 @@ class AssessmentRepository extends BaseRepository {
     await _updateQuizTotalMarks(quizId);
   }
 
+  /// Adds a batch of questions from the bank to a quiz.
+  ///
+  /// Stage 2 / S2.15 — was an N+1: one SELECT per question, then one INSERT
+  /// per question (2N round-trips for N questions). Now two queries total:
+  /// one bulk SELECT with `.in_('id', ids)`, one bulk INSERT.
+  /// On a 50-question quiz this drops from ~100 to 2 round-trips.
   Future<void> addQuestionsFromBank(
     String quizId,
     List<String> questionIds,
   ) async {
-    // Get current max sequence order
+    if (questionIds.isEmpty) return;
+
+    // Get current max sequence order so the new questions append cleanly.
     final existingQuestions = await getQuizQuestions(quizId);
-    int sequenceOrder = existingQuestions.isNotEmpty
+    var sequenceOrder = existingQuestions.isNotEmpty
         ? existingQuestions.last.sequenceOrder + 1
         : 1;
 
-    for (final questionId in questionIds) {
-      final bankQuestion = await getQuestionById(questionId);
-      if (bankQuestion != null) {
-        await client.from('quiz_questions').insert({
-          'quiz_id': quizId,
-          'question_bank_id': questionId,
-          'sequence_order': sequenceOrder,
-          'question_type': bankQuestion.questionType,
-          'question_text': bankQuestion.questionText,
-          'options': bankQuestion.options,
-          'correct_answer': bankQuestion.correctAnswer,
-          'explanation': bankQuestion.explanation,
-          'marks': bankQuestion.marks,
-        });
-        sequenceOrder++;
-      }
+    // 1) Bulk-fetch every bank question in a single round-trip.
+    final bankRows = await client
+        .from('question_bank')
+        .select('''
+          *,
+          subject:subjects(name)
+        ''')
+        .inFilter('id', questionIds);
+
+    final banksById = <String, QuestionBank>{};
+    for (final row in (bankRows as List).cast<Map<String, dynamic>>()) {
+      banksById[row['id'] as String] = QuestionBank.fromJson(row);
+    }
+
+    // 2) Preserve the caller's order and assign sequence numbers in that order.
+    //    A bank row that's been deleted upstream is silently skipped — same
+    //    behaviour as the old loop, which fell through `if (bankQuestion != null)`.
+    final inserts = <Map<String, dynamic>>[];
+    for (final id in questionIds) {
+      final bank = banksById[id];
+      if (bank == null) continue;
+      inserts.add({
+        'quiz_id': quizId,
+        'question_bank_id': id,
+        'sequence_order': sequenceOrder,
+        'question_type': bank.questionType,
+        'question_text': bank.questionText,
+        'options': bank.options,
+        'correct_answer': bank.correctAnswer,
+        'explanation': bank.explanation,
+        'marks': bank.marks,
+      });
+      sequenceOrder++;
+    }
+
+    if (inserts.isNotEmpty) {
+      // 3) Single bulk INSERT.
+      await client.from('quiz_questions').insert(inserts);
     }
 
     await _updateQuizTotalMarks(quizId);
@@ -288,15 +318,21 @@ class AssessmentRepository extends BaseRepository {
     await _updateQuizTotalMarks(question['quiz_id']);
   }
 
+  /// Reorders questions in a quiz. Each row needs its own sequence_order, so
+  /// we can't compress to a single UPDATE without a custom RPC. We can still
+  /// fire all updates in parallel — total wall time is now ≈ one round-trip
+  /// instead of N sequential ones.
   Future<void> reorderQuizQuestions(
     String quizId,
     List<String> questionIds,
   ) async {
-    for (var i = 0; i < questionIds.length; i++) {
-      await client
-          .from('quiz_questions')
-          .update({'sequence_order': i + 1}).eq('id', questionIds[i]);
-    }
+    if (questionIds.isEmpty) return;
+    await Future.wait([
+      for (var i = 0; i < questionIds.length; i++)
+        client
+            .from('quiz_questions')
+            .update({'sequence_order': i + 1}).eq('id', questionIds[i]),
+    ]);
   }
 
   Future<void> _updateQuizTotalMarks(String quizId) async {

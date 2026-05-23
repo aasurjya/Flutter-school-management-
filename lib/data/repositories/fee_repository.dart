@@ -1,3 +1,5 @@
+import '../../core/net/idempotency.dart';
+import '../../core/net/retry.dart';
 import '../models/invoice.dart';
 import '../models/fee_default_prediction.dart';
 import 'base_repository.dart';
@@ -167,6 +169,18 @@ class FeeRepository extends BaseRepository {
     return response as int;
   }
 
+  /// Records a payment. **The single most safety-critical write in the app.**
+  ///
+  /// Stage 1 / S1.8 + Stage 2 / S2.17 — every call carries a
+  /// `client_request_id` that the UNIQUE(tenant_id, client_request_id) index
+  /// (migration `00063`) uses to dedupe. If the gateway already returned a
+  /// `gatewayPaymentId`, prefer that as the idempotency key — it's the
+  /// strongest guarantee against double-charge (Razorpay returns the same
+  /// payment_id on retry of the same client-side capture call).
+  ///
+  /// The whole insert is wrapped in [retryNetwork] which retries transient
+  /// 5xx/timeout failures with jitter — exactly the failure mode that used
+  /// to cause double-charges before this PR.
   Future<Payment> recordPayment({
     required String invoiceId,
     required double amount,
@@ -176,8 +190,13 @@ class FeeRepository extends BaseRepository {
     String? gatewayPaymentId,
     String? gatewayOrderId,
     String? gatewaySignature,
+    String? clientRequestId,
   }) async {
     final paymentNumber = 'PAY-${DateTime.now().millisecondsSinceEpoch}';
+    // Prefer gateway-provided id as the dedup key when available — Razorpay
+    // returns the same payment_id on retry of the same capture, so this is
+    // a stronger guarantee than a freshly-generated UUID.
+    final key = clientRequestId ?? gatewayPaymentId ?? IdempotencyKey.generate();
 
     final data = <String, dynamic>{
       'tenant_id': tenantId,
@@ -190,6 +209,7 @@ class FeeRepository extends BaseRepository {
       'paid_at': DateTime.now().toIso8601String(),
       'received_by': currentUserId,
       'remarks': remarks,
+      'client_request_id': key,
     };
 
     if (gatewayPaymentId != null || gatewayOrderId != null) {
@@ -200,7 +220,10 @@ class FeeRepository extends BaseRepository {
       };
     }
 
-    final response = await client.from('payments').insert(data).select().single();
+    final response = await retryNetwork(
+      () => client.from('payments').insert(data).select().single(),
+      label: 'payments.record',
+    );
     return Payment.fromJson(response);
   }
 

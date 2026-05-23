@@ -11,6 +11,7 @@ during an incident is not the time to figure out the restore process.
 | [migrations.md](./migrations.md)    | About to merge a schema change. Always.              |
 | [feature-flags.md](./feature-flags.md) | Need to dark-launch / staged-rollout / disable a feature. |
 | [idempotency.md](./idempotency.md)  | Adding a new write path that users can retry.        |
+| [environments.md](./environments.md) | Setting up / drilling staging vs production.        |
 
 ## Conventions
 

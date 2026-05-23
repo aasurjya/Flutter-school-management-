@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/pagination/paginated_notifier.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/invoice.dart';
 import '../../../data/models/fee_default_prediction.dart';
@@ -31,6 +32,29 @@ final invoicesProvider = FutureProvider.autoDispose.family<List<Invoice>, Invoic
       studentId: filter.studentId,
       status: filter.status,
       academicYearId: filter.academicYearId,
+    );
+  },
+);
+
+/// Infinite-scroll invoices list (Stage 3 / S3.18). Prefer this over
+/// [invoicesProvider] for any screen that renders a scrollable list — at
+/// 100+ invoices per tenant, the eager fetch becomes a noticeable hang.
+///
+/// Family key is the filter so different filter combinations get their own
+/// paginated cursor (and don't pollute each other's pages on switch).
+final paginatedInvoicesProvider = StateNotifierProvider.autoDispose.family<
+    PaginatedNotifier<Invoice>, PaginatedState<Invoice>, InvoicesFilter>(
+  (ref, filter) {
+    final repository = ref.watch(feeRepositoryProvider);
+    return PaginatedNotifier<Invoice>(
+      fetcher: ({required offset, required limit}) =>
+          repository.getInvoices(
+        studentId: filter.studentId,
+        status: filter.status,
+        academicYearId: filter.academicYearId,
+        offset: offset,
+        limit: limit,
+      ),
     );
   },
 );

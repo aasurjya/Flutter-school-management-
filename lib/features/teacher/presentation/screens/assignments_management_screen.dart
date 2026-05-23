@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/pagination/paginated_notifier.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/assignment.dart';
 import '../../../../shared/extensions/context_extensions.dart';
@@ -77,50 +78,91 @@ class _AssignmentsManagementScreenState extends ConsumerState<AssignmentsManagem
   }
 }
 
-class _AssignmentsList extends ConsumerWidget {
+class _AssignmentsList extends ConsumerStatefulWidget {
   final AssignmentsFilter filter;
 
   const _AssignmentsList({required this.filter});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final assignmentsAsync = ref.watch(assignmentsProvider(filter));
+  ConsumerState<_AssignmentsList> createState() => _AssignmentsListState();
+}
 
-    return assignmentsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
-      data: (assignments) {
-        if (assignments.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.assignment_outlined, size: 64, color: Colors.grey[400]),
-                const SizedBox(height: 16),
-                Text(
-                  'No ${filter.status} assignments',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-              ],
+class _AssignmentsListState extends ConsumerState<_AssignmentsList> {
+  final _scrollController = ScrollController();
+  PaginationScrollListener? _scrollListener;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(paginatedAssignmentsProvider(widget.filter).notifier)
+          .loadInitial();
+    });
+    _scrollListener = PaginationScrollListener(
+      controller: _scrollController,
+      onLoadMore: () => ref
+          .read(paginatedAssignmentsProvider(widget.filter).notifier)
+          .loadMore(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollListener?.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(paginatedAssignmentsProvider(widget.filter));
+
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state.error != null) {
+      return Center(child: Text('Error: ${state.error}'));
+    }
+    if (state.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.assignment_outlined, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'No ${widget.filter.status} assignments',
+              style: TextStyle(color: Colors.grey[600]),
             ),
-          );
-        }
+          ],
+        ),
+      );
+    }
 
-        return RefreshIndicator(
-          onRefresh: () async => ref.invalidate(assignmentsProvider(filter)),
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: assignments.length,
-            itemBuilder: (context, index) {
-              final assignment = assignments[index];
-              return _AssignmentCard(
-                assignment: assignment,
-                onTap: () => _showAssignmentDetail(context, assignment),
-              );
-            },
-          ),
-        );
-      },
+    final assignments = state.items;
+    return RefreshIndicator(
+      onRefresh: () => ref
+          .read(paginatedAssignmentsProvider(widget.filter).notifier)
+          .refresh(),
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(16),
+        itemCount: assignments.length + (state.hasMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index >= assignments.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          final assignment = assignments[index];
+          return _AssignmentCard(
+            assignment: assignment,
+            onTap: () => _showAssignmentDetail(context, assignment),
+          );
+        },
+      ),
     );
   }
 

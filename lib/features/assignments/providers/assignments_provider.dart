@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/pagination/paginated_notifier.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../../../data/models/assignment.dart';
 import '../../../data/repositories/assignment_repository.dart';
@@ -16,6 +17,28 @@ final assignmentsProvider = FutureProvider.autoDispose.family<List<Assignment>, 
       teacherId: filter.teacherId,
       status: filter.status,
       upcomingOnly: filter.upcomingOnly,
+    );
+  },
+);
+
+/// Infinite-scroll assignments list (Stage 3 / S3.18). Same shape as
+/// [paginatedInvoicesProvider]; pick this for any screen that renders a
+/// scrollable list of assignments.
+final paginatedAssignmentsProvider = StateNotifierProvider.autoDispose.family<
+    PaginatedNotifier<Assignment>, PaginatedState<Assignment>, AssignmentsFilter>(
+  (ref, filter) {
+    final repository = ref.watch(assignmentRepositoryProvider);
+    return PaginatedNotifier<Assignment>(
+      fetcher: ({required offset, required limit}) =>
+          repository.getAssignments(
+        sectionId: filter.sectionId,
+        subjectId: filter.subjectId,
+        teacherId: filter.teacherId,
+        status: filter.status,
+        upcomingOnly: filter.upcomingOnly,
+        offset: offset,
+        limit: limit,
+      ),
     );
   },
 );

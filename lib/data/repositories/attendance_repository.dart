@@ -1,4 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/net/idempotency.dart';
+import '../../core/net/retry.dart';
 import '../../core/services/offline_sync_service.dart';
 import '../models/attendance.dart';
 import 'base_repository.dart';
@@ -114,23 +116,37 @@ class AttendanceRepository extends BaseRepository {
     return response;
   }
 
+  /// Marks attendance for one student. Wrapped in [retryNetwork] +
+  /// idempotency keys (Stage 1 / S1.8 + Stage 2 / S2.17) so flaky-network
+  /// retries don't double-write. The existing `onConflict: 'student_id,date'`
+  /// already handles same-day toggles between present/absent; the new
+  /// `client_request_id` index handles the network-retry case.
+  ///
+  /// Caller may pass a stable [clientRequestId] when retrying themselves.
+  /// Default: generate a fresh UUID per call.
   Future<void> markAttendance({
     required String studentId,
     required String sectionId,
     required DateTime date,
     required String status,
     String? remarks,
+    String? clientRequestId,
   }) async {
-    await client.from('attendance').upsert({
-      'tenant_id': tenantId,
-      'student_id': studentId,
-      'section_id': sectionId,
-      'date': date.toIso8601String().split('T')[0],
-      'status': status,
-      'remarks': remarks,
-      'marked_by': currentUserId,
-      'marked_at': DateTime.now().toIso8601String(),
-    }, onConflict: 'student_id,date');
+    final key = clientRequestId ?? IdempotencyKey.generate();
+    await retryNetwork(
+      () => client.from('attendance').upsert({
+        'tenant_id': tenantId,
+        'student_id': studentId,
+        'section_id': sectionId,
+        'date': date.toIso8601String().split('T')[0],
+        'status': status,
+        'remarks': remarks,
+        'marked_by': currentUserId,
+        'marked_at': DateTime.now().toIso8601String(),
+        'client_request_id': key,
+      }, onConflict: 'student_id,date'),
+      label: 'attendance.mark',
+    );
   }
 
   Future<bool> markBulkAttendance({

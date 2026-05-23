@@ -1,4 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/net/idempotency.dart';
+import '../../core/net/retry.dart';
 import '../models/message.dart';
 import '../models/announcement.dart';
 import 'base_repository.dart';
@@ -125,24 +127,44 @@ class MessageRepository extends BaseRepository {
     return (response as List).map((json) => Message.fromJson(json)).toList();
   }
 
+  /// Sends a message. Wrapped in [retryNetwork] + idempotency key (Stage 1
+  /// / S1.8 + Stage 2 / S2.17) so a retried tap on the Send button after a
+  /// network blip cannot create two messages — the second insert hits the
+  /// UNIQUE(tenant_id, client_request_id) index and is silently rejected.
+  ///
+  /// Caller may pass a stable [clientRequestId] when wiring its own retry
+  /// loop on top of this method.
   Future<Message> sendMessage({
     required String threadId,
     required String content,
     List<Map<String, dynamic>>? attachments,
     String? replyToId,
+    String? clientRequestId,
   }) async {
-    final response = await client.from('messages').insert({
-      'tenant_id': tenantId,
-      'thread_id': threadId,
-      'sender_id': currentUserId,
-      'content': content,
-      'attachments': attachments ?? [],
-      'reply_to_id': replyToId,
-    }).select().single();
+    final key = clientRequestId ?? IdempotencyKey.generate();
+    final response = await retryNetwork(
+      () => client.from('messages').insert({
+        'tenant_id': tenantId,
+        'thread_id': threadId,
+        'sender_id': currentUserId,
+        'content': content,
+        'attachments': attachments ?? [],
+        'reply_to_id': replyToId,
+        'client_request_id': key,
+      }).select().single(),
+      label: 'messages.send',
+    );
 
-    await client.from('threads').update({
-      'last_message_at': DateTime.now().toIso8601String(),
-    }).eq('id', threadId);
+    // Thread last_message_at update is best-effort — not part of the
+    // idempotent transaction. If a retry beats the original to the UNIQUE
+    // index and gets 23505, the row exists, and bumping last_message_at
+    // again is harmless.
+    await retryNetwork(
+      () => client.from('threads').update({
+        'last_message_at': DateTime.now().toIso8601String(),
+      }).eq('id', threadId),
+      label: 'threads.bump',
+    );
 
     return Message.fromJson(response);
   }

@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class BaseRepository {
@@ -97,5 +98,52 @@ abstract class BaseRepository {
   
   Future<void> unsubscribe(RealtimeChannel channel) async {
     await _client.removeChannel(channel);
+  }
+
+  /// Subscribe to a table and *automatically* unsubscribe when the provided
+  /// Riverpod [ref] is disposed.
+  ///
+  /// Stage 2 / S2.16 — prefer this over [subscribeToTable] in all new code.
+  /// The old direct API requires the caller to remember to call
+  /// [unsubscribe] in `StateNotifier.dispose()` (and 6 of the 7 existing
+  /// subscribe methods on this codebase have no live consumer that does
+  /// that). Tying the cleanup to `ref.onDispose` makes the leak impossible
+  /// at the call site:
+  ///
+  /// ```dart
+  /// final notificationsProvider = StreamProvider.autoDispose<...>((ref) {
+  ///   final repo = ref.watch(notificationRepositoryProvider);
+  ///   final controller = StreamController<Notification>();
+  ///   repo.subscribeToTableScoped(
+  ///     ref,
+  ///     'notifications',
+  ///     filter: (column: 'user_id', value: userId),
+  ///     onInsert: (p) => controller.add(Notification.fromJson(p.newRow)),
+  ///   );
+  ///   ref.onDispose(controller.close);
+  ///   return controller.stream;
+  /// });
+  /// ```
+  RealtimeChannel subscribeToTableScoped(
+    Ref ref,
+    String table, {
+    required void Function(PostgresChangePayload payload) onInsert,
+    void Function(PostgresChangePayload payload)? onUpdate,
+    void Function(PostgresChangePayload payload)? onDelete,
+    ({String column, String value})? filter,
+  }) {
+    final channel = subscribeToTable(
+      table,
+      onInsert: onInsert,
+      onUpdate: onUpdate,
+      onDelete: onDelete,
+      filter: filter,
+    );
+    ref.onDispose(() {
+      // Fire-and-forget; the channel is server-side anyway, and we don't
+      // want to block dispose on the network round-trip.
+      unsubscribe(channel);
+    });
+    return channel;
   }
 }

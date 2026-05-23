@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/pagination/paginated_notifier.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/message.dart';
 import '../../../../shared/widgets/glass_card.dart';
@@ -209,69 +211,115 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
   }
 }
 
-class _ChatsTab extends ConsumerWidget {
+class _ChatsTab extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final threadsAsync = ref.watch(threadsProvider);
+  ConsumerState<_ChatsTab> createState() => _ChatsTabState();
+}
 
-    return threadsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(
+class _ChatsTabState extends ConsumerState<_ChatsTab> {
+  final _scrollController = ScrollController();
+  PaginationScrollListener? _scrollListener;
+
+  @override
+  void initState() {
+    super.initState();
+    // Kick the first page after the widget mounts; `loadInitial` resets
+    // offset and emits an isLoading state for the loading spinner.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(paginatedThreadsProvider.notifier).loadInitial();
+    });
+    _scrollListener = PaginationScrollListener(
+      controller: _scrollController,
+      onLoadMore: () =>
+          ref.read(paginatedThreadsProvider.notifier).loadMore(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollListener?.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(paginatedThreadsProvider);
+
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.error != null) {
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.error_outline, size: 48, color: Colors.grey),
             const SizedBox(height: 12),
-            Text('Failed to load chats: $e'),
+            Text('Failed to load chats: ${state.error}'),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () => ref.invalidate(threadsProvider),
+              onPressed: () =>
+                  ref.read(paginatedThreadsProvider.notifier).refresh(),
               child: const Text('Retry'),
             ),
           ],
         ),
-      ),
-      data: (threads) {
-        if (threads.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.chat_bubble_outline, size: 48, color: Colors.grey),
-                SizedBox(height: 12),
-                Text('No messages yet'),
-                SizedBox(height: 4),
-                Text(
-                  'Start a conversation using the compose button',
-                  style: TextStyle(color: Colors.grey, fontSize: 13),
-                ),
-              ],
+      );
+    }
+
+    if (state.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.chat_bubble_outline, size: 48, color: Colors.grey),
+            SizedBox(height: 12),
+            Text('No messages yet'),
+            SizedBox(height: 4),
+            Text(
+              'Start a conversation using the compose button',
+              style: TextStyle(color: Colors.grey, fontSize: 13),
             ),
-          );
-        }
+          ],
+        ),
+      );
+    }
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: threads.length,
-          itemBuilder: (context, index) {
-            final thread = threads[index];
-            final lastMsgTime = thread.lastMessageAt != null
-                ? _formatChatTime(thread.lastMessageAt!)
-                : '';
-            final lastMsg = thread.lastMessage?.content ?? '';
-
-            return _ChatItem(
-              name: thread.displayTitle,
-              lastMessage: lastMsg,
-              time: lastMsgTime,
-              unreadCount: thread.unreadCount ?? 0,
-              isGroup: thread.isGroup || thread.isClass,
-              avatarColor: AppColors.primary,
-              onTap: () => _openChat(context, thread),
+    final threads = state.items;
+    return RefreshIndicator(
+      onRefresh: () =>
+          ref.read(paginatedThreadsProvider.notifier).refresh(),
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(16),
+        // +1 for the trailing loader when more pages remain.
+        itemCount: threads.length + (state.hasMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index >= threads.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: CircularProgressIndicator()),
             );
-          },
-        );
-      },
+          }
+          final thread = threads[index];
+          final lastMsgTime = thread.lastMessageAt != null
+              ? _formatChatTime(thread.lastMessageAt!)
+              : '';
+          final lastMsg = thread.lastMessage?.content ?? '';
+
+          return _ChatItem(
+            name: thread.displayTitle,
+            lastMessage: lastMsg,
+            time: lastMsgTime,
+            unreadCount: thread.unreadCount ?? 0,
+            isGroup: thread.isGroup || thread.isClass,
+            avatarColor: AppColors.primary,
+            onTap: () => _openChat(context, thread),
+          );
+        },
+      ),
     );
   }
 

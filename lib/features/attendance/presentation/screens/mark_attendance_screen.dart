@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/providers/connectivity_provider.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/undo_banner.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../data/models/attendance.dart';
 import '../../../attendance/providers/attendance_provider.dart';
@@ -82,14 +84,26 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
       setState(() {
         _isLoading = false;
       });
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
-        context.showErrorSnackBar('Failed to load students: $e');
+        context.showErrorSnackBar(WarmCopy.loadFailed('students'));
       }
       setState(() {
         _isLoading = false;
       });
     }
+  }
+
+  /// Snapshot the current roster as a wire payload so we can restore
+  /// byte-for-byte if the teacher hits Undo within the banner window.
+  List<Map<String, dynamic>> _snapshotPayload() {
+    return _students
+        .map((s) => <String, dynamic>{
+              'student_id': s.studentId,
+              'status': s.status.dbValue,
+              'remarks': s.remarks,
+            })
+        .toList(growable: false);
   }
 
   @override
@@ -304,65 +318,96 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
   }
 
   Future<void> _submitAttendance() async {
-    // Confirm before overwriting any existing attendance
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Submit Attendance'),
-        content: Text(
-          'This will record attendance for ${_students.length} students. '
-          'Any existing records for this date will be overwritten.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Submit'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
+    // Snapshot the prior server state so Undo can restore it byte-for-byte.
+    // Read BEFORE we overwrite; if the read fails the undo simply won't be
+    // offered (caller falls through to the normal save path).
+    List<Map<String, dynamic>>? priorPayload;
+    try {
+      final attendanceRepo = ref.read(attendanceRepositoryProvider);
+      final date = widget.date != null
+          ? DateTime.parse(widget.date!)
+          : DateTime.now();
+      final prior = await attendanceRepo.getAttendanceBySection(
+        sectionId: widget.sectionId,
+        date: date,
+      );
+      if (prior.isNotEmpty) {
+        priorPayload = prior
+            .map((a) => <String, dynamic>{
+                  'student_id': a.studentId,
+                  'status': a.status.dbValue,
+                  'remarks': a.remarks,
+                })
+            .toList(growable: false);
+      }
+    } catch (_) {
+      // Best-effort; undo just won't be offered.
+      priorPayload = null;
+    }
 
     setState(() => _isSubmitting = true);
 
     try {
       final attendanceRepo = ref.read(attendanceRepositoryProvider);
+      final date = widget.date != null
+          ? DateTime.parse(widget.date!)
+          : DateTime.now();
 
       final savedOnline = await attendanceRepo.markBulkAttendance(
         sectionId: widget.sectionId,
-        date: widget.date != null
-            ? DateTime.parse(widget.date!)
-            : DateTime.now(),
-        attendanceRecords: _students
-            .map((s) => {
-                  'student_id': s.studentId,
-                  'status': s.status.dbValue,
-                  'remarks': s.remarks,
-                })
-            .toList(),
+        date: date,
+        attendanceRecords: _snapshotPayload(),
       );
 
-      if (mounted) {
-        if (savedOnline) {
-          context.showSuccessSnackBar('Attendance submitted successfully');
-        } else {
-          context.showSuccessSnackBar(
-            'Attendance saved offline — will sync when connected',
-          );
-        }
-        Navigator.pop(context);
+      if (!mounted) return;
+
+      if (priorPayload != null) {
+        // Existing records were overwritten — offer a 6s undo window.
+        UndoBanner.show(
+          context,
+          message: savedOnline
+              ? WarmCopy.undoBanner('Attendance')
+              : WarmCopy.savedOffline('Attendance'),
+          onUndo: () => _restoreAttendance(priorPayload!, date),
+        );
+      } else {
+        // First-time save — no prior state to restore, just confirm.
+        context.showSuccessSnackBar(
+          savedOnline
+              ? WarmCopy.undoBanner('Attendance')
+              : WarmCopy.savedOffline('Attendance'),
+        );
       }
-    } catch (e) {
+
+      Navigator.pop(context);
+    } catch (_) {
       if (mounted) {
-        context.showErrorSnackBar('Failed to submit: $e');
+        context.showErrorSnackBar(WarmCopy.saveFailed('attendance'));
       }
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
+  Future<void> _restoreAttendance(
+    List<Map<String, dynamic>> priorPayload,
+    DateTime date,
+  ) async {
+    try {
+      final attendanceRepo = ref.read(attendanceRepositoryProvider);
+      await attendanceRepo.markBulkAttendance(
+        sectionId: widget.sectionId,
+        date: date,
+        attendanceRecords: priorPayload,
+      );
+      if (mounted) {
+        context.showSuccessSnackBar('Restored previous attendance.');
+      }
+    } catch (_) {
+      if (mounted) {
+        context.showErrorSnackBar(WarmCopy.saveFailed('the previous state'));
       }
     }
   }

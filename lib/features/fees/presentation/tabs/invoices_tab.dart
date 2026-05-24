@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/pagination/paginated_notifier.dart';
 import '../../../../core/theme/app_colors.dart';
 // Imported for the `pendingAmount` extension on Invoice.
@@ -73,7 +74,7 @@ class _InvoicesTabState extends ConsumerState<InvoicesTab> {
           children: [
             const Icon(Icons.error_outline, size: 48, color: AppColors.error),
             const SizedBox(height: 12),
-            Text('Failed to load invoices: ${state.error}'),
+            Text(WarmCopy.loadFailed('invoices')),
             const SizedBox(height: 8),
             TextButton(
               onPressed: () =>

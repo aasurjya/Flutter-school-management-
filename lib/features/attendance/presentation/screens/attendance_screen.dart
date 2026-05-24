@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../academic/providers/academic_provider.dart';
@@ -139,7 +140,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Failed to load classes: $error',
+                  WarmCopy.loadFailed('classes'),
                   style: const TextStyle(color: AppColors.error),
                 ),
               ),
@@ -247,7 +248,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
               gradient: AppColors.primaryGradient,
               child: Center(
                 child: Text(
-                  'Failed to load stats: $error',
+                  WarmCopy.loadFailed('the stats'),
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -330,7 +331,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Failed to load history: $error',
+                  WarmCopy.loadFailed('history'),
                   style: const TextStyle(color: AppColors.error),
                 ),
               ),
@@ -505,7 +506,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
             ),
             error: (error, _) => Center(
               child: Text(
-                'Failed to load summary: $error',
+                WarmCopy.loadFailed('the summary'),
                 style: const TextStyle(color: AppColors.error),
               ),
             ),
@@ -550,7 +551,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
             ),
             error: (error, _) => Center(
               child: Text(
-                'Failed to load report: $error',
+                WarmCopy.loadFailed('the report'),
                 style: const TextStyle(color: AppColors.error),
               ),
             ),

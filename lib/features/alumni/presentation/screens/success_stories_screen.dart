@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/alumni.dart';
 import '../../providers/alumni_provider.dart';
 import '../widgets/story_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class SuccessStoriesScreen extends ConsumerStatefulWidget {
   const SuccessStoriesScreen({super.key});
@@ -92,7 +93,7 @@ class _SuccessStoriesScreenState extends ConsumerState<SuccessStoriesScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showSubmitStoryDialog(context, ref),
@@ -300,7 +301,7 @@ class _SuccessStoriesScreenState extends ConsumerState<SuccessStoriesScreen> {
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
+                    SnackBar(content: Text(WarmCopy.genericError)),
                   );
                 }
               }

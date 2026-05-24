@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../data/models/inventory.dart';
 import '../../providers/inventory_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AssetFormScreen extends ConsumerStatefulWidget {
   final String? assetId;
@@ -433,7 +434,7 @@ class _AssetFormScreenState extends ConsumerState<AssetFormScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {

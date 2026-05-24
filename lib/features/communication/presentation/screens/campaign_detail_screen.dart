@@ -9,6 +9,7 @@ import '../../providers/communication_provider.dart';
 import '../widgets/campaign_status_badge.dart';
 import '../widgets/channel_selector.dart';
 import '../widgets/delivery_stats_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CampaignDetailScreen extends ConsumerWidget {
   final String campaignId;
@@ -83,7 +84,7 @@ class CampaignDetailScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

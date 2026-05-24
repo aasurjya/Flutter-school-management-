@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../exams/providers/exams_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ChildResultsScreen extends ConsumerStatefulWidget {
   final String childId;
@@ -35,7 +36,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
       ),
       body: examsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
         data: (exams) {
           if (exams.isEmpty) {
             return const Center(
@@ -107,7 +108,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
 
     return performanceAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Text('Error: $e'),
+      error: (e, _) => Text(WarmCopy.genericError),
       data: (performance) {
         if (performance.isEmpty) {
           return const GlassCard(
@@ -231,7 +232,7 @@ class _ChildResultsScreenState extends ConsumerState<ChildResultsScreen> {
         const SizedBox(height: 12),
         performanceAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Text('Error: $e'),
+          error: (e, _) => Text(WarmCopy.genericError),
           data: (performance) {
             if (performance.isEmpty) {
               return const Text('No data available');

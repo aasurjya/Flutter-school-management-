@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/achievement.dart';
 import '../../providers/gamification_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
   const LeaderboardScreen({super.key});
@@ -77,7 +78,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

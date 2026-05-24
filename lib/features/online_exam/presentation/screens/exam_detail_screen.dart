@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/online_exam.dart';
 import '../../providers/online_exam_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ExamDetailScreen extends ConsumerWidget {
   final String examId;
@@ -105,7 +106,7 @@ class ExamDetailScreen extends ConsumerWidget {
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(),
-        body: Center(child: Text('Error: $e')),
+        body: Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

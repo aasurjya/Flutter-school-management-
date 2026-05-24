@@ -7,6 +7,7 @@ import '../../../../data/models/timetable.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../students/providers/students_provider.dart';
 import '../../../timetable/providers/timetable_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StudentTimetableScreen extends ConsumerStatefulWidget {
   const StudentTimetableScreen({super.key});
@@ -45,7 +46,7 @@ class _StudentTimetableScreenState extends ConsumerState<StudentTimetableScreen>
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
-        body: Center(child: Text('Error: $e')),
+        body: Center(child: Text(WarmCopy.genericError)),
       ),
       data: (student) {
         if (student == null || student.currentEnrollment == null) {

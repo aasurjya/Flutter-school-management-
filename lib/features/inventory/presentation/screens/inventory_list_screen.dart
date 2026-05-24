@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/inventory.dart';
 import '../../providers/inventory_provider.dart';
 import '../widgets/stock_level_indicator.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class InventoryListScreen extends ConsumerStatefulWidget {
   const InventoryListScreen({super.key});
@@ -172,7 +173,7 @@ class _InventoryListScreenState
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
               error: (error, _) =>
-                  Center(child: Text('Error: $error')),
+                  Center(child: Text(WarmCopy.genericError)),
             ),
           ),
         ],
@@ -338,7 +339,7 @@ class _InventoryListScreenState
                     } catch (e) {
                       if (mounted) {
                         messenger.showSnackBar(
-                          SnackBar(content: Text('Error: $e')),
+                          SnackBar(content: Text(WarmCopy.genericError)),
                         );
                       }
                     }

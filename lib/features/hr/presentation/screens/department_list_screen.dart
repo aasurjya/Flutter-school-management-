@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/hr_payroll.dart';
 import '../../providers/hr_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class DepartmentListScreen extends ConsumerWidget {
   const DepartmentListScreen({super.key});
@@ -57,7 +58,7 @@ class DepartmentListScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateDialog(context, ref),
@@ -146,7 +147,7 @@ class DepartmentListScreen extends ConsumerWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Error: $e'),
+                                content: Text(WarmCopy.genericError),
                                 backgroundColor: AppColors.error,
                               ),
                             );

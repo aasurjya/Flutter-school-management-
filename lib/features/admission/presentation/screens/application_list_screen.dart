@@ -9,6 +9,7 @@ import '../../../../data/models/admission.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/admission_provider.dart';
 import '../widgets/application_status_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ApplicationListScreen extends ConsumerStatefulWidget {
   const ApplicationListScreen({super.key});
@@ -116,7 +117,7 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen>
                   const Icon(Icons.error_outline,
                       size: 48, color: AppColors.error),
                   const SizedBox(height: 12),
-                  Text('Error: $e'),
+                  Text(WarmCopy.genericError),
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: () => ref

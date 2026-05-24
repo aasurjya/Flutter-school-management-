@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/ptm.dart';
 import '../../providers/ptm_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class PTMSchedulerScreen extends ConsumerStatefulWidget {
   const PTMSchedulerScreen({super.key});
@@ -101,7 +102,7 @@ class _UpcomingPTMsTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -145,7 +146,7 @@ class _MyAppointmentsTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -172,7 +173,7 @@ class _AllPTMsTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }

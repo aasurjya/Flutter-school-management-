@@ -7,6 +7,7 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/alumni_provider.dart';
 import '../widgets/event_card.dart';
 import '../widgets/story_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AlumniDashboardScreen extends ConsumerWidget {
   const AlumniDashboardScreen({super.key});
@@ -246,7 +247,7 @@ class AlumniDashboardScreen extends ConsumerWidget {
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (e, _) => SliverToBoxAdapter(
-                child: Text('Error: $e'),
+                child: Text(WarmCopy.genericError),
               ),
             ),
 
@@ -300,7 +301,7 @@ class AlumniDashboardScreen extends ConsumerWidget {
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (e, _) => SliverToBoxAdapter(
-                child: Text('Error: $e'),
+                child: Text(WarmCopy.genericError),
               ),
             ),
 

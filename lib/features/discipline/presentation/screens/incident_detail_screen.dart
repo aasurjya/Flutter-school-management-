@@ -9,6 +9,7 @@ import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/discipline_provider.dart';
 import '../widgets/severity_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class IncidentDetailScreen extends ConsumerStatefulWidget {
   final String incidentId;
@@ -70,7 +71,7 @@ class _IncidentDetailScreenState extends ConsumerState<IncidentDetailScreen> {
             children: [
               const Icon(Icons.error_outline, size: 48, color: AppColors.error),
               const SizedBox(height: 12),
-              Text('Error: $e'),
+              Text(WarmCopy.genericError),
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () =>
@@ -404,7 +405,7 @@ class _IncidentDetailScreenState extends ConsumerState<IncidentDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Error: $e');
+        context.showErrorSnackBar(WarmCopy.genericError);
       }
     }
   }

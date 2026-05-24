@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/online_exam.dart';
 import '../../providers/online_exam_provider.dart';
 import '../widgets/question_widget.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ExamResultScreen extends ConsumerWidget {
   final String attemptId;
@@ -87,7 +88,7 @@ class ExamResultScreen extends ConsumerWidget {
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(title: const Text('Result')),
-        body: Center(child: Text('Error: $e')),
+        body: Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

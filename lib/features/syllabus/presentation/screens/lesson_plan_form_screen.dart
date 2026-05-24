@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../providers/syllabus_provider.dart';
 import '../../providers/syllabus_ai_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class LessonPlanFormScreen extends ConsumerStatefulWidget {
   final String topicId;
@@ -298,7 +299,7 @@ class _LessonPlanFormScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/leave.dart';
 import '../../providers/leave_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class LeaveManagementScreen extends ConsumerStatefulWidget {
   const LeaveManagementScreen({super.key});
@@ -103,7 +104,7 @@ class _MyLeavesTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -132,7 +133,7 @@ class _PendingApprovalsTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -159,7 +160,7 @@ class _AllRequestsTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }

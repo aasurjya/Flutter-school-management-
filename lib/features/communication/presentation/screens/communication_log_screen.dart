@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/communication.dart';
 import '../../providers/communication_provider.dart';
 import '../widgets/channel_selector.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CommunicationLogScreen extends ConsumerStatefulWidget {
   const CommunicationLogScreen({super.key});
@@ -103,7 +104,7 @@ class _CommunicationLogScreenState
                     const Icon(Icons.error_outline,
                         size: 48, color: AppColors.error),
                     const SizedBox(height: 16),
-                    Text('Error: $e'),
+                    Text(WarmCopy.genericError),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () => ref.invalidate(
@@ -511,7 +512,7 @@ class _LogEntry extends StatelessWidget {
                     log.errorMessage!.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Error: ${log.errorMessage}',
+                    WarmCopy.genericError,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: AppColors.error,
                     ),

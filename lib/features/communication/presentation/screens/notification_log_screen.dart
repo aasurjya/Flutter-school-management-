@@ -407,7 +407,7 @@ class _LogTile extends StatelessWidget {
                     log.errorMessage!.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Error: ${log.errorMessage}',
+                    WarmCopy.genericError,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: AppColors.error,
                     ),

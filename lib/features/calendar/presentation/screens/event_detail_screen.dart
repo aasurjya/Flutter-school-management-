@@ -29,7 +29,7 @@ class EventDetailScreen extends ConsumerWidget {
           isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       body: eventAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
         data: (event) {
           if (event == null) {
             return const Center(child: Text('Event not found'));
@@ -441,7 +441,7 @@ class EventDetailScreen extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     }
@@ -481,7 +481,7 @@ class EventDetailScreen extends ConsumerWidget {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }

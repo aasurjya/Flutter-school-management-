@@ -8,6 +8,7 @@ import '../../../../data/models/lms.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/lms_provider.dart';
 import '../widgets/course_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class LmsDashboardScreen extends ConsumerWidget {
   const LmsDashboardScreen({super.key});
@@ -172,7 +173,7 @@ class LmsDashboardScreen extends ConsumerWidget {
               ),
               error: (e, _) => GlassCard(
                 padding: const EdgeInsets.all(16),
-                child: Text('Error: $e'),
+                child: Text(WarmCopy.genericError),
               ),
             ),
           ],

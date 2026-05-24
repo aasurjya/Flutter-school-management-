@@ -7,6 +7,7 @@ import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../data/models/invoice.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../fees/providers/fees_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class FeeManagementScreen extends ConsumerStatefulWidget {
   const FeeManagementScreen({super.key});
@@ -77,7 +78,7 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
 
     return statsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       data: (stats) => SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -197,7 +198,7 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
 
     return feeHeadsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       data: (feeHeads) => ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -272,7 +273,7 @@ class _FeeManagementScreenState extends ConsumerState<FeeManagementScreen>
 
     return invoicesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       data: (invoices) {
         if (invoices.isEmpty) {
           return const Center(

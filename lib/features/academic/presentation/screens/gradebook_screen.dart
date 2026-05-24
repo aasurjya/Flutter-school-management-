@@ -9,6 +9,7 @@ import '../../../../data/repositories/timetable_repository.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../timetable/providers/timetable_provider.dart';
 import '../../providers/gradebook_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Main teacher gradebook screen with three tabs:
 ///  1. By Student — class roster with weighted grades per category
@@ -618,7 +619,7 @@ class _CategorySection extends ConsumerWidget {
             ),
             error: (e, _) => Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('Error: $e'),
+              child: Text(WarmCopy.genericError),
             ),
             data: (entries) {
               final summaries = _buildSummaries(entries, category);

@@ -13,6 +13,7 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../../admin/presentation/widgets/credential_display_dialog.dart';
 import '../../providers/tenant_provider.dart';
 import '../widgets/user_profile_detail_sheet.dart' as profile_sheet;
+import '../../../../core/copy/warm_strings.dart';
 
 // ─── Role meta ────────────────────────────────────────────────────────────────
 
@@ -602,7 +603,7 @@ class _RoleUsersSheet extends ConsumerWidget {
             error: (e, _) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: Text('Error: $e', style: TextStyle(color: Colors.grey[500])),
+                child: Text(WarmCopy.genericError, style: TextStyle(color: Colors.grey[500])),
               ),
             ),
             data: (users) {

@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/inventory.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/inventory_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AuditScreen extends ConsumerStatefulWidget {
   const AuditScreen({super.key});
@@ -228,7 +229,7 @@ class _AuditHistoryTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 
@@ -634,7 +635,7 @@ class _NewAuditTabState extends ConsumerState<_NewAuditTab> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     }

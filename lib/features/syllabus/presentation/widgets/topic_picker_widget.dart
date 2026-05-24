@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/syllabus_topic.dart';
 import '../../providers/syllabus_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Reusable widget: shows a chip with topic title.
 /// Tap opens a bottom sheet with searchable topic list.
@@ -174,7 +175,7 @@ class _TopicSearchSheetState extends ConsumerState<_TopicSearchSheet> {
 
     return resultsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       data: (topics) {
         if (topics.isEmpty) {
           return const Center(

@@ -503,7 +503,7 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
             .deleteUser(createdUserId);
       }
       if (mounted) {
-        context.showErrorSnackBar('Error: $e');
+        context.showErrorSnackBar(WarmCopy.genericError);
       }
     } finally {
       if (mounted) {

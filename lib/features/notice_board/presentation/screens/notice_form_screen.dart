@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/notice_board.dart';
 import '../../providers/notice_board_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class NoticeFormScreen extends ConsumerStatefulWidget {
   final Notice? existingNotice;
@@ -68,7 +69,7 @@ class _NoticeFormScreenState extends ConsumerState<NoticeFormScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: Colors.red),
         );
       }
     } finally {

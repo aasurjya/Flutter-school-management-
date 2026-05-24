@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../providers/bus_tracking_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class TripHistoryScreen extends ConsumerWidget {
   const TripHistoryScreen({super.key});
@@ -184,7 +185,7 @@ class TripHistoryScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

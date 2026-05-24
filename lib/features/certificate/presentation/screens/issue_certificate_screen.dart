@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/certificate.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/certificate_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class IssueCertificateScreen extends ConsumerStatefulWidget {
   const IssueCertificateScreen({super.key});
@@ -194,7 +195,7 @@ class _IssueCertificateScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {

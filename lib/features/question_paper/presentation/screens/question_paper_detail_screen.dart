@@ -28,7 +28,7 @@ class QuestionPaperDetailScreen extends ConsumerWidget {
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(title: const Text('Question Paper')),
-        body: Center(child: Text('Error: $e')),
+        body: Center(child: Text(WarmCopy.genericError)),
       ),
       data: (paper) => _PaperDetailView(paper: paper),
     );

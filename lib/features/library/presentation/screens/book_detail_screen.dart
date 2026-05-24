@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/library_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class BookDetailScreen extends ConsumerWidget {
   final String bookId;
@@ -146,7 +147,7 @@ class BookDetailScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

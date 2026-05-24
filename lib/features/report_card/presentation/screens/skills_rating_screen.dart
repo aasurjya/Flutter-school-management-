@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/report_card_full.dart';
 import '../../providers/report_card_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class SkillsRatingScreen extends ConsumerStatefulWidget {
   final String reportId;
@@ -159,7 +160,7 @@ class _SkillsRatingScreenState extends ConsumerState<SkillsRatingScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }
@@ -194,7 +195,7 @@ class _SkillsRatingScreenState extends ConsumerState<SkillsRatingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

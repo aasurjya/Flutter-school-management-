@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/inventory.dart';
 import '../../providers/inventory_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class PurchaseRequestScreen extends ConsumerStatefulWidget {
   const PurchaseRequestScreen({super.key});
@@ -251,7 +252,7 @@ class _RequestListTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 
@@ -269,7 +270,7 @@ class _RequestListTab extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     }
@@ -573,7 +574,7 @@ class _NewRequestTabState extends ConsumerState<_NewRequestTab> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {

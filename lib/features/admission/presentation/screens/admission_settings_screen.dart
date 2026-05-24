@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/admission.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/admission_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AdmissionSettingsScreen extends ConsumerStatefulWidget {
   const AdmissionSettingsScreen({super.key});
@@ -78,7 +79,7 @@ class _AdmissionSettingsScreenState
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddSettingsDialog(context, ref),
@@ -495,7 +496,7 @@ class _AdmissionSettingsScreenState
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Error: $e'),
+                        content: Text(WarmCopy.genericError),
                         backgroundColor: AppColors.error,
                       ),
                     );
@@ -534,7 +535,7 @@ class _AdmissionSettingsScreenState
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

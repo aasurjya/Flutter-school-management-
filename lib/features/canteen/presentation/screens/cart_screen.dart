@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../data/models/canteen.dart';
 import '../../providers/canteen_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
@@ -179,7 +180,7 @@ class CartScreen extends ConsumerWidget {
         Navigator.pop(context); // Close loading
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: Colors.red,
           ),
         );

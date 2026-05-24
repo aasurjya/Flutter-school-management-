@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/report_card_full.dart';
 import '../../providers/report_card_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class TemplateListScreen extends ConsumerWidget {
   const TemplateListScreen({super.key});
@@ -61,7 +62,7 @@ class TemplateListScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/report-cards/templates/new'),

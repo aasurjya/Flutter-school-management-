@@ -6,6 +6,7 @@ import '../../../../data/models/communication.dart';
 import '../../providers/communication_provider.dart';
 import '../widgets/channel_selector.dart';
 import '../widgets/template_preview.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class TemplateEditorScreen extends ConsumerStatefulWidget {
   final CommunicationTemplate? template;
@@ -346,7 +347,7 @@ class _TemplateEditorScreenState extends ConsumerState<TemplateEditorScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

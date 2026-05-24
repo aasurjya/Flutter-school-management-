@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/certificate.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/certificate_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CertificateTemplateScreen extends ConsumerStatefulWidget {
   const CertificateTemplateScreen({super.key});
@@ -82,7 +83,7 @@ class _CertificateTemplateScreenState
         },
         loading: () =>
             const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }
@@ -437,7 +438,7 @@ class _TemplateFormState extends State<_TemplateForm> {
                           } catch (e) {
                             if (mounted) {
                               messenger.showSnackBar(
-                                SnackBar(content: Text('Error: $e')),
+                                SnackBar(content: Text(WarmCopy.genericError)),
                               );
                             }
                           } finally {

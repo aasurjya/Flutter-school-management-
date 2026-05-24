@@ -9,6 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/bus_tracking.dart';
 import '../../providers/bus_tracking_provider.dart';
 import '../widgets/bus_map_marker.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Live GPS tracking map view using a custom-rendered canvas.
 /// For production, integrate with google_maps_flutter or flutter_map.
@@ -302,7 +303,7 @@ class _LiveMapScreenState extends ConsumerState<LiveMapScreen> {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text(WarmCopy.genericError)),
             ),
           ),
         ],

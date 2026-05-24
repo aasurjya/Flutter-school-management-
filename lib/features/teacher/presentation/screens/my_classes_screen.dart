@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/repositories/timetable_repository.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../timetable/providers/timetable_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class MyClassesScreen extends ConsumerWidget {
   const MyClassesScreen({super.key});
@@ -44,7 +45,7 @@ class MyClassesScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 48, color: AppColors.error),
               const SizedBox(height: 16),
-              Text('Error: $e'),
+              Text(WarmCopy.genericError),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => ref.invalidate(teacherClassesProvider(userId)),

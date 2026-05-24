@@ -330,7 +330,7 @@ class _WallOfFameTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -493,7 +493,7 @@ class _LeaderboardTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }

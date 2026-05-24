@@ -6,6 +6,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../academic/providers/academic_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StudentSyllabusScreen extends ConsumerWidget {
   const StudentSyllabusScreen({super.key});
@@ -39,7 +40,7 @@ class StudentSyllabusScreen extends ConsumerWidget {
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (e, _) => SliverFillRemaining(
-                child: Center(child: Text('Error: $e')),
+                child: Center(child: Text(WarmCopy.genericError)),
               ),
               data: (year) {
                 if (year == null) {
@@ -71,7 +72,7 @@ class StudentSyllabusScreen extends ConsumerWidget {
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => SliverFillRemaining(
-        child: Center(child: Text('Error: $e')),
+        child: Center(child: Text(WarmCopy.genericError)),
       ),
       data: (classes) {
         if (classes.isEmpty) {

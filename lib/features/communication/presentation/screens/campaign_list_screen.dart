@@ -8,6 +8,7 @@ import '../../../../data/models/communication.dart';
 import '../../providers/communication_provider.dart';
 import '../widgets/campaign_status_badge.dart';
 import '../widgets/channel_selector.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CampaignListScreen extends ConsumerStatefulWidget {
   const CampaignListScreen({super.key});
@@ -89,7 +90,7 @@ class _CampaignListScreenState extends ConsumerState<CampaignListScreen>
             children: [
               const Icon(Icons.error_outline, size: 48, color: AppColors.error),
               const SizedBox(height: 16),
-              Text('Error: $e'),
+              Text(WarmCopy.genericError),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () =>

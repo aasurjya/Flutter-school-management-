@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/certificate.dart';
 import '../../providers/certificate_provider.dart';
 import '../widgets/certificate_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CertificateListScreen extends ConsumerStatefulWidget {
   const CertificateListScreen({super.key});
@@ -199,7 +200,7 @@ class _CertificateListScreenState
               },
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text(WarmCopy.genericError)),
             ),
           ),
         ],

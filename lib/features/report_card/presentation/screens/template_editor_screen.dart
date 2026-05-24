@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/report_card_full.dart';
 import '../../providers/report_card_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class TemplateEditorScreen extends ConsumerStatefulWidget {
   final String? templateId; // null = create new
@@ -451,7 +452,7 @@ class _TemplateEditorScreenState extends ConsumerState<TemplateEditorScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Error: $e'), backgroundColor: AppColors.error),
+              content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     } finally {

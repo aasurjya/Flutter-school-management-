@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../providers/hr_provider.dart';
 import '../widgets/staff_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StaffDirectoryScreen extends ConsumerStatefulWidget {
   const StaffDirectoryScreen({super.key});
@@ -181,7 +182,7 @@ class _StaffDirectoryScreenState extends ConsumerState<StaffDirectoryScreen> {
               },
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(child: Text('Error: $error')),
+              error: (error, _) => Center(child: Text(WarmCopy.genericError)),
             ),
           ),
         ],

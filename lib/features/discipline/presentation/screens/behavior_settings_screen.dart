@@ -6,6 +6,7 @@ import '../../../../data/models/discipline.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/discipline_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class BehaviorSettingsScreen extends ConsumerStatefulWidget {
   const BehaviorSettingsScreen({super.key});
@@ -541,7 +542,7 @@ class _CategoryList extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }

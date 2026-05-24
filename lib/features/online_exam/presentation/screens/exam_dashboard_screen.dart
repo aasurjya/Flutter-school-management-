@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/online_exam.dart';
 import '../../providers/online_exam_provider.dart';
 import '../widgets/exam_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ExamDashboardScreen extends ConsumerStatefulWidget {
   const ExamDashboardScreen({super.key});
@@ -134,7 +135,7 @@ class _ExamDashboardScreenState extends ConsumerState<ExamDashboardScreen>
             children: [
               const Icon(Icons.error_outline, size: 48, color: AppColors.error),
               const SizedBox(height: 8),
-              Text('Error: $error'),
+              Text(WarmCopy.genericError),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () =>

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/models/resource.dart';
 import '../../providers/resource_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ResourceLibraryScreen extends ConsumerStatefulWidget {
   const ResourceLibraryScreen({super.key});
@@ -190,7 +191,7 @@ class _BrowseTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -216,7 +217,7 @@ class _RecentTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -244,7 +245,7 @@ class _PopularTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -291,7 +292,7 @@ class _MyUploadsTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 

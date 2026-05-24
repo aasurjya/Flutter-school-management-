@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/models/report_card.dart';
 import '../../providers/report_card_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ReportCardViewScreen extends ConsumerWidget {
   final String reportId;
@@ -66,7 +67,7 @@ class ReportCardViewScreen extends ConsumerWidget {
           return _ReportCardContent(report: report);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

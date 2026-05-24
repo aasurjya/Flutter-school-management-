@@ -8,6 +8,7 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/hr_payroll.dart';
 import '../../providers/hr_provider.dart';
 import '../widgets/salary_breakdown_chart.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class SalarySlipScreen extends ConsumerWidget {
   final String? staffId;
@@ -109,7 +110,7 @@ class SalarySlipScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

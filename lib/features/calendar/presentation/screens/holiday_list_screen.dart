@@ -587,7 +587,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     }
@@ -630,7 +630,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
       } catch (e) {
         if (mounted) {
           messenger.showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }

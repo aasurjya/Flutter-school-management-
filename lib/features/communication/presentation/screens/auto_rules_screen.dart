@@ -6,6 +6,7 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/communication.dart';
 import '../../providers/communication_provider.dart';
 import '../widgets/channel_selector.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AutoRulesScreen extends ConsumerStatefulWidget {
   const AutoRulesScreen({super.key});
@@ -73,7 +74,7 @@ class _AutoRulesScreenState extends ConsumerState<AutoRulesScreen> {
             children: [
               const Icon(Icons.error_outline, size: 48, color: AppColors.error),
               const SizedBox(height: 16),
-              Text('Error: $e'),
+              Text(WarmCopy.genericError),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () =>
@@ -162,7 +163,7 @@ class _AutoRulesScreenState extends ConsumerState<AutoRulesScreen> {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Error: $e'),
+                        content: Text(WarmCopy.genericError),
                         backgroundColor: AppColors.error,
                       ),
                     );

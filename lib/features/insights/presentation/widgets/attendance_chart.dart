@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/models/student_insights.dart';
 import '../../providers/insights_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AttendanceChart extends ConsumerWidget {
   final String studentId;
@@ -62,7 +63,7 @@ class AttendanceChart extends ConsumerWidget {
               error: (e, _) => Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32),
-                  child: Text('Error: $e'),
+                  child: Text(WarmCopy.genericError),
                 ),
               ),
             ),

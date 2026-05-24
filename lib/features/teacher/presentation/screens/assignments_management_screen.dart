@@ -8,6 +8,7 @@ import '../../../../data/models/assignment.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../assignments/providers/assignments_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AssignmentsManagementScreen extends ConsumerStatefulWidget {
   const AssignmentsManagementScreen({super.key});
@@ -122,7 +123,7 @@ class _AssignmentsListState extends ConsumerState<_AssignmentsList> {
       return const Center(child: CircularProgressIndicator());
     }
     if (state.error != null) {
-      return Center(child: Text('Error: ${state.error}'));
+      return Center(child: Text(WarmCopy.genericError));
     }
     if (state.isEmpty) {
       return Center(
@@ -402,7 +403,7 @@ class _AssignmentDetailSheet extends ConsumerWidget {
           Expanded(
             child: submissionsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text(WarmCopy.genericError)),
               data: (submissions) {
                 if (submissions.isEmpty) {
                   return const Center(
@@ -463,7 +464,7 @@ class _AssignmentDetailSheet extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        context.showErrorSnackBar('Error: $e');
+        context.showErrorSnackBar(WarmCopy.genericError);
       }
     }
   }
@@ -530,7 +531,7 @@ class _AssignmentDetailSheet extends ConsumerWidget {
                 }
               } catch (e) {
                 if (context.mounted) {
-                  context.showErrorSnackBar('Error: $e');
+                  context.showErrorSnackBar(WarmCopy.genericError);
                 }
               }
             },
@@ -848,7 +849,7 @@ class _CreateAssignmentSheetState extends ConsumerState<_CreateAssignmentSheet> 
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Error: $e');
+        context.showErrorSnackBar(WarmCopy.genericError);
       }
     } finally {
       if (mounted) {

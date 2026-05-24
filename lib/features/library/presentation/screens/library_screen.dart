@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/library.dart';
 import '../../providers/library_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class LibraryScreen extends ConsumerStatefulWidget {
   const LibraryScreen({super.key});
@@ -166,7 +167,7 @@ class _BrowseTab extends ConsumerWidget {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(child: Text('Error: $error')),
+            error: (error, _) => Center(child: Text(WarmCopy.genericError)),
           ),
         ),
       ],
@@ -269,7 +270,7 @@ class _SearchTabState extends ConsumerState<_SearchTab> {
                     );
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => Center(child: Text('Error: $error')),
+                  error: (error, _) => Center(child: Text(WarmCopy.genericError)),
                 ),
         ),
       ],

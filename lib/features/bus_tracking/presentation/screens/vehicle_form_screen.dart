@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../providers/bus_tracking_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class VehicleFormScreen extends ConsumerStatefulWidget {
   final String? vehicleId;
@@ -120,7 +121,7 @@ class _VehicleFormScreenState extends ConsumerState<VehicleFormScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

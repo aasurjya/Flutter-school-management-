@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/hr_provider.dart';
 import '../widgets/payroll_summary_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class PayrollDashboardScreen extends ConsumerStatefulWidget {
   const PayrollDashboardScreen({super.key});
@@ -176,7 +177,7 @@ class _PayrollDashboardScreenState
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/hr/payroll/run'),

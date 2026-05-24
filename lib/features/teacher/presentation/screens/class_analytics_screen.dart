@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../exams/providers/exams_provider.dart';
 import '../../../attendance/providers/attendance_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ClassAnalyticsScreen extends ConsumerStatefulWidget {
   final String sectionId;
@@ -90,7 +91,7 @@ class _ExamPerformanceTab extends ConsumerWidget {
 
     return examsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       data: (exams) {
         if (exams.isEmpty) {
           return const Center(
@@ -157,7 +158,7 @@ class _ExamPerformanceTab extends ConsumerWidget {
 
     return statsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Text('Error: $e'),
+      error: (e, _) => Text(WarmCopy.genericError),
       data: (stats) {
         if (stats.isEmpty) {
           return const GlassCard(
@@ -512,7 +513,7 @@ class _AttendanceTab extends ConsumerWidget {
           const SizedBox(height: 12),
           todayStats.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Text('Error: $e'),
+            error: (e, _) => Text(WarmCopy.genericError),
             data: (stats) {
               if (stats == null) {
                 return const GlassCard(

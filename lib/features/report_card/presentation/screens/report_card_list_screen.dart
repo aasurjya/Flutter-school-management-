@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/report_card_full.dart';
 import '../../providers/report_card_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ReportCardListScreen extends ConsumerStatefulWidget {
   const ReportCardListScreen({super.key});
@@ -138,7 +139,7 @@ class _ReportCardListScreenState extends ConsumerState<ReportCardListScreen> {
               },
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text(WarmCopy.genericError)),
             ),
           ),
         ],

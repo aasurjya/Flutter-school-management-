@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/report_card_full.dart';
 import '../../providers/report_card_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class GradingScaleScreen extends ConsumerWidget {
   const GradingScaleScreen({super.key});
@@ -62,7 +63,7 @@ class GradingScaleScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showScaleEditor(context, ref, null),
@@ -143,7 +144,7 @@ class GradingScaleScreen extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('Error: $e'),
+                content: Text(WarmCopy.genericError),
                 backgroundColor: AppColors.error),
           );
         }
@@ -623,7 +624,7 @@ class _GradingScaleEditorSheetState extends State<_GradingScaleEditorSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Error: $e'),
+              content: Text(WarmCopy.genericError),
               backgroundColor: AppColors.error),
         );
       }

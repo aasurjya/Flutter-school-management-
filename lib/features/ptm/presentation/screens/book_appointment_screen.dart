@@ -247,7 +247,7 @@ class _TeacherSelectionStep extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Text('Error: $error'),
+      error: (error, _) => Text(WarmCopy.genericError),
     );
   }
 }
@@ -300,7 +300,7 @@ class _TimeSlotSelectionStep extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Text('Error: $error'),
+      error: (error, _) => Text(WarmCopy.genericError),
     );
   }
 }

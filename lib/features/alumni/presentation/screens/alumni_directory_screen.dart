@@ -5,6 +5,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../providers/alumni_provider.dart';
 import '../widgets/alumni_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AlumniDirectoryScreen extends ConsumerStatefulWidget {
   const AlumniDirectoryScreen({super.key});
@@ -236,7 +237,7 @@ class _AlumniDirectoryScreenState
                   children: [
                     const Icon(Icons.error_outline, size: 48, color: AppColors.error),
                     const SizedBox(height: 8),
-                    Text('Error: $e'),
+                    Text(WarmCopy.genericError),
                     const SizedBox(height: 8),
                     ElevatedButton(
                       onPressed: () => ref.invalidate(

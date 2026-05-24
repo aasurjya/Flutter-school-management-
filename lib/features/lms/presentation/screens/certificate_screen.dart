@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/lms.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/lms_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CertificateScreen extends ConsumerWidget {
   final String enrollmentId;
@@ -51,7 +52,7 @@ class CertificateScreen extends ConsumerWidget {
               const Icon(Icons.error_outline,
                   size: 48, color: AppColors.error),
               const SizedBox(height: 12),
-              Text('Error: $e'),
+              Text(WarmCopy.genericError),
               const SizedBox(height: 12),
               FilledButton(
                 onPressed: () => ref.invalidate(certificateProvider),
@@ -88,7 +89,7 @@ class CertificateScreen extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     }

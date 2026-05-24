@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../data/models/quiz.dart';
 import '../../providers/assessment_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class QuizResultScreen extends ConsumerWidget {
   final String attemptId;
@@ -30,7 +31,7 @@ class QuizResultScreen extends ConsumerWidget {
           return _ResultContent(attempt: attempt);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

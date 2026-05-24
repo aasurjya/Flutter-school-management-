@@ -6,6 +6,7 @@ import '../../../../core/providers/supabase_provider.dart';
 import '../../../../data/models/gradebook.dart';
 import '../../../../data/repositories/timetable_repository.dart';
 import '../../providers/gradebook_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Screen to add or edit a grade entry.
 ///
@@ -469,7 +470,7 @@ class _GradeEntryFormScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

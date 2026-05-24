@@ -16,6 +16,7 @@ import '../../../students/providers/students_provider.dart';
 import '../widgets/add_student_form.dart';
 import '../widgets/credential_display_dialog.dart';
 import '../widgets/parent_link_dialog.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StudentManagementScreen extends ConsumerStatefulWidget {
   const StudentManagementScreen({super.key});
@@ -105,7 +106,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                   children: [
                     Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.outlineVariant),
                     const SizedBox(height: 16),
-                    Text('Error: $e'),
+                    Text(WarmCopy.genericError),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: _loadStudents,
@@ -298,7 +299,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                 }
               } catch (e) {
                 if (mounted) {
-                  messenger.showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error));
+                  messenger.showSnackBar(SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error));
                 }
               }
             },
@@ -1353,7 +1354,7 @@ class _AddStudentSheetState extends ConsumerState<_AddStudentSheet> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Error: $e');
+        context.showErrorSnackBar(WarmCopy.genericError);
       }
     } finally {
       if (mounted) {
@@ -1550,7 +1551,7 @@ class _EditStudentSheetState extends ConsumerState<_EditStudentSheet> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Error: $e');
+        context.showErrorSnackBar(WarmCopy.genericError);
       }
     } finally {
       if (mounted) {

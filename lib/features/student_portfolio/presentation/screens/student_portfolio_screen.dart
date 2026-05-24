@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/student_portfolio.dart';
 import '../../providers/student_portfolio_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StudentPortfolioScreen extends ConsumerWidget {
   final String studentId;
@@ -22,7 +23,7 @@ class StudentPortfolioScreen extends ConsumerWidget {
           worksAsync: worksAsync,
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

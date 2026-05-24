@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../data/models/transport.dart';
 import '../../providers/transport_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class TransportScreen extends ConsumerWidget {
   const TransportScreen({super.key});
@@ -40,7 +41,7 @@ class TransportScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

@@ -9,6 +9,7 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/inventory_provider.dart';
 import '../widgets/asset_qr_widget.dart';
 import '../widgets/depreciation_chart.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AssetDetailScreen extends ConsumerWidget {
   final String assetId;
@@ -423,7 +424,7 @@ class AssetDetailScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }
@@ -557,7 +558,7 @@ class AssetDetailScreen extends ConsumerWidget {
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
+                    SnackBar(content: Text(WarmCopy.genericError)),
                   );
                 }
               }

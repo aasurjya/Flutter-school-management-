@@ -7,6 +7,7 @@ import '../../../academic/providers/academic_provider.dart';
 import '../../../../data/models/syllabus_topic.dart';
 import '../../providers/syllabus_provider.dart';
 import '../widgets/coverage_progress_bar.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class SectionCoverageScreen extends ConsumerWidget {
   final String subjectId;
@@ -49,7 +50,7 @@ class SectionCoverageScreen extends ConsumerWidget {
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (e, _) => SliverFillRemaining(
-                child: Center(child: Text('Error: $e')),
+                child: Center(child: Text(WarmCopy.genericError)),
               ),
               data: (sections) {
                 if (sections.isEmpty) {
@@ -113,7 +114,7 @@ class _SectionCoverageCard extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: summaryAsync.when(
           loading: () => _buildShimmer(),
-          error: (e, _) => Text('Error: $e'),
+          error: (e, _) => Text(WarmCopy.genericError),
           data: (summary) {
             final total = summary?.totalTopics ?? 0;
             final completed = summary?.completedTopics ?? 0;

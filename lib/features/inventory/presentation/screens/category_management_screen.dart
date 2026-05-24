@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/inventory.dart';
 import '../../providers/inventory_provider.dart';
 import '../widgets/category_tree_widget.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CategoryManagementScreen extends ConsumerWidget {
   const CategoryManagementScreen({super.key});
@@ -66,7 +67,7 @@ class CategoryManagementScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -208,7 +209,7 @@ class CategoryManagementScreen extends ConsumerWidget {
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
+                      SnackBar(content: Text(WarmCopy.genericError)),
                     );
                   }
                 }
@@ -253,7 +254,7 @@ class CategoryManagementScreen extends ConsumerWidget {
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
+                    SnackBar(content: Text(WarmCopy.genericError)),
                   );
                 }
               }

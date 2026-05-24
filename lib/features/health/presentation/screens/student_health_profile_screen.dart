@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../providers/health_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StudentHealthProfileScreen extends ConsumerWidget {
   final String studentId;
@@ -310,14 +311,14 @@ class StudentHealthProfileScreen extends ConsumerWidget {
                     );
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => Text('Error: $error'),
+                  error: (error, _) => Text(WarmCopy.genericError),
                 ),
               ],
             ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/emergency.dart';
 import '../../providers/emergency_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class EmergencyDashboardScreen extends ConsumerWidget {
   const EmergencyDashboardScreen({super.key});
@@ -434,7 +435,7 @@ class _HistoryTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -526,7 +527,7 @@ class _ContactsTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }

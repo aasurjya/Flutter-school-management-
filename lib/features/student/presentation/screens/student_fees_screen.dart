@@ -7,6 +7,7 @@ import '../../../../data/models/invoice.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../fees/providers/fees_provider.dart';
 import '../../../students/providers/students_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StudentFeesScreen extends ConsumerWidget {
   final String? studentId;
@@ -22,7 +23,7 @@ class StudentFeesScreen extends ConsumerWidget {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
-        body: Center(child: Text('Error: $e')),
+        body: Center(child: Text(WarmCopy.genericError)),
       ),
       data: (student) {
         if (student == null) {
@@ -70,7 +71,7 @@ class StudentFeesScreen extends ConsumerWidget {
                   // Summary Card
                   statsAsync.when(
                     loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Text('Error: $e'),
+                    error: (e, _) => Text(WarmCopy.genericError),
                     data: (stats) => _buildSummaryCard(stats),
                   ),
                   const SizedBox(height: 24),

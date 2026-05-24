@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/quiz.dart';
 import '../../providers/assessment_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class QuizzesScreen extends ConsumerStatefulWidget {
   const QuizzesScreen({super.key});
@@ -121,7 +122,7 @@ class _AllQuizzesTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -160,7 +161,7 @@ class _MyQuizzesTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -246,7 +247,7 @@ class _QuestionBankTabState extends ConsumerState<_QuestionBankTab> {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(child: Text('Error: $error')),
+            error: (error, _) => Center(child: Text(WarmCopy.genericError)),
           ),
         ),
       ],

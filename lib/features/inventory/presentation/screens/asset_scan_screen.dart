@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/inventory.dart';
 import '../../providers/inventory_provider.dart';
 import '../widgets/asset_qr_widget.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AssetScanScreen extends ConsumerStatefulWidget {
   const AssetScanScreen({super.key});
@@ -272,7 +273,7 @@ class _AssetScanScreenState extends ConsumerState<AssetScanScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Error: ${e.toString()}';
+          _errorMessage = WarmCopy.genericError;
           _isProcessing = false;
         });
       }

@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/lms.dart';
 import '../../providers/lms_provider.dart';
 import '../widgets/content_viewer.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ModuleContentScreen extends ConsumerStatefulWidget {
   final String enrollmentId;
@@ -108,7 +109,7 @@ class _ModuleContentScreenState extends ConsumerState<ModuleContentScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {

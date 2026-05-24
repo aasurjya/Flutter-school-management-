@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../data/models/canteen.dart';
 import '../../providers/canteen_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class OrderHistoryScreen extends ConsumerWidget {
   const OrderHistoryScreen({super.key});
@@ -25,7 +26,7 @@ class OrderHistoryScreen extends ConsumerWidget {
           return _OrdersList(walletId: wallet.id);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }
@@ -78,7 +79,7 @@ class _OrdersList extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -313,7 +314,7 @@ class _OrderCard extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: $e'),
+              content: Text(WarmCopy.genericError),
               backgroundColor: Colors.red,
             ),
           );

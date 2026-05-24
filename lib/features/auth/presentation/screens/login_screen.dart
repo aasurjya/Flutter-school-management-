@@ -11,6 +11,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/loading_button.dart';
 import '../../providers/auth_provider.dart';
+import '../widgets/demo_accounts_panel.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -32,6 +33,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _fillCredentials(String email, String password) {
+    setState(() {
+      _emailController.text = email;
+      _passwordController.text = password;
+      _errorMessage = null;
+    });
   }
 
   Future<void> _handleLogin() async {
@@ -278,6 +287,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 48),
                       if (_errorMessage != null) _buildErrorBanner(),
                       _buildLoginForm(),
+                      if (AppEnvironment.showDemoCredentials) ...[
+                        const SizedBox(height: 20),
+                        DemoAccountsPanel(onSelect: _fillCredentials),
+                      ],
                       if (!AppEnvironment.isProduction) ...[
                         const SizedBox(height: 24),
                         _buildEnvironmentBadge(),

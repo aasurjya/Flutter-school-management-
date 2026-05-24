@@ -43,38 +43,34 @@ echo "Linting migrations:"
 echo "$CHANGED" | sed 's/^/  - /'
 echo ""
 
-# Rules to enforce. See https://squawkhq.com/docs/rules for the full list.
-# We pick the ones that catch P0 prod-breaking patterns.
-RULES=(
-  adding-required-field            # ADD COLUMN NOT NULL without default
-  adding-not-nullable-field        # same family, stricter
-  changing-column-type             # rewrites the table
-  disallowed-unique-constraint     # blocking unique on big tables
-  prefer-big-int                   # foot-gun: int32 PKs run out
-  prefer-bigint-over-int           # same
-  prefer-bigint-over-smallint      # same
-  prefer-identity                  # serial vs identity
-  prefer-text-field                # varchar(N) with too-small N
-  renaming-column                  # breaks deployed clients
-  renaming-table                   # ditto
-  require-concurrent-index-creation # CREATE INDEX without CONCURRENTLY
-  require-concurrent-index-deletion # DROP INDEX without CONCURRENTLY
-  transaction-nesting              # nested BEGINs inside Supabase wrappers
-  ban-drop-column                  # data loss is rarely intentional
-  ban-drop-database                # data loss is rarely intentional
-  ban-drop-not-null                # changes contract; needs review
-)
-
-EXCLUDE_RULES=""
-for r in "${RULES[@]}"; do
-  EXCLUDE_RULES+=" --include $r"
-done
+# Rules we care about (P0 prod-breaking patterns). All of these are in
+# Squawk's default rule set as of 1.5.4 — listed here as documentation of
+# what we expect to be enforced. Squawk 1.x removed the `--include` flag;
+# the supported pattern is "run defaults; --exclude noisy rules if needed".
+# Reference: https://squawkhq.com/docs/rules
+#
+#   adding-required-field, adding-not-nullable-field, changing-column-type,
+#   disallowed-unique-constraint, prefer-big-int, prefer-bigint-over-int,
+#   prefer-bigint-over-smallint, prefer-identity, prefer-text-field,
+#   renaming-column, renaming-table, require-concurrent-index-creation,
+#   require-concurrent-index-deletion, transaction-nesting,
+#   ban-drop-column, ban-drop-database, ban-drop-not-null.
+#
+# If a default rule starts flagging too many false positives on a migration
+# we can't restructure, add it to EXCLUDE below with a comment explaining why.
+#
+#   prefer-big-int / prefer-bigint-over-int:
+#     False-positive prone for bounded config columns (CHECK-constrained,
+#     enum-like). These rules matter for PKs/FKs/counters, not for columns
+#     like `max_tokens INT CHECK (max_tokens BETWEEN 50 AND 8000)`. Manual
+#     review of new PK/FK definitions catches the real cases.
+EXCLUDE="--exclude prefer-big-int,prefer-bigint-over-int"
 
 FAILED=0
 for f in $CHANGED; do
   if [ ! -f "$f" ]; then continue; fi
   echo "::group::Squawk $f"
-  if ! $SQUAWK $EXCLUDE_RULES "$f"; then
+  if ! $SQUAWK $EXCLUDE "$f"; then
     echo "::error file=$f::squawk flagged a dangerous schema change — see docs/runbooks/migrations.md"
     FAILED=1
   fi

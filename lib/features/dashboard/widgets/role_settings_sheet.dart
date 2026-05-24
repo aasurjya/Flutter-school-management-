@@ -16,36 +16,43 @@ class RoleSettingsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Material (rather than a decorated Container) so the ListTiles below
+    // have a proper Material ancestor for ink splashes and background
+    // painting. Without this, Flutter's debug-mode assertion fires:
+    // "ListTile background color or ink splashes may be invisible."
     return SafeArea(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      child: Material(
+        color: Theme.of(context).cardColor,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 36,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: AppColors.grey200,
-                borderRadius: BorderRadius.circular(2),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.grey200,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            ...actions.map((a) => ListTile(
-                  leading: Icon(a.icon, color: a.iconColor),
-                  title: Text(a.title),
-                  subtitle:
-                      a.subtitle == null ? null : Text(a.subtitle!),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    a.onTap();
-                  },
-                )),
-          ],
+              ...actions.map((a) => ListTile(
+                    leading: Icon(a.icon, color: a.iconColor),
+                    title: Text(a.title),
+                    subtitle:
+                        a.subtitle == null ? null : Text(a.subtitle!),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      a.onTap();
+                    },
+                  )),
+            ],
+          ),
         ),
       ),
     );

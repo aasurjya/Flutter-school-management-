@@ -8,6 +8,7 @@ import '../../../../data/models/substitution.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../providers/substitution_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ReportAbsenceScreen extends ConsumerStatefulWidget {
   const ReportAbsenceScreen({super.key});
@@ -326,7 +327,7 @@ class _ReportAbsenceScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to report absence: $e'),
+            content: Text(WarmCopy.saveFailed('absence')),
             backgroundColor: Colors.red,
           ),
         );

@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/discipline.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../providers/discipline_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ReportIncidentScreen extends ConsumerStatefulWidget {
   final String? preselectedStudentId;
@@ -93,7 +94,7 @@ class _ReportIncidentScreenState extends ConsumerState<ReportIncidentScreen> {
                   onChanged: (v) => setState(() => _categoryId = v),
                 ),
                 loading: () => const LinearProgressIndicator(),
-                error: (_, __) => const Text('Failed to load categories'),
+                error: (_, __) => Text(WarmCopy.loadFailed('categories')),
               ),
               const SizedBox(height: 16),
 
@@ -295,7 +296,7 @@ class _ReportIncidentScreenState extends ConsumerState<ReportIncidentScreen> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Failed to report incident: $e');
+        context.showErrorSnackBar(WarmCopy.saveFailed('incident'));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);

@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../../students/providers/students_provider.dart';
 import '../../providers/exams_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class MarksEntryScreen extends ConsumerStatefulWidget {
   final String examId;
@@ -46,7 +47,7 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(title: const Text('Enter Marks')),
-        body: Center(child: Text('Failed to load exam: $e')),
+        body: Center(child: Text(WarmCopy.loadFailed('exam'))),
       ),
       data: (exam) => subjectsAsync.when(
         loading: () => const Scaffold(
@@ -54,7 +55,7 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
         ),
         error: (e, _) => Scaffold(
           appBar: AppBar(title: const Text('Enter Marks')),
-          body: Center(child: Text('Failed to load subjects: $e')),
+          body: Center(child: Text(WarmCopy.loadFailed('subjects'))),
         ),
         data: (subjects) {
           if (subjects.isEmpty) {
@@ -260,7 +261,7 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
                     const Icon(Icons.error_outline,
                         size: 48, color: AppColors.error),
                     const SizedBox(height: 12),
-                    Text('Failed to load students: $e'),
+                    Text(WarmCopy.loadFailed('students')),
                     const SizedBox(height: 8),
                     TextButton(
                       onPressed: () => ref.invalidate(

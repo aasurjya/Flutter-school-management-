@@ -8,6 +8,7 @@ import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/early_warning_provider.dart';
 import '../widgets/alert_severity_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Detail screen for a single [EarlyWarningAlert].
 ///
@@ -661,7 +662,7 @@ class _AlertDetailScreenState extends ConsumerState<AlertDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Failed to update status: $e');
+        context.showErrorSnackBar(WarmCopy.saveFailed('status'));
       }
     } finally {
       if (mounted) {

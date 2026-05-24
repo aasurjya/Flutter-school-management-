@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../students/providers/students_provider.dart';
 import '../../providers/exams_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ExamsScreen extends ConsumerWidget {
   const ExamsScreen({super.key});
@@ -56,7 +57,7 @@ class _UpcomingExamsTab extends ConsumerWidget {
           children: [
             const Icon(Icons.error_outline, size: 48, color: Colors.grey),
             const SizedBox(height: 16),
-            Text('Failed to load exams: $e'),
+            Text(WarmCopy.loadFailed('exams')),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => ref.invalidate(examsProvider(const ExamsFilter())),

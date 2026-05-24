@@ -9,6 +9,7 @@ import '../../../../data/models/substitution.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../providers/substitution_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 // ============================================================
 // SubstitutionDashboardScreen — admin + teacher view
@@ -445,7 +446,7 @@ class _AbsenceCardState extends ConsumerState<_AbsenceCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to cancel absence: $e'),
+            content: Text(WarmCopy.saveFailed('absence')),
             backgroundColor: Colors.red,
           ),
         );

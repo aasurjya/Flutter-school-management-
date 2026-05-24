@@ -7,6 +7,7 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/trend_prediction_provider.dart';
 import '../widgets/prediction_confidence_badge.dart';
 import '../widgets/trend_line_chart.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class TrendDashboardScreen extends ConsumerStatefulWidget {
   final String? sectionId;
@@ -99,9 +100,9 @@ class _TrendDashboardScreenState extends ConsumerState<TrendDashboardScreen> {
             padding: EdgeInsets.all(40),
             child: Center(child: CircularProgressIndicator()),
           ),
-          error: (_, __) => const GlassCard(
+          error: (_, __) => GlassCard(
             padding: EdgeInsets.all(20),
-            child: Text('Failed to load trend data'),
+            child: Text(WarmCopy.loadFailed('trend data')),
           ),
           data: (prediction) {
             return Column(
@@ -172,9 +173,9 @@ class _TrendDashboardScreenState extends ConsumerState<TrendDashboardScreen> {
             padding: EdgeInsets.all(40),
             child: Center(child: CircularProgressIndicator()),
           ),
-          error: (_, __) => const GlassCard(
+          error: (_, __) => GlassCard(
             padding: EdgeInsets.all(20),
-            child: Text('Failed to load trend data'),
+            child: Text(WarmCopy.loadFailed('trend data')),
           ),
           data: (prediction) {
             return Column(

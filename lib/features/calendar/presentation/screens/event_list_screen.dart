@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/school_event.dart';
 import '../../providers/calendar_provider.dart';
 import '../widgets/event_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Screen showing upcoming events list with type filters
 class EventListScreen extends ConsumerStatefulWidget {
@@ -68,7 +69,7 @@ class _EventListScreenState extends ConsumerState<EventListScreen> {
                     const Icon(Icons.error_outline,
                         size: 48, color: AppColors.error),
                     const SizedBox(height: 12),
-                    Text('Failed to load events: $error'),
+                    Text(WarmCopy.loadFailed('events')),
                   ],
                 ),
               ),

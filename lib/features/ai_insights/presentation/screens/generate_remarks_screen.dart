@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/report_commentary_provider.dart';
 import '../../../../data/models/report_commentary.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class GenerateRemarksScreen extends ConsumerStatefulWidget {
   const GenerateRemarksScreen({super.key});
@@ -76,7 +77,7 @@ class _GenerateRemarksScreenState extends ConsumerState<GenerateRemarksScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to generate remarks: $e'),
+            content: Text(WarmCopy.saveFailed('remarks')),
             backgroundColor: AppColors.error,
           ),
         );

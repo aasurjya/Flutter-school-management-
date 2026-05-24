@@ -7,6 +7,7 @@ import '../../providers/attendance_insights_provider.dart';
 import '../widgets/chronic_absentee_card.dart';
 import '../widgets/day_pattern_chart.dart';
 import '../widgets/attendance_trend_chart.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AttendanceInsightsScreen extends ConsumerStatefulWidget {
   final String sectionId;
@@ -99,7 +100,7 @@ class _PatternsTab extends ConsumerWidget {
 
     return patternsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const Center(child: Text('Failed to load patterns')),
+      error: (_, __) => Center(child: Text(WarmCopy.loadFailed('patterns'))),
       data: (patterns) {
         if (patterns.isEmpty) {
           return const Center(child: Text('No attendance data available'));
@@ -235,7 +236,7 @@ class _StudentsTab extends ConsumerWidget {
           const SizedBox(height: 12),
           absenteesAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => const Text('Failed to load data'),
+            error: (_, __) => Text(WarmCopy.loadFailed('data')),
             data: (absentees) {
               if (absentees.isEmpty) {
                 return const GlassCard(
@@ -267,7 +268,7 @@ class _StudentsTab extends ConsumerWidget {
           const SizedBox(height: 12),
           streaksAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => const Text('Failed to load streaks'),
+            error: (_, __) => Text(WarmCopy.loadFailed('streaks')),
             data: (streaks) {
               if (streaks.isEmpty) {
                 return const Text(
@@ -346,7 +347,7 @@ class _AnomaliesTab extends ConsumerWidget {
                 child: anomaliesAsync.when(
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (_, __) => const Text('Failed to load'),
+                  error: (_, __) => const Text(WarmCopy.genericError),
                   data: (anomalies) => AttendanceTrendChart(
                     dailyHistory: dailyHistory,
                     anomalies: anomalies,

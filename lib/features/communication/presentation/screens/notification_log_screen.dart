@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_error_widget.dart';
 import '../../../../core/widgets/status_chip.dart';
 import '../../../../data/models/whatsapp_config.dart';
 import '../../providers/whatsapp_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class NotificationLogScreen extends ConsumerStatefulWidget {
   const NotificationLogScreen({super.key});
@@ -100,7 +101,7 @@ class _NotificationLogScreenState
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
               error: (e, st) => AppErrorWidget(
-                message: 'Failed to load logs',
+                message: WarmCopy.loadFailed('logs'),
                 onRetry: () => ref.invalidate(notificationLogsProvider),
               ),
             ),

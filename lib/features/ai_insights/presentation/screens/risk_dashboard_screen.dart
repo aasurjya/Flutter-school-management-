@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/risk_score_provider.dart';
 import '../widgets/risk_score_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class RiskDashboardScreen extends ConsumerStatefulWidget {
   final String academicYearId;
@@ -69,7 +70,7 @@ class _RiskDashboardScreenState extends ConsumerState<RiskDashboardScreen> {
                       child: CircularProgressIndicator(),
                     ),
                   ),
-                  error: (_, __) => const Text('Failed to load distribution'),
+                  error: (_, __) => Text(WarmCopy.loadFailed('distribution')),
                   data: (dist) => _buildDistributionRow(dist),
                 ),
                 const SizedBox(height: 20),
@@ -86,8 +87,8 @@ class _RiskDashboardScreenState extends ConsumerState<RiskDashboardScreen> {
                       child: CircularProgressIndicator(),
                     ),
                   ),
-                  error: (_, __) => const Center(
-                    child: Text('Failed to load at-risk students'),
+                  error: (_, __) => Center(
+                    child: Text(WarmCopy.loadFailed('at-risk students')),
                   ),
                   data: (students) {
                     if (students.isEmpty) {

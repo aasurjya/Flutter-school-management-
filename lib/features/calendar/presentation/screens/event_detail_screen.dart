@@ -8,6 +8,7 @@ import '../../../../data/models/school_event.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/calendar_provider.dart';
 import '../widgets/event_type_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Full event detail screen with RSVP, attendees, reminders, location
 class EventDetailScreen extends ConsumerWidget {
@@ -296,7 +297,7 @@ class EventDetailScreen extends ConsumerWidget {
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
                         error: (_, __) =>
-                            const Text('Failed to load RSVP status'),
+                            Text(WarmCopy.loadFailed('RSVP status')),
                         data: (rsvp) => _buildRsvpButtons(
                             context, ref, rsvp),
                       ),

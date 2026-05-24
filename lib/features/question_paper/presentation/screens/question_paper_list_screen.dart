@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/question_paper.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/question_paper_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class QuestionPaperListScreen extends ConsumerStatefulWidget {
   const QuestionPaperListScreen({super.key});
@@ -61,7 +62,7 @@ class _QuestionPaperListScreenState
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 12),
-              Text('Failed to load papers', style: Theme.of(context).textTheme.titleMedium),
+              Text(WarmCopy.loadFailed('papers'), style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () =>

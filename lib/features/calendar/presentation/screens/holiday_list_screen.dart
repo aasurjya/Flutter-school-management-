@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/school_event.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/calendar_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Holiday calendar management screen (add/edit/delete holidays)
 class HolidayListScreen extends ConsumerStatefulWidget {
@@ -78,9 +79,9 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
         ref.watch(holidaysProvider(_academicYearId!));
 
     return holidaysAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => Center(child: CircularProgressIndicator()),
       error: (error, _) =>
-          Center(child: Text('Failed to load: $error')),
+          Center(child: Text(WarmCopy.genericError)),
       data: (holidays) {
         // Apply filter
         final filtered = _filterType != null

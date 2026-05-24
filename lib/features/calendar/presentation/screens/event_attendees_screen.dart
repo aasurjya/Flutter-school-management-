@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/school_event.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/calendar_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// RSVP list and check-in management screen for an event
 class EventAttendeesScreen extends ConsumerStatefulWidget {
@@ -67,7 +68,7 @@ class _EventAttendeesScreenState
               const Icon(Icons.error_outline,
                   size: 48, color: AppColors.error),
               const SizedBox(height: 12),
-              Text('Failed to load attendees: $error'),
+              Text(WarmCopy.loadFailed('attendees')),
             ],
           ),
         ),

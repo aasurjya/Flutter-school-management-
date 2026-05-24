@@ -6,6 +6,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../providers/parent_digest_provider.dart';
 import '../widgets/digest_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ParentDigestListScreen extends ConsumerWidget {
   final String parentId;
@@ -51,8 +52,8 @@ class ParentDigestListScreen extends ConsumerWidget {
               loading: () => const SliverFillRemaining(
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (_, __) => const SliverFillRemaining(
-                child: Center(child: Text('Failed to load digests')),
+              error: (_, __) => SliverFillRemaining(
+                child: Center(child: Text(WarmCopy.loadFailed('digests'))),
               ),
               data: (digests) {
                 if (digests.isEmpty) {

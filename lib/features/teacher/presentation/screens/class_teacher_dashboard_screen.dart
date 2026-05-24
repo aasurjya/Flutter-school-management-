@@ -7,6 +7,7 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../../students/providers/students_provider.dart';
 import '../../../qr_scan/providers/qr_scan_provider.dart';
 import '../../../attendance/providers/attendance_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Dashboard for class teachers – shows section overview, student list,
 /// attendance summary, check-in log, and quick actions.
@@ -208,7 +209,7 @@ class ClassTeacherDashboardScreen extends ConsumerWidget {
         studentsAsync.when(
           loading: () =>
               const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Text('Failed to load students: $e'),
+          error: (e, _) => Text(WarmCopy.loadFailed('students')),
           data: (students) {
             if (students.isEmpty) {
               return const Card(
@@ -267,7 +268,7 @@ class ClassTeacherDashboardScreen extends ConsumerWidget {
         checkinsAsync.when(
           loading: () =>
               const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Text('Failed to load check-ins: $e'),
+          error: (e, _) => Text(WarmCopy.loadFailed('check-ins')),
           data: (checkins) {
             if (checkins.isEmpty) {
               return Card(

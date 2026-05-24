@@ -7,6 +7,7 @@ import '../../../../data/models/school_event.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/calendar_provider.dart';
 import '../widgets/academic_timeline.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Year overview screen with terms, exams, and holidays on a timeline
 class AcademicCalendarScreen extends ConsumerStatefulWidget {
@@ -122,15 +123,15 @@ class _AcademicCalendarScreenState
         ref.watch(academicCalendarProvider(_academicYearId!));
 
     return itemsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.error_outline,
                 size: 48, color: AppColors.error),
-            const SizedBox(height: 12),
-            Text('Failed to load: $error'),
+            SizedBox(height: 12),
+            Text(WarmCopy.genericError),
           ],
         ),
       ),

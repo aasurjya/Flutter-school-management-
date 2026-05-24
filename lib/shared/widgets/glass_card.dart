@@ -1,32 +1,45 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 
-/// A glassmorphism-style card widget that adapts to light/dark themes.
+/// "GlassCard" — historical name kept for API compatibility, now a calm
+/// Apple-style grouped surface: solid fill, hairline separator, no blur,
+/// no shadow. The BackdropFilter blur was a measured ~3x GPU cost on
+/// low-end Android and contributed nothing to clarity.
+///
+/// The constructor still accepts `blur`, `borderColor`, `borderWidth`,
+/// `boxShadow`, `gradient` — they're silently ignored so existing call
+/// sites compile unchanged. Schedule them for removal in a follow-up
+/// refactor PR once feature screens migrate to direct widgets.
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final double borderRadius;
-  final double blur;
   final Color? backgroundColor;
-  final Color? borderColor;
-  final double borderWidth;
-  final List<BoxShadow>? boxShadow;
   final VoidCallback? onTap;
-  final Gradient? gradient;
+  final Gradient? gradient; // retained for GradientGlassCard contract
+
+  // Deprecated visual knobs — ignored, kept for source compat.
+  @Deprecated('BackdropFilter removed in Phase 0. Will be deleted in a follow-up.')
+  final double blur;
+  @Deprecated('Border is now a hairline. Will be deleted in a follow-up.')
+  final Color? borderColor;
+  @Deprecated('Border width is now fixed at 0.5. Will be deleted in a follow-up.')
+  final double borderWidth;
+  @Deprecated('Cards no longer ship with a default shadow. Will be deleted in a follow-up.')
+  final List<BoxShadow>? boxShadow;
 
   const GlassCard({
     super.key,
     required this.child,
     this.padding,
     this.margin,
-    this.borderRadius = 20,
-    this.blur = 10,
+    this.borderRadius = 10,
+    this.blur = 0,
     this.backgroundColor,
     this.borderColor,
-    this.borderWidth = 1.5,
+    this.borderWidth = 0,
     this.boxShadow,
     this.onTap,
     this.gradient,
@@ -34,64 +47,47 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final brightness = Theme.of(context).brightness;
+    final fill = backgroundColor ?? AppColors.groupedCellFor(brightness);
+    final radius = BorderRadius.circular(borderRadius);
 
-    // Dark mode: solid card surface instead of barely-visible frosted glass.
-    // Light mode: classic frosted-glass effect.
-    final defaultBackgroundColor = isDark
-        ? AppColors.surfaceDark
-        : Colors.white.withValues(alpha: 0.7);
-
-    final defaultBorderColor = isDark
-        ? AppColors.borderDark.withValues(alpha: 0.4)
-        : Colors.white.withValues(alpha: 0.5);
-
-    Widget cardContent = ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: backgroundColor ?? defaultBackgroundColor,
-            borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(
-              color: borderColor ?? defaultBorderColor,
-              width: borderWidth,
-            ),
-            gradient: gradient,
-            boxShadow: boxShadow ??
-                [
-                  BoxShadow(
-                    color:
-                        Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-          ),
-          child: child,
-        ),
+    Widget content = AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOut,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: gradient == null ? fill : null,
+        gradient: gradient,
+        borderRadius: radius,
       ),
+      child: child,
     );
 
     if (onTap != null) {
-      cardContent = InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: cardContent,
+      content = Material(
+        color: Colors.transparent,
+        borderRadius: radius,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          splashFactory: NoSplash.splashFactory,
+          highlightColor: AppColors.separatorFor(brightness),
+          child: content,
+        ),
       );
     }
 
     if (margin != null) {
-      cardContent = Padding(padding: margin!, child: cardContent);
+      content = Padding(padding: margin!, child: content);
     }
 
-    return cardContent;
+    return content;
   }
 }
 
-/// A variant of glass card with gradient overlay
+/// Gradient variant — kept for chart cards and onboarding flourishes.
+/// Most feature code should NOT reach for this — the default solid
+/// GlassCard is the calm choice.
 class GradientGlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -106,7 +102,7 @@ class GradientGlassCard extends StatelessWidget {
     required this.gradient,
     this.padding,
     this.margin,
-    this.borderRadius = 20,
+    this.borderRadius = 10,
     this.onTap,
   });
 
@@ -124,7 +120,11 @@ class GradientGlassCard extends StatelessWidget {
   }
 }
 
-/// A stat card with glassmorphism effect
+/// Stat card — value + label + icon on the grouped surface.
+/// Visual changes (Phase 0):
+///   - No tint-tinted icon backdrop (was using primary.withValues(alpha: 0.1)).
+///   - Headline weight follows the new Apple HIG scale.
+///   - No shadow.
 class GlassStatCard extends StatelessWidget {
   final String title;
   final String value;
@@ -150,30 +150,26 @@ class GlassStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final brightness = theme.brightness;
     final colorScheme = theme.colorScheme;
+    final iconCol = iconColor ?? colorScheme.primary;
+    final onGradient = gradient != null;
 
     return GlassCard(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       onTap: onTap,
       gradient: gradient,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color:
-                      (iconColor ?? colorScheme.primary).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor ?? colorScheme.primary,
-                  size: 24,
-                ),
+              Icon(
+                icon,
+                color: onGradient ? Colors.white : iconCol,
+                size: 22,
               ),
               if (trailing != null) trailing!,
             ],
@@ -181,25 +177,28 @@ class GlassStatCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             value,
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: gradient != null ? Colors.white : null,
+            style: theme.textTheme.displayMedium?.copyWith(
+              color: onGradient ? Colors.white : null,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             title,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: gradient != null
-                  ? Colors.white.withValues(alpha: 0.8)
-                  : theme.textTheme.bodySmall?.color,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: onGradient
+                  ? Colors.white.withValues(alpha: 0.85)
+                  : AppColors.labelFor(brightness, tier: 2),
             ),
           ),
           if (subtitle != null) ...[
             const SizedBox(height: 8),
             Text(
               subtitle!,
-              style: theme.textTheme.bodySmall,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: onGradient
+                    ? Colors.white.withValues(alpha: 0.7)
+                    : AppColors.labelFor(brightness, tier: 3),
+              ),
             ),
           ],
         ],

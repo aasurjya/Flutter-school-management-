@@ -25,13 +25,23 @@ fi
 SQUAWK="${SQUAWK_BIN:-npx --yes squawk-cli@1.5.4}"
 
 # Find migrations added/modified vs the base branch.
-# Fall back to the most recent migration if `git` doesn't have history (e.g.
-# shallow CI clone with depth=1 — github checkout@v4 fetches full by default).
+#
+# If the base ref isn't reachable (e.g. shallow CI clone without
+# fetch-depth: 0), we *skip* rather than fall back to "lint the latest
+# migration by mtime". The fallback was unsafe: in a fresh checkout
+# every file has the same mtime, so `ls -t` returns whatever order the
+# filesystem happens to surface — easily a legacy migration with 28
+# pre-existing warnings that block CI on every PR.
+#
+# Skipping is the correct trade-off for the ratchet pattern: better to
+# briefly lose enforcement (until the workflow's fetch-depth is fixed)
+# than to scan files that were already grandfathered in.
 if git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
   CHANGED=$(git diff --name-only --diff-filter=AM "$BASE_REF"...HEAD -- "$MIGRATIONS_DIR/*.sql" || true)
 else
-  echo "::notice::base ref $BASE_REF not available; linting the latest migration only"
-  CHANGED=$(ls -t "$MIGRATIONS_DIR"/*.sql 2>/dev/null | head -1)
+  echo "::warning::base ref $BASE_REF not reachable — squawk ratchet skipped."
+  echo "::warning::fix: ensure the workflow's actions/checkout uses fetch-depth: 0 (or 'git fetch origin main' before this step)."
+  exit 0
 fi
 
 if [ -z "$CHANGED" ]; then

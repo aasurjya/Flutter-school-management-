@@ -21,6 +21,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Fetch enough history so the migration-linter ratchet can diff
+          # the PR head against origin/main. Without this, depth=1 hides
+          # main entirely and the linter falls back to scanning legacy
+          # migrations it was supposed to ignore.
+          fetch-depth: 0
 
       - name: Set up Flutter (stable)
         uses: subosito/flutter-action@v2

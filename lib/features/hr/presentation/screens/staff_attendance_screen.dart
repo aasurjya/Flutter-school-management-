@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/hr_payroll.dart';
 import '../../providers/hr_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StaffAttendanceScreen extends ConsumerStatefulWidget {
   const StaffAttendanceScreen({super.key});
@@ -142,7 +143,7 @@ class _StaffAttendanceScreenState
               },
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(child: Text('Error: $error')),
+              error: (error, _) => Center(child: Text(WarmCopy.genericError)),
             ),
           ),
         ],
@@ -253,7 +254,7 @@ class _StaffAttendanceScreenState
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/visitor.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/visitor_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class VisitorDetailScreen extends ConsumerWidget {
   final String visitorId;
@@ -318,7 +319,7 @@ class VisitorDetailScreen extends ConsumerWidget {
                 },
                 loading: () => const Center(
                     child: CircularProgressIndicator()),
-                error: (e, _) => Text('Error: $e'),
+                error: (e, _) => Text(WarmCopy.genericError),
               ),
               const SizedBox(height: 24),
             ],
@@ -326,7 +327,7 @@ class VisitorDetailScreen extends ConsumerWidget {
         },
         loading: () =>
             const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

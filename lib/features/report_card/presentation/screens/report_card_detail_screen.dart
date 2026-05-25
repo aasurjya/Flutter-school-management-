@@ -12,6 +12,7 @@ import '../widgets/grade_table_widget.dart';
 import '../widgets/attendance_summary_widget.dart';
 import '../widgets/skills_radar_chart.dart';
 import '../widgets/report_card_pdf_builder.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ReportCardDetailScreen extends ConsumerWidget {
   final String reportId;
@@ -85,7 +86,7 @@ class ReportCardDetailScreen extends ConsumerWidget {
           return _ReportCardDetailContent(report: report);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
       floatingActionButton: reportAsync.whenOrNull(
         data: (report) {
@@ -142,7 +143,7 @@ class ReportCardDetailScreen extends ConsumerWidget {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content: Text('Error: $e'),
+                  content: Text(WarmCopy.genericError),
                   backgroundColor: AppColors.error),
             );
           }
@@ -163,7 +164,7 @@ class ReportCardDetailScreen extends ConsumerWidget {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content: Text('Error: $e'),
+                  content: Text(WarmCopy.genericError),
                   backgroundColor: AppColors.error),
             );
           }

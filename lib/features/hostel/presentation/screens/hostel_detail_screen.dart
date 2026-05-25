@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/models/hostel.dart';
 import '../../providers/hostel_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class HostelDetailScreen extends ConsumerWidget {
   final String hostelId;
@@ -193,14 +194,14 @@ class HostelDetailScreen extends ConsumerWidget {
                     );
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => Text('Error: $error'),
+                  error: (error, _) => Text(WarmCopy.genericError),
                 ),
               ],
             ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/communication.dart';
 import '../../providers/communication_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class EmailSettingsScreen extends ConsumerStatefulWidget {
   const EmailSettingsScreen({super.key});
@@ -100,7 +101,7 @@ class _EmailSettingsScreenState extends ConsumerState<EmailSettingsScreen> {
           return _buildForm(theme, config);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }
@@ -493,7 +494,7 @@ class _EmailSettingsScreenState extends ConsumerState<EmailSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/ptm.dart';
 import '../../providers/ptm_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class BookAppointmentScreen extends ConsumerStatefulWidget {
   final String scheduleId;
@@ -47,7 +48,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Failed to load PTM details'),
+                      Text(WarmCopy.loadFailed('PTM details')),
                       if (state.error != null)
                         Text(state.error!, style: const TextStyle(color: AppColors.error)),
                       TextButton(
@@ -246,7 +247,7 @@ class _TeacherSelectionStep extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Text('Error: $error'),
+      error: (error, _) => Text(WarmCopy.genericError),
     );
   }
 }
@@ -299,7 +300,7 @@ class _TimeSlotSelectionStep extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Text('Error: $error'),
+      error: (error, _) => Text(WarmCopy.genericError),
     );
   }
 }

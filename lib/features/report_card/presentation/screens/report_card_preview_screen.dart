@@ -5,6 +5,7 @@ import 'package:printing/printing.dart';
 import '../../../../data/models/report_card.dart';
 import '../../providers/report_card_provider.dart';
 import '../widgets/report_card_pdf_builder.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ReportCardPreviewScreen extends ConsumerWidget {
   final String reportId;
@@ -103,7 +104,7 @@ class ReportCardPreviewScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

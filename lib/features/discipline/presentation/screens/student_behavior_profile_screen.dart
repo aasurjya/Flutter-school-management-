@@ -8,6 +8,7 @@ import '../../providers/discipline_provider.dart';
 import '../widgets/behavior_score_widget.dart';
 import '../widgets/incident_card.dart';
 import '../widgets/recognition_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StudentBehaviorProfileScreen extends ConsumerWidget {
   final String studentId;
@@ -174,7 +175,7 @@ class StudentBehaviorProfileScreen extends ConsumerWidget {
                 height: 60,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (_, __) => const Text('Failed to load incidents'),
+              error: (_, __) => Text(WarmCopy.loadFailed('incidents')),
             ),
             const SizedBox(height: 24),
 
@@ -217,7 +218,7 @@ class StudentBehaviorProfileScreen extends ConsumerWidget {
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (_, __) =>
-                  const Text('Failed to load recognitions'),
+                  Text(WarmCopy.loadFailed('recognitions')),
             ),
             const SizedBox(height: 32),
           ],

@@ -274,6 +274,7 @@ import '../../features/academic/presentation/screens/grade_entry_form_screen.dar
 import '../../data/models/gradebook.dart';
 import '../../data/repositories/timetable_repository.dart';
 import '../../features/settings/presentation/screens/language_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/fees/presentation/screens/payment_gateway_screen.dart';
 import '../../features/fees/presentation/screens/payment_checkout_screen.dart';
 import '../../features/fees/presentation/screens/payment_history_screen.dart';
@@ -2185,6 +2186,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // ==================== SETTINGS ====================
+      GoRoute(
+        path: AppRoutes.settings,
+        builder: (context, state) => const SettingsScreen(),
+      ),
       GoRoute(
         path: AppRoutes.languageSettings,
         builder: (context, state) => const LanguageScreen(),

@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/whatsapp_provider.dart';
 import '../../providers/communication_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 enum _SendTarget { allStudents, allParents, specificClass, specificSection }
 
@@ -388,7 +389,7 @@ class _BulkNotifyScreenState extends ConsumerState<BulkNotifyScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

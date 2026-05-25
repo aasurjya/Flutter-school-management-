@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/communication.dart';
 import '../../providers/communication_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class SmsSettingsScreen extends ConsumerStatefulWidget {
   const SmsSettingsScreen({super.key});
@@ -70,7 +71,7 @@ class _SmsSettingsScreenState extends ConsumerState<SmsSettingsScreen> {
           return _buildForm(theme, config);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }
@@ -381,7 +382,7 @@ class _SmsSettingsScreenState extends ConsumerState<SmsSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

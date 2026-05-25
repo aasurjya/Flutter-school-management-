@@ -7,6 +7,7 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/syllabus_topic.dart';
 import '../../../../features/academic/providers/academic_provider.dart';
 import '../../providers/syllabus_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class TopicFormScreen extends ConsumerStatefulWidget {
   final String subjectId;
@@ -93,7 +94,7 @@ class _TopicFormScreenState extends ConsumerState<TopicFormScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load topic: $e')),
+          SnackBar(content: Text(WarmCopy.loadFailed('topic'))),
         );
       }
     } finally {
@@ -520,7 +521,7 @@ class _TopicFormScreenState extends ConsumerState<TopicFormScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

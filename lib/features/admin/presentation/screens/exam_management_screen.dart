@@ -177,7 +177,7 @@ class _ExamManagementScreenState extends ConsumerState<ExamManagementScreen>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Publish Results'),
-        content: Text('Are you sure you want to publish results for "${exam['name']}"? This action cannot be undone.'),
+        content: Text('Publish results for "${exam['name']}"? This action cannot be undone.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           ElevatedButton(

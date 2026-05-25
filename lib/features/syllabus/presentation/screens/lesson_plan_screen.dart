@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/lesson_plan.dart';
 import '../../providers/syllabus_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class LessonPlanScreen extends ConsumerWidget {
   final String planId;
@@ -20,7 +21,7 @@ class LessonPlanScreen extends ConsumerWidget {
     return Scaffold(
       body: planAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
         data: (plan) {
           if (plan == null) {
             return const Center(child: Text('Lesson plan not found.'));

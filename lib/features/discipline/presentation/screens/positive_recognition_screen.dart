@@ -7,6 +7,7 @@ import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/discipline_provider.dart';
 import '../widgets/recognition_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class PositiveRecognitionScreen extends ConsumerStatefulWidget {
   const PositiveRecognitionScreen({super.key});
@@ -146,7 +147,7 @@ class _PositiveRecognitionScreenState
                       ),
                       loading: () => const LinearProgressIndicator(),
                       error: (_, __) =>
-                          const Text('Failed to load categories'),
+                          Text(WarmCopy.loadFailed('categories')),
                     ),
                     const SizedBox(height: 12),
 
@@ -329,7 +330,7 @@ class _WallOfFameTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -492,7 +493,7 @@ class _LeaderboardTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }

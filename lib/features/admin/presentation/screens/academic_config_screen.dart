@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/academic.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../academic/providers/academic_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AcademicConfigScreen extends ConsumerStatefulWidget {
   const AcademicConfigScreen({super.key});
@@ -131,7 +132,7 @@ class _AcademicYearsConfig extends ConsumerWidget {
     return yearsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => _ErrorRetry(
-        message: 'Failed to load academic years: $e',
+        message: WarmCopy.loadFailed('academic years'),
         onRetry: () => ref.invalidate(academicYearsProvider),
       ),
       data: (years) => _ConfigListScaffold(
@@ -215,7 +216,7 @@ class _AcademicYearsConfig extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -321,7 +322,7 @@ class _TermsConfig extends ConsumerWidget {
     return yearsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => _ErrorRetry(
-        message: 'Failed to load: $e',
+        message: WarmCopy.genericError,
         onRetry: () => ref.invalidate(academicYearsProvider),
       ),
       data: (years) {
@@ -353,7 +354,7 @@ class _TermsForYear extends ConsumerWidget {
     return termsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => _ErrorRetry(
-        message: 'Failed to load terms: $e',
+        message: WarmCopy.loadFailed('terms'),
         onRetry: () => ref.invalidate(termsProvider(academicYear.id)),
       ),
       data: (terms) => _ConfigListScaffold(
@@ -399,7 +400,7 @@ class _TermsForYear extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -506,7 +507,7 @@ class _ClassesConfig extends ConsumerWidget {
     return classesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => _ErrorRetry(
-        message: 'Failed to load classes: $e',
+        message: WarmCopy.loadFailed('classes'),
         onRetry: () => ref.invalidate(classesProvider),
       ),
       data: (classes) => _ConfigListScaffold(
@@ -567,7 +568,7 @@ class _ClassesConfig extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -675,7 +676,7 @@ class _SectionsConfig extends ConsumerWidget {
     if (isLoading) return const Center(child: CircularProgressIndicator());
     if (error != null) {
       return _ErrorRetry(
-        message: 'Failed to load: $error',
+        message: WarmCopy.genericError,
         onRetry: () {
           ref.invalidate(allSectionsProvider);
           ref.invalidate(classesProvider);
@@ -748,7 +749,7 @@ class _SectionsConfig extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -946,7 +947,7 @@ class _SubjectsConfig extends ConsumerWidget {
     return subjectsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => _ErrorRetry(
-        message: 'Failed to load subjects: $e',
+        message: WarmCopy.loadFailed('subjects'),
         onRetry: () => ref.invalidate(subjectsProvider),
       ),
       data: (subjects) => _ConfigListScaffold(
@@ -1009,7 +1010,7 @@ class _SubjectsConfig extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }

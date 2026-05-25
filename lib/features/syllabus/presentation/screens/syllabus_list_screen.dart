@@ -8,6 +8,7 @@ import '../../../../features/auth/providers/auth_provider.dart';
 import '../../../../features/academic/providers/academic_provider.dart';
 import '../../providers/syllabus_provider.dart';
 import '../widgets/coverage_summary_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class SyllabusListScreen extends ConsumerWidget {
   const SyllabusListScreen({super.key});
@@ -112,7 +113,7 @@ class SyllabusListScreen extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.all(40),
               child: Text(
-                'Error: $error',
+                WarmCopy.genericError,
                 style: const TextStyle(color: Colors.grey),
                 textAlign: TextAlign.center,
               ),

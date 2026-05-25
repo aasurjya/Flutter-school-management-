@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/school_event.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/calendar_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Holiday calendar management screen (add/edit/delete holidays)
 class HolidayListScreen extends ConsumerStatefulWidget {
@@ -78,9 +79,9 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
         ref.watch(holidaysProvider(_academicYearId!));
 
     return holidaysAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => Center(child: CircularProgressIndicator()),
       error: (error, _) =>
-          Center(child: Text('Failed to load: $error')),
+          Center(child: Text(WarmCopy.genericError)),
       data: (holidays) {
         // Apply filter
         final filtered = _filterType != null
@@ -586,7 +587,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     }
@@ -600,7 +601,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Delete Holiday'),
         content: Text(
-            'Are you sure you want to delete "${holiday.name}"?'),
+            'Delete "${holiday.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -629,7 +630,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
       } catch (e) {
         if (mounted) {
           messenger.showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }

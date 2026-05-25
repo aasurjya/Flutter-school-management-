@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/message_template.dart';
 import '../../providers/message_draft_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AIMessageComposerScreen extends ConsumerStatefulWidget {
   const AIMessageComposerScreen({super.key});
@@ -76,7 +77,7 @@ class _AIMessageComposerScreenState
         setState(() => _isGenerating = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to generate draft: $e'),
+            content: Text(WarmCopy.saveFailed('draft')),
             backgroundColor: AppColors.error,
           ),
         );

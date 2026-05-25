@@ -10,6 +10,7 @@ import '../../../academic/providers/academic_provider.dart';
 import '../../providers/syllabus_provider.dart';
 import '../widgets/coverage_progress_bar.dart';
 import '../widgets/coverage_summary_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CoverageDashboardScreen extends ConsumerWidget {
   const CoverageDashboardScreen({super.key});
@@ -45,7 +46,7 @@ class CoverageDashboardScreen extends ConsumerWidget {
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (e, _) => SliverFillRemaining(
-                child: Center(child: Text('Error: $e')),
+                child: Center(child: Text(WarmCopy.genericError)),
               ),
               data: (year) {
                 if (year == null || currentUser == null) {

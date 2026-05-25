@@ -10,6 +10,7 @@ import '../../../../data/models/lms.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/lms_provider.dart';
 import '../widgets/module_list_widget.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CourseDetailScreen extends ConsumerWidget {
   final String courseId;
@@ -144,7 +145,7 @@ class CourseDetailScreen extends ConsumerWidget {
               const Icon(Icons.error_outline,
                   size: 48, color: AppColors.error),
               const SizedBox(height: 12),
-              Text('Error: $e'),
+              Text(WarmCopy.genericError),
               const SizedBox(height: 12),
               FilledButton(
                 onPressed: () => ref.invalidate(courseByIdProvider),

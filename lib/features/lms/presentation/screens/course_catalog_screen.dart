@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/lms_provider.dart';
 import '../widgets/course_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CourseCatalogScreen extends ConsumerStatefulWidget {
   const CourseCatalogScreen({super.key});
@@ -161,7 +162,7 @@ class _CourseCatalogScreenState extends ConsumerState<CourseCatalogScreen> {
                       const Icon(Icons.error_outline,
                           size: 48, color: AppColors.error),
                       const SizedBox(height: 12),
-                      Text('Error: $e'),
+                      Text(WarmCopy.genericError),
                       const SizedBox(height: 12),
                       FilledButton(
                         onPressed: () =>

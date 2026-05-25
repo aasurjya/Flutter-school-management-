@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_error_widget.dart';
 import '../../../../data/models/payment_gateway.dart';
@@ -237,7 +238,7 @@ class _GatewayCard extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.saveFailed('the payment'))),
         );
       }
     }
@@ -339,7 +340,7 @@ class _GatewayConfigSheetState extends ConsumerState<_GatewayConfigSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: $e')));
+            .showSnackBar(SnackBar(content: Text(WarmCopy.saveFailed('the payment'))));
       }
     } finally {
       if (mounted) setState(() => _saving = false);

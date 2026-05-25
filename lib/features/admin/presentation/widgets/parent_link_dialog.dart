@@ -12,6 +12,7 @@ import '../../../../data/models/student.dart';
 import '../../../../data/repositories/parent_repository.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../providers/parent_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 import 'credential_display_dialog.dart';
 
 /// Full-screen bottom sheet for managing parents linked to a student.
@@ -226,7 +227,7 @@ class _LinkedParentsSection extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to unlink: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );
@@ -453,7 +454,7 @@ class _LinkOptionsSheetState extends ConsumerState<_LinkOptionsSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to link: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );
@@ -701,7 +702,7 @@ class _CreateLinkSectionState extends ConsumerState<_CreateLinkSection> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to create account: ${e.message}'),
+            content: Text(WarmCopy.saveFailed('account')),
             backgroundColor: AppColors.error,
           ),
         );
@@ -715,7 +716,7 @@ class _CreateLinkSectionState extends ConsumerState<_CreateLinkSection> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

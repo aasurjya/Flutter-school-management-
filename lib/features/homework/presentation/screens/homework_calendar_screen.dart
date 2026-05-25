@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/homework.dart';
 import '../../providers/homework_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class HomeworkCalendarScreen extends ConsumerStatefulWidget {
   const HomeworkCalendarScreen({super.key});
@@ -324,7 +325,7 @@ class _HomeworkCalendarScreenState
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

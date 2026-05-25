@@ -6,6 +6,7 @@ import '../../../../data/models/alumni.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/alumni_provider.dart';
 import '../widgets/donation_progress.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class DonationsScreen extends ConsumerStatefulWidget {
   const DonationsScreen({super.key});
@@ -123,7 +124,7 @@ class _DonationsScreenState extends ConsumerState<DonationsScreen> {
               ),
               error: (e, _) => Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('Error: $e'),
+                child: Text(WarmCopy.genericError),
               ),
             ),
           ),
@@ -167,7 +168,7 @@ class _DonationsScreenState extends ConsumerState<DonationsScreen> {
               child: Center(child: CircularProgressIndicator()),
             ),
             error: (e, _) => SliverToBoxAdapter(
-              child: Center(child: Text('Error: $e')),
+              child: Center(child: Text(WarmCopy.genericError)),
             ),
           ),
 
@@ -308,7 +309,7 @@ class _DonationsScreenState extends ConsumerState<DonationsScreen> {
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
+                      SnackBar(content: Text(WarmCopy.genericError)),
                     );
                   }
                 }

@@ -8,6 +8,7 @@ import '../../../../data/models/lms.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/lms_provider.dart';
 import '../widgets/module_list_widget.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CourseBuilderScreen extends ConsumerStatefulWidget {
   final String? courseId;
@@ -411,7 +412,7 @@ class _CourseBuilderScreenState extends ConsumerState<CourseBuilderScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {
@@ -448,7 +449,7 @@ class _CourseBuilderScreenState extends ConsumerState<CourseBuilderScreen> {
           builder: (context) => AlertDialog(
             title: const Text('Delete Course'),
             content: const Text(
-                'Are you sure you want to delete this course? This cannot be undone.'),
+                'Delete this course? This cannot be undone.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -538,7 +539,7 @@ class _CourseBuilderScreenState extends ConsumerState<CourseBuilderScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }
@@ -609,7 +610,7 @@ class _CourseBuilderScreenState extends ConsumerState<CourseBuilderScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }
@@ -646,7 +647,7 @@ class _CourseBuilderScreenState extends ConsumerState<CourseBuilderScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }
@@ -758,7 +759,7 @@ class _CourseBuilderScreenState extends ConsumerState<CourseBuilderScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }

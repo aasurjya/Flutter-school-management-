@@ -9,6 +9,7 @@ import '../../../../data/models/school_event.dart';
 import '../../providers/calendar_provider.dart';
 import '../widgets/event_card.dart';
 import '../widgets/event_type_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Main calendar screen with month/week/day toggle using table_calendar
 class CalendarScreen extends ConsumerStatefulWidget {
@@ -106,7 +107,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               const Icon(Icons.error_outline,
                   size: 48, color: AppColors.error),
               const SizedBox(height: 12),
-              Text('Failed to load events',
+              Text(WarmCopy.loadFailed('events'),
                   style: theme.textTheme.bodyLarge),
               const SizedBox(height: 4),
               Text('$error', style: theme.textTheme.bodySmall),

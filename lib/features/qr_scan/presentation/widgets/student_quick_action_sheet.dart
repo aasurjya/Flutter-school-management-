@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/student.dart';
 import '../../../../data/models/student_checkin.dart';
@@ -228,7 +229,7 @@ class _StudentQuickActionSheetState
         );
       }
     } catch (e) {
-      _showError('Failed to mark attendance: $e');
+      _showError(WarmCopy.saveFailed('attendance'));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -261,7 +262,7 @@ class _StudentQuickActionSheetState
         );
       }
     } catch (e) {
-      _showError('Failed to record ${type.displayName}: $e');
+      _showError(WarmCopy.saveFailed(type.displayName.toLowerCase()));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

@@ -8,6 +8,7 @@ import '../../../../data/models/school_event.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/calendar_provider.dart';
 import '../widgets/event_type_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Full event detail screen with RSVP, attendees, reminders, location
 class EventDetailScreen extends ConsumerWidget {
@@ -28,7 +29,7 @@ class EventDetailScreen extends ConsumerWidget {
           isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       body: eventAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
         data: (event) {
           if (event == null) {
             return const Center(child: Text('Event not found'));
@@ -296,7 +297,7 @@ class EventDetailScreen extends ConsumerWidget {
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
                         error: (_, __) =>
-                            const Text('Failed to load RSVP status'),
+                            Text(WarmCopy.loadFailed('RSVP status')),
                         data: (rsvp) => _buildRsvpButtons(
                             context, ref, rsvp),
                       ),
@@ -440,7 +441,7 @@ class EventDetailScreen extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     }
@@ -452,7 +453,7 @@ class EventDetailScreen extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: const Text('Delete Event'),
         content: const Text(
-            'Are you sure you want to delete this event? This action cannot be undone.'),
+            'Delete this event? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -480,7 +481,7 @@ class EventDetailScreen extends ConsumerWidget {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }

@@ -9,6 +9,7 @@ import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../assignments/providers/assignments_provider.dart';
 import '../../../students/providers/students_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StudentAssignmentsScreen extends ConsumerStatefulWidget {
   const StudentAssignmentsScreen({super.key});
@@ -56,7 +57,7 @@ class _StudentAssignmentsScreenState extends ConsumerState<StudentAssignmentsScr
       ),
       body: currentStudent.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
         data: (student) {
           if (student == null) {
             return const Center(child: Text('Student not found'));
@@ -168,7 +169,7 @@ class _AssignmentsListState extends ConsumerState<_AssignmentsList> {
       return const Center(child: CircularProgressIndicator());
     }
     if (state.error != null) {
-      return Center(child: Text('Error: ${state.error}'));
+      return Center(child: Text(WarmCopy.genericError));
     }
     if (state.isEmpty) {
       return Center(
@@ -482,7 +483,7 @@ class _AssignmentDetailSheetState extends ConsumerState<_AssignmentDetailSheet> 
                   const SizedBox(height: 12),
                   submissionAsync.when(
                     loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Text('Error: $e'),
+                    error: (e, _) => Text(WarmCopy.genericError),
                     data: (submission) {
                       if (submission != null && submission.isGraded) {
                         return _buildGradedSubmission(submission);
@@ -676,7 +677,7 @@ class _AssignmentDetailSheetState extends ConsumerState<_AssignmentDetailSheet> 
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Error: $e');
+        context.showErrorSnackBar(WarmCopy.genericError);
       }
     } finally {
       if (mounted) {

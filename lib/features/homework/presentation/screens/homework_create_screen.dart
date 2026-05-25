@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/homework.dart';
 import '../../providers/homework_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class HomeworkCreateScreen extends ConsumerStatefulWidget {
   const HomeworkCreateScreen({super.key});
@@ -113,7 +114,7 @@ class _HomeworkCreateScreenState extends ConsumerState<HomeworkCreateScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

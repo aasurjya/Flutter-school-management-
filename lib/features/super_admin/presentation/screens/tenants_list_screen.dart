@@ -8,6 +8,7 @@ import '../../../../data/models/tenant.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/tenant_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class TenantsListScreen extends ConsumerStatefulWidget {
   const TenantsListScreen({super.key});
@@ -90,7 +91,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
                     const Icon(Icons.error_outline,
                         size: 48, color: AppColors.error),
                     const SizedBox(height: 16),
-                    Text('Error: $e'),
+                    Text(WarmCopy.genericError),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () => ref
@@ -277,7 +278,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Suspend Tenant'),
         content: Text(
-            'Are you sure you want to suspend "${tenant.name}"? All users will lose access.'),
+            'Suspend "${tenant.name}"? All users will lose access.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
@@ -298,7 +299,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
                 }
               } catch (e) {
                 if (mounted) {
-                  context.showErrorSnackBar('Error: $e');
+                  context.showErrorSnackBar(WarmCopy.genericError);
                 }
               }
             },
@@ -321,7 +322,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Error: $e');
+        context.showErrorSnackBar(WarmCopy.genericError);
       }
     }
   }
@@ -332,7 +333,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Tenant'),
         content: Text(
-            'Are you sure you want to permanently delete "${tenant.name}"? This action cannot be undone.'),
+            'Permanently delete "${tenant.name}"? This action cannot be undone.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
@@ -349,7 +350,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
                 }
               } catch (e) {
                 if (mounted) {
-                  context.showErrorSnackBar('Error: $e');
+                  context.showErrorSnackBar(WarmCopy.genericError);
                 }
               }
             },

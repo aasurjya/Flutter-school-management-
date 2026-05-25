@@ -7,6 +7,7 @@ import '../../../../data/models/admission.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/admission_provider.dart';
 import '../widgets/application_status_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class InterviewScheduleScreen extends ConsumerStatefulWidget {
   final String? applicationId;
@@ -103,7 +104,7 @@ class _InterviewScheduleScreenState
               },
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text(WarmCopy.genericError)),
             ),
           ),
         ],
@@ -461,7 +462,7 @@ class _InterviewScheduleScreenState
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Error: $e'),
+                        content: Text(WarmCopy.genericError),
                         backgroundColor: AppColors.error,
                       ),
                     );
@@ -539,7 +540,7 @@ class _InterviewScheduleScreenState
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Error: $e'),
+                      content: Text(WarmCopy.genericError),
                       backgroundColor: AppColors.error,
                     ),
                   );
@@ -560,7 +561,7 @@ class _InterviewScheduleScreenState
       builder: (ctx) => AlertDialog(
         title: const Text('Cancel Interview?'),
         content: const Text(
-            'Are you sure you want to cancel this interview?'),
+            'Cancel this interview?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -596,7 +597,7 @@ class _InterviewScheduleScreenState
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: $e'),
+              content: Text(WarmCopy.genericError),
               backgroundColor: AppColors.error,
             ),
           );

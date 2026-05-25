@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/online_exam.dart';
 import '../../providers/online_exam_provider.dart';
 import '../widgets/score_distribution_chart.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ExamAnalyticsScreen extends ConsumerWidget {
   final String examId;
@@ -75,7 +76,7 @@ class ExamAnalyticsScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

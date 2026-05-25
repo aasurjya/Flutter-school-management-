@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/alumni.dart';
 import '../../providers/alumni_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class EventDetailScreen extends ConsumerWidget {
   final String eventId;
@@ -294,7 +295,7 @@ class EventDetailScreen extends ConsumerWidget {
                   child: Center(child: CircularProgressIndicator()),
                 ),
                 error: (e, _) => SliverToBoxAdapter(
-                  child: Text('Error: $e'),
+                  child: Text(WarmCopy.genericError),
                 ),
               ),
 
@@ -303,7 +304,7 @@ class EventDetailScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
 
       // Register button
@@ -355,7 +356,10 @@ class EventDetailScreen extends ConsumerWidget {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                        'Error: ${e.toString().contains('duplicate') ? 'Already registered' : e}'),
+                                      e.toString().contains('duplicate')
+                                          ? 'Already registered.'
+                                          : WarmCopy.genericError,
+                                    ),
                                   ),
                                 );
                               }

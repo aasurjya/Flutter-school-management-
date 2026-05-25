@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/question_paper.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/question_paper_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 // ============================================================
 // Detail / Preview Screen
@@ -27,7 +28,7 @@ class QuestionPaperDetailScreen extends ConsumerWidget {
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(title: const Text('Question Paper')),
-        body: Center(child: Text('Error: $e')),
+        body: Center(child: Text(WarmCopy.genericError)),
       ),
       data: (paper) => _PaperDetailView(paper: paper),
     );
@@ -275,7 +276,7 @@ class _PaperDetailViewState extends ConsumerState<_PaperDetailView> {
       ref.invalidate(questionPaperDetailProvider(widget.paper.id));
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Failed to update status: $e')),
+        SnackBar(content: Text(WarmCopy.saveFailed('status'))),
       );
     }
   }

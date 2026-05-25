@@ -9,6 +9,7 @@ import '../../../../data/models/syllabus_topic.dart';
 import '../../providers/syllabus_provider.dart';
 import '../widgets/topic_tree_item.dart';
 import '../widgets/coverage_progress_bar.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class SyllabusEditorScreen extends ConsumerStatefulWidget {
   final String subjectId;
@@ -386,7 +387,7 @@ class _SyllabusEditorScreenState extends ConsumerState<SyllabusEditorScreen> {
           } catch (e) {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Failed to update status: $e')),
+                SnackBar(content: Text(WarmCopy.saveFailed('status'))),
               );
             }
           }
@@ -424,7 +425,7 @@ class _SyllabusEditorScreenState extends ConsumerState<SyllabusEditorScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Topic?'),
         content: Text(
-          'Are you sure you want to delete "${topic.title}"? '
+          'Delete "${topic.title}"? '
           '${topic.hasChildren ? 'All child topics will also be deleted.' : 'This action cannot be undone.'}',
         ),
         actions: [
@@ -454,7 +455,7 @@ class _SyllabusEditorScreenState extends ConsumerState<SyllabusEditorScreen> {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to delete: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }

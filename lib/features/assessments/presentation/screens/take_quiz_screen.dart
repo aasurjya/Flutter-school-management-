@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/quiz.dart';
 import '../../providers/assessment_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class TakeQuizScreen extends ConsumerStatefulWidget {
   final String quizId;
@@ -62,7 +63,7 @@ class _TakeQuizScreenState extends ConsumerState<TakeQuizScreen> {
               children: [
                 const Icon(Icons.error_outline, size: 64, color: AppColors.error),
                 const SizedBox(height: 16),
-                Text('Error: $error'),
+                Text(WarmCopy.genericError),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => context.pop(),
@@ -415,7 +416,7 @@ class _QuizContent extends ConsumerWidget {
                 style: const TextStyle(color: AppColors.warning),
               ),
             const SizedBox(height: 8),
-            const Text('Are you sure you want to submit?'),
+            const Text('Submit?'),
           ],
         ),
         actions: [

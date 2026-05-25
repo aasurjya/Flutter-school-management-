@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/bus_tracking.dart';
 import '../../providers/bus_tracking_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class GeofenceListScreen extends ConsumerStatefulWidget {
   const GeofenceListScreen({super.key});
@@ -76,7 +77,7 @@ class _GeofenceListScreenState extends ConsumerState<GeofenceListScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }
@@ -203,7 +204,7 @@ class _GeofenceListScreenState extends ConsumerState<GeofenceListScreen> {
       } catch (e) {
         if (mounted) {
           messenger.showSnackBar(
-            SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+            SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
           );
         }
       }
@@ -226,7 +227,7 @@ class _GeofenceListScreenState extends ConsumerState<GeofenceListScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -261,7 +262,7 @@ class _GeofenceListScreenState extends ConsumerState<GeofenceListScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+            SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
           );
         }
       }

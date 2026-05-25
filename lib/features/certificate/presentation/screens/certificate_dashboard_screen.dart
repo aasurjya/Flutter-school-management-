@@ -8,6 +8,7 @@ import '../../../../data/models/certificate.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/certificate_provider.dart';
 import '../widgets/certificate_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CertificateDashboardScreen extends ConsumerWidget {
   const CertificateDashboardScreen({super.key});
@@ -51,7 +52,7 @@ class CertificateDashboardScreen extends ConsumerWidget {
               ),
               error: (e, _) => Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('Error: $e'),
+                child: Text(WarmCopy.genericError),
               ),
             ),
             const SizedBox(height: 16),
@@ -183,7 +184,7 @@ class CertificateDashboardScreen extends ConsumerWidget {
               ),
               error: (e, _) => Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('Error: $e'),
+                child: Text(WarmCopy.genericError),
               ),
             ),
             const SizedBox(height: 24),

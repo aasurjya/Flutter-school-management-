@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/students_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StudentsListScreen extends ConsumerStatefulWidget {
   const StudentsListScreen({super.key});
@@ -173,7 +174,7 @@ class _StudentsListScreenState extends ConsumerState<StudentsListScreen> {
           children: [
             const Icon(Icons.error_outline, size: 48, color: Colors.grey),
             const SizedBox(height: 16),
-            Text('Failed to load students: ${state.error}'),
+            Text(WarmCopy.loadFailed('students')),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () =>

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../data/models/library.dart';
 import '../../providers/library_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class MyBooksScreen extends ConsumerWidget {
   const MyBooksScreen({super.key});
@@ -55,7 +56,7 @@ class MyBooksScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

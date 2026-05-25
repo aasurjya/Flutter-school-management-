@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../providers/bus_tracking_provider.dart';
 import '../widgets/bus_status_card.dart';
 import '../widgets/tracking_stats_row.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class BusTrackingDashboardScreen extends ConsumerWidget {
   const BusTrackingDashboardScreen({super.key});
@@ -80,7 +81,7 @@ class BusTrackingDashboardScreen extends ConsumerWidget {
                 height: 100,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (e, _) => Text('Error: $e'),
+              error: (e, _) => Text(WarmCopy.genericError),
             ),
 
             const SizedBox(height: 24),

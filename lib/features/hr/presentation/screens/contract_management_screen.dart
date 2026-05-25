@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/hr_provider.dart';
 import '../widgets/contract_status_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ContractManagementScreen extends ConsumerStatefulWidget {
   const ContractManagementScreen({super.key});
@@ -394,7 +395,7 @@ class _ContractList extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/services/admin_user_service.dart';
 import '../../../../core/services/credential_service.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -282,7 +283,7 @@ class _StaffListState extends ConsumerState<_StaffList> {
       builder: (ctx) => AlertDialog(
         title: const Text('Deactivate Staff'),
         content: Text(
-          'Are you sure you want to deactivate ${member.fullName}? '
+          'Deactivate ${member.fullName}? '
           'Their account will be disabled.',
         ),
         actions: [
@@ -318,7 +319,7 @@ class _StaffListState extends ConsumerState<_StaffList> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Failed to deactivate: $e');
+        context.showErrorSnackBar(WarmCopy.saveFailed('the staff record'));
       }
     }
   }
@@ -1094,7 +1095,7 @@ class _ErrorView extends StatelessWidget {
           Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
           const SizedBox(height: 16),
           Text(
-            'Failed to load staff',
+            WarmCopy.loadFailed('staff'),
             style: TextStyle(color: Colors.grey[700], fontSize: 16),
           ),
           const SizedBox(height: 8),

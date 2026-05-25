@@ -7,6 +7,7 @@ import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../data/models/announcement.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../announcements/providers/announcement_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AnnouncementsScreen extends ConsumerStatefulWidget {
   const AnnouncementsScreen({super.key});
@@ -52,7 +53,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
               children: [
                 const Icon(Icons.error_outline, size: 48, color: AppColors.error),
                 const SizedBox(height: 16),
-                Text('Error: $e'),
+                Text(WarmCopy.genericError),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => ref.read(announcementsNotifierProvider.notifier).loadAnnouncements(),
@@ -137,7 +138,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     }
@@ -154,7 +155,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     }
@@ -171,7 +172,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     }
@@ -188,7 +189,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     }
@@ -226,7 +227,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Announcement'),
-        content: Text('Are you sure you want to delete "${announcement.title}"?'),
+        content: Text('Delete "${announcement.title}"?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           ElevatedButton(
@@ -249,7 +250,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }
@@ -737,7 +738,7 @@ class _EditAnnouncementSheetState extends State<_EditAnnouncementSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {

@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/school_event.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/calendar_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Form screen for creating/editing events with type, dates, time,
 /// recurrence, visibility, target classes, and color picker
@@ -627,7 +628,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {

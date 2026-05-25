@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/bus_tracking.dart';
 import '../../providers/bus_tracking_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Driver panel for starting/ending trips and checking in at stops.
 /// In production, this would use geolocator package for real GPS.
@@ -92,7 +93,7 @@ class _DriverPanelScreenState extends ConsumerState<DriverPanelScreen> {
       setState(() => _isStartingTrip = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -128,7 +129,7 @@ class _DriverPanelScreenState extends ConsumerState<DriverPanelScreen> {
       setState(() => _isEndingTrip = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -401,7 +402,7 @@ class _DriverPanelScreenState extends ConsumerState<DriverPanelScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

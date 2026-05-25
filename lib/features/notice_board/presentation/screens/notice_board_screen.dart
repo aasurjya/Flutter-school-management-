@@ -5,6 +5,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/notice_board.dart';
 import '../../providers/notice_board_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class NoticeBoardScreen extends ConsumerStatefulWidget {
   const NoticeBoardScreen({super.key});
@@ -61,7 +62,7 @@ class _NoticeBoardScreenState extends ConsumerState<NoticeBoardScreen> {
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(
-                child: Text('Error: $e',
+                child: Text(WarmCopy.genericError,
                     style: const TextStyle(color: Colors.red)),
               ),
             ),

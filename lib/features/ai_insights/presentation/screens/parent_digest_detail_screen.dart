@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/parent_digest_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ParentDigestDetailScreen extends ConsumerWidget {
   final String digestId;
@@ -20,7 +21,7 @@ class ParentDigestDetailScreen extends ConsumerWidget {
     return Scaffold(
       body: digestAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
         data: (digest) {
           if (digest == null) {
             return const Center(child: Text('Digest not found'));

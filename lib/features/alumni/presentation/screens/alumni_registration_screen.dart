@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/alumni.dart';
 import '../../providers/alumni_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AlumniRegistrationScreen extends ConsumerStatefulWidget {
   const AlumniRegistrationScreen({super.key});
@@ -440,7 +441,7 @@ class _AlumniRegistrationScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {

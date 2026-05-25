@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/hr_provider.dart';
 import '../widgets/contract_status_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class HRDashboardScreen extends ConsumerWidget {
   const HRDashboardScreen({super.key});
@@ -167,7 +168,7 @@ class HRDashboardScreen extends ConsumerWidget {
                 error: (error, _) => Center(
                   child: Padding(
                     padding: const EdgeInsets.all(40),
-                    child: Text('Error: $error'),
+                    child: Text(WarmCopy.genericError),
                   ),
                 ),
               ),
@@ -241,7 +242,7 @@ class HRDashboardScreen extends ConsumerWidget {
                 },
                 loading: () =>
                     const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Text('Error: $error'),
+                error: (error, _) => Text(WarmCopy.genericError),
               ),
             ],
           ),

@@ -84,7 +84,7 @@ class ComposeMessageTool extends AiTool {
         'draft_message': response.text,
       };
     } catch (e) {
-      return {'error': 'Failed to compose message: $e'};
+      return {'error': 'compose_failed', 'detail': e.toString()};
     }
   }
 }

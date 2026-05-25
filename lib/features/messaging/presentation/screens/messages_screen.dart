@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/message.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/messages_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class MessagesScreen extends ConsumerStatefulWidget {
   const MessagesScreen({super.key});
@@ -257,7 +258,7 @@ class _ChatsTabState extends ConsumerState<_ChatsTab> {
           children: [
             const Icon(Icons.error_outline, size: 48, color: Colors.grey),
             const SizedBox(height: 12),
-            Text('Failed to load chats: ${state.error}'),
+            Text(WarmCopy.loadFailed('chats')),
             const SizedBox(height: 8),
             TextButton(
               onPressed: () =>
@@ -363,7 +364,7 @@ class _AnnouncementsTab extends ConsumerWidget {
           children: [
             const Icon(Icons.error_outline, size: 48, color: Colors.grey),
             const SizedBox(height: 12),
-            Text('Failed to load announcements: $e'),
+            Text(WarmCopy.loadFailed('announcements')),
             const SizedBox(height: 8),
             TextButton(
               onPressed: () => ref.invalidate(announcementsProvider(true)),

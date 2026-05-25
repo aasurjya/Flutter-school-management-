@@ -6,6 +6,7 @@ import '../../../../data/models/early_warning_alert.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/early_warning_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Admin screen for managing alert rules configuration.
 ///
@@ -128,7 +129,7 @@ class AlertRulesConfigScreen extends ConsumerWidget {
       ref.invalidate(alertRulesProvider);
     } catch (e) {
       if (context.mounted) {
-        context.showErrorSnackBar('Failed to update rule: $e');
+        context.showErrorSnackBar(WarmCopy.saveFailed('rule'));
       }
     }
   }
@@ -662,7 +663,7 @@ class _AddRuleSheetState extends State<_AddRuleSheet> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Failed to create rule: $e');
+        context.showErrorSnackBar(WarmCopy.saveFailed('rule'));
       }
     } finally {
       if (mounted) {

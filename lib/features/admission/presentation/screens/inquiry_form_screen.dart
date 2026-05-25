@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/admission.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/admission_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class InquiryFormScreen extends ConsumerStatefulWidget {
   final AdmissionInquiry? inquiry;
@@ -100,7 +101,7 @@ class _InquiryFormScreenState extends ConsumerState<InquiryFormScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

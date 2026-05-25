@@ -6,6 +6,7 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/risk_score_provider.dart';
 import '../widgets/risk_factor_bar.dart';
 import '../widgets/risk_score_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StudentRiskDetailScreen extends ConsumerWidget {
   final String studentId;
@@ -29,7 +30,7 @@ class StudentRiskDetailScreen extends ConsumerWidget {
     return Scaffold(
       body: riskAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
         data: (risk) {
           if (risk == null) {
             return const Center(

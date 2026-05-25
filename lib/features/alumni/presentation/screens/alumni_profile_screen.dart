@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/alumni_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AlumniProfileScreen extends ConsumerWidget {
   final String alumniId;
@@ -300,7 +301,7 @@ class AlumniProfileScreen extends ConsumerWidget {
               const Icon(Icons.error_outline,
                   size: 48, color: AppColors.error),
               const SizedBox(height: 8),
-              Text('Error: $e'),
+              Text(WarmCopy.genericError),
             ],
           ),
         ),

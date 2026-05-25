@@ -6,6 +6,7 @@ import '../../../../data/models/lms.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/lms_provider.dart';
 import '../widgets/forum_post_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class DiscussionForumScreen extends ConsumerStatefulWidget {
   final String courseId;
@@ -101,7 +102,7 @@ class _DiscussionForumScreenState
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }
@@ -164,7 +165,7 @@ class _DiscussionForumScreenState
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }
@@ -412,7 +413,7 @@ class _ForumPostsViewState extends ConsumerState<_ForumPostsView> {
             },
             loading: () =>
                 const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('Error: $e')),
+            error: (e, _) => Center(child: Text(WarmCopy.genericError)),
           ),
         ),
         // Reply input
@@ -515,7 +516,7 @@ class _ForumPostsViewState extends ConsumerState<_ForumPostsView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {
@@ -544,7 +545,7 @@ class _ForumPostsViewState extends ConsumerState<_ForumPostsView> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Post'),
-        content: const Text('Are you sure you want to delete this post?'),
+        content: const Text('Delete this post?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -568,7 +569,7 @@ class _ForumPostsViewState extends ConsumerState<_ForumPostsView> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../data/models/hostel.dart';
 import '../../providers/hostel_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class HostelScreen extends ConsumerWidget {
   const HostelScreen({super.key});
@@ -39,7 +40,7 @@ class HostelScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

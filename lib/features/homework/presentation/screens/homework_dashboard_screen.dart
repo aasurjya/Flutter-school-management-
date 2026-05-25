@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/homework.dart';
 import '../../providers/homework_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class HomeworkDashboardScreen extends ConsumerStatefulWidget {
   const HomeworkDashboardScreen({super.key});
@@ -161,7 +162,7 @@ class _HomeworkDashboardScreenState
               ),
               error: (e, _) => GlassCard(
                 padding: const EdgeInsets.all(16),
-                child: Text('Error: $e'),
+                child: Text(WarmCopy.genericError),
               ),
             ),
           ],

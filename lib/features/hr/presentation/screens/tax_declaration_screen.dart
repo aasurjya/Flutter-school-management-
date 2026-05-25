@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/hr_payroll.dart';
 import '../../providers/hr_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class TaxDeclarationScreen extends ConsumerStatefulWidget {
   const TaxDeclarationScreen({super.key});
@@ -108,7 +109,7 @@ class _TaxDeclarationScreenState
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateDialog(context),
@@ -137,7 +138,7 @@ class _TaxDeclarationScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -287,7 +288,7 @@ class _TaxDeclarationScreenState
                             if (ctx.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Error: $e'),
+                                  content: Text(WarmCopy.genericError),
                                   backgroundColor: AppColors.error,
                                 ),
                               );

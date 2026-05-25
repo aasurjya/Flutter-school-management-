@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/inventory.dart';
 import '../../providers/inventory_provider.dart';
 import '../widgets/asset_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AssetListScreen extends ConsumerStatefulWidget {
   const AssetListScreen({super.key});
@@ -307,7 +308,7 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
               },
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(child: Text('Error: $error')),
+              error: (error, _) => Center(child: Text(WarmCopy.genericError)),
             ),
           ),
         ],

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/homework_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class HomeworkSubmitScreen extends ConsumerStatefulWidget {
   final String homeworkId;
@@ -63,7 +64,7 @@ class _HomeworkSubmitScreenState extends ConsumerState<HomeworkSubmitScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );
@@ -270,7 +271,7 @@ class _HomeworkSubmitScreenState extends ConsumerState<HomeworkSubmitScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

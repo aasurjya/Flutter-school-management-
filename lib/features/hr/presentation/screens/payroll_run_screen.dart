@@ -7,6 +7,7 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/hr_payroll.dart';
 import '../../providers/hr_provider.dart';
 import '../widgets/salary_breakdown_chart.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class PayrollRunScreen extends ConsumerStatefulWidget {
   final String? payrollRunId;
@@ -169,7 +170,7 @@ class _PayrollRunScreenState extends ConsumerState<PayrollRunScreen> {
         setState(() => _isGenerating = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );
@@ -196,7 +197,7 @@ class _PayrollRunScreenState extends ConsumerState<PayrollRunScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -247,7 +248,7 @@ class _ExistingRunView extends ConsumerWidget {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                              content: Text('Error: $e'),
+                              content: Text(WarmCopy.genericError),
                               backgroundColor: AppColors.error),
                         );
                       }
@@ -257,7 +258,7 @@ class _ExistingRunView extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

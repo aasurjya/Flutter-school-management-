@@ -2,1121 +2,338 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/preferences/ai_minimal_mode_provider.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/logout_helper.dart';
-import '../../../ai_insights/presentation/widgets/admin_ai_narrative_card.dart';
-import '../../../id_card/providers/id_card_provider.dart';
-import '../../../academic/providers/academic_provider.dart';
-import '../../../ai_insights/providers/risk_score_provider.dart';
-import '../../../ai_insights/providers/early_warning_provider.dart';
-import '../../../attendance/providers/attendance_provider.dart';
-import '../../../fees/providers/fees_provider.dart';
-import '../../../students/providers/students_provider.dart';
-import '../../widgets/mv_backed_kpi_strip.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/apple_list_section.dart';
+import '../../../auth/providers/auth_provider.dart';
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
-const _bg    = AppColors.background;
-const _ink   = AppColors.grey900;
-const _border = AppColors.grey200;
-
+/// Apple-style admin / principal dashboard.
+///
+/// Admins use this screen as a launch surface — they're not "doing" a
+/// task here, they're navigating to one. So the screen is grouped
+/// links, not KPI cards. KPIs live where the data does (Reports tab,
+/// Fees screen, etc.).
+///
+/// Four sections, Settings-style:
+///   1. People       — Students, Staff, Admissions
+///   2. Academic     — Classes, Timetable, Syllabus, Exams, Report cards
+///   3. Operations   — Fees, Announcements, Reports, AI insights
+///   4. School       — Branding, Payment gateways, ID card
+///
+/// Replaces the prior 1122-line gradient/glass/8-tile-grid/AI-narrative
+/// screen. AI insights move to a single Operations entry that points
+/// at the risk dashboard.
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
-
-  void _logout(BuildContext context, WidgetRef ref) => confirmLogout(context, ref);
-
-  void _showSettingsMenu(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _SettingsSheet(
-        onLogout: () {
-          Navigator.of(context).pop();
-          _logout(context, ref);
-        },
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final now = DateTime.now();
-    final dateStr = _formatDate(now);
+    final brightness = theme.brightness;
+    final scaffoldBg = AppColors.groupedBackgroundFor(brightness);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: RefreshIndicator(
+      backgroundColor: scaffoldBg,
+      body: RefreshIndicator.adaptive(
         onRefresh: () async {
-          ref.invalidate(studentCountProvider(null));
-          ref.invalidate(feeCollectionStatsProvider(null));
-          ref.invalidate(todayAttendancePercentageProvider);
-          ref.invalidate(todayStudentAttendanceCountsProvider);
-          ref.invalidate(currentAcademicYearProvider);
-          ref.invalidate(currentTenantProvider);
+          ref.invalidate(currentUserProvider);
         },
         child: CustomScrollView(
           slivers: [
-            // Professional Header
-            SliverAppBar(
-            expandedHeight: 200,
-            floating: false,
-            pinned: true,
-            elevation: 0,
-            backgroundColor: AppColors.primary,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [AppColors.primary, AppColors.grey800],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: -40,
-                    right: -40,
-                    child: CircleAvatar(
-                      radius: 80,
-                      backgroundColor: Colors.white.withValues(alpha: 0.03),
-                    ),
-                  ),
-                  SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Administrative Command Center',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.85),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            ref.watch(currentTenantProvider).valueOrNull?.name ?? 'Dashboard',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              dateStr,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+            _AppBar(brightness: brightness),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.sm,
+                AppSpacing.md,
+                AppSpacing.xl,
+              ),
+              sliver: SliverList.list(
+                children: const [
+                  _GreetingCard(),
+                  _PeopleSection(),
+                  _AcademicSection(),
+                  _OperationsSection(),
+                  _SchoolSection(),
                 ],
               ),
             ),
-            actions: [
-              _HeaderActionBtn(
-                icon: Icons.notifications_none_rounded,
-                onTap: () => context.push(AppRoutes.notifications),
-                tooltip: 'Notifications',
-              ),
-              _HeaderActionBtn(
-                icon: Icons.account_circle_outlined,
-                onTap: () => context.go(AppRoutes.account),
-                tooltip: 'Account',
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: _HeaderActionBtn(
-                  icon: Icons.settings_outlined,
-                  onTap: () => _showSettingsMenu(context, ref),
-                  tooltip: 'Settings',
-                ),
-              ),
-            ],
-          ),
-
-          // MV-backed school snapshot (auto-hides when migration 00064
-          // hasn't been applied or when there's no tenant row in
-          // v_my_admin_kpis yet). Reads ONE pre-aggregated row instead of
-          // the 5 ad-hoc aggregations the metrics grid below fires.
-          const SliverPadding(
-            padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
-            sliver: SliverToBoxAdapter(child: MvBackedKpiStrip()),
-          ),
-
-          // Main Metrics Grid
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-            sliver: SliverToBoxAdapter(
-              child: _buildMainMetricsGrid(ref),
-            ),
-          ),
-
-          // Critical Alerts
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              child: Column(
-                children: [
-                  _buildAtRiskCard(context, ref),
-                  const SizedBox(height: 12),
-                  _buildEarlyWarningCard(context, ref),
-                  const SizedBox(height: 12),
-                  _buildSyllabusCoverageCard(context),
-                ],
-              ),
-            ),
-          ),
-
-          // AI School Health Summary
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: AdminAINarrativeCard(),
-            ),
-          ),
-
-          // Quick Actions Section
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: _AdminSectionHeader(label: 'Management Tools'),
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 12)),
-          SliverToBoxAdapter(
-            child: _QuickActionsGrid(context: context),
-          ),
-
-          // Academic Setup Section
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: _AdminSectionHeader(label: 'Academic Setup'),
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 12)),
-          SliverToBoxAdapter(
-            child: _AcademicActionsGrid(context: context),
-          ),
-
-          // School Operations Section
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: _AdminSectionHeader(label: 'School Operations'),
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 12)),
-          SliverToBoxAdapter(
-            child: _OperationsActionsGrid(context: context),
-          ),
-
-          // Operations Summary
-          const SliverToBoxAdapter(child: SizedBox(height: 32)),
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: _AdminSectionHeader(label: 'Operational Health'),
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: _buildTodaySummary(context, ref),
-            ),
-          ),
-
-          // Hidden 2026-05-16 — see wiki/panels/feature-audit-decision-2026-05-16.md
-
-          const SliverToBoxAdapter(child: SizedBox(height: 120)),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  static String _formatCurrency(double amount) {
-    if (amount >= 100000) {
-      return '\u20B9${(amount / 100000).toStringAsFixed(1)}L';
-    } else if (amount >= 1000) {
-      return '\u20B9${(amount / 1000).toStringAsFixed(1)}K';
-    }
-    return '\u20B9${amount.toStringAsFixed(0)}';
-  }
+// ---------------------------------------------------------------------------
+// App bar
+// ---------------------------------------------------------------------------
 
-  Widget _buildMainMetricsGrid(WidgetRef ref) {
-    final studentCountAsync = ref.watch(studentCountProvider(null));
-    final feeStatsAsync     = ref.watch(feeCollectionStatsProvider(null));
-    final attendancePctAsync = ref.watch(todayAttendancePercentageProvider);
+class _AppBar extends StatelessWidget {
+  const _AppBar({required this.brightness});
+  final Brightness brightness;
 
-    final enrollmentValue = studentCountAsync.when(
-      loading: () => '--',
-      error: (_, __) => '--',
-      data: (count) => _formatNumber(count),
-    );
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bg = AppColors.groupedBackgroundFor(brightness);
+    final now = DateTime.now();
 
-    final revenueValue = feeStatsAsync.when(
-      loading: () => '--',
-      error: (_, __) => '--',
-      data: (stats) => _formatCurrency(stats['total_paid'] ?? 0.0),
-    );
-
-    final attendanceValue = attendancePctAsync.when(
-      loading: () => '--',
-      error: (_, __) => '--',
-      data: (pct) => '${pct.toStringAsFixed(1)}%',
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.borderLight),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
+    return SliverAppBar(
+      backgroundColor: bg,
+      surfaceTintColor: bg,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      pinned: true,
+      expandedHeight: 92,
+      automaticallyImplyLeading: false,
+      titleSpacing: AppSpacing.md,
+      title: Text(
+        'Today',
+        style: theme.textTheme.displayLarge?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.notifications_none, size: 26),
+          tooltip: 'Notifications',
+          onPressed: () => context.push(AppRoutes.notifications),
+        ),
+        IconButton(
+          icon: const Icon(Icons.account_circle_outlined, size: 28),
+          tooltip: 'Account',
+          onPressed: () => context.go(AppRoutes.account),
+        ),
+        const SizedBox(width: AppSpacing.xs),
+      ],
+      flexibleSpace: FlexibleSpaceBar(
+        titlePadding: const EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          0,
+          AppSpacing.md,
+          AppSpacing.xs,
+        ),
+        title: Text(
+          '${_weekdayShort(now.weekday)} · ${_monthShort(now.month)} ${now.day}',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: AppColors.labelFor(brightness, tier: 2),
           ),
+        ),
+        background: const SizedBox.shrink(),
+        centerTitle: false,
+      ),
+    );
+  }
+}
+
+String _weekdayShort(int weekday) {
+  const w = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  return w[weekday];
+}
+
+String _monthShort(int month) {
+  const m = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return m[month];
+}
+
+// ---------------------------------------------------------------------------
+// Greeting card
+// ---------------------------------------------------------------------------
+
+class _GreetingCard extends ConsumerWidget {
+  const _GreetingCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final cellBg = AppColors.groupedCellFor(brightness);
+    final secondary = AppColors.labelFor(brightness, tier: 2);
+    final user = ref.watch(currentUserProvider);
+    final firstName = (user?.fullName ?? 'Administrator').split(' ').first;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      child: ClipRRect(
+        borderRadius: AppRadius.card,
+        child: Container(
+          color: cellBg,
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Enrollment Strength',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.grey500,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 12),
+              Text('Hi $firstName.', style: theme.textTheme.displaySmall),
+              const SizedBox(height: AppSpacing.xxs),
               Text(
-                enrollmentValue,
-                style: const TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.grey900,
-                  letterSpacing: -2,
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Total students active this term',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.grey500,
-                  fontWeight: FontWeight.w400,
-                ),
+                'Manage your school from here.',
+                style: theme.textTheme.bodySmall?.copyWith(color: secondary),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                label: 'Attendance',
-                value: attendanceValue,
-                icon: Icons.how_to_reg_rounded,
-                color: AppColors.success,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricCard(
-                label: 'Revenue',
-                value: revenueValue,
-                icon: Icons.account_balance_wallet_rounded,
-                color: AppColors.warning,
-              ),
-            ),
-          ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// People — students, staff, admissions
+// ---------------------------------------------------------------------------
+
+class _PeopleSection extends StatelessWidget {
+  const _PeopleSection();
+  @override
+  Widget build(BuildContext context) {
+    return AppleListSection(
+      header: 'People',
+      children: [
+        AppleListCell(
+          leading: const Icon(Icons.school_outlined, size: 22),
+          title: 'Students',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.studentManagement),
+        ),
+        AppleListCell(
+          leading: const Icon(Icons.badge_outlined, size: 22),
+          title: 'Staff',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.staffManagement),
+        ),
+        AppleListCell(
+          leading: const Icon(Icons.how_to_reg_outlined, size: 22),
+          title: 'Admissions',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.admissionDashboard),
         ),
       ],
     );
   }
-
-  static String _formatNumber(int n) {
-    if (n >= 1000) {
-      return '${(n / 1000).toStringAsFixed(n % 1000 == 0 ? 0 : 1)}K';
-    }
-    return '$n';
-  }
-
-  // ── Alert cards ─────────────────────────────────────────────────────────────
-
-  Widget _buildAtRiskCard(BuildContext context, WidgetRef ref) {
-    final academicYear = ref.watch(currentAcademicYearProvider);
-
-    return academicYear.when(
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-      data: (year) {
-        if (year == null) return const SizedBox.shrink();
-
-        final distribution = ref.watch(
-          riskDistributionProvider(
-            RiskDistributionFilter(academicYearId: year.id),
-          ),
-        );
-
-        return distribution.when(
-          loading: () => const SizedBox.shrink(),
-          error: (_, __) => const SizedBox.shrink(),
-          data: (dist) {
-            final highCount = (dist['high'] ?? 0) + (dist['critical'] ?? 0);
-            if (highCount == 0) return const SizedBox.shrink();
-
-            return _AlertBanner(
-              icon: Icons.warning_amber_rounded,
-              title: '$highCount At-Risk Students',
-              subtitle: 'Requires immediate attention',
-              accentColor: AppColors.error,
-              onTap: () => context.push(AppRoutes.riskDashboard),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildEarlyWarningCard(BuildContext context, WidgetRef ref) {
-    final countAsync = ref.watch(unresolvedAlertCountProvider);
-
-    return countAsync.when(
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-      data: (count) {
-        if (count == 0) return const SizedBox.shrink();
-
-        return _AlertBanner(
-          icon: Icons.notification_important_rounded,
-          title: '$count Early Warning Alert${count == 1 ? '' : 's'}',
-          subtitle: 'Unresolved alerts need review',
-          accentColor: AppColors.warning,
-          badge: count > 99 ? '99+' : '$count',
-          onTap: () => context.push(AppRoutes.earlyWarningAlerts),
-        );
-      },
-    );
-  }
-
-  Widget _buildSyllabusCoverageCard(BuildContext context) {
-    return _AlertBanner(
-      icon: Icons.menu_book,
-      title: 'Syllabus Coverage',
-      subtitle: 'Track topic coverage across classes',
-      accentColor: AppColors.success,
-      onTap: () => context.push(AppRoutes.coverageDashboard),
-    );
-  }
-
-  // ── Today's summary ─────────────────────────────────────────────────────────
-
-  Widget _buildTodaySummary(BuildContext context, WidgetRef ref) {
-    final studentCountsAsync = ref.watch(todayStudentAttendanceCountsProvider);
-    final staffAsync         = ref.watch(staffAttendanceTodayProvider);
-    final feeStatsAsync      = ref.watch(feeCollectionStatsProvider(null));
-
-    final studentValue = studentCountsAsync.when(
-      loading: () => '— / —',
-      error: (_, __) => '— / —',
-      data: (counts) {
-        final present = counts['present'] ?? 0;
-        final total   = counts['total'] ?? 0;
-        return '${_formatNumber(present)} / ${_formatNumber(total)}';
-      },
-    );
-
-    final staffValue = staffAsync.when(
-      loading: () => '—',
-      error: (_, __) => '—',
-      // No staff-scoped query yet — see staffAttendanceTodayProvider
-      data: (_) => '—',
-    );
-
-    final outstandingValue = feeStatsAsync.when(
-      loading: () => '—',
-      error: (_, __) => '—',
-      data: (stats) => _formatCurrency(stats['total_pending'] ?? 0.0),
-    );
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Column(
-        children: [
-          _SummaryItem(
-            icon: Icons.people_outline_rounded,
-            label: 'Students present',
-            value: studentValue,
-            color: AppColors.success,
-          ),
-          const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
-          _SummaryItem(
-            icon: Icons.school_outlined,
-            label: 'Teachers present',
-            value: staffValue,
-            color: AppColors.success,
-          ),
-          const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
-          _SummaryItem(
-            icon: Icons.pending_actions_rounded,
-            label: 'Outstanding Invoices',
-            value: outstandingValue,
-            color: AppColors.warning,
-          ),
-          const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.borderLight),
-          const _SummaryItem(
-            icon: Icons.calendar_today_rounded,
-            label: 'Scheduled Events',
-            // TODO(sprint-1.6): wire to eventsProvider when built
-            value: '—',
-            color: AppColors.info,
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ignore: unused_element — kept for easy restore if pilot schools request it
-  Widget _buildRecentActivity(BuildContext context) {
-    final activities = [
-      const _ActivityData(
-        title: 'Fee Payment Received',
-        subtitle: 'Reference #PAY-9021 • John Doe',
-        time: '5m ago',
-        icon: Icons.payment_rounded,
-        color: AppColors.success,
-      ),
-      const _ActivityData(
-        title: 'New Admission',
-        subtitle: 'Class 10-A • Sarah Smith',
-        time: '1h ago',
-        icon: Icons.person_add_rounded,
-        color: AppColors.primary,
-      ),
-      const _ActivityData(
-        title: 'Exam Results Published',
-        subtitle: 'Mid-term • Class 12 Science',
-        time: '2h ago',
-        icon: Icons.assignment_turned_in_rounded,
-        color: AppColors.info,
-      ),
-    ];
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Column(
-        children: activities.asMap().entries.map((e) {
-          final i = e.key;
-          final a = e.value;
-          return Column(
-            children: [
-              _ActivityTile(data: a),
-              if (i < activities.length - 1)
-                const Divider(height: 1, indent: 64, endIndent: 20, color: AppColors.borderLight),
-            ],
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  // ── Helpers ──────────────────────────────────────────────────────────────────
-
-  String _formatDate(DateTime d) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return '${weekdays[d.weekday - 1]}, ${months[d.month - 1]} ${d.day}';
-  }
 }
 
-class _HeaderActionBtn extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
+// ---------------------------------------------------------------------------
+// Academic
+// ---------------------------------------------------------------------------
 
-  final String? tooltip;
-
-  const _HeaderActionBtn({required this.icon, required this.onTap, this.tooltip});
-
+class _AcademicSection extends StatelessWidget {
+  const _AcademicSection();
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: Colors.white, size: 20),
-        onPressed: onTap,
-        tooltip: tooltip,
-      ),
-    );
-  }
-}
-
-class _MetricCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
-
-  const _MetricCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderLight),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
-              color: AppColors.grey900,
-              letterSpacing: -0.5,
-            ),
-          ),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.grey500,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Responsive action grid (shared by all 3 grids) ──────────────────────────
-
-typedef _ActionItem = ({String label, IconData icon, Color color, String route});
-
-class _ResponsiveActionGrid extends StatelessWidget {
-  final List<_ActionItem> actions;
-  const _ResponsiveActionGrid({required this.actions});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      // Available width minus horizontal padding (24 * 2)
-      final availableWidth = constraints.maxWidth - 48;
-      // Each card ~80px wide on mobile, scale up on desktop
-      final crossAxisCount = (availableWidth / 90).floor().clamp(3, 7);
-      final spacing = crossAxisCount > 4 ? 10.0 : 12.0;
-
-      return GridView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: spacing,
-          mainAxisSpacing: spacing,
-          childAspectRatio: 0.85,
+    return AppleListSection(
+      header: 'Academic',
+      children: [
+        AppleListCell(
+          leading: const Icon(Icons.class_outlined, size: 22),
+          title: 'Classes',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.academicConfig),
         ),
-        itemCount: actions.length,
-        itemBuilder: (context, index) {
-          final a = actions[index];
-          return Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () => context.push(a.route),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.borderLight),
-                    ),
-                    child: Icon(a.icon, color: a.color, size: 24),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    a.label,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.grey700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    });
-  }
-}
-
-class _QuickActionsGrid extends StatelessWidget {
-  final BuildContext context;
-
-  const _QuickActionsGrid({required this.context});
-
-  @override
-  Widget build(BuildContext context) {
-    final actions = [
-      (label: 'Students',    icon: Icons.person_add_rounded,        color: AppColors.primary,       route: AppRoutes.studentManagement),
-      (label: 'Staff',       icon: Icons.badge_rounded,              color: const Color(0xFF8B5CF6), route: AppRoutes.staffManagement),
-      (label: 'Classes',     icon: Icons.class_rounded,              color: AppColors.info,          route: AppRoutes.academicConfig),
-      (label: 'Attendance',  icon: Icons.fact_check_rounded,         color: AppColors.success,       route: AppRoutes.attendance),
-      (label: 'Fee Invoice', icon: Icons.receipt_long_rounded,       color: AppColors.warning,       route: AppRoutes.fees),
-      (label: 'Exams',       icon: Icons.edit_document,              color: AppColors.error,         route: AppRoutes.examManagement),
-      (label: 'Broadcast',   icon: Icons.campaign_rounded,           color: AppColors.secondary,     route: AppRoutes.noticeBoard),
-      (label: 'Timetable',   icon: Icons.calendar_view_week_rounded, color: const Color(0xFF059669), route: AppRoutes.timetable),
-      (label: 'Admissions',  icon: Icons.how_to_reg_rounded,         color: const Color(0xFFD97706), route: AppRoutes.admissionDashboard),
-    ];
-
-    return _ResponsiveActionGrid(actions: actions);
-  }
-}
-
-// ─── Section header ────────────────────────────────────────────────────────────
-class _AdminSectionHeader extends StatelessWidget {
-  final String label;
-
-  const _AdminSectionHeader({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w700,
-        color: _ink,
-        letterSpacing: -0.3,
-      ),
-    );
-  }
-}
-
-// ─── Summary item ──────────────────────────────────────────────────────────────
-// Design principle: numbers are the content, labels are context.
-// No icons competing with the data.
-class _SummaryItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-
-  const _SummaryItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.grey600,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.w800,
-              color: AppColors.grey900,
-              fontSize: 14,
-              letterSpacing: -0.3,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Activity tile ─────────────────────────────────────────────────────────────
-class _ActivityData {
-  final String title;
-  final String subtitle;
-  final String time;
-  final IconData icon;
-  final Color color;
-
-  const _ActivityData({
-    required this.title,
-    required this.subtitle,
-    required this.time,
-    required this.icon,
-    required this.color,
-  });
-}
-
-// Design principle: Linear.app activity feed — dot category indicator,
-// text leads, timestamp trails. No icon boxes competing for attention.
-class _ActivityTile extends StatelessWidget {
-  final _ActivityData data;
-
-  const _ActivityTile({required this.data});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: data.color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(data.icon, color: data.color, size: 20),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  data.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    color: AppColors.grey900,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  data.subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.grey500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            data.time,
-            style: const TextStyle(
-              color: AppColors.grey400,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Settings bottom sheet ─────────────────────────────────────────────────────
-class _SettingsSheet extends StatelessWidget {
-  final VoidCallback onLogout;
-
-  const _SettingsSheet({required this.onLogout});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: _bg,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.grey200,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 8),
-          ListTile(
-            leading: const Icon(Icons.person_outline,
-                color: AppColors.primary, size: 20),
-            title: const Text('Profile',
-                style: TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: const Text('View and edit your profile'),
-            onTap: () {
-              Navigator.of(context).pop();
-              GoRouter.of(context).go(AppRoutes.account);
-            },
-          ),
-          const Divider(height: 1, color: _border),
-          ListTile(
-            leading: const Icon(Icons.badge_rounded,
-                color: AppColors.primary, size: 20),
-            title: const Text('My ID Card',
-                style: TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: const Text('View your staff identity card'),
-            onTap: () {
-              Navigator.of(context).pop();
-              GoRouter.of(context).push(AppRoutes.staffIdCard);
-            },
-          ),
-          const Divider(height: 1, color: _border),
-          ListTile(
-            leading: const Icon(Icons.brush_rounded,
-                color: AppColors.grey700, size: 20),
-            title: const Text('School Branding',
-                style: TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: const Text('Upload logo & manage identity'),
-            onTap: () {
-              Navigator.of(context).pop();
-              GoRouter.of(context).push(AppRoutes.schoolBranding);
-            },
-          ),
-          // Settings tile hidden — no settings route this sprint; restore when /settings is built
-          const Divider(height: 1, color: _border),
-          ListTile(
-            leading: const Icon(Icons.logout,
-                color: AppColors.error, size: 20),
-            title: const Text('Logout',
-                style: TextStyle(
-                    fontWeight: FontWeight.w600, color: AppColors.error)),
-            subtitle: const Text('Sign out from your account'),
-            onTap: onLogout,
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Academic Setup grid ───────────────────────────────────────────────────────
-class _AcademicActionsGrid extends StatelessWidget {
-  final BuildContext context;
-  const _AcademicActionsGrid({required this.context});
-
-  @override
-  Widget build(BuildContext context) {
-    final actions = [
-      (label: 'Classes',      icon: Icons.class_rounded,             color: AppColors.primary,        route: AppRoutes.academicConfig),
-      (label: 'Timetable',    icon: Icons.calendar_view_week_rounded, color: const Color(0xFF8B5CF6), route: AppRoutes.timetable),
-      (label: 'Syllabus',     icon: Icons.menu_book_rounded,          color: AppColors.info,           route: AppRoutes.coverageDashboard),
-      (label: 'Report Cards', icon: Icons.workspace_premium_rounded,  color: AppColors.success,        route: AppRoutes.reportCardDashboard),
-      (label: 'Assignments',  icon: Icons.assignment_rounded,         color: AppColors.warning,        route: AppRoutes.assignments),
-      (label: 'Q. Papers',    icon: Icons.quiz_rounded,               color: AppColors.error,          route: AppRoutes.questionPaperList),
-    ];
-
-    return _ResponsiveActionGrid(actions: actions);
-  }
-}
-
-// ─── School Operations grid ────────────────────────────────────────────────────
-class _OperationsActionsGrid extends StatelessWidget {
-  final BuildContext context;
-  const _OperationsActionsGrid({required this.context});
-
-  @override
-  Widget build(BuildContext context) {
-    final actions = [
-      (label: 'Admissions',  icon: Icons.how_to_reg_rounded,         color: AppColors.primary,        route: AppRoutes.admissionDashboard),
-      (label: 'Calendar',    icon: Icons.event_rounded,               color: const Color(0xFF8B5CF6), route: AppRoutes.calendar),
-      (label: 'Discipline',  icon: Icons.gavel_rounded,               color: AppColors.error,          route: AppRoutes.disciplineDashboard),
-      (label: 'AI Insights', icon: Icons.psychology_rounded,          color: AppColors.info,           route: AppRoutes.riskDashboard),
-      (label: 'Bulk Notify', icon: Icons.send_rounded,                color: AppColors.warning,        route: AppRoutes.bulkNotify),
-      (label: 'Visitors',    icon: Icons.badge_outlined,              color: AppColors.success,        route: AppRoutes.visitorDashboard),
-    ];
-
-    return _ResponsiveActionGrid(actions: actions);
-  }
-}
-
-class _AlertBanner extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color accentColor;
-  final VoidCallback onTap;
-  final String? badge;
-
-  const _AlertBanner({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.accentColor,
-    required this.onTap,
-    this.badge,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: accentColor.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: accentColor.withValues(alpha: 0.2)),
+        AppleListCell(
+          leading: const Icon(Icons.calendar_view_week_outlined, size: 22),
+          title: 'Timetable',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.timetable),
         ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: accentColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: accentColor, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                      color: accentColor,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.grey600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (badge != null) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: accentColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  badge!,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-            ],
-            Icon(Icons.arrow_forward_ios_rounded, size: 16, color: accentColor),
-          ],
+        AppleListCell(
+          leading: const Icon(Icons.menu_book_outlined, size: 22),
+          title: 'Syllabus coverage',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.coverageDashboard),
         ),
-      ),
+        AppleListCell(
+          leading: const Icon(Icons.edit_document, size: 22),
+          title: 'Exams',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.examManagement),
+        ),
+        AppleListCell(
+          leading: const Icon(Icons.workspace_premium_outlined, size: 22),
+          title: 'Report cards',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.reportCardDashboard),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Operations
+// ---------------------------------------------------------------------------
+
+class _OperationsSection extends ConsumerWidget {
+  const _OperationsSection();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final minimal = ref.watch(aiMinimalModeProvider);
+    return AppleListSection(
+      header: 'Operations',
+      children: [
+        AppleListCell(
+          leading: const Icon(Icons.account_balance_wallet_outlined, size: 22),
+          title: 'Fees',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.feeManagement),
+        ),
+        AppleListCell(
+          leading: const Icon(Icons.campaign_outlined, size: 22),
+          title: 'Announcements',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.announcements),
+        ),
+        AppleListCell(
+          leading: const Icon(Icons.assessment_outlined, size: 22),
+          title: 'Reports',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.reports),
+        ),
+        // AI insights row hides when the operator opted out of AI surfaces.
+        if (!minimal)
+          AppleListCell(
+            leading: const Icon(Icons.insights_outlined, size: 22),
+            title: 'AI insights',
+            subtitle: 'Risk, alerts, trends',
+            showChevron: true,
+            onTap: () => context.push(AppRoutes.riskDashboard),
+          ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// School — branding, payment gateway, ID card
+// ---------------------------------------------------------------------------
+
+class _SchoolSection extends StatelessWidget {
+  const _SchoolSection();
+  @override
+  Widget build(BuildContext context) {
+    return AppleListSection(
+      header: 'School',
+      children: [
+        AppleListCell(
+          leading: const Icon(Icons.brush_outlined, size: 22),
+          title: 'School branding',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.schoolBranding),
+        ),
+        AppleListCell(
+          leading: const Icon(Icons.credit_card_outlined, size: 22),
+          title: 'Payment gateways',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.paymentGateway),
+        ),
+        AppleListCell(
+          leading: const Icon(Icons.qr_code_outlined, size: 22),
+          title: 'My ID card',
+          showChevron: true,
+          onTap: () => context.push(AppRoutes.staffIdCard),
+        ),
+      ],
     );
   }
 }

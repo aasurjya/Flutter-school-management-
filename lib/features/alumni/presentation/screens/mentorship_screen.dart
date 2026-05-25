@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/alumni.dart';
 import '../../providers/alumni_provider.dart';
 import '../widgets/mentorship_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class MentorshipScreen extends ConsumerStatefulWidget {
   const MentorshipScreen({super.key});
@@ -212,7 +213,7 @@ class _MentorshipScreenState extends ConsumerState<MentorshipScreen>
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
+                      SnackBar(content: Text(WarmCopy.genericError)),
                     );
                   }
                 }
@@ -281,7 +282,7 @@ class _ProgramList extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 
@@ -342,7 +343,7 @@ class _ProgramList extends ConsumerWidget {
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
+                    SnackBar(content: Text(WarmCopy.genericError)),
                   );
                 }
               }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
@@ -90,7 +91,7 @@ class _AdminOverviewState extends ConsumerState<_AdminOverview> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load overdue invoices: $e')),
+          SnackBar(content: Text(WarmCopy.loadFailed('the latest invoices'))),
         );
       }
       return;
@@ -199,7 +200,7 @@ class _AdminOverviewState extends ConsumerState<_AdminOverview> {
                   children: [
                     const Icon(Icons.error_outline, color: AppColors.error),
                     const SizedBox(width: 8),
-                    Expanded(child: Text('Failed to load stats: $e')),
+                    Expanded(child: Text(WarmCopy.loadFailed('the stats'))),
                     TextButton(
                       onPressed: () => ref.invalidate(feeCollectionStatsProvider(null)),
                       child: const Text('Retry'),
@@ -329,7 +330,7 @@ class _AdminOverviewState extends ConsumerState<_AdminOverview> {
             error: (e, _) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
-                'Failed to load payments: $e',
+                WarmCopy.loadFailed('payments'),
                 style: const TextStyle(color: AppColors.error),
               ),
             ),
@@ -377,7 +378,7 @@ class _ParentOverview extends ConsumerWidget {
           children: [
             const Icon(Icons.error_outline, size: 48, color: AppColors.error),
             const SizedBox(height: 12),
-            Text('Failed to load student data: $e'),
+            Text(WarmCopy.loadFailed('student data')),
             const SizedBox(height: 8),
             TextButton(
               onPressed: () => ref.invalidate(currentStudentProvider),
@@ -413,7 +414,7 @@ class _ParentOverview extends ConsumerWidget {
                 error: (e, _) => Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Text('Failed to load fee summary: $e'),
+                    child: Text(WarmCopy.loadFailed('the fee summary')),
                   ),
                 ),
                 data: (summary) {
@@ -501,7 +502,7 @@ class _ParentOverview extends ConsumerWidget {
                 loading: () =>
                     const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Text(
-                  'Failed to load invoices: $e',
+                  WarmCopy.loadFailed('invoices'),
                   style: const TextStyle(color: AppColors.error),
                 ),
                 data: (invoices) {
@@ -677,7 +678,7 @@ class _CollectionTabState extends ConsumerState<_CollectionTab> {
                   children: [
                     const Icon(Icons.error_outline, color: AppColors.error),
                     const SizedBox(width: 8),
-                    Expanded(child: Text('Failed to load stats: $e')),
+                    Expanded(child: Text(WarmCopy.loadFailed('the stats'))),
                     TextButton(
                       onPressed: () =>
                           ref.invalidate(feeCollectionStatsProvider(null)),
@@ -768,7 +769,7 @@ class _CollectionTabState extends ConsumerState<_CollectionTab> {
             loading: () =>
                 const Center(child: CircularProgressIndicator()),
             error: (e, _) => Text(
-              'Failed to load class data: $e',
+              WarmCopy.loadFailed('class data'),
               style: const TextStyle(color: AppColors.error),
             ),
             data: (summaries) {

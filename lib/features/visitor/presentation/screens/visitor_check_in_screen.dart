@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/visitor.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/visitor_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class VisitorCheckInScreen extends ConsumerStatefulWidget {
   final String? preRegQrData;
@@ -184,7 +185,7 @@ class _VisitorCheckInScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {

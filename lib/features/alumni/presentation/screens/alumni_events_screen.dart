@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/alumni.dart';
 import '../../providers/alumni_provider.dart';
 import '../widgets/event_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AlumniEventsScreen extends ConsumerStatefulWidget {
   const AlumniEventsScreen({super.key});
@@ -228,7 +229,7 @@ class _AlumniEventsScreenState extends ConsumerState<AlumniEventsScreen>
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
+                      SnackBar(content: Text(WarmCopy.genericError)),
                     );
                   }
                 }
@@ -301,7 +302,7 @@ class _EventList extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }

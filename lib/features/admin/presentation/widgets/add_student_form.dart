@@ -12,6 +12,7 @@ import '../../../../data/models/student.dart';
 import '../../../../data/repositories/student_repository.dart';
 import '../../../academic/providers/academic_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Bottom-sheet form for creating a new student account and profile.
 ///
@@ -183,7 +184,7 @@ class _AddStudentFormState extends ConsumerState<AddStudentForm> {
         await adminService.deleteUser(createdUserId);
       }
       if (mounted) {
-        _showError('Failed to create student: $e');
+        _showError(WarmCopy.saveFailed('student'));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);

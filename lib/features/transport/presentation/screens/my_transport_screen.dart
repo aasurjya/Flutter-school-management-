@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/transport_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class MyTransportScreen extends ConsumerWidget {
   const MyTransportScreen({super.key});
@@ -214,7 +215,7 @@ class MyTransportScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

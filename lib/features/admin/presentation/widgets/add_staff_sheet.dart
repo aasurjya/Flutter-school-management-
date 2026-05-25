@@ -9,6 +9,7 @@ import '../../../../core/utils/credential_generator.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../providers/staff_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 import 'credential_display_dialog.dart';
 
 /// Bottom sheet for creating a new staff member.
@@ -493,7 +494,7 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
       }
     } on AdminUserCreationException catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Failed to create account: ${e.message}');
+        context.showErrorSnackBar(WarmCopy.saveFailed('account'));
       }
     } catch (e) {
       // Attempt to roll back orphaned auth user if staff insert failed.
@@ -502,7 +503,7 @@ class _AddStaffSheetState extends ConsumerState<AddStaffSheet> {
             .deleteUser(createdUserId);
       }
       if (mounted) {
-        context.showErrorSnackBar('Error: $e');
+        context.showErrorSnackBar(WarmCopy.genericError);
       }
     } finally {
       if (mounted) {

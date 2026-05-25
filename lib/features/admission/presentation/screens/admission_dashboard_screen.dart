@@ -10,6 +10,7 @@ import '../../providers/admission_provider.dart';
 import '../widgets/admission_pipeline_chart.dart';
 import '../widgets/admission_stat_card.dart';
 import '../widgets/application_status_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class AdmissionDashboardScreen extends ConsumerWidget {
   const AdmissionDashboardScreen({super.key});
@@ -123,7 +124,7 @@ class AdmissionDashboardScreen extends ConsumerWidget {
               ),
               error: (e, _) => GlassCard(
                 padding: const EdgeInsets.all(16),
-                child: Text('Error: $e'),
+                child: Text(WarmCopy.genericError),
               ),
             ),
           ],

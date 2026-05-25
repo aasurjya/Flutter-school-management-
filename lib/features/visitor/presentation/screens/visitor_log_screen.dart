@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/visitor.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/visitor_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class VisitorLogScreen extends ConsumerStatefulWidget {
   const VisitorLogScreen({super.key});
@@ -286,7 +287,7 @@ class _VisitorLogScreenState extends ConsumerState<VisitorLogScreen> {
               },
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text(WarmCopy.genericError)),
             ),
           ),
         ],

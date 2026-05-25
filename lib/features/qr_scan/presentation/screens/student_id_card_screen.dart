@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../students/providers/students_provider.dart';
 import '../widgets/student_id_card_widget.dart';
 import '../../services/id_card_pdf_service.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 /// Full-screen student ID card view with Download / Print / Share buttons.
 class StudentIdCardScreen extends ConsumerWidget {
@@ -20,7 +21,7 @@ class StudentIdCardScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Student ID Card')),
       body: studentAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
         data: (student) {
           if (student == null) {
             return const Center(child: Text('Student not found'));

@@ -7,6 +7,7 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/inventory_provider.dart';
 import '../widgets/maintenance_calendar.dart';
 import '../widgets/stock_level_indicator.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class InventoryDashboardScreen extends ConsumerWidget {
   const InventoryDashboardScreen({super.key});
@@ -70,7 +71,7 @@ class InventoryDashboardScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 48, color: AppColors.error),
               const SizedBox(height: 12),
-              Text('Failed to load stats: $error'),
+              Text(WarmCopy.loadFailed('stats')),
               const SizedBox(height: 12),
               FilledButton(
                 onPressed: () => ref.invalidate(inventoryStatsProvider),

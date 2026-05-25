@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/discipline.dart';
 import '../../providers/discipline_provider.dart';
 import '../widgets/incident_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class IncidentListScreen extends ConsumerStatefulWidget {
   const IncidentListScreen({super.key});
@@ -110,7 +111,7 @@ class _IncidentListScreenState extends ConsumerState<IncidentListScreen> {
                     const Icon(Icons.error_outline,
                         size: 48, color: AppColors.error),
                     const SizedBox(height: 12),
-                    Text('Error: $e'),
+                    Text(WarmCopy.genericError),
                     const SizedBox(height: 8),
                     ElevatedButton(
                       onPressed: () => ref.invalidate(

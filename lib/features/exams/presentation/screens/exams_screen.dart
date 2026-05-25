@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../students/providers/students_provider.dart';
 import '../../providers/exams_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ExamsScreen extends ConsumerWidget {
   const ExamsScreen({super.key});
@@ -56,7 +57,7 @@ class _UpcomingExamsTab extends ConsumerWidget {
           children: [
             const Icon(Icons.error_outline, size: 48, color: Colors.grey),
             const SizedBox(height: 16),
-            Text('Failed to load exams: $e'),
+            Text(WarmCopy.loadFailed('exams')),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => ref.invalidate(examsProvider(const ExamsFilter())),
@@ -154,7 +155,7 @@ class _ResultsTabState extends ConsumerState<_ResultsTab> {
 
     return examsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       data: (exams) {
         if (exams.isEmpty) {
           return const Center(
@@ -288,7 +289,7 @@ class _ResultsTabState extends ConsumerState<_ResultsTab> {
                 // Subject results
                 performanceAsync.when(
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Text('Error: $e'),
+                  error: (e, _) => Text(WarmCopy.genericError),
                   data: (performance) {
                     if (performance.isEmpty) {
                       return const Center(
@@ -391,7 +392,7 @@ class _AnalyticsTab extends ConsumerWidget {
 
     return examsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       data: (exams) {
         if (exams.isEmpty) {
           return const Center(
@@ -408,7 +409,7 @@ class _AnalyticsTab extends ConsumerWidget {
 
         return currentStudentAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          error: (e, _) => Center(child: Text(WarmCopy.genericError)),
           data: (student) {
             if (student == null) {
               return const Center(child: Text('Student profile not found'));
@@ -500,7 +501,7 @@ class _AnalyticsTab extends ConsumerWidget {
 
                   performanceAsync.when(
                     loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Text('Error: $e'),
+                    error: (e, _) => Text(WarmCopy.genericError),
                     data: (performance) {
                       return classStatsAsync.when(
                         loading: () => Column(

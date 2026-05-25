@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/hostel_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class MyHostelScreen extends ConsumerWidget {
   const MyHostelScreen({super.key});
@@ -158,7 +159,7 @@ class MyHostelScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

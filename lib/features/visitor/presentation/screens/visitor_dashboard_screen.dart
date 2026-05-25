@@ -9,6 +9,7 @@ import '../../../../data/models/visitor.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/visitor_provider.dart';
 import '../widgets/visitor_stats_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class VisitorDashboardScreen extends ConsumerStatefulWidget {
   const VisitorDashboardScreen({super.key});
@@ -199,7 +200,7 @@ class _VisitorDashboardScreenState
               ),
               error: (e, _) => Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('Error: $e'),
+                child: Text(WarmCopy.genericError),
               ),
             ),
             const SizedBox(height: 24),

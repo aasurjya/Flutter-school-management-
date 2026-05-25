@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/online_exam.dart';
 import '../../providers/online_exam_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ExamSettingsScreen extends ConsumerStatefulWidget {
   final String examId;
@@ -282,7 +283,7 @@ class _ExamSettingsScreenState extends ConsumerState<ExamSettingsScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }
@@ -309,7 +310,7 @@ class _ExamSettingsScreenState extends ConsumerState<ExamSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

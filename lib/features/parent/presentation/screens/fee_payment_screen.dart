@@ -8,6 +8,7 @@ import '../../../../data/models/invoice.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../fees/providers/fees_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class FeePaymentScreen extends ConsumerStatefulWidget {
   final String childId;
@@ -47,7 +48,7 @@ class _FeePaymentScreenState extends ConsumerState<FeePaymentScreen> {
       ),
       body: invoicesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Failed to load invoices: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.loadFailed('invoices'))),
         data: (invoices) {
           final pending = invoices
               .where((inv) => !inv.isPaid && !inv.isCancelled)
@@ -326,7 +327,7 @@ class _FeePaymentScreenState extends ConsumerState<FeePaymentScreen> {
         paymentsAsync.when(
           loading: () =>
               const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Text('Failed to load payments: $e'),
+          error: (e, _) => Text(WarmCopy.loadFailed('payments')),
           data: (payments) {
             if (payments.isEmpty) {
               return Padding(

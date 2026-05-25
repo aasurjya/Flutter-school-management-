@@ -9,6 +9,7 @@ import '../../providers/communication_provider.dart';
 import '../widgets/channel_selector.dart';
 import '../widgets/audience_picker.dart';
 import '../widgets/template_preview.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CampaignCreateScreen extends ConsumerStatefulWidget {
   const CampaignCreateScreen({super.key});
@@ -204,7 +205,7 @@ class _CampaignCreateScreenState extends ConsumerState<CampaignCreateScreen> {
             );
           },
           loading: () => const LinearProgressIndicator(),
-          error: (_, __) => const Text('Failed to load templates'),
+          error: (_, __) => Text(WarmCopy.loadFailed('templates')),
         ),
         const SizedBox(height: 16),
 
@@ -633,7 +634,7 @@ class _CampaignCreateScreenState extends ConsumerState<CampaignCreateScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

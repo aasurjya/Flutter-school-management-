@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../exams/providers/exams_provider.dart';
 import '../../../students/providers/students_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StudentResultsScreen extends ConsumerStatefulWidget {
   final String? studentId;
@@ -43,7 +44,7 @@ class _StudentResultsScreenState extends ConsumerState<StudentResultsScreen> {
       ),
       body: examsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
         data: (exams) {
           if (exams.isEmpty) {
             return const Center(
@@ -69,7 +70,7 @@ class _StudentResultsScreenState extends ConsumerState<StudentResultsScreen> {
                 const SizedBox(height: 16),
                 performanceAsync.when(
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(child: Text('Error: $e')),
+                  error: (e, _) => Center(child: Text(WarmCopy.genericError)),
                   data: (performance) {
                     if (performance.isEmpty) {
                       return const Center(child: Text('No results for this exam'));

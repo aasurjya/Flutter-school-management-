@@ -10,6 +10,7 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/admission_provider.dart';
 import '../widgets/application_status_badge.dart';
 import '../widgets/document_checklist_widget.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class ApplicationDetailScreen extends ConsumerWidget {
   final String applicationId;
@@ -101,7 +102,7 @@ class ApplicationDetailScreen extends ConsumerWidget {
           return _buildContent(context, ref, app, isDark);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }
@@ -254,7 +255,7 @@ class ApplicationDetailScreen extends ConsumerWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Error: $e'),
+                      content: Text(WarmCopy.genericError),
                       backgroundColor: AppColors.error,
                     ),
                   );
@@ -595,7 +596,7 @@ class ApplicationDetailScreen extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Are you sure you want to $action this application?'),
+            Text('${action[0].toUpperCase()}${action.substring(1)} this application?'),
             const SizedBox(height: 16),
             TextField(
               controller: notesController,
@@ -662,7 +663,7 @@ class ApplicationDetailScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

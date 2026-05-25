@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../data/models/canteen.dart';
 import '../../providers/canteen_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class CanteenMenuScreen extends ConsumerStatefulWidget {
   const CanteenMenuScreen({super.key});
@@ -122,7 +123,7 @@ class _CanteenMenuScreenState extends ConsumerState<CanteenMenuScreen> {
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Center(
-                child: Text('Error: $error'),
+                child: Text(WarmCopy.genericError),
               ),
             ),
           ),

@@ -8,6 +8,7 @@ import '../../../../data/models/hr_payroll.dart';
 import '../../providers/hr_provider.dart';
 import '../widgets/attendance_calendar_widget.dart';
 import '../widgets/contract_status_badge.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class StaffProfileScreen extends ConsumerStatefulWidget {
   final String staffId;
@@ -242,7 +243,7 @@ class _OverviewTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 
@@ -321,7 +322,7 @@ class _ContractTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 }
@@ -385,7 +386,7 @@ class _AttendanceTab extends ConsumerWidget {
             ),
             loading: () =>
                 const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Text('Error: $error'),
+            error: (error, _) => Text(WarmCopy.genericError),
           ),
         ],
       ),
@@ -455,7 +456,7 @@ class _DocumentsTab extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+      error: (error, _) => Center(child: Text(WarmCopy.genericError)),
     );
   }
 

@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/visitor.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/visitor_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class VisitorCheckOutScreen extends ConsumerStatefulWidget {
   const VisitorCheckOutScreen({super.key});
@@ -48,7 +49,7 @@ class _VisitorCheckOutScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {
@@ -78,7 +79,7 @@ class _VisitorCheckOutScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {
@@ -249,7 +250,7 @@ class _VisitorCheckOutScreenState
                 },
                 loading: () => const Center(
                     child: CircularProgressIndicator()),
-                error: (e, _) => Text('Error: $e'),
+                error: (e, _) => Text(WarmCopy.genericError),
               );
             },
           ),

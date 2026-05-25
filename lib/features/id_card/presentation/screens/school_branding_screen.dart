@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/providers/supabase_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../providers/id_card_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 // ============================================================
 // School Branding Screen — Logo Upload for Admin
@@ -38,7 +39,7 @@ class _SchoolBrandingScreenState extends ConsumerState<SchoolBrandingScreen> {
       body: SafeArea(
         child: tenantAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          error: (e, _) => Center(child: Text(WarmCopy.genericError)),
           data: (tenant) {
             if (tenant == null) {
               return const Center(child: Text('No school data found'));
@@ -230,7 +231,7 @@ class _SchoolBrandingScreenState extends ConsumerState<SchoolBrandingScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Remove Logo'),
         content: const Text(
-            'Are you sure? ID cards will show a text placeholder instead.'),
+            'ID cards will show a text placeholder instead.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

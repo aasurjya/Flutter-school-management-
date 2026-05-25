@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/whatsapp_config.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/whatsapp_provider.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class WhatsAppSettingsScreen extends ConsumerStatefulWidget {
   const WhatsAppSettingsScreen({super.key});
@@ -545,7 +546,7 @@ class _WhatsAppSettingsScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

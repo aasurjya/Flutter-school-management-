@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/providers/ai_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -40,7 +41,7 @@ class _RiskTabState extends ConsumerState<RiskTab> {
           children: [
             const Icon(Icons.error_outline, size: 48, color: Colors.red),
             const SizedBox(height: 12),
-            const Text('Failed to load risk data'),
+            Text(WarmCopy.loadFailed('risk data')),
             const SizedBox(height: 8),
             TextButton(
               onPressed: () =>
@@ -625,7 +626,7 @@ class _ReminderDialogState extends ConsumerState<_ReminderDialog> {
       if (mounted) {
         setState(() => _sending = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to log reminder: $e')),
+          SnackBar(content: Text(WarmCopy.saveFailed('the reminder'))),
         );
       }
     }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../data/models/notification.dart';
 import '../../providers/notification_provider.dart';
 import '../widgets/notification_card.dart';
+import '../../../../core/copy/warm_strings.dart';
 
 class NotificationCenterScreen extends ConsumerStatefulWidget {
   const NotificationCenterScreen({super.key});
@@ -218,7 +219,7 @@ class _NotificationCenterScreenState
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }
@@ -336,7 +337,7 @@ class _NotificationCenterScreenState
       builder: (context) => AlertDialog(
         title: const Text('Clear All Notifications'),
         content:
-            const Text('Are you sure you want to delete all notifications?'),
+            const Text('Delete all notifications?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

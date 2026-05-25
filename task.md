@@ -135,11 +135,90 @@ Each phase is independently shippable, has its own commit, and updates this file
 
 ---
 
-## 5. Other-Role Followups (post-admin sprint)
+## 5. Other-Role Audit Findings (operational staff dashboards)
 
-- **Librarian:** audit issue/return flow, fine calculation, overdue PDF report.
-- **Transport manager:** audit route assignment, bus capacity, GPS live map.
-- **Hostel warden:** audit allocation, mess attendance, leave-out register.
-- **Canteen staff:** audit menu, order processing, wallet top-up.
-- **Receptionist:** mostly visitor — covered by Phase 6.
-- **Super admin:** tenant CRUD audit + plan/feature flags.
+Audited 2026-05-25 via Explore agent. Common pattern: all 6 dashboards are
+pure `StatelessWidget` with zero providers and delegate to
+`StaffPortalScaffold`. Verdict depends entirely on the destination screens
+each tile points to.
+
+| Role | Verdict | Top gap |
+| --- | --- | --- |
+| **Receptionist** | ✅ SHIP-READY | None blocking. Could add live count badge. |
+| **Accountant** | 🟡 SHALLOW | "Collections" and "Reminders" tiles collapse to same `/fees` root — should land on tab 2 / overdue filter. |
+| **Librarian** | 🟡 SHALLOW | NO ISSUE/RETURN WRITE FLOW. Sees student-facing catalogue only. |
+| **Transport mgr** | 🟡 SHALLOW | "Live tracking" tile duplicates "All routes". No map / GPS. |
+| **Hostel warden** | 🟡 SHALLOW | NO check-in / check-out resident action. Two tiles collapse to same destination. |
+| **Canteen staff** | 🟡 SHALLOW | ALL tiles point at consumer flows (cart). No order queue, no availability toggle. |
+
+### Phase 8 — Librarian issue/return (top of next sprint)
+
+**Outcome:** Librarian can issue a book to a student, mark it returned,
+view active loans, see overdue list with fines.
+- Repo methods: `issueBook`, `returnBook`, `getActiveLoans`, `getOverdueLoans`.
+- Action sheet on `library_screen.dart` when role is librarian: "Issue book"
+  scans QR/searches student → assigns to selected book.
+- New screen `librarian_loans_screen.dart` for active loans + overdue.
+
+### Phase 9 — Canteen order queue
+
+**Outcome:** Canteen staff sees a real-time order queue, can mark items
+ready / served, can toggle item availability.
+
+### Phase 10 — Transport live tracking
+
+**Outcome:** Live map showing bus positions, driver assignment write flow,
+route capacity vs students assigned.
+
+### Phase 11 — Hostel warden write flows
+
+**Outcome:** Check-in/check-out resident on `hostel_detail_screen.dart`,
+allocation flow, mess attendance.
+
+### Phase 12 — Accountant tile precision
+
+Small: route accountant tiles to specific filtered views, not generic `/fees`.
+
+### Phase 13 — Super admin tenant CRUD audit
+
+Out of current scope.
+
+---
+
+## 6. AI Features Audit (added 2026-05-26)
+
+Audited 14 AI-branded screens + `ai_text_generator.dart`. Headline: the
+LLM infrastructure is REAL (OpenRouter gateway → DeepSeek fallback,
+quota-gated). Most screens are SHALLOW (display-only) — actions are the
+weak link.
+
+| Screen | Verdict | Top issue |
+| --- | --- | --- |
+| Risk Dashboard | ✅ SHIP-READY | No "Recalculate" affordance when empty. |
+| Student Risk Detail | 🟡 SHALLOW | No share / regenerate; recommendations vs LLM disconnected. |
+| Attendance Insights | 🟡 SHALLOW | Silent failure mode for empty LLM response. |
+| Trend Dashboard | 🟡 SHALLOW | Display-only; no academic year context. |
+| Parent Digest List | ✅ SHIP-READY | No manual "Generate digest" trigger. |
+| Parent Digest Detail | 🟡 SHALLOW | Sections are template-filled (not LLM); no share. |
+| Early Warning Dashboard | ✅ SHIP-READY | No bulk acknowledge. |
+| Alert Detail | ✅ SHIP-READY | **BUG**: permanent spinner on null explanation. |
+| Alert Rules Config | ✅ SHIP-READY | No edit / delete on existing rules. |
+| Study Recommendations | 🟡 SHALLOW | LLM real; no save / share. |
+| **Generate Remarks** | 🔴 STUB | **`_saveAllApproved()` writes NOTHING despite success snackbar.** |
+| **AI Message Composer** | 🟡 SHALLOW | `parentName='Parent'` + `contextData={}` hardcoded; "Send via Chat" is stub. |
+| Class Intelligence | 🟡 SHALLOW | `_academicYearId='current'` brittle sentinel. |
+| Child Insights "Tips" | 🟡 MOCK | Tips are rule-based; no LLM despite AI-branded section. |
+
+### Phase 14 — AI bug & gap fixes (next)
+
+**Outcomes:**
+1. **Generate Remarks → real save**: persist approved remarks to a
+   `report_remarks` table (add migration only if absent, else use existing).
+2. **AI Message Composer → real context**: resolve student name to record;
+   pass attendance + fee + grade snapshot as `contextData`; wire "Send via
+   Chat" to the messaging module.
+3. **Alert Detail spinner bug**: replace permanent spinner with
+   "No analysis available" when `aiExplanation == null` after load.
+4. **`'current'` sentinel removal**: pass academic year id explicitly.
+5. **Child Insights "Tips" → LLM**: swap rule-based tips for
+   `studyRecommendationsProvider` output.

@@ -7,22 +7,33 @@ final messageDraftProvider =
     FutureProvider.autoDispose.family<MessageDraft, MessageDraftRequest>(
   (ref, request) async {
     final aiTextGenerator = ref.watch(aiTextGeneratorProvider);
-    const parentName =
-        'Parent'; // In production, fetch from student's parent record
 
-    // Generate subject line based on type
+    // Use real parent name when available; fall back to generic salutation.
+    final parentName = request.parentName ?? 'Parent';
+
+    // Generate subject line based on type.
     final subject = _getSubject(request.messageType, request.studentName);
 
-    // Build fallback
+    // Build fallback text.
     final fallback =
         _getFallback(request.messageType, request.studentName, parentName);
+
+    // Build context map from real student data when available.
+    final contextData = <String, dynamic>{
+      if (request.attendancePct != null)
+        'attendance_pct': request.attendancePct!.round(),
+      if (request.pendingFees != null)
+        'pending_fees': request.pendingFees!.toStringAsFixed(2),
+      if (request.latestExamAvg != null)
+        'latest_exam_avg': request.latestExamAvg!.round(),
+    };
 
     try {
       final result = await aiTextGenerator.generateParentMessage(
         messageType: request.messageType.label,
         studentName: request.studentName,
         parentName: parentName,
-        contextData: {},
+        contextData: contextData,
         fallback: fallback,
       );
 

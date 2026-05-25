@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/student_insights.dart';
+import '../../../../data/models/study_recommendation.dart';
+import '../../../ai_insights/providers/study_recommendation_provider.dart';
 import '../../providers/insights_provider.dart';
 import '../widgets/performance_summary_card.dart';
 import '../widgets/subject_radar_chart.dart';
@@ -523,13 +526,123 @@ class _AttendanceSummaryCard extends StatelessWidget {
   }
 }
 
-class _TipsTab extends StatelessWidget {
+class _TipsTab extends ConsumerWidget {
   final StudentInsights insights;
 
   const _TipsTab({required this.insights});
 
   @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recsAsync =
+        ref.watch(studyRecommendationsProvider(insights.studentId));
+
+    return recsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) =>
+          // LLM unavailable — fall back to DB rule-based tips.
+          ImprovementTipsCard(tips: insights.tips),
+      data: (recs) {
+        if (recs.recommendations.isEmpty) {
+          return ImprovementTipsCard(tips: insights.tips);
+        }
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: recs.recommendations.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, i) =>
+              _RecommendationCard(item: recs.recommendations[i]),
+        );
+      },
+    );
+  }
+}
+
+class _RecommendationCard extends StatelessWidget {
+  final RecommendationItem item;
+
+  const _RecommendationCard({required this.item});
+
+  @override
   Widget build(BuildContext context) {
-    return ImprovementTipsCard(tips: insights.tips);
+    final theme = Theme.of(context);
+    final color = item.priority.color;
+    final bg = item.priority.backgroundColor;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(item.icon, color: color, size: 18),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.title,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimaryLight,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        item.priority.label,
+                        style: TextStyle(
+                          color: color,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (item.subject != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    item.subject!,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 6),
+                Text(
+                  item.description,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondaryLight,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

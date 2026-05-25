@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
-import '../../providers/report_commentary_provider.dart';
 import '../../../../data/models/report_commentary.dart';
 import '../../../../core/copy/warm_strings.dart';
+import '../../../academic/providers/academic_provider.dart';
+import '../../../exams/providers/exams_provider.dart';
+import '../../../report_card/providers/report_card_provider.dart';
+import '../../providers/report_commentary_provider.dart';
 
 class GenerateRemarksScreen extends ConsumerStatefulWidget {
   const GenerateRemarksScreen({super.key});
@@ -19,20 +22,8 @@ class _GenerateRemarksScreenState extends ConsumerState<GenerateRemarksScreen> {
   String? _selectedSectionId;
   String? _selectedExamId;
   bool _isGenerating = false;
+  bool _isSaving = false;
   double _generationProgress = 0.0;
-
-  // Mock data for section and exam dropdowns
-  final _sections = const [
-    {'id': 'sec-1', 'name': 'Class 10 - A'},
-    {'id': 'sec-2', 'name': 'Class 10 - B'},
-    {'id': 'sec-3', 'name': 'Class 9 - A'},
-  ];
-
-  final _exams = const [
-    {'id': 'exam-1', 'name': 'Mid-Term Exam 2026'},
-    {'id': 'exam-2', 'name': 'Unit Test 3'},
-    {'id': 'exam-3', 'name': 'Final Exam 2025'},
-  ];
 
   Future<void> _generateRemarks() async {
     if (_selectedSectionId == null || _selectedExamId == null) {
@@ -152,7 +143,7 @@ class _GenerateRemarksScreenState extends ConsumerState<GenerateRemarksScreen> {
     );
   }
 
-  void _saveAllApproved() {
+  Future<void> _saveAllApproved() async {
     final approved = ref.read(remarksNotifierProvider.notifier).approved;
     if (approved.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -164,15 +155,71 @@ class _GenerateRemarksScreenState extends ConsumerState<GenerateRemarksScreen> {
       return;
     }
 
-    // In production, persist to Supabase here
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${approved.length} approved remark(s) saved successfully.',
+    setState(() => _isSaving = true);
+
+    final repo = ref.read(rcFullRepositoryProvider);
+    int saved = 0;
+    int skipped = 0;
+
+    for (final remark in approved) {
+      try {
+        // Find the student's most recent report card to attach the comment to.
+        // TODO(scope: Phase 14.x): when generate_remarks is wired end-to-end,
+        // pass exam_id through so we can match the exact report card row.
+        final reportCards =
+            await repo.getStudentReportCards(remark.studentId);
+
+        if (reportCards.isEmpty) {
+          // No report card exists yet for this student — skip gracefully.
+          skipped++;
+          continue;
+        }
+
+        // Use the most recent report card.
+        final reportCardId = reportCards.first.id;
+        await repo.upsertComment(
+          reportCardId: reportCardId,
+          commentType: 'class_teacher',
+          commentText: remark.remark,
+          isAiGenerated: remark.isLLMGenerated,
+        );
+        saved++;
+      } catch (_) {
+        skipped++;
+      }
+    }
+
+    if (!mounted) return;
+    setState(() => _isSaving = false);
+
+    if (skipped > 0 && saved == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Could not save remarks — no report cards found for '
+            '$skipped student(s). Generate report cards first.',
+          ),
+          backgroundColor: AppColors.warning,
         ),
-        backgroundColor: AppColors.success,
-      ),
-    );
+      );
+    } else if (skipped > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '$saved remark(s) saved. '
+            '$skipped skipped (no report card found).',
+          ),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$saved approved remark(s) saved successfully.'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    }
   }
 
   @override
@@ -298,49 +345,69 @@ class _GenerateRemarksScreenState extends ConsumerState<GenerateRemarksScreen> {
           ),
           const SizedBox(height: 20),
 
-          // Section dropdown
-          DropdownButtonFormField<String>(
-            initialValue: _selectedSectionId,
-            decoration: InputDecoration(
-              labelText: 'Section',
-              filled: true,
-              fillColor: isDark ? AppColors.inputFillDark : AppColors.inputFillLight,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
+          // Section dropdown — real data
+          ref.watch(allSectionsProvider).when(
+            loading: () => const LinearProgressIndicator(),
+            error: (e, _) => Text('Could not load sections. $e'),
+            data: (sections) => DropdownButtonFormField<String>(
+              initialValue: _selectedSectionId,
+              decoration: InputDecoration(
+                labelText: 'Section',
+                filled: true,
+                fillColor:
+                    isDark ? AppColors.inputFillDark : AppColors.inputFillLight,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                prefixIcon: const Icon(Icons.class_, size: 20),
               ),
-              prefixIcon: const Icon(Icons.class_, size: 20),
+              items: sections
+                  .map((s) => DropdownMenuItem(
+                        value: s.id,
+                        child: Text(s.displayName),
+                      ))
+                  .toList(),
+              onChanged: (val) => setState(() => _selectedSectionId = val),
             ),
-            items: _sections
-                .map((s) => DropdownMenuItem(
-                      value: s['id'],
-                      child: Text(s['name']!),
-                    ))
-                .toList(),
-            onChanged: (val) => setState(() => _selectedSectionId = val),
           ),
           const SizedBox(height: 14),
 
-          // Exam dropdown
-          DropdownButtonFormField<String>(
-            initialValue: _selectedExamId,
-            decoration: InputDecoration(
-              labelText: 'Exam',
-              filled: true,
-              fillColor: isDark ? AppColors.inputFillDark : AppColors.inputFillLight,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              prefixIcon: const Icon(Icons.assignment, size: 20),
-            ),
-            items: _exams
-                .map((e) => DropdownMenuItem(
-                      value: e['id'],
-                      child: Text(e['name']!),
-                    ))
-                .toList(),
-            onChanged: (val) => setState(() => _selectedExamId = val),
+          // Exam dropdown — real data scoped to current academic year
+          ref.watch(currentAcademicYearProvider).when(
+            loading: () => const LinearProgressIndicator(),
+            error: (e, _) => Text('Could not load academic year. $e'),
+            data: (currentYear) {
+              final filter = ExamsFilter(
+                academicYearId: currentYear?.id,
+              );
+              return ref.watch(examsProvider(filter)).when(
+                loading: () => const LinearProgressIndicator(),
+                error: (e, _) => Text('Could not load exams. $e'),
+                data: (exams) => DropdownButtonFormField<String>(
+                  initialValue: _selectedExamId,
+                  decoration: InputDecoration(
+                    labelText: 'Exam',
+                    filled: true,
+                    fillColor: isDark
+                        ? AppColors.inputFillDark
+                        : AppColors.inputFillLight,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(Icons.assignment, size: 20),
+                  ),
+                  items: exams
+                      .map((e) => DropdownMenuItem(
+                            value: e.id,
+                            child: Text(e.name),
+                          ))
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedExamId = val),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -642,9 +709,18 @@ class _GenerateRemarksScreenState extends ConsumerState<GenerateRemarksScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: FilledButton.icon(
-            onPressed: _saveAllApproved,
-            icon: const Icon(Icons.save, size: 18),
-            label: const Text('Save Approved'),
+            onPressed: (_isSaving || _isGenerating) ? null : _saveAllApproved,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.save, size: 18),
+            label: Text(_isSaving ? 'Saving...' : 'Save Approved'),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.success,
               padding: const EdgeInsets.symmetric(vertical: 14),

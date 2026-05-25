@@ -5,8 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/message_template.dart';
-import '../../providers/message_draft_provider.dart';
+import '../../../../data/models/student.dart';
 import '../../../../core/copy/warm_strings.dart';
+import '../../../attendance/providers/attendance_provider.dart';
+import '../../../exams/providers/exams_provider.dart';
+import '../../../fees/providers/fees_provider.dart' show feeRepositoryProvider;
+import '../../../messaging/providers/messages_provider.dart';
+import '../../../students/providers/students_provider.dart';
+import '../../providers/message_draft_provider.dart';
 
 class AIMessageComposerScreen extends ConsumerStatefulWidget {
   const AIMessageComposerScreen({super.key});
@@ -18,29 +24,32 @@ class AIMessageComposerScreen extends ConsumerStatefulWidget {
 
 class _AIMessageComposerScreenState
     extends ConsumerState<AIMessageComposerScreen> {
-  final _studentNameController = TextEditingController();
+  final _searchController = TextEditingController();
   final _subjectController = TextEditingController();
   final _bodyController = TextEditingController();
 
   MessageType _selectedType = MessageType.general;
   MessageDraft? _currentDraft;
+  Student? _selectedStudent;
   bool _isGenerating = false;
+  bool _isSending = false;
   bool _hasGenerated = false;
+  bool _showSuggestions = false;
+  String _searchQuery = '';
 
   @override
   void dispose() {
-    _studentNameController.dispose();
+    _searchController.dispose();
     _subjectController.dispose();
     _bodyController.dispose();
     super.dispose();
   }
 
   Future<void> _generateDraft() async {
-    final studentName = _studentNameController.text.trim();
-    if (studentName.isEmpty) {
+    if (_selectedStudent == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter the student name.'),
+          content: Text('Please select a student first.'),
           backgroundColor: AppColors.warning,
         ),
       );
@@ -52,14 +61,58 @@ class _AIMessageComposerScreenState
       _hasGenerated = false;
     });
 
+    final student = _selectedStudent!;
+
+    // Fetch real attendance % (last 30 days).
+    double? attendancePct;
+    try {
+      final stats = await ref
+          .read(attendanceRepositoryProvider)
+          .getAttendanceStats(studentId: student.id);
+      attendancePct = (stats['attendance_percentage'] ?? 0).toDouble();
+    } catch (_) {}
+
+    // Fetch pending fees total.
+    double? pendingFees;
+    try {
+      final invoices = await ref
+          .read(feeRepositoryProvider)
+          .getInvoices(
+            studentId: student.id,
+            status: 'pending',
+          );
+      pendingFees = invoices.fold<double>(0, (sum, inv) => sum + inv.totalAmount);
+    } catch (_) {}
+
+    // Fetch latest exam average.
+    double? examAvg;
+    try {
+      final performances = await ref
+          .read(examRepositoryProvider)
+          .getStudentPerformance(studentId: student.id);
+      final valid = performances.where((p) => !p.isAbsent).toList();
+      if (valid.isNotEmpty) {
+        examAvg =
+            valid.fold<double>(0, (sum, p) => sum + p.percentage) / valid.length;
+      }
+    } catch (_) {}
+
+    // Resolve primary parent name.
+    final parentName = student.parents?.isNotEmpty == true
+        ? student.parents!.first.firstName
+        : null;
+
     final request = MessageDraftRequest(
-      studentId: studentName.toLowerCase().replaceAll(' ', '-'),
-      studentName: studentName,
+      studentId: student.id,
+      studentName: student.fullName,
       messageType: _selectedType,
+      parentName: parentName,
+      attendancePct: attendancePct,
+      pendingFees: pendingFees,
+      latestExamAvg: examAvg,
     );
 
     try {
-      // Invalidate any cached result for this request before fetching
       ref.invalidate(messageDraftProvider(request));
       final draft = await ref.read(messageDraftProvider(request).future);
 
@@ -110,7 +163,7 @@ class _AIMessageComposerScreenState
     );
   }
 
-  void _sendViaChat() {
+  Future<void> _sendViaChat() async {
     final body = _bodyController.text.trim();
     if (body.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -122,12 +175,73 @@ class _AIMessageComposerScreenState
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Message ready to send.'),
-        backgroundColor: AppColors.success,
-      ),
-    );
+    final student = _selectedStudent;
+    if (student == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No student selected.'),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+      return;
+    }
+
+    // Resolve the primary parent's user ID.
+    final parentUserId = student.parents
+        ?.where((p) => p.userId != null)
+        .map((p) => p.userId!)
+        .firstOrNull;
+
+    if (parentUserId == null) {
+      // TODO(scope: Phase 14.x — needs DB migration): student has no linked
+      // parent user account. Cannot open a chat thread without a user_id.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No parent account linked to this student. '
+            'Ask the parent to register first.',
+          ),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSending = true);
+
+    try {
+      final threadsNotifier = ref.read(threadsNotifierProvider.notifier);
+      final thread =
+          await threadsNotifier.getOrCreatePrivateThread(parentUserId);
+
+      if (thread == null) {
+        throw Exception('Could not create or find a chat thread.');
+      }
+
+      final messagesNotifier = ref.read(messagesNotifierProvider.notifier);
+      await messagesNotifier.loadMessages(threadId: thread.id);
+      await messagesNotifier.sendMessage(content: body);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Message sent via chat.'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(WarmCopy.saveFailed('message')),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSending = false);
+    }
   }
 
   @override
@@ -171,8 +285,8 @@ class _AIMessageComposerScreenState
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // Student name input
-                _buildStudentNameCard(theme, isDark),
+                // Student search-select
+                _buildStudentSearchCard(theme, isDark),
                 const SizedBox(height: 16),
 
                 // Message type selector
@@ -208,7 +322,7 @@ class _AIMessageComposerScreenState
     );
   }
 
-  Widget _buildStudentNameCard(ThemeData theme, bool isDark) {
+  Widget _buildStudentSearchCard(ThemeData theme, bool isDark) {
     return GlassCard(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -223,14 +337,14 @@ class _AIMessageComposerScreenState
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
-                  Icons.person_outline,
+                  Icons.person_search_outlined,
                   color: AppColors.primary,
                   size: 22,
                 ),
               ),
               const SizedBox(width: 12),
               Text(
-                'Student Details',
+                'Student',
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
@@ -239,29 +353,185 @@ class _AIMessageComposerScreenState
             ],
           ),
           const SizedBox(height: 20),
-          TextField(
-            controller: _studentNameController,
-            textCapitalization: TextCapitalization.words,
-            decoration: InputDecoration(
-              labelText: 'Student Name',
-              hintText: 'Enter student name',
-              filled: true,
-              fillColor:
-                  isDark ? AppColors.inputFillDark : AppColors.inputFillLight,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    const BorderSide(color: AppColors.primary, width: 2),
-              ),
-              prefixIcon: const Icon(Icons.school_outlined, size: 20),
-            ),
-          ),
+
+          // Show selected student chip or search field.
+          if (_selectedStudent != null)
+            _buildSelectedStudentChip(theme)
+          else
+            _buildStudentSearchField(theme, isDark),
+
+          // Suggestions list.
+          if (_showSuggestions && _searchQuery.length >= 2)
+            _buildSuggestions(theme, isDark),
         ],
       ),
+    );
+  }
+
+  Widget _buildSelectedStudentChip(ThemeData theme) {
+    final student = _selectedStudent!;
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 18,
+          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+          child: Text(
+            _initials(student.fullName),
+            style: const TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                student.fullName,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                student.admissionNumber,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondaryLight,
+                ),
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.close, size: 18),
+          onPressed: () {
+            setState(() {
+              _selectedStudent = null;
+              _searchController.clear();
+              _searchQuery = '';
+              _hasGenerated = false;
+            });
+          },
+          color: AppColors.textSecondaryLight,
+          tooltip: 'Clear selection',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStudentSearchField(ThemeData theme, bool isDark) {
+    return TextField(
+      controller: _searchController,
+      textCapitalization: TextCapitalization.words,
+      decoration: InputDecoration(
+        labelText: 'Search student by name or admission number',
+        filled: true,
+        fillColor: isDark ? AppColors.inputFillDark : AppColors.inputFillLight,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        prefixIcon: const Icon(Icons.search, size: 20),
+        suffixIcon: _searchQuery.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear, size: 18),
+                onPressed: () {
+                  _searchController.clear();
+                  setState(() {
+                    _searchQuery = '';
+                    _showSuggestions = false;
+                  });
+                },
+              )
+            : null,
+      ),
+      onChanged: (val) {
+        setState(() {
+          _searchQuery = val.trim();
+          _showSuggestions = _searchQuery.length >= 2;
+        });
+      },
+    );
+  }
+
+  Widget _buildSuggestions(ThemeData theme, bool isDark) {
+    final filter = StudentsFilter(searchQuery: _searchQuery, activeOnly: true);
+    final studentsAsync = ref.watch(studentsProvider(filter));
+
+    return studentsAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.only(top: 8),
+        child: LinearProgressIndicator(),
+      ),
+      error: (e, _) => Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Text('Could not load students. $e',
+            style: const TextStyle(color: AppColors.error, fontSize: 12)),
+      ),
+      data: (students) {
+        if (students.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(
+              'No students found.',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondaryLight),
+            ),
+          );
+        }
+        return Container(
+          margin: const EdgeInsets.only(top: 8),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.inputFillDark : AppColors.inputFillLight,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            itemCount: students.length > 8 ? 8 : students.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (context, i) {
+              final s = students[i];
+              return ListTile(
+                dense: true,
+                leading: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                  child: Text(
+                    _initials(s.fullName),
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                title: Text(s.fullName,
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(fontWeight: FontWeight.w600)),
+                subtitle: Text(s.admissionNumber,
+                    style: theme.textTheme.labelSmall),
+                onTap: () {
+                  setState(() {
+                    _selectedStudent = s;
+                    _searchController.clear();
+                    _searchQuery = '';
+                    _showSuggestions = false;
+                    _hasGenerated = false;
+                  });
+                },
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -574,9 +844,18 @@ class _AIMessageComposerScreenState
         // Send via Chat
         Expanded(
           child: FilledButton.icon(
-            onPressed: _sendViaChat,
-            icon: const Icon(Icons.send, size: 18),
-            label: const Text('Send via Chat'),
+            onPressed: _isSending ? null : _sendViaChat,
+            icon: _isSending
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.send, size: 18),
+            label: Text(_isSending ? 'Sending...' : 'Send via Chat'),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.success,
               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -588,5 +867,13 @@ class _AIMessageComposerScreenState
         ),
       ],
     );
+  }
+
+  String _initials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+    }
+    return parts.first.isNotEmpty ? parts.first[0].toUpperCase() : '?';
   }
 }

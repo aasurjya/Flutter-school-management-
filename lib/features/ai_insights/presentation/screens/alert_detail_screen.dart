@@ -322,28 +322,13 @@ class _AlertDetailScreenState extends ConsumerState<AlertDetailScreen> {
               ),
             )
           else
-            Row(
-              children: [
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation(
-                      AppColors.accent.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Generating analysis...',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[500],
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ],
+            Text(
+              'No AI analysis available for this alert.',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[500],
+                fontStyle: FontStyle.italic,
+              ),
             ),
         ],
       ),

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../academic/providers/academic_provider.dart';
 import '../../providers/class_intelligence_provider.dart';
 import '../widgets/class_narrative_card.dart';
 import '../widgets/subject_comparison_chart.dart';
@@ -26,15 +27,17 @@ class ClassIntelligenceScreen extends ConsumerStatefulWidget {
 
 class _ClassIntelligenceScreenState
     extends ConsumerState<ClassIntelligenceScreen> {
-  // Hardcoded for now -- in production, derive from the current academic year
-  // context or accept it as a constructor parameter.
-  final String _academicYearId = 'current';
-
   @override
   Widget build(BuildContext context) {
+    // Resolve the real current academic year from the DB; fall back to an
+    // empty string so the provider can surface its own error state rather
+    // than sending a 'current' sentinel that no DB row will match.
+    final currentYearAsync = ref.watch(currentAcademicYearProvider);
+    final academicYearId = currentYearAsync.valueOrNull?.id ?? '';
+
     final filter = SectionYearFilter(
       sectionId: widget.sectionId,
-      academicYearId: _academicYearId,
+      academicYearId: academicYearId,
     );
 
     final intelligenceAsync =

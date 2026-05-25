@@ -100,10 +100,21 @@ class MessageDraftRequest {
   final String studentName;
   final MessageType messageType;
 
+  /// Optional enriched context — populated when a real Student record is
+  /// selected so the LLM can produce a personalised message.
+  final String? parentName;
+  final double? attendancePct;
+  final double? pendingFees;
+  final double? latestExamAvg;
+
   const MessageDraftRequest({
     required this.studentId,
     required this.studentName,
     required this.messageType,
+    this.parentName,
+    this.attendancePct,
+    this.pendingFees,
+    this.latestExamAvg,
   });
 
   @override

@@ -6,8 +6,10 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/question_paper.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../id_card/providers/id_card_provider.dart';
 import '../../providers/question_paper_provider.dart';
 import '../../../../core/copy/warm_strings.dart';
+import '../../utils/question_paper_pdf_builder.dart';
 
 // ============================================================
 // Detail / Preview Screen
@@ -28,7 +30,7 @@ class QuestionPaperDetailScreen extends ConsumerWidget {
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(title: const Text('Question Paper')),
-        body: Center(child: Text(WarmCopy.genericError)),
+        body: const Center(child: Text(WarmCopy.genericError)),
       ),
       data: (paper) => _PaperDetailView(paper: paper),
     );
@@ -66,6 +68,36 @@ class _PaperDetailViewState extends ConsumerState<_PaperDetailView> {
             tooltip: _showAnswers ? 'Hide Answers' : 'Show Answers',
             onPressed: () =>
                 setState(() => _showAnswers = !_showAnswers),
+          ),
+          // PDF (share + print)
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            tooltip: 'Generate Paper PDF',
+            onSelected: (action) {
+              if (action == 'share') {
+                _sharePdf();
+              } else if (action == 'print') {
+                _printPdf();
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'share',
+                child: Row(children: [
+                  Icon(Icons.ios_share, size: 18),
+                  SizedBox(width: 8),
+                  Text('Share PDF'),
+                ]),
+              ),
+              PopupMenuItem(
+                value: 'print',
+                child: Row(children: [
+                  Icon(Icons.print, size: 18),
+                  SizedBox(width: 8),
+                  Text('Print'),
+                ]),
+              ),
+            ],
           ),
           // Status menu
           PopupMenuButton<PaperStatus>(
@@ -266,6 +298,36 @@ class _PaperDetailViewState extends ConsumerState<_PaperDetailView> {
         ],
       ),
     );
+  }
+
+  Future<void> _sharePdf() async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final tenant = await ref.read(currentTenantProvider.future);
+      await QuestionPaperPdfBuilder.buildAndShare(
+        widget.paper,
+        tenant: tenant,
+      );
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text("Couldn't build the PDF.")),
+      );
+    }
+  }
+
+  Future<void> _printPdf() async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final tenant = await ref.read(currentTenantProvider.future);
+      await QuestionPaperPdfBuilder.buildAndPrint(
+        widget.paper,
+        tenant: tenant,
+      );
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text("Couldn't print the PDF.")),
+      );
+    }
   }
 
   void _changeStatus(PaperStatus status) async {

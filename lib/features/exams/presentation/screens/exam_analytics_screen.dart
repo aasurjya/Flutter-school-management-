@@ -137,7 +137,7 @@ class ExamAnalyticsScreen extends ConsumerWidget {
               children: [
                 const Icon(Icons.error_outline, size: 48, color: AppColors.error),
                 const SizedBox(height: 12),
-                Text(
+                const Text(
                   WarmCopy.genericError,
                   textAlign: TextAlign.center,
                 ),
@@ -287,17 +287,17 @@ class _AnalyticsBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 24),
-        _SectionTitle('Top performers'),
+        const _SectionTitle('Top performers'),
         const SizedBox(height: 8),
         if (toppers.isEmpty)
-          _NoData('No graded students yet.')
+          const _NoData('No graded students yet.')
         else
           ...toppers.asMap().entries.map((e) => _TopperRow(rank: e.key + 1, total: e.value)),
         const SizedBox(height: 24),
-        _SectionTitle('Subject average'),
+        const _SectionTitle('Subject average'),
         const SizedBox(height: 8),
         if (subjectAverages.isEmpty)
-          _NoData('No subject data yet.')
+          const _NoData('No subject data yet.')
         else
           GlassCard(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -308,7 +308,7 @@ class _AnalyticsBody extends StatelessWidget {
             ),
           ),
         const SizedBox(height: 24),
-        _SectionTitle('Score distribution'),
+        const _SectionTitle('Score distribution'),
         const SizedBox(height: 8),
         GlassCard(
           padding: const EdgeInsets.all(16),

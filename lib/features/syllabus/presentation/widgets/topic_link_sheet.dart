@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../providers/syllabus_provider.dart';
 

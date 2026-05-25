@@ -129,9 +129,11 @@ Each phase is independently shippable, has its own commit, and updates this file
 | 2. Fee Mgmt persistence | ✅ Done | — | `_RecordPaymentSheet` writes payments; `_generateInvoices` calls `generate_class_invoices` RPC; PDF receipt + collection report + defaulter report + statement; discount + edit head + add structure all real. |
 | 3. Timetable builder | ✅ Done | — | New `TimetableBuilderScreen` + `/timetable` GoRoute + role guard + teacher conflict detection. |
 | 4. Report Card mock removal | ✅ Done | — | `_mockExams` replaced with `examsProvider`. Year/term/class/section dropdowns now real. Dashboard `_OverviewStats` + `_ClassStatusGrid` wired to `rcDashboardSummaryProvider`. `?examId=` query param prefills selection. |
-| 5. Admission deepening | 🟡 In progress | — | PDF builders exist (`enrollment_letter`, `inquiry_receipt`). Class picker + enroll-to-student still TODO. |
-| 6. Visitor badge print | ✅ Done | — | `VisitorBadgePdfBuilder` (4×6 inch with QR) wired into check-in success. |
-| 7. Polish | ⚪ Queued | — | |
+| 5. Admission deepening | ✅ Done | `98dec3f` | Real class picker, Accept-and-Enroll runs 5-step pathway: student row + enrollment + auth user + parents + status update. Offer letter PDF action. |
+| 6. Visitor badge print | ✅ Done | `c723f98` | `VisitorBadgePdfBuilder` (4×6 inch with QR) wired into check-in success. |
+| 7. HR / Inventory / Certificate polish | ✅ Done | `cee55e5` | HR contract action wired; bulk salary slip PDF; inventory register PDF; certificate auto-PDF on issue + new bulk-issue sheet. |
+| 8. Librarian issue/return | ✅ Done | `cee55e5` | New `librarian_loans_screen` + issue book sheet + return action; role-guarded `/library/loans` route. |
+| 14. AI bug fixes | ✅ Done | `fdd5fc3` | Generate Remarks save + real student context in Message Composer + Send via Chat + spinner bug + sentinel + Child Insights LLM tips. |
 
 ---
 

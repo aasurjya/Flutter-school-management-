@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/admission_provider.dart';
 import '../../../../core/copy/warm_strings.dart';
+import '../../../academic/providers/academic_provider.dart';
 
 /// Multi-step application form:
 /// Step 0: Personal info
@@ -377,29 +378,96 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                // Class ID - In production this would use a provider to load classes
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Applying for Class ID *',
-                    prefixIcon: Icon(Icons.class_),
-                    hintText: 'Enter class UUID',
+                // Class picker — populated from classesProvider
+                ref.watch(classesProvider).when(
+                  data: (classes) => DropdownButtonFormField<String>(
+                    initialValue: _applyingForClassId,
+                    decoration: const InputDecoration(
+                      labelText: 'Applying for Class *',
+                      prefixIcon: Icon(Icons.class_),
+                    ),
+                    items: classes
+                        .map((c) => DropdownMenuItem(
+                              value: c.id,
+                              child: Text(c.name),
+                            ))
+                        .toList(),
+                    onChanged: (v) {
+                      setState(() {
+                        _applyingForClassId = v;
+                      });
+                    },
+                    validator: (v) =>
+                        v == null || v.isEmpty ? 'Please select a class' : null,
                   ),
-                  initialValue: _applyingForClassId,
-                  onChanged: (v) => _applyingForClassId = v.trim(),
-                  validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Required' : null,
+                  loading: () => const InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: 'Applying for Class *',
+                      prefixIcon: Icon(Icons.class_),
+                    ),
+                    child: LinearProgressIndicator(),
+                  ),
+                  error: (_, __) => TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Applying for Class *',
+                      prefixIcon: Icon(Icons.class_),
+                      hintText: 'Could not load classes',
+                    ),
+                    onChanged: (v) => _applyingForClassId = v.trim(),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Required' : null,
+                  ),
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Academic Year ID *',
-                    prefixIcon: Icon(Icons.calendar_month),
-                    hintText: 'Enter academic year UUID',
+                // Academic year picker — populated from academicYearsProvider
+                ref.watch(academicYearsProvider).when(
+                  data: (years) {
+                    // Auto-select current year when list first loads.
+                    if (_academicYearId == null && years.isNotEmpty) {
+                      final current = years.where((y) => y.isCurrent).toList();
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          setState(() {
+                            _academicYearId =
+                                current.isNotEmpty ? current.first.id : years.first.id;
+                          });
+                        }
+                      });
+                    }
+                    return DropdownButtonFormField<String>(
+                      initialValue: _academicYearId,
+                      decoration: const InputDecoration(
+                        labelText: 'Academic Year *',
+                        prefixIcon: Icon(Icons.calendar_month),
+                      ),
+                      items: years
+                          .map((y) => DropdownMenuItem(
+                                value: y.id,
+                                child: Text(y.name),
+                              ))
+                          .toList(),
+                      onChanged: (v) => setState(() => _academicYearId = v),
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Please select an academic year' : null,
+                    );
+                  },
+                  loading: () => const InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: 'Academic Year *',
+                      prefixIcon: Icon(Icons.calendar_month),
+                    ),
+                    child: LinearProgressIndicator(),
                   ),
-                  initialValue: _academicYearId,
-                  onChanged: (v) => _academicYearId = v.trim(),
-                  validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Required' : null,
+                  error: (_, __) => TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Academic Year *',
+                      prefixIcon: Icon(Icons.calendar_month),
+                      hintText: 'Could not load academic years',
+                    ),
+                    onChanged: (v) => _academicYearId = v.trim(),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Required' : null,
+                  ),
                 ),
               ],
             ),
@@ -664,6 +732,32 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
               _reviewRow('Date of Birth',
                   '${_dateOfBirth.day}/${_dateOfBirth.month}/${_dateOfBirth.year}', isDark),
               _reviewRow('Gender', _gender, isDark),
+              _reviewRow(
+                'Class',
+                ref
+                    .watch(classesProvider)
+                    .whenOrNull(
+                      data: (classes) => classes
+                          .where((c) => c.id == _applyingForClassId)
+                          .map((c) => c.name)
+                          .firstOrNull,
+                    ) ??
+                    (_applyingForClassId ?? '-'),
+                isDark,
+              ),
+              _reviewRow(
+                'Academic Year',
+                ref
+                    .watch(academicYearsProvider)
+                    .whenOrNull(
+                      data: (years) => years
+                          .where((y) => y.id == _academicYearId)
+                          .map((y) => y.name)
+                          .firstOrNull,
+                    ) ??
+                    (_academicYearId ?? '-'),
+                isDark,
+              ),
               const Divider(height: 24),
               if (_fatherNameController.text.isNotEmpty)
                 _reviewRow('Father', _fatherNameController.text, isDark),

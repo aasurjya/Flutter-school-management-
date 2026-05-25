@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -12,6 +13,9 @@ import '../widgets/application_status_badge.dart';
 import '../widgets/document_checklist_widget.dart';
 import '../../../../core/copy/warm_strings.dart';
 import '../../../id_card/providers/id_card_provider.dart';
+import '../../../academic/providers/academic_provider.dart';
+import '../../../students/providers/students_provider.dart';
+import '../../services/enrollment_service.dart';
 import '../../utils/enrollment_letter_pdf_builder.dart';
 
 class ApplicationDetailScreen extends ConsumerWidget {
@@ -60,6 +64,16 @@ class ApplicationDetailScreen extends ConsumerWidget {
                             dense: true,
                           ),
                         ),
+                      // Accept & Enroll: visible when accepted but not yet enrolled
+                      if (app.status == ApplicationStatus.accepted)
+                        const PopupMenuItem(
+                          value: 'enroll',
+                          child: ListTile(
+                            leading: Icon(Icons.school, color: AppColors.primary),
+                            title: Text('Accept & Enroll'),
+                            dense: true,
+                          ),
+                        ),
                       if (app.status != ApplicationStatus.rejected &&
                           app.status != ApplicationStatus.enrolled)
                         const PopupMenuItem(
@@ -89,17 +103,17 @@ class ApplicationDetailScreen extends ConsumerWidget {
                           dense: true,
                         ),
                       ),
-                      if (app.status == ApplicationStatus.accepted ||
-                          app.status == ApplicationStatus.enrolled)
-                        const PopupMenuItem(
-                          value: 'enrollment_letter',
-                          child: ListTile(
-                            leading: Icon(Icons.description,
-                                color: AppColors.primary),
-                            title: Text('Enrollment letter'),
-                            dense: true,
-                          ),
+                      // Offer / enrollment letter — always available so admin
+                      // can issue an offer letter ahead of enrollment.
+                      const PopupMenuItem(
+                        value: 'enrollment_letter',
+                        child: ListTile(
+                          leading: Icon(Icons.description,
+                              color: AppColors.primary),
+                          title: Text('Print offer letter'),
+                          dense: true,
                         ),
+                      ),
                     ],
                   );
                 },
@@ -582,6 +596,9 @@ class ApplicationDetailScreen extends ConsumerWidget {
         _showConfirmDialog(
             context, ref, app.id, ApplicationStatus.accepted, 'Accept');
         break;
+      case 'enroll':
+        _showEnrollConfirmSheet(context, ref, app);
+        break;
       case 'reject':
         _showConfirmDialog(
             context, ref, app.id, ApplicationStatus.rejected, 'Reject');
@@ -691,6 +708,199 @@ class ApplicationDetailScreen extends ConsumerWidget {
       }
     }
   }
+
+  // ── Accept & Enroll ────────────────────────────────────────────────────────
+
+  /// Confirmation bottom-sheet that shows applicant summary and lets admin
+  /// pick a section, edit the proposed admission number, then confirm.
+  void _showEnrollConfirmSheet(
+    BuildContext context,
+    WidgetRef ref,
+    AdmissionApplication app,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetCtx) => _EnrollConfirmSheet(
+        app: app,
+        onConfirm: (sectionId, academicYearId, admissionNumber) {
+          Navigator.pop(sheetCtx);
+          _executeEnroll(
+            context,
+            ref,
+            app,
+            sectionId: sectionId,
+            academicYearId: academicYearId,
+            admissionNumber: admissionNumber,
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _executeEnroll(
+    BuildContext context,
+    WidgetRef ref,
+    AdmissionApplication app, {
+    required String sectionId,
+    required String academicYearId,
+    required String admissionNumber,
+  }) async {
+    // Show a loading indicator while the chain runs.
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Enrolling student…'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final tenant = await ref.read(currentTenantProvider.future);
+      final service = EnrollmentService(Supabase.instance.client);
+
+      final result = await service.enroll(
+        app: app,
+        sectionId: sectionId,
+        academicYearId: academicYearId,
+        admissionNumber: admissionNumber,
+        tenant: tenant,
+      );
+
+      // Dismiss loading dialog.
+      if (context.mounted) Navigator.pop(context);
+
+      // Invalidate stale providers.
+      ref.invalidate(applicationByIdProvider(applicationId));
+      ref.invalidate(admissionNotifierProvider);
+      ref.invalidate(currentAdmissionStatsProvider);
+      ref.invalidate(studentsProvider);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Student enrolled successfully'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+
+        // Show credentials + offer to print enrollment letter.
+        await _showPostEnrollSheet(context, ref, app, result);
+      }
+    } catch (e) {
+      if (context.mounted) Navigator.pop(context);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(WarmCopy.genericError),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showPostEnrollSheet(
+    BuildContext context,
+    WidgetRef ref,
+    AdmissionApplication app,
+    EnrollmentResult result,
+  ) {
+    return showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetCtx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.check_circle, color: AppColors.success),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Enrollment complete — ${app.studentName}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Login credentials generated:',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 6),
+                      SelectableText('Email: ${result.email}',
+                          style: Theme.of(context).textTheme.bodySmall),
+                      SelectableText('Password: ${result.password}',
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: () {
+                    Navigator.pop(sheetCtx);
+                    _generateEnrollmentLetter(context, ref, app, share: true);
+                  },
+                  icon: const Icon(Icons.download),
+                  label: const Text('Download enrollment letter'),
+                ),
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(sheetCtx);
+                    _generateEnrollmentLetter(context, ref, app, share: false);
+                  },
+                  icon: const Icon(Icons.print),
+                  label: const Text('Print enrollment letter'),
+                ),
+                const SizedBox(height: 6),
+                TextButton(
+                  onPressed: () => Navigator.pop(sheetCtx),
+                  child: const Text('Done'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ── Enrollment letter ──────────────────────────────────────────────────────
 
   Future<void> _showEnrollmentLetterSheet(
     BuildContext context,
@@ -808,4 +1018,226 @@ class _InfoRow {
   final String label;
   final String value;
   const _InfoRow(this.label, this.value);
+}
+
+/// Bottom-sheet that confirms Accept-and-Enroll: shows applicant summary,
+/// lets admin pick a section in the applied class, edit a proposed
+/// admission number, then fires the [onConfirm] callback.
+class _EnrollConfirmSheet extends ConsumerStatefulWidget {
+  final AdmissionApplication app;
+  final void Function(
+    String sectionId,
+    String academicYearId,
+    String admissionNumber,
+  ) onConfirm;
+
+  const _EnrollConfirmSheet({
+    required this.app,
+    required this.onConfirm,
+  });
+
+  @override
+  ConsumerState<_EnrollConfirmSheet> createState() =>
+      _EnrollConfirmSheetState();
+}
+
+class _EnrollConfirmSheetState extends ConsumerState<_EnrollConfirmSheet> {
+  String? _selectedSectionId;
+  late final TextEditingController _admissionNumberController;
+
+  @override
+  void initState() {
+    super.initState();
+    _admissionNumberController = TextEditingController(
+      text: EnrollmentService.suggestAdmissionNumber(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _admissionNumberController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final app = widget.app;
+    final sectionsAsync =
+        ref.watch(sectionsByClassProvider(app.applyingForClassId));
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          20,
+          4,
+          20,
+          24 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.school, color: AppColors.primary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Accept & Enroll',
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Applicant summary
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      app.studentName,
+                      style: theme.textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Class: ${app.className ?? 'N/A'}',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    Text(
+                      'Academic Year: ${app.academicYearName ?? 'N/A'}',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    if (app.applicationNumber != null)
+                      Text(
+                        'Application: ${app.applicationNumber}',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Section picker
+              sectionsAsync.when(
+                data: (sections) {
+                  if (sections.isEmpty) {
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.warning.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.warning_amber,
+                              size: 18, color: AppColors.warning),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'No sections found for the applied class. '
+                              'Create a section first.',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return DropdownButtonFormField<String>(
+                    initialValue: _selectedSectionId,
+                    decoration: const InputDecoration(
+                      labelText: 'Assign to Section *',
+                      prefixIcon: Icon(Icons.groups),
+                    ),
+                    items: sections
+                        .map((s) => DropdownMenuItem(
+                              value: s.id,
+                              child: Text(s.name),
+                            ))
+                        .toList(),
+                    onChanged: (v) => setState(() => _selectedSectionId = v),
+                  );
+                },
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(8),
+                  child: LinearProgressIndicator(),
+                ),
+                error: (_, __) => Text(
+                  'Could not load sections',
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: AppColors.error),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Admission number
+              TextField(
+                controller: _admissionNumberController,
+                decoration: const InputDecoration(
+                  labelText: 'Admission Number *',
+                  prefixIcon: Icon(Icons.badge),
+                  helperText: 'Auto-suggested, edit if needed',
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.info.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.info_outline,
+                        size: 16, color: AppColors.info),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'This will create a student record, login account, '
+                        'and link parent contacts. The application will be '
+                        'marked enrolled.',
+                        style:
+                            TextStyle(fontSize: 12, color: AppColors.info),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: _canConfirm()
+                    ? () => widget.onConfirm(
+                          _selectedSectionId!,
+                          app.academicYearId,
+                          _admissionNumberController.text.trim(),
+                        )
+                    : null,
+                icon: const Icon(Icons.check),
+                label: const Text('Confirm enrollment'),
+              ),
+              const SizedBox(height: 6),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _canConfirm() {
+    return _selectedSectionId != null &&
+        _admissionNumberController.text.trim().isNotEmpty;
+  }
 }

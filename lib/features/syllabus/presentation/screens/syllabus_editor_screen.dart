@@ -455,7 +455,7 @@ class _SyllabusEditorScreenState extends ConsumerState<SyllabusEditorScreen> {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to delete: $e')),
+            SnackBar(content: Text(WarmCopy.genericError)),
           );
         }
       }

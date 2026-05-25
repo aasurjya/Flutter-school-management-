@@ -1240,7 +1240,7 @@ class _AddCategoryDialogState extends ConsumerState<_AddCategoryDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

@@ -206,7 +206,7 @@ class _TopicLinkSheetState extends ConsumerState<TopicLinkSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to link: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

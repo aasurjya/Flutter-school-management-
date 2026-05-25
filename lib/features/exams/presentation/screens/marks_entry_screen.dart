@@ -414,7 +414,7 @@ class _MarksEntryScreenState extends ConsumerState<MarksEntryScreen> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Failed to submit: $e');
+        context.showErrorSnackBar(WarmCopy.genericError);
       }
     } finally {
       if (mounted) {

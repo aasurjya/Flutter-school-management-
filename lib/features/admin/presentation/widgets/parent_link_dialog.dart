@@ -227,7 +227,7 @@ class _LinkedParentsSection extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to unlink: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );
@@ -454,7 +454,7 @@ class _LinkOptionsSheetState extends ConsumerState<_LinkOptionsSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to link: $e'),
+            content: Text(WarmCopy.genericError),
             backgroundColor: AppColors.error,
           ),
         );

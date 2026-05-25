@@ -216,7 +216,7 @@ class _AcademicYearsConfig extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -400,7 +400,7 @@ class _TermsForYear extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -568,7 +568,7 @@ class _ClassesConfig extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -749,7 +749,7 @@ class _SectionsConfig extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }
@@ -1010,7 +1010,7 @@ class _SubjectsConfig extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(WarmCopy.genericError), backgroundColor: AppColors.error),
         );
       }
     }

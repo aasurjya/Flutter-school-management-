@@ -111,7 +111,7 @@ class TemplateListScreen extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('Failed to delete: $e'),
+                content: Text(WarmCopy.genericError),
                 backgroundColor: AppColors.error),
           );
         }

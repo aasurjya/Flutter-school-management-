@@ -502,7 +502,7 @@ class _AppointmentCard extends ConsumerWidget {
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to cancel: $e')),
+                    SnackBar(content: Text(WarmCopy.genericError)),
                   );
                 }
               }

@@ -378,19 +378,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Widget _buildLoginForm() {
+    final brightness = Theme.of(context).brightness;
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.borderLight),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
+        color: AppColors.groupedCellFor(brightness),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.separatorFor(brightness),
+          width: 0.5,
+        ),
       ),
       child: Form(
         key: _formKey,

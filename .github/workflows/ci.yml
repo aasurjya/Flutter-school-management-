@@ -185,8 +185,13 @@ jobs:
           EOF
           sed -i 's/^ *//' .env
 
-      - name: Build Flutter web (release, tree-shake icons)
-        run: flutter build web --release --base-href /Flutter-school-management-/ --tree-shake-icons
+      - name: Build Flutter web (release, tree-shake icons, bundled CanvasKit)
+        # --no-web-resources-cdn bundles CanvasKit (canvaskit.js + canvaskit.wasm)
+        # into build/web/canvaskit/ instead of fetching from gstatic.com at
+        # runtime. Browsers with strict shields (Brave, hardened Firefox,
+        # uBlock-aggressive Chromium) block gstatic.com as a Google tracker;
+        # without bundled CanvasKit those visitors see a blank page.
+        run: flutter build web --release --base-href /Flutter-school-management-/ --tree-shake-icons --no-web-resources-cdn
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

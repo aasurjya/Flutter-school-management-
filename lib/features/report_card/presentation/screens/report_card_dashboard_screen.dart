@@ -3,8 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../data/models/report_card_full.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../academic/providers/academic_provider.dart';
+import '../../providers/report_card_provider.dart';
 
+/// Report Card dashboard — admin/principal entry point.
+///
+/// Year and term selectors are real (academicYearsProvider, termsProvider).
+/// Both `_OverviewStats` and `_ClassStatusGrid` are powered by
+/// `rcDashboardSummaryProvider` which reads `v_report_card_summary`.
 class ReportCardDashboardScreen extends ConsumerStatefulWidget {
   const ReportCardDashboardScreen({super.key});
 
@@ -21,6 +29,7 @@ class _ReportCardDashboardScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final yearsAsync = ref.watch(academicYearsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -38,7 +47,6 @@ class _ReportCardDashboardScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Quick Actions
             _QuickActionsSection(
               onGenerate: () => context.push('/report-cards/generate'),
               onTemplates: () => context.push('/report-cards/templates'),
@@ -48,62 +56,32 @@ class _ReportCardDashboardScreenState
             ),
             const SizedBox(height: 24),
 
-            // Filter Row
+            // Filters — real year + term
             Row(
               children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    initialValue: _selectedAcademicYear,
-                    decoration: const InputDecoration(
-                      labelText: 'Academic Year',
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                          value: '2024-25', child: Text('2024-25')),
-                      DropdownMenuItem(
-                          value: '2023-24', child: Text('2023-24')),
-                    ],
-                    onChanged: (v) => setState(() => _selectedAcademicYear = v),
-                  ),
-                ),
+                Expanded(child: _yearDropdown(yearsAsync)),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    initialValue: _selectedTerm,
-                    decoration: const InputDecoration(
-                      labelText: 'Term',
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'term1', child: Text('Term 1')),
-                      DropdownMenuItem(value: 'term2', child: Text('Term 2')),
-                      DropdownMenuItem(
-                          value: 'term3', child: Text('Final Term')),
-                    ],
-                    onChanged: (v) => setState(() => _selectedTerm = v),
-                  ),
-                ),
+                Expanded(child: _termDropdown()),
               ],
             ),
             const SizedBox(height: 24),
 
-            // Summary Stats
-            _OverviewStats(),
+            _OverviewStats(
+              academicYearId: _selectedAcademicYear,
+              termId: _selectedTerm,
+            ),
             const SizedBox(height: 24),
 
-            // Per-Class Status
             Text(
               'Class-wise Status',
               style: theme.textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            _ClassStatusGrid(),
+            _ClassStatusGrid(
+              academicYearId: _selectedAcademicYear,
+              termId: _selectedTerm,
+            ),
           ],
         ),
       ),
@@ -114,6 +92,81 @@ class _ReportCardDashboardScreenState
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
+    );
+  }
+
+  Widget _yearDropdown(AsyncValue<List<dynamic>> yearsAsync) {
+    return yearsAsync.when(
+      loading: () => const LinearProgressIndicator(),
+      error: (e, _) => Text('Years unavailable. $e'),
+      data: (years) {
+        if (years.isEmpty) {
+          return const Text(
+            'No academic years yet.',
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          );
+        }
+        _selectedAcademicYear ??= years.first.id as String;
+        return DropdownButtonFormField<String>(
+          initialValue: _selectedAcademicYear,
+          decoration: const InputDecoration(
+            labelText: 'Academic Year',
+            border: OutlineInputBorder(),
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+          items: years
+              .map((y) => DropdownMenuItem(
+                    value: y.id as String,
+                    child: Text(y.name as String),
+                  ))
+              .toList(),
+          onChanged: (v) => setState(() {
+            _selectedAcademicYear = v;
+            _selectedTerm = null;
+          }),
+        );
+      },
+    );
+  }
+
+  Widget _termDropdown() {
+    if (_selectedAcademicYear == null) {
+      return DropdownButtonFormField<String>(
+        decoration: const InputDecoration(
+          labelText: 'Term',
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+        items: const [],
+        onChanged: null,
+      );
+    }
+    final termsAsync = ref.watch(termsProvider(_selectedAcademicYear!));
+    return termsAsync.when(
+      loading: () => const LinearProgressIndicator(),
+      error: (e, _) => Text('Terms unavailable. $e'),
+      data: (terms) {
+        if (terms.isEmpty) {
+          return const Text(
+            'No terms yet.',
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          );
+        }
+        return DropdownButtonFormField<String>(
+          initialValue: _selectedTerm,
+          decoration: const InputDecoration(
+            labelText: 'Term',
+            border: OutlineInputBorder(),
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+          items: terms
+              .map((t) => DropdownMenuItem(value: t.id, child: Text(t.name)))
+              .toList(),
+          onChanged: (v) => setState(() => _selectedTerm = v),
+        );
+      },
     );
   }
 }
@@ -184,48 +237,120 @@ class _QuickActionsSection extends StatelessWidget {
   }
 }
 
-class _OverviewStats extends StatelessWidget {
+// ---------------------------------------------------------------------------
+// Real overview stats — totals across all sections for the picked year/term
+// ---------------------------------------------------------------------------
+
+class _OverviewStats extends ConsumerWidget {
+  const _OverviewStats({this.academicYearId, this.termId});
+  final String? academicYearId;
+  final String? termId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (academicYearId == null || termId == null) {
+      return const _OverviewPlaceholder(
+        message: 'Pick an academic year and term to see totals.',
+      );
+    }
+    final params = RCDashboardParams(
+      academicYearId: academicYearId!,
+      termId: termId!,
+    );
+    final summaryAsync = ref.watch(rcDashboardSummaryProvider(params));
+    return summaryAsync.when(
+      loading: () => const _OverviewPlaceholder(
+        message: 'Loading…',
+        isProgress: true,
+      ),
+      error: (e, _) => _OverviewPlaceholder(
+        message: 'Could not load summary. $e',
+      ),
+      data: (rows) => _OverviewRow(rows: rows),
+    );
+  }
+}
+
+class _OverviewRow extends StatelessWidget {
+  const _OverviewRow({required this.rows});
+  final List<ReportCardSummary> rows;
+
   @override
   Widget build(BuildContext context) {
-    // In production, these would come from the dashboard summary provider
-    return const Row(
+    final total = rows.fold<int>(0, (sum, r) => sum + r.totalReports);
+    final pending = rows.fold<int>(0, (sum, r) => sum + r.pendingCount);
+    final published = rows.fold<int>(0, (sum, r) => sum + r.publishedCount);
+    final sent = rows.fold<int>(0, (sum, r) => sum + r.sentCount);
+
+    return Row(
       children: [
         Expanded(
           child: _StatTile(
             label: 'Total Generated',
-            value: '248',
+            value: '$total',
             icon: Icons.description,
             color: AppColors.info,
           ),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(
           child: _StatTile(
             label: 'Pending Review',
-            value: '32',
+            value: '$pending',
             icon: Icons.rate_review,
             color: AppColors.warning,
           ),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(
           child: _StatTile(
             label: 'Published',
-            value: '180',
+            value: '$published',
             icon: Icons.publish,
             color: AppColors.success,
           ),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(
           child: _StatTile(
             label: 'Sent to Parents',
-            value: '156',
+            value: '$sent',
             icon: Icons.send,
             color: AppColors.primary,
           ),
         ),
       ],
+    );
+  }
+}
+
+class _OverviewPlaceholder extends StatelessWidget {
+  const _OverviewPlaceholder({required this.message, this.isProgress = false});
+  final String message;
+  final bool isProgress;
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          if (isProgress)
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            const Icon(Icons.info_outline, color: AppColors.info, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -279,89 +404,118 @@ class _StatTile extends StatelessWidget {
   }
 }
 
-class _ClassStatusGrid extends StatelessWidget {
+// ---------------------------------------------------------------------------
+// Real class-status grid — one tile per section
+// ---------------------------------------------------------------------------
+
+class _ClassStatusGrid extends ConsumerWidget {
+  const _ClassStatusGrid({this.academicYearId, this.termId});
+  final String? academicYearId;
+  final String? termId;
+
   @override
-  Widget build(BuildContext context) {
-    // Mock data; in production this comes from v_report_card_summary
-    final classes = [
-      _ClassStatus('Class 1-A', 40, 38, 2, 0),
-      _ClassStatus('Class 1-B', 42, 40, 0, 2),
-      _ClassStatus('Class 2-A', 38, 30, 5, 3),
-      _ClassStatus('Class 2-B', 40, 40, 0, 0),
-      _ClassStatus('Class 3-A', 45, 20, 10, 15),
-      _ClassStatus('Class 3-B', 43, 0, 0, 43),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (academicYearId == null || termId == null) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: Text(
+          'Select year and term to see per-class status.',
+          style: TextStyle(fontSize: 13, color: Colors.grey),
+        ),
+      );
+    }
+    final params = RCDashboardParams(
+      academicYearId: academicYearId!,
+      termId: termId!,
+    );
+    final summaryAsync = ref.watch(rcDashboardSummaryProvider(params));
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 1.8,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+    return summaryAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.all(24),
+        child: Center(child: CircularProgressIndicator()),
       ),
-      itemCount: classes.length,
-      itemBuilder: (context, index) {
-        final c = classes[index];
-        final publishedPct =
-            c.total > 0 ? (c.published / c.total * 100) : 0.0;
-
-        return GlassCard(
-          padding: const EdgeInsets.all(16),
-          onTap: () =>
-              context.push('/report-cards/list?section=${c.name}'),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                c.name,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: publishedPct / 100,
-                  backgroundColor: Colors.grey.withValues(alpha: 0.2),
-                  valueColor: AlwaysStoppedAnimation(
-                    publishedPct == 100
-                        ? AppColors.success
-                        : publishedPct > 50
-                            ? AppColors.info
-                            : AppColors.warning,
-                  ),
-                  minHeight: 6,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                '${c.published}/${c.total} published  '
-                '${c.pending > 0 ? "${c.pending} pending" : ""}'
-                '${c.notGenerated > 0 ? "  ${c.notGenerated} not started" : ""}',
-                style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+      error: (e, _) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text('Could not load class status. $e'),
+      ),
+      data: (rows) {
+        if (rows.isEmpty) {
+          return const GlassCard(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              'No report cards generated for this term yet.\nTap Generate to start.',
+              style: TextStyle(color: Colors.grey),
+            ),
+          );
+        }
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            childAspectRatio: 1.8,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
           ),
+          itemCount: rows.length,
+          itemBuilder: (context, index) {
+            final r = rows[index];
+            final publishedPct = r.publishedPercent;
+            return GlassCard(
+              padding: const EdgeInsets.all(16),
+              onTap: () =>
+                  context.push('/report-cards/list?section=${r.sectionId}'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${r.className} · ${r.sectionName}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: publishedPct / 100,
+                      backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                      valueColor: AlwaysStoppedAnimation(
+                        publishedPct == 100
+                            ? AppColors.success
+                            : publishedPct > 50
+                                ? AppColors.info
+                                : AppColors.warning,
+                      ),
+                      minHeight: 6,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _statusLine(r),
+                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
   }
-}
 
-class _ClassStatus {
-  final String name;
-  final int total;
-  final int published;
-  final int pending;
-  final int notGenerated;
-
-  _ClassStatus(
-      this.name, this.total, this.published, this.pending, this.notGenerated);
+  String _statusLine(ReportCardSummary r) {
+    final parts = <String>[
+      '${r.publishedCount + r.sentCount}/${r.totalReports} published',
+    ];
+    if (r.pendingCount > 0) parts.add('${r.pendingCount} pending');
+    return parts.join('  ');
+  }
 }

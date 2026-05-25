@@ -29,6 +29,41 @@ class FeeRepository extends BaseRepository {
     return FeeHead.fromJson(response);
   }
 
+  Future<FeeHead> updateFeeHead(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    final response = await client
+        .from('fee_heads')
+        .update(data)
+        .eq('id', id)
+        .eq('tenant_id', requireTenantId)
+        .select()
+        .single();
+    return FeeHead.fromJson(response);
+  }
+
+  /// Apply a discount/concession to a specific invoice.
+  /// Writes `discount_amount` and an optional `notes` line; trigger on the
+  /// invoices table recomputes balance and status.
+  Future<Invoice> applyInvoiceDiscount({
+    required String invoiceId,
+    required double discountAmount,
+    String? reason,
+  }) async {
+    final response = await client
+        .from('invoices')
+        .update({
+          'discount_amount': discountAmount,
+          if (reason != null) 'notes': reason,
+        })
+        .eq('id', invoiceId)
+        .eq('tenant_id', requireTenantId)
+        .select()
+        .single();
+    return Invoice.fromJson(response);
+  }
+
   Future<List<FeeStructure>> getFeeStructures({
     required String academicYearId,
     String? classId,

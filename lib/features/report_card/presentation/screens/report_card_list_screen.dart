@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/report_card_full.dart';
+import '../../../id_card/providers/id_card_provider.dart';
 import '../../providers/report_card_provider.dart';
 import '../../../../core/copy/warm_strings.dart';
+import '../../utils/report_card_bulk_pdf.dart';
 
 class ReportCardListScreen extends ConsumerStatefulWidget {
   const ReportCardListScreen({super.key});
@@ -33,6 +35,16 @@ class _ReportCardListScreenState extends ConsumerState<ReportCardListScreen> {
       appBar: AppBar(
         title: const Text('Report Cards'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.download_outlined),
+            onPressed: () => _bulkDownload(reportsAsync.valueOrNull ?? []),
+            tooltip: 'Bulk Download',
+          ),
+          IconButton(
+            icon: const Icon(Icons.publish_outlined),
+            onPressed: () => _bulkPublish(reportsAsync.valueOrNull ?? []),
+            tooltip: 'Bulk Publish',
+          ),
           IconButton(
             icon: const Icon(Icons.filter_list),
             onPressed: _showFilterSheet,
@@ -139,12 +151,111 @@ class _ReportCardListScreenState extends ConsumerState<ReportCardListScreen> {
               },
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text(WarmCopy.genericError)),
+              error: (e, _) => const Center(child: Text(WarmCopy.genericError)),
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// Bulk Download — fetch every report card matching the current filter,
+  /// render each one with ReportCardPdfBuilder, merge into a single PDF, and
+  /// hand the bytes to the OS share sheet. Replaces the old
+  /// "Bulk download coming soon" snack-bar stub.
+  Future<void> _bulkDownload(List<ReportCardFull> reports) async {
+    final messenger = ScaffoldMessenger.of(context);
+    if (reports.isEmpty) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('No report cards match the current filter.')),
+      );
+      return;
+    }
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('Building PDF for ${reports.length} report cards…'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    try {
+      final tenant = await ref.read(currentTenantProvider.future);
+      await ReportCardBulkPdf.shareMerged(
+        reports: reports,
+        tenant: tenant,
+        filename: 'report-cards-${DateTime.now().millisecondsSinceEpoch}.pdf',
+      );
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text(WarmCopy.genericError)),
+      );
+    }
+  }
+
+  /// Bulk Publish — confirm, then mark every currently filtered report card
+  /// as `published`. Replaces the old "Bulk publish coming soon" snack-bar
+  /// stub.
+  Future<void> _bulkPublish(List<ReportCardFull> reports) async {
+    final messenger = ScaffoldMessenger.of(context);
+    if (reports.isEmpty) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('No report cards match the current filter.')),
+      );
+      return;
+    }
+
+    // Don't republish already-published; show user the effective count.
+    final publishable = reports
+        .where((r) => r.status != 'published' && r.status != 'sent')
+        .toList();
+
+    if (publishable.isEmpty) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('All filtered reports are already published.'),
+        ),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Publish report cards?'),
+        content: Text(
+          'Publish ${publishable.length} report card(s)? '
+          'Published reports become visible to students and parents.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Publish'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      final repo = ref.read(rcFullRepositoryProvider);
+      await repo.publishReportCards(publishable.map((r) => r.id).toList());
+      ref.invalidate(rcListProvider);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Published ${publishable.length} report card(s)'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text(WarmCopy.genericError)),
+      );
+    }
   }
 
   void _showFilterSheet() {

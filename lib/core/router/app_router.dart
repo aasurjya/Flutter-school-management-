@@ -27,6 +27,7 @@ import '../../features/attendance/presentation/screens/attendance_screen.dart';
 import '../../features/attendance/presentation/screens/mark_attendance_screen.dart';
 import '../../features/exams/presentation/screens/exams_screen.dart';
 import '../../features/exams/presentation/screens/marks_entry_screen.dart';
+import '../../features/exams/presentation/screens/exam_analytics_screen.dart' as exam_analytics;
 import '../../features/fees/presentation/screens/fees_screen.dart';
 import '../../features/messaging/presentation/screens/messages_screen.dart';
 import '../../features/student/presentation/screens/student_results_screen.dart';
@@ -50,6 +51,7 @@ import '../../features/admin/presentation/screens/exam_management_screen.dart';
 import '../../features/admin/presentation/screens/fee_management_screen.dart';
 import '../../features/admin/presentation/screens/announcements_screen.dart';
 import '../../features/teacher/presentation/screens/teacher_timetable_screen.dart';
+import '../../features/timetable/presentation/screens/timetable_builder_screen.dart';
 import '../../features/super_admin/presentation/screens/super_admin_dashboard_screen.dart';
 import '../../features/super_admin/presentation/screens/tenants_list_screen.dart';
 import '../../features/super_admin/presentation/screens/create_tenant_screen.dart';
@@ -300,6 +302,7 @@ class AppRoutes {
   static const String markAttendance = '/attendance/mark/:sectionId';
   static const String exams = '/exams';
   static const String marksEntry = '/exams/:examId/marks';
+  static const String examAnalytics = '/exams/:examId/analytics';
   static const String fees = '/fees';
   static const String messages = '/messages';
   static const String assignments = '/assignments';
@@ -749,6 +752,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return _getDashboardRoute(ref);
         }
 
+        // Timetable builder requires tenant_admin or principal
+        if (location == AppRoutes.timetable &&
+            !const ['tenant_admin', 'principal'].contains(role)) {
+          return _getDashboardRoute(ref);
+        }
+
         // Teacher routes require teacher role
         if (location.startsWith('/teacher') && role != 'teacher') {
           return _getDashboardRoute(ref);
@@ -930,6 +939,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: ':examId/marks',
                 builder: (context, state) => MarksEntryScreen(
+                  examId: state.pathParameters['examId']!,
+                ),
+              ),
+              GoRoute(
+                path: ':examId/analytics',
+                builder: (context, state) => exam_analytics.ExamAnalyticsScreen(
                   examId: state.pathParameters['examId']!,
                 ),
               ),
@@ -1315,6 +1330,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.teacherTimetable,
             builder: (context, state) => const TeacherTimetableScreen(),
+          ),
+
+          // ==================== ADMIN TIMETABLE BUILDER ====================
+          GoRoute(
+            path: AppRoutes.timetable,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: TimetableBuilderScreen(),
+            ),
           ),
 
           // ==================== QR SCAN & ID CARD ====================

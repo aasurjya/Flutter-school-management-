@@ -291,6 +291,16 @@ class ExamsNotifier extends StateNotifier<AsyncValue<List<Exam>>> {
     await _repository.publishExam(examId);
     await loadExams();
   }
+
+  Future<void> unpublishExam(String examId) async {
+    await _repository.unpublishExam(examId);
+    await loadExams();
+  }
+
+  Future<void> deleteExam(String examId) async {
+    await _repository.deleteExam(examId);
+    await loadExams();
+  }
 }
 
 final examsNotifierProvider =

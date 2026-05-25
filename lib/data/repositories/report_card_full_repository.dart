@@ -357,22 +357,67 @@ class ReportCardFullRepository extends BaseRepository {
 
     final double attendancePct = totalDays > 0 ? (daysPresent / totalDays) * 100 : 0;
 
-    // 7. Calculate rank (by total percentage within the same section)
+    // 7. Calculate rank using v_student_overall_ranks view.
+    // The view exposes (student_id, section_id, exam_id, class_rank,
+    // overall_percentage). Average rank across the selected exams; tie-break
+    // ignored. Falls back to in-memory ranking if the view returns nothing.
     int rank = 0;
     int totalStudents = 0;
-    if (enrollment?['section_id'] != null) {
-      // Get all students in the section
+    final sectionId = enrollment?['section_id'] as String?;
+    if (sectionId != null) {
       final sectionStudents = await client
           .from('student_enrollments')
           .select('student_id')
-          .eq('section_id', enrollment!['section_id'])
+          .eq('section_id', sectionId)
           .eq('academic_year_id', academicYearId);
-
       totalStudents = (sectionStudents as List).length;
 
-      // Simplified rank: count students with higher percentage
-      // In production, this would use the mv_student_performance view
-      rank = 1; // Placeholder; full ranking requires class-wide marks query
+      if (examIds.isNotEmpty) {
+        try {
+          final ranksResp = await client
+              .from('v_student_overall_ranks')
+              .select('class_rank, overall_percentage')
+              .eq('student_id', studentId)
+              .eq('section_id', sectionId)
+              .inFilter('exam_id', examIds);
+          final ranks = (ranksResp as List)
+              .map((r) => (r['class_rank'] as num?)?.toInt() ?? 0)
+              .where((r) => r > 0)
+              .toList();
+          if (ranks.isNotEmpty) {
+            // Average rank across the selected exams (rounded).
+            final avg = ranks.fold<int>(0, (s, r) => s + r) / ranks.length;
+            rank = avg.round();
+          }
+        } catch (_) {
+          // View missing or RLS denied — fall through to in-memory ranking.
+        }
+      }
+
+      // Fallback: compute rank by overall percentage within the section.
+      if (rank == 0) {
+        try {
+          final peers = await client
+              .from('report_cards')
+              .select('student_id, data')
+              .eq('tenant_id', requireTenantId)
+              .eq('academic_year_id', academicYearId)
+              .eq('term_id', termId);
+          final scores = <_PeerScore>[];
+          for (final row in peers as List) {
+            final d = row['data'] as Map<String, dynamic>?;
+            final pct = (d?['overall_percentage'] as num?)?.toDouble();
+            if (pct != null) {
+              scores.add(_PeerScore(row['student_id'] as String, pct));
+            }
+          }
+          scores.add(_PeerScore(studentId, overallPct));
+          scores.sort((a, b) => b.pct.compareTo(a.pct));
+          rank = scores.indexWhere((s) => s.studentId == studentId) + 1;
+        } catch (_) {
+          rank = 0;
+        }
+      }
     }
 
     // 8. Assemble data snapshot
@@ -469,6 +514,7 @@ class ReportCardFullRepository extends BaseRepository {
 
   /// Publish report cards (change status to published)
   Future<void> publishReportCards(List<String> reportIds) async {
+    if (reportIds.isEmpty) return;
     await client
         .from('report_cards')
         .update({
@@ -476,6 +522,19 @@ class ReportCardFullRepository extends BaseRepository {
           'published_at': DateTime.now().toIso8601String(),
         })
         .inFilter('id', reportIds);
+  }
+
+  /// Hydrate a list of report cards by IDs (with joins).
+  Future<List<ReportCardFull>> getReportCardsByIds(List<String> ids) async {
+    if (ids.isEmpty) return const [];
+    final response = await client
+        .from('report_cards')
+        .select(_reportCardSelect)
+        .eq('tenant_id', requireTenantId)
+        .inFilter('id', ids);
+    return (response as List)
+        .map((json) => ReportCardFull.fromJson(json))
+        .toList();
   }
 
   /// Mark as reviewed
@@ -637,6 +696,13 @@ class ReportCardFullRepository extends BaseRepository {
     if (percentage >= 33) return 'D';
     return 'E';
   }
+}
+
+/// Internal tuple for in-memory rank fallback.
+class _PeerScore {
+  final String studentId;
+  final double pct;
+  const _PeerScore(this.studentId, this.pct);
 }
 
 /// Internal aggregator for subject marks across multiple exams.

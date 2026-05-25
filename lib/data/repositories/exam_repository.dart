@@ -83,6 +83,68 @@ class ExamRepository extends BaseRepository {
         .eq('id', examId);
   }
 
+  Future<void> unpublishExam(String examId) async {
+    await client
+        .from('exams')
+        .update({'is_published': false})
+        .eq('id', examId);
+  }
+
+  Future<void> deleteExam(String examId) async {
+    await client.from('exams').delete().eq('id', examId);
+  }
+
+  Future<void> deleteExamSubject(String examSubjectId) async {
+    await client.from('exam_subjects').delete().eq('id', examSubjectId);
+  }
+
+  /// Patch one or more fields on an exam_subjects row. Used by the
+  /// per-subject scheduling sheet (exam date / start time / end time).
+  /// Pass only the keys that change.
+  ///
+  /// Returns void — callers should invalidate [examSubjectsProvider]
+  /// to refresh the list.
+  Future<void> updateExamSubject(
+    String examSubjectId,
+    Map<String, dynamic> data,
+  ) async {
+    await client
+        .from('exam_subjects')
+        .update(data)
+        .eq('id', examSubjectId);
+  }
+
+  /// All marks for every exam_subject under an exam — joined with student
+  /// and subject info so the analytics screen can compute pass-rate,
+  /// averages, toppers and distribution without N+1 calls.
+  ///
+  /// Returns raw rows (snake_case, with nested `students` / `exam_subjects`
+  /// objects) because the freezed [Mark] model uses camelCase keys and
+  /// can't deserialise the joined shape directly.
+  Future<List<Map<String, dynamic>>> getMarksForExam(String examId) async {
+    final response = await client
+        .from('marks')
+        .select('''
+          id,
+          student_id,
+          marks_obtained,
+          is_absent,
+          remarks,
+          students(id, first_name, last_name, admission_number),
+          exam_subjects!inner(
+            id,
+            exam_id,
+            max_marks,
+            passing_marks,
+            subjects(id, name)
+          )
+        ''')
+        .eq('exam_subjects.exam_id', examId);
+    return (response as List)
+        .map((row) => Map<String, dynamic>.from(row as Map))
+        .toList();
+  }
+
   Future<List<ExamSubject>> getExamSubjects(String examId) async {
     final response = await client
         .from('exam_subjects')

@@ -116,6 +116,14 @@ final paymentsProvider = FutureProvider.autoDispose.family<List<Payment>, Paymen
   },
 );
 
+/// Recent payments across the tenant — used by the admin Fees overview
+/// "Recent Transactions" strip. Replaces the hardcoded mock list.
+final recentPaymentsProvider =
+    FutureProvider.autoDispose<List<Payment>>((ref) async {
+  final repository = ref.watch(feeRepositoryProvider);
+  return repository.getPayments(limit: 10);
+});
+
 class FeeStructureFilter {
   final String academicYearId;
   final String? classId;

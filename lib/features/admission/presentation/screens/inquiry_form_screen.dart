@@ -7,6 +7,8 @@ import '../../../../data/models/admission.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/admission_provider.dart';
 import '../../../../core/copy/warm_strings.dart';
+import '../../../id_card/providers/id_card_provider.dart';
+import '../../utils/inquiry_receipt_pdf_builder.dart';
 
 class InquiryFormScreen extends ConsumerStatefulWidget {
   final AdmissionInquiry? inquiry;
@@ -80,10 +82,11 @@ class _InquiryFormScreenState extends ConsumerState<InquiryFormScreen> {
       };
 
       final notifier = ref.read(inquiryNotifierProvider.notifier);
+      final AdmissionInquiry saved;
       if (isEditing) {
-        await notifier.updateInquiry(widget.inquiry!.id, data);
+        saved = await notifier.updateInquiry(widget.inquiry!.id, data);
       } else {
-        await notifier.createInquiry(data);
+        saved = await notifier.createInquiry(data);
       }
 
       if (mounted) {
@@ -95,7 +98,9 @@ class _InquiryFormScreenState extends ConsumerState<InquiryFormScreen> {
             backgroundColor: AppColors.success,
           ),
         );
-        context.pop();
+        // Offer a printable receipt for the parent / walk-in.
+        await _showInquiryReceiptSheet(saved);
+        if (mounted) context.pop();
       }
     } catch (e) {
       if (mounted) {
@@ -108,6 +113,100 @@ class _InquiryFormScreenState extends ConsumerState<InquiryFormScreen> {
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  Future<void> _showInquiryReceiptSheet(AdmissionInquiry inquiry) async {
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetCtx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.receipt_long, color: AppColors.primary),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Inquiry receipt',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Hand a printable acknowledgement to the parent — '
+                  'inquiry no., contact, and a 2-business-day reassurance line.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: () {
+                    Navigator.pop(sheetCtx);
+                    _generateInquiryReceipt(inquiry, share: true);
+                  },
+                  icon: const Icon(Icons.ios_share),
+                  label: const Text('Share receipt'),
+                ),
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(sheetCtx);
+                    _generateInquiryReceipt(inquiry, share: false);
+                  },
+                  icon: const Icon(Icons.print),
+                  label: const Text('Print receipt'),
+                ),
+                const SizedBox(height: 6),
+                TextButton(
+                  onPressed: () => Navigator.pop(sheetCtx),
+                  child: const Text('Skip'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _generateInquiryReceipt(
+    AdmissionInquiry inquiry, {
+    required bool share,
+  }) async {
+    try {
+      final tenant = await ref.read(currentTenantProvider.future);
+      if (share) {
+        await InquiryReceiptPdfBuilder.buildAndShare(
+          inquiry: inquiry,
+          tenant: tenant,
+        );
+      } else {
+        await InquiryReceiptPdfBuilder.buildAndPrint(
+          inquiry: inquiry,
+          tenant: tenant,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(WarmCopy.genericError),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 

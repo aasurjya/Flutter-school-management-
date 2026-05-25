@@ -196,18 +196,19 @@ class _GatewayCard extends ConsumerWidget {
                 ],
               ),
             ),
-            // Configure button
-            if (existing != null)
-              TextButton(
-                onPressed: () => _showConfigSheet(context, ref, existing!),
-                style: TextButton.styleFrom(
-                  foregroundColor: brandColor,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  minimumSize: Size.zero,
-                ),
-                child: const Text('Configure'),
+            // Configure / Set up button
+            TextButton(
+              onPressed: existing != null
+                  ? () => _showConfigSheet(context, ref, existing!)
+                  : () => _setupAndConfigure(context, ref),
+              style: TextButton.styleFrom(
+                foregroundColor: brandColor,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
               ),
+              child: Text(existing != null ? 'Configure' : 'Set up'),
+            ),
             const SizedBox(width: 8),
             // Toggle switch
             Switch(
@@ -252,6 +253,25 @@ class _GatewayCard extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => _GatewayConfigSheet(gateway: gateway),
     );
+  }
+
+  /// Create the gateway row (disabled + test-mode) so the admin can fill
+  /// in credentials. Opens the config sheet on success.
+  Future<void> _setupAndConfigure(BuildContext context, WidgetRef ref) async {
+    try {
+      final created = await ref.read(gatewaysProvider.notifier).setup(
+            gatewayName: gatewayName.name,
+            displayName: displayName,
+          );
+      if (!context.mounted) return;
+      _showConfigSheet(context, ref, created);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(WarmCopy.saveFailed('the gateway'))),
+        );
+      }
+    }
   }
 }
 

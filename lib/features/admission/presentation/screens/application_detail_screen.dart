@@ -11,6 +11,8 @@ import '../../providers/admission_provider.dart';
 import '../widgets/application_status_badge.dart';
 import '../widgets/document_checklist_widget.dart';
 import '../../../../core/copy/warm_strings.dart';
+import '../../../id_card/providers/id_card_provider.dart';
+import '../../utils/enrollment_letter_pdf_builder.dart';
 
 class ApplicationDetailScreen extends ConsumerWidget {
   final String applicationId;
@@ -87,6 +89,17 @@ class ApplicationDetailScreen extends ConsumerWidget {
                           dense: true,
                         ),
                       ),
+                      if (app.status == ApplicationStatus.accepted ||
+                          app.status == ApplicationStatus.enrolled)
+                        const PopupMenuItem(
+                          value: 'enrollment_letter',
+                          child: ListTile(
+                            leading: Icon(Icons.description,
+                                color: AppColors.primary),
+                            title: Text('Enrollment letter'),
+                            dense: true,
+                          ),
+                        ),
                     ],
                   );
                 },
@@ -582,6 +595,9 @@ class ApplicationDetailScreen extends ConsumerWidget {
           '${AppRoutes.admissionInterviews}?applicationId=${app.id}',
         );
         break;
+      case 'enrollment_letter':
+        _showEnrollmentLetterSheet(context, ref, app);
+        break;
     }
   }
 
@@ -642,7 +658,7 @@ class ApplicationDetailScreen extends ConsumerWidget {
   }) async {
     try {
       final repo = ref.read(admissionRepositoryProvider);
-      await repo.updateApplicationStatus(
+      final updated = await repo.updateApplicationStatus(
         appId,
         status: status,
         statusNotes: notes,
@@ -657,6 +673,122 @@ class ApplicationDetailScreen extends ConsumerWidget {
             content: Text('Application ${status.label.toLowerCase()}'),
             backgroundColor: AppColors.success,
           ),
+        );
+      }
+
+      // After acceptance, surface the enrollment-letter actions immediately.
+      if (status == ApplicationStatus.accepted && context.mounted) {
+        await _showEnrollmentLetterSheet(context, ref, updated);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(WarmCopy.genericError),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showEnrollmentLetterSheet(
+    BuildContext context,
+    WidgetRef ref,
+    AdmissionApplication app,
+  ) {
+    return showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetCtx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.description, color: AppColors.primary),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Enrollment letter',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Generate a formal admission confirmation for '
+                  '${app.studentName}.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: () {
+                    Navigator.pop(sheetCtx);
+                    _generateEnrollmentLetter(context, ref, app, share: true);
+                  },
+                  icon: const Icon(Icons.download),
+                  label: const Text('Download enrollment letter (PDF)'),
+                ),
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(sheetCtx);
+                    _generateEnrollmentLetter(context, ref, app, share: false);
+                  },
+                  icon: const Icon(Icons.print),
+                  label: const Text('Print enrollment letter'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _generateEnrollmentLetter(
+    BuildContext context,
+    WidgetRef ref,
+    AdmissionApplication app, {
+    required bool share,
+  }) async {
+    try {
+      final tenant = await ref.read(currentTenantProvider.future);
+
+      // Best-effort fetch of admission settings for this class/year so the
+      // letter shows the annual fee. Failures are non-fatal.
+      AdmissionSettings? settings;
+      try {
+        final repo = ref.read(admissionRepositoryProvider);
+        final all = await repo.getSettings(
+          academicYearId: app.academicYearId,
+          classId: app.applyingForClassId,
+        );
+        if (all.isNotEmpty) settings = all.first;
+      } catch (_) {
+        settings = null;
+      }
+
+      if (share) {
+        await EnrollmentLetterPdfBuilder.buildAndShare(
+          app: app,
+          tenant: tenant,
+          settings: settings,
+        );
+      } else {
+        await EnrollmentLetterPdfBuilder.buildAndPrint(
+          app: app,
+          tenant: tenant,
+          settings: settings,
         );
       }
     } catch (e) {

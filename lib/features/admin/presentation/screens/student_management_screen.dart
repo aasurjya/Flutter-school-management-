@@ -12,6 +12,8 @@ import '../../../../data/models/student.dart';
 import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../academic/providers/academic_provider.dart';
+import '../../../id_card/providers/id_card_provider.dart';
+import '../../../id_card/utils/bulk_student_id_card_pdf_builder.dart';
 import '../../../students/providers/students_provider.dart';
 import '../widgets/add_student_form.dart';
 import '../widgets/credential_display_dialog.dart';
@@ -29,6 +31,12 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
   final _searchController = TextEditingController();
   String? _selectedClassId;
   String? _selectedSectionId;
+  // Status: null = all, true = active only, false = inactive only.
+  bool? _activeFilter = true;
+  // Gender: null = all, otherwise 'Male' / 'Female' / 'Other'.
+  String? _genderFilter;
+  // Pay status: null = all, 'pending' = has dues, 'paid' = all paid.
+  String? _payStatusFilter;
 
   @override
   void initState() {
@@ -36,12 +44,42 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
     _loadStudents();
   }
 
+  bool get _hasActiveFilter =>
+      _selectedClassId != null ||
+      _selectedSectionId != null ||
+      _activeFilter != true ||
+      _genderFilter != null ||
+      _payStatusFilter != null;
+
   void _loadStudents() {
     ref.read(studentsNotifierProvider.notifier).loadStudents(
       sectionId: _selectedSectionId,
       classId: _selectedClassId,
       searchQuery: _searchController.text.isNotEmpty ? _searchController.text : null,
+      // When _activeFilter is null we still default to true; flip to false
+      // only when the admin explicitly picks "Inactive" in the sheet.
+      activeOnly: _activeFilter ?? true,
     );
+  }
+
+  /// Client-side trim for filters the repo doesn't accept directly.
+  /// Keeps gender + payment filtering live without round-tripping.
+  List<Student> _applyClientFilters(List<Student> students) {
+    Iterable<Student> filtered = students;
+    if (_genderFilter != null) {
+      filtered = filtered.where(
+        (s) => (s.gender ?? '').toLowerCase() ==
+            _genderFilter!.toLowerCase(),
+      );
+    }
+    if (_payStatusFilter != null) {
+      if (_payStatusFilter == 'paid') {
+        filtered = filtered.where((s) => s.paymentStatus == 'paid');
+      } else if (_payStatusFilter == 'pending') {
+        filtered = filtered.where((s) => s.paymentStatus != 'paid');
+      }
+    }
+    return filtered.toList(growable: false);
   }
 
   @override
@@ -61,9 +99,32 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list),
-            tooltip: 'Filter',
-            onPressed: _showFilterDialog,
+            icon: const Icon(Icons.print_outlined),
+            tooltip: 'Bulk Print ID Cards',
+            onPressed: _showBulkIdCardSheet,
+          ),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.filter_list),
+                tooltip: 'Filter',
+                onPressed: _showFilterSheet,
+              ),
+              if (_hasActiveFilter)
+                Positioned(
+                  right: 10,
+                  top: 10,
+                  child: Container(
+                    width: 9,
+                    height: 9,
+                    decoration: const BoxDecoration(
+                      color: Colors.amber,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
@@ -115,7 +176,8 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                   ],
                 ),
               ),
-              data: (students) {
+              data: (rawStudents) {
+                final students = _applyClientFilters(rawStudents);
                 if (students.isEmpty) {
                   return Center(
                     child: Column(
@@ -175,40 +237,47 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
     );
   }
 
-  void _showFilterDialog() {
-    showDialog(
+  void _showFilterSheet() {
+    showModalBottomSheet<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Filter Students'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Class dropdown would go here
-            // Section dropdown would go here
-            Text('Filter options coming soon'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedClassId = null;
-                _selectedSectionId = null;
-              });
-              _loadStudents();
-              Navigator.pop(context);
-            },
-            child: const Text('Clear'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _loadStudents();
-              Navigator.pop(context);
-            },
-            child: const Text('Apply'),
-          ),
-        ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _StudentFilterSheet(
+        initialClassId: _selectedClassId,
+        initialSectionId: _selectedSectionId,
+        initialActive: _activeFilter,
+        initialGender: _genderFilter,
+        initialPayStatus: _payStatusFilter,
+        onApply: ({classId, sectionId, active, gender, payStatus}) {
+          setState(() {
+            _selectedClassId = classId;
+            _selectedSectionId = sectionId;
+            _activeFilter = active;
+            _genderFilter = gender;
+            _payStatusFilter = payStatus;
+          });
+          _loadStudents();
+        },
+        onClear: () {
+          setState(() {
+            _selectedClassId = null;
+            _selectedSectionId = null;
+            _activeFilter = true;
+            _genderFilter = null;
+            _payStatusFilter = null;
+          });
+          _loadStudents();
+        },
       ),
+    );
+  }
+
+  void _showBulkIdCardSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _BulkIdCardSheet(),
     );
   }
 
@@ -251,27 +320,11 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
   }
 
   void _showChangeSectionDialog(Student student) {
-    showDialog(
+    showModalBottomSheet<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Change Section'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Section change coming soon'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Change'),
-          ),
-        ],
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ChangeSectionSheet(student: student),
     );
   }
 
@@ -1556,6 +1609,692 @@ class _EditStudentSheetState extends ConsumerState<_EditStudentSheet> {
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
+      }
+    }
+  }
+}
+
+// ============================================================================
+// Filter bottom-sheet
+// ============================================================================
+
+typedef _ApplyFilters = void Function({
+  String? classId,
+  String? sectionId,
+  bool? active,
+  String? gender,
+  String? payStatus,
+});
+
+class _StudentFilterSheet extends ConsumerStatefulWidget {
+  final String? initialClassId;
+  final String? initialSectionId;
+  final bool? initialActive;
+  final String? initialGender;
+  final String? initialPayStatus;
+  final _ApplyFilters onApply;
+  final VoidCallback onClear;
+
+  const _StudentFilterSheet({
+    required this.initialClassId,
+    required this.initialSectionId,
+    required this.initialActive,
+    required this.initialGender,
+    required this.initialPayStatus,
+    required this.onApply,
+    required this.onClear,
+  });
+
+  @override
+  ConsumerState<_StudentFilterSheet> createState() =>
+      _StudentFilterSheetState();
+}
+
+class _StudentFilterSheetState extends ConsumerState<_StudentFilterSheet> {
+  String? _classId;
+  String? _sectionId;
+  // 'active' / 'inactive' / null=all
+  String? _statusKey;
+  String? _gender;
+  // 'paid' / 'pending' / null=all
+  String? _payStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _classId = widget.initialClassId;
+    _sectionId = widget.initialSectionId;
+    _statusKey = widget.initialActive == null
+        ? null
+        : (widget.initialActive! ? 'active' : 'inactive');
+    _gender = widget.initialGender;
+    _payStatus = widget.initialPayStatus;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final classesAsync = ref.watch(classesProvider);
+    final sectionsAsync = _classId != null
+        ? ref.watch(sectionsByClassProvider(_classId!))
+        : null;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const Text(
+                'Filter Students',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              classesAsync.when(
+                data: (classes) {
+                  return DropdownButtonFormField<String?>(
+                    initialValue: _classId,
+                    decoration: const InputDecoration(
+                      labelText: 'Class',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('All classes'),
+                      ),
+                      ...classes.map(
+                        (c) => DropdownMenuItem<String?>(
+                          value: c.id,
+                          child: Text(c.name),
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) => setState(() {
+                      _classId = value;
+                      _sectionId = null;
+                    }),
+                  );
+                },
+                loading: () => const LinearProgressIndicator(),
+                error: (_, __) => const Text(WarmCopy.genericError),
+              ),
+              const SizedBox(height: 12),
+              if (_classId != null && sectionsAsync != null)
+                sectionsAsync.when(
+                  data: (sections) {
+                    return DropdownButtonFormField<String?>(
+                      initialValue: _sectionId,
+                      decoration: const InputDecoration(
+                        labelText: 'Section',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('All sections'),
+                        ),
+                        ...sections.map(
+                          (s) => DropdownMenuItem<String?>(
+                            value: s.id,
+                            child: Text(s.name),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _sectionId = value),
+                    );
+                  },
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, __) => const Text(WarmCopy.genericError),
+                ),
+              if (_classId != null) const SizedBox(height: 12),
+              DropdownButtonFormField<String?>(
+                initialValue: _statusKey,
+                decoration: const InputDecoration(
+                  labelText: 'Status',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text('All statuses'),
+                  ),
+                  DropdownMenuItem<String?>(
+                    value: 'active',
+                    child: Text('Active'),
+                  ),
+                  DropdownMenuItem<String?>(
+                    value: 'inactive',
+                    child: Text('Inactive'),
+                  ),
+                ],
+                onChanged: (value) => setState(() => _statusKey = value),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String?>(
+                initialValue: _gender,
+                decoration: const InputDecoration(
+                  labelText: 'Gender',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text('All genders'),
+                  ),
+                  DropdownMenuItem<String?>(
+                    value: 'Male',
+                    child: Text('Male'),
+                  ),
+                  DropdownMenuItem<String?>(
+                    value: 'Female',
+                    child: Text('Female'),
+                  ),
+                  DropdownMenuItem<String?>(
+                    value: 'Other',
+                    child: Text('Other'),
+                  ),
+                ],
+                onChanged: (value) => setState(() => _gender = value),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String?>(
+                initialValue: _payStatus,
+                decoration: const InputDecoration(
+                  labelText: 'Payment status',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text('All'),
+                  ),
+                  DropdownMenuItem<String?>(
+                    value: 'pending',
+                    child: Text('Has dues'),
+                  ),
+                  DropdownMenuItem<String?>(
+                    value: 'paid',
+                    child: Text('All paid'),
+                  ),
+                ],
+                onChanged: (value) => setState(() => _payStatus = value),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        widget.onClear();
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Clear'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {
+                        widget.onApply(
+                          classId: _classId,
+                          sectionId: _sectionId,
+                          active: _statusKey == null
+                              ? null
+                              : _statusKey == 'active',
+                          gender: _gender,
+                          payStatus: _payStatus,
+                        );
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Apply'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// Change-Section bottom-sheet
+// ============================================================================
+
+class _ChangeSectionSheet extends ConsumerStatefulWidget {
+  final Student student;
+
+  const _ChangeSectionSheet({required this.student});
+
+  @override
+  ConsumerState<_ChangeSectionSheet> createState() =>
+      _ChangeSectionSheetState();
+}
+
+class _ChangeSectionSheetState extends ConsumerState<_ChangeSectionSheet> {
+  String? _classId;
+  String? _sectionId;
+  bool _isSubmitting = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final classesAsync = ref.watch(classesProvider);
+    final sectionsAsync = _classId != null
+        ? ref.watch(sectionsByClassProvider(_classId!))
+        : null;
+    final academicYearAsync = ref.watch(currentAcademicYearProvider);
+
+    final currentEnrollment = widget.student.currentEnrollment;
+    final currentLabel = currentEnrollment == null
+        ? 'Not Enrolled'
+        : '${currentEnrollment.className ?? ''} - '
+            '${currentEnrollment.sectionName ?? ''}';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const Text(
+                'Change Section',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '${widget.student.firstName} ${widget.student.lastName ?? ''}'
+                    .trim(),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Currently: $currentLabel',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 16),
+              classesAsync.when(
+                data: (classes) {
+                  if (classes.isEmpty) {
+                    return const Text('No classes found.');
+                  }
+                  return DropdownButtonFormField<String>(
+                    initialValue: _classId,
+                    decoration: const InputDecoration(
+                      labelText: 'Destination Class *',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: classes
+                        .map((c) => DropdownMenuItem<String>(
+                              value: c.id,
+                              child: Text(c.name),
+                            ))
+                        .toList(),
+                    onChanged: (value) => setState(() {
+                      _classId = value;
+                      _sectionId = null;
+                    }),
+                  );
+                },
+                loading: () => const LinearProgressIndicator(),
+                error: (_, __) => const Text(WarmCopy.genericError),
+              ),
+              const SizedBox(height: 12),
+              if (_classId != null && sectionsAsync != null)
+                sectionsAsync.when(
+                  data: (sections) {
+                    if (sections.isEmpty) {
+                      return const Text(
+                          'No sections configured for this class.');
+                    }
+                    return DropdownButtonFormField<String>(
+                      initialValue: _sectionId,
+                      decoration: const InputDecoration(
+                        labelText: 'Destination Section *',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: sections
+                          .map((s) => DropdownMenuItem<String>(
+                                value: s.id,
+                                child: Text(s.name),
+                              ))
+                          .toList(),
+                      onChanged: (value) =>
+                          setState(() => _sectionId = value),
+                    );
+                  },
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, __) => const Text(WarmCopy.genericError),
+                ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: _isSubmitting
+                      ? null
+                      : () => _submit(academicYearAsync),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Confirm Change'),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: _isSubmitting
+                    ? null
+                    : () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _submit(AsyncValue<AcademicYear?> academicYearAsync) async {
+    if (_sectionId == null) {
+      context.showErrorSnackBar('Pick a destination section first.');
+      return;
+    }
+    final academicYear = academicYearAsync.maybeWhen(
+      data: (year) => year,
+      orElse: () => null,
+    );
+    if (academicYear == null) {
+      context.showErrorSnackBar(
+        'No current academic year configured.',
+      );
+      return;
+    }
+    setState(() => _isSubmitting = true);
+    try {
+      await ref.read(studentsNotifierProvider.notifier).changeSection(
+            studentId: widget.student.id,
+            newSectionId: _sectionId!,
+            academicYearId: academicYear.id,
+          );
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      context.showSuccessSnackBar('Section updated.');
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+        context.showErrorSnackBar(WarmCopy.genericError);
+      }
+    }
+  }
+}
+
+// ============================================================================
+// Bulk ID-Card bottom-sheet
+// ============================================================================
+
+class _BulkIdCardSheet extends ConsumerStatefulWidget {
+  const _BulkIdCardSheet();
+
+  @override
+  ConsumerState<_BulkIdCardSheet> createState() => _BulkIdCardSheetState();
+}
+
+class _BulkIdCardSheetState extends ConsumerState<_BulkIdCardSheet> {
+  String? _classId;
+  String? _sectionId;
+  bool _isBuilding = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final classesAsync = ref.watch(classesProvider);
+    final sectionsAsync = _classId != null
+        ? ref.watch(sectionsByClassProvider(_classId!))
+        : null;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const Text(
+                'Bulk Print ID Cards',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'A4 sheet — 2 columns x 5 rows = 10 cards per page.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 16),
+              classesAsync.when(
+                data: (classes) {
+                  if (classes.isEmpty) {
+                    return const Text('No classes available.');
+                  }
+                  return DropdownButtonFormField<String>(
+                    initialValue: _classId,
+                    decoration: const InputDecoration(
+                      labelText: 'Class *',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: classes
+                        .map((c) => DropdownMenuItem<String>(
+                              value: c.id,
+                              child: Text(c.name),
+                            ))
+                        .toList(),
+                    onChanged: (value) => setState(() {
+                      _classId = value;
+                      _sectionId = null;
+                    }),
+                  );
+                },
+                loading: () => const LinearProgressIndicator(),
+                error: (_, __) => const Text(WarmCopy.genericError),
+              ),
+              const SizedBox(height: 12),
+              if (_classId != null && sectionsAsync != null)
+                sectionsAsync.when(
+                  data: (sections) {
+                    return DropdownButtonFormField<String?>(
+                      initialValue: _sectionId,
+                      decoration: const InputDecoration(
+                        labelText: 'Section (optional - all if blank)',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('All sections in class'),
+                        ),
+                        ...sections.map(
+                          (s) => DropdownMenuItem<String?>(
+                            value: s.id,
+                            child: Text(s.name),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _sectionId = value),
+                    );
+                  },
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, __) => const Text(WarmCopy.genericError),
+                ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed:
+                          _isBuilding ? null : () => _generate(share: false),
+                      icon: const Icon(Icons.print_outlined),
+                      label: const Text('Print'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed:
+                          _isBuilding ? null : () => _generate(share: true),
+                      icon: _isBuilding
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.ios_share),
+                      label: const Text('Share PDF'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _generate({required bool share}) async {
+    if (_classId == null) {
+      context.showErrorSnackBar('Pick a class first.');
+      return;
+    }
+    setState(() => _isBuilding = true);
+    try {
+      final repo = ref.read(studentRepositoryProvider);
+      final tenant = await ref.read(currentTenantProvider.future);
+      final students = await repo.getStudents(
+        classId: _classId,
+        sectionId: _sectionId,
+        // Pull the full class - bulk printing should not respect the
+        // default page size of the list screen.
+        limit: 500,
+        offset: 0,
+      );
+      if (students.isEmpty) {
+        if (!mounted) return;
+        context.showErrorSnackBar('No students found for this selection.');
+        return;
+      }
+      if (share) {
+        await BulkStudentIdCardPdfBuilder.buildAndShare(
+          students: students,
+          tenant: tenant,
+        );
+      } else {
+        await BulkStudentIdCardPdfBuilder.buildAndPrint(
+          students: students,
+          tenant: tenant,
+        );
+      }
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (_) {
+      if (mounted) {
+        context.showErrorSnackBar(WarmCopy.genericError);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isBuilding = false);
       }
     }
   }

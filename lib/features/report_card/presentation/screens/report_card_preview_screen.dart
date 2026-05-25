@@ -2,109 +2,64 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
 
+import '../../../../core/copy/warm_strings.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/report_card.dart';
+import '../../../id_card/providers/id_card_provider.dart';
 import '../../providers/report_card_provider.dart';
 import '../widgets/report_card_pdf_builder.dart';
-import '../../../../core/copy/warm_strings.dart';
 
+/// PDF preview screen for a single report card.
+///
+/// Hosts the printing package's PdfPreview widget so admins can scroll,
+/// zoom, print, share, or save the PDF without leaving the app.
 class ReportCardPreviewScreen extends ConsumerWidget {
   final String reportId;
-
   const ReportCardPreviewScreen({super.key, required this.reportId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final reportAsync = ref.watch(rcByIdProvider(reportId));
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('PDF Preview'),
-        actions: [
-          reportAsync.whenOrNull(
-                data: (report) {
-                  if (report == null) return const SizedBox.shrink();
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.share),
-                        tooltip: 'Share PDF',
-                        onPressed: () async {
-                          final data = report.data.isNotEmpty
-                              ? ReportCardData.fromJson(report.data)
-                              : null;
-                          if (data == null) return;
-                          final bytes = await ReportCardPdfBuilder.build(
-                            data: data,
-                            comments: report.comments,
-                            skills: report.skills,
-                            activities: report.activities,
-                          );
-                          await Printing.sharePdf(
-                            bytes: bytes,
-                            filename:
-                                'report_card_${report.studentName ?? "student"}.pdf',
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.print),
-                        tooltip: 'Print',
-                        onPressed: () async {
-                          final data = report.data.isNotEmpty
-                              ? ReportCardData.fromJson(report.data)
-                              : null;
-                          if (data == null) return;
-                          final bytes = await ReportCardPdfBuilder.build(
-                            data: data,
-                            comments: report.comments,
-                            skills: report.skills,
-                            activities: report.activities,
-                          );
-                          await Printing.layoutPdf(
-                              onLayout: (_) => bytes);
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ) ??
-              const SizedBox.shrink(),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Report Card Preview')),
       body: reportAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, __) => const Center(
+          child: Text(
+            WarmCopy.genericError,
+            style: TextStyle(color: AppColors.error),
+          ),
+        ),
         data: (report) {
           if (report == null) {
-            return const Center(child: Text('Report not found'));
+            return const Center(child: Text('Report not found.'));
           }
-
           final data = report.data.isNotEmpty
               ? ReportCardData.fromJson(report.data)
               : null;
-
           if (data == null) {
             return const Center(
-                child: Text('No report data available'));
+              child: Text('Report data missing — regenerate the card.'),
+            );
           }
 
           return PdfPreview(
-            build: (format) => ReportCardPdfBuilder.build(
-              data: data,
-              comments: report.comments,
-              skills: report.skills,
-              activities: report.activities,
-              headerConfig: null, // Would come from template
-            ),
-            canChangeOrientation: false,
-            canChangePageFormat: false,
-            allowPrinting: true,
-            allowSharing: true,
-            pdfFileName:
-                'report_card_${report.studentName ?? "student"}.pdf',
+            useActions: true,
+            canDebug: false,
+            build: (_) async {
+              final tenant = await ref.read(currentTenantProvider.future);
+              return ReportCardPdfBuilder.build(
+                data: data,
+                comments: report.comments,
+                skills: report.skills,
+                activities: report.activities,
+                headerConfig: {
+                  if (tenant?.name != null) 'school_name': tenant!.name,
+                },
+              );
+            },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(WarmCopy.genericError)),
       ),
     );
   }

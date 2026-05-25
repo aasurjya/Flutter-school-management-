@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:printing/printing.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/visitor.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/visitor_provider.dart';
+import '../../utils/visitor_badge_pdf_builder.dart';
 import '../../../../core/copy/warm_strings.dart';
 
 class VisitorCheckInScreen extends ConsumerStatefulWidget {
@@ -104,6 +106,23 @@ class _VisitorCheckInScreenState
     }
   }
 
+  Future<void> _offerPrintBadge(Visitor visitor, VisitorLog log) async {
+    try {
+      await Printing.layoutPdf(
+        name: 'visitor-badge-${visitor.fullName}.pdf',
+        onLayout: (format) async => VisitorBadgePdfBuilder.build(
+          visitor: visitor,
+          log: log,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Badge ready, but print dialog failed: $e')),
+      );
+    }
+  }
+
   Future<void> _checkIn() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -168,24 +187,33 @@ class _VisitorCheckInScreenState
             : _notesController.text.trim(),
       };
 
-      await ref
+      final log = await ref
           .read(visitorLogNotifierProvider.notifier)
           .checkIn(logData);
 
-      if (mounted) {
+      if (!mounted) return;
+      ref.invalidate(visitorStatsProvider);
+
+      // Fetch the just-created visitor so we can print a badge.
+      final visitor = _existingVisitor ??
+          await ref.read(visitorRepositoryProvider).getVisitorById(visitorId);
+      if (!mounted) return;
+
+      if (visitor != null) {
+        await _offerPrintBadge(visitor, log);
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Visitor checked in successfully'),
             backgroundColor: AppColors.success,
           ),
         );
-        ref.invalidate(visitorStatsProvider);
-        context.pop();
       }
+      if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(WarmCopy.genericError)),
+          const SnackBar(content: Text(WarmCopy.genericError)),
         );
       }
     } finally {

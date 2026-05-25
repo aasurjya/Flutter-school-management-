@@ -53,6 +53,28 @@ class GatewaysNotifier extends AsyncNotifier<List<PaymentGateway>> {
       return repo.getGateways();
     });
   }
+
+  /// Insert a previously-unconfigured gateway row so the admin can edit
+  /// its credentials. Defaults to test-mode + disabled. Returns the new
+  /// gateway so the caller can open the config sheet on it.
+  Future<PaymentGateway> setup({
+    required String gatewayName,
+    required String displayName,
+  }) async {
+    final repo = ref.read(paymentGatewayRepositoryProvider);
+    final created = await repo.upsertGateway(
+      gatewayName: gatewayName,
+      displayName: displayName,
+      isActive: false,
+    );
+    state = state.whenData((gateways) {
+      final exists = gateways.any((g) => g.id == created.id);
+      return exists
+          ? gateways.map((g) => g.id == created.id ? created : g).toList()
+          : [...gateways, created];
+    });
+    return created;
+  }
 }
 
 final gatewaysProvider =

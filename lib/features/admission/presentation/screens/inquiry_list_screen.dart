@@ -10,6 +10,8 @@ import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/admission_provider.dart';
 import '../widgets/application_status_badge.dart';
 import '../../../../core/copy/warm_strings.dart';
+import '../../../id_card/providers/id_card_provider.dart';
+import '../../utils/inquiry_receipt_pdf_builder.dart';
 
 class InquiryListScreen extends ConsumerStatefulWidget {
   const InquiryListScreen({super.key});
@@ -139,6 +141,89 @@ class _InquiryListScreenState extends ConsumerState<InquiryListScreen> {
     );
   }
 
+  Future<void> _showReceiptSheet(AdmissionInquiry inquiry) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetCtx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.receipt_long,
+                        color: AppColors.primary),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Inquiry receipt — ${inquiry.studentName}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () {
+                    Navigator.pop(sheetCtx);
+                    _generateInquiryReceipt(inquiry, share: true);
+                  },
+                  icon: const Icon(Icons.ios_share),
+                  label: const Text('Share receipt'),
+                ),
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(sheetCtx);
+                    _generateInquiryReceipt(inquiry, share: false);
+                  },
+                  icon: const Icon(Icons.print),
+                  label: const Text('Print receipt'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _generateInquiryReceipt(
+    AdmissionInquiry inquiry, {
+    required bool share,
+  }) async {
+    try {
+      final tenant = await ref.read(currentTenantProvider.future);
+      if (share) {
+        await InquiryReceiptPdfBuilder.buildAndShare(
+          inquiry: inquiry,
+          tenant: tenant,
+        );
+      } else {
+        await InquiryReceiptPdfBuilder.buildAndPrint(
+          inquiry: inquiry,
+          tenant: tenant,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(WarmCopy.genericError),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   Widget _buildFilterChip(String label, String? status) {
     final isSelected = _selectedStatus == status;
     return Padding(
@@ -213,6 +298,11 @@ class _InquiryListScreenState extends ConsumerState<InquiryListScreen> {
                 ),
               ),
               InquiryStatusBadge(status: inquiry.status),
+              IconButton(
+                tooltip: 'Receipt',
+                icon: const Icon(Icons.receipt_long, size: 20),
+                onPressed: () => _showReceiptSheet(inquiry),
+              ),
             ],
           ),
           const SizedBox(height: 10),

@@ -26,6 +26,22 @@ class FeesPdfBuilder {
     await Printing.sharePdf(bytes: bytes, filename: 'fees-report-$date.pdf');
   }
 
+  /// Defaulter list — overdue invoices grouped by class, with days
+  /// overdue and pending amount. Shares via OS share sheet.
+  static Future<void> buildAndShareDefaulters(List<Invoice> overdue) async {
+    final bytes = await _buildDefaulterBytes(overdue);
+    final date = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    await Printing.sharePdf(
+      bytes: bytes,
+      filename: 'defaulters-$date.pdf',
+    );
+  }
+
+  static Future<void> buildAndPrintDefaulters(List<Invoice> overdue) async {
+    final bytes = await _buildDefaulterBytes(overdue);
+    await Printing.layoutPdf(onLayout: (_) async => bytes);
+  }
+
   /// Loads Noto Sans fonts: bundled asset first, Google Fonts CDN as fallback.
   static Future<pw.Font> _loadFont(
     String assetPath,
@@ -145,7 +161,8 @@ class FeesPdfBuilder {
     );
   }
 
-  static pw.Widget _cell(String text, {bool isHeader = false}) {
+  static pw.Widget _cell(String text,
+      {bool isHeader = false, PdfColor? color}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 5),
       child: pw.Text(
@@ -153,7 +170,7 @@ class FeesPdfBuilder {
         style: pw.TextStyle(
           fontSize: isHeader ? 10 : 9,
           fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
-          color: isHeader ? PdfColors.white : _textColor,
+          color: color ?? (isHeader ? PdfColors.white : _textColor),
         ),
       ),
     );
@@ -190,6 +207,141 @@ class FeesPdfBuilder {
           _summaryRow('Pending / Overdue', '₹${pending.toStringAsFixed(0)}'),
         ],
       ),
+    );
+  }
+
+  /// Defaulter PDF: group overdue invoices by class, show days overdue
+  /// and pending amount per row. Tail summary aggregates dues.
+  static Future<Uint8List> _buildDefaulterBytes(List<Invoice> overdue) async {
+    final regular = await _loadFont(
+      'assets/fonts/NotoSans-Regular.ttf',
+      PdfGoogleFonts.notoSansRegular,
+    );
+    final bold = await _loadFont(
+      'assets/fonts/NotoSans-Bold.ttf',
+      PdfGoogleFonts.notoSansBold,
+    );
+    final theme = pw.ThemeData.withFont(
+      base: regular,
+      bold: bold,
+      fontFallback: [regular],
+    );
+    final pdf = pw.Document(
+      title: 'Fee Defaulter Report',
+      theme: theme,
+    );
+
+    // group by className (or 'Unassigned')
+    final groups = <String, List<Invoice>>{};
+    for (final inv in overdue) {
+      final key = inv.className ?? 'Unassigned';
+      groups.putIfAbsent(key, () => []).add(inv);
+    }
+    final sortedKeys = groups.keys.toList()..sort();
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        header: (_) => _defaulterHeader(overdue.length),
+        build: (_) {
+          final widgets = <pw.Widget>[];
+          widgets.add(pw.SizedBox(height: 12));
+          for (final cls in sortedKeys) {
+            widgets.add(_classSectionTitle(cls, groups[cls]!.length));
+            widgets.add(pw.SizedBox(height: 4));
+            widgets.add(_defaulterTable(groups[cls]!));
+            widgets.add(pw.SizedBox(height: 14));
+          }
+          widgets.add(_buildSummary(overdue));
+          return widgets;
+        },
+      ),
+    );
+    return pdf.save();
+  }
+
+  static pw.Widget _defaulterHeader(int count) {
+    final now = DateFormat('d MMM yyyy, hh:mm a').format(DateTime.now());
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          'Fee Defaulter Report',
+          style: pw.TextStyle(
+            fontSize: 18,
+            fontWeight: pw.FontWeight.bold,
+            color: _primary,
+          ),
+        ),
+        pw.SizedBox(height: 4),
+        pw.Text(
+          '$count overdue invoices · Generated $now',
+          style: const pw.TextStyle(fontSize: 10, color: _grey),
+        ),
+        pw.Divider(color: _border),
+      ],
+    );
+  }
+
+  static pw.Widget _classSectionTitle(String cls, int rows) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      color: const PdfColor.fromInt(0xFFEEF2FF),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(cls,
+              style: pw.TextStyle(
+                fontSize: 11,
+                fontWeight: pw.FontWeight.bold,
+                color: _primary,
+              )),
+          pw.Text('$rows defaulters',
+              style: const pw.TextStyle(fontSize: 9, color: _grey)),
+        ],
+      ),
+    );
+  }
+
+  static pw.Widget _defaulterTable(List<Invoice> invoices) {
+    final today = DateTime.now();
+    return pw.Table(
+      border: pw.TableBorder.all(color: _border, width: 0.4),
+      columnWidths: const {
+        0: pw.FlexColumnWidth(2.5),
+        1: pw.FlexColumnWidth(2),
+        2: pw.FlexColumnWidth(1.5),
+        3: pw.FlexColumnWidth(1.2),
+        4: pw.FlexColumnWidth(1.5),
+      },
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(
+              color: PdfColor.fromInt(0xFFF1F5F9)),
+          children: [
+            _cell('Student', isHeader: true, color: _textColor),
+            _cell('Invoice #', isHeader: true, color: _textColor),
+            _cell('Due Date', isHeader: true, color: _textColor),
+            _cell('Days', isHeader: true, color: _textColor),
+            _cell('Pending', isHeader: true, color: _textColor),
+          ],
+        ),
+        ...invoices.map((inv) {
+          final days = today.difference(inv.dueDate).inDays;
+          final pending = inv.totalAmount - inv.discountAmount - inv.paidAmount;
+          return pw.TableRow(children: [
+            _cell(inv.studentName ?? '—'),
+            _cell(inv.invoiceNumber),
+            _cell(DateFormat('d MMM').format(inv.dueDate)),
+            _cell('$days',
+                color: days > 30
+                    ? const PdfColor.fromInt(0xFFDC2626)
+                    : _textColor),
+            _cell('₹ ${pending.toStringAsFixed(0)}'),
+          ]);
+        }),
+      ],
     );
   }
 

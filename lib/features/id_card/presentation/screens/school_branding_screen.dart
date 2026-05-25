@@ -231,7 +231,7 @@ class _SchoolBrandingScreenState extends ConsumerState<SchoolBrandingScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Remove Logo'),
         content: const Text(
-            'Are you sure? ID cards will show a text placeholder instead.'),
+            'ID cards will show a text placeholder instead.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

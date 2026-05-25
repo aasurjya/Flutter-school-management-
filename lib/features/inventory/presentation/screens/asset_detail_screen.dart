@@ -534,7 +534,7 @@ class AssetDetailScreen extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Asset?'),
         content: Text(
-            'Are you sure you want to delete "${asset.name}" (${asset.assetCode})? This action cannot be undone.'),
+            'Delete "${asset.name}" (${asset.assetCode})? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),

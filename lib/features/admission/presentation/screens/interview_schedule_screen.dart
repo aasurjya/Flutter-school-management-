@@ -561,7 +561,7 @@ class _InterviewScheduleScreenState
       builder: (ctx) => AlertDialog(
         title: const Text('Cancel Interview?'),
         content: const Text(
-            'Are you sure you want to cancel this interview?'),
+            'Cancel this interview?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

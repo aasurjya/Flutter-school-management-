@@ -453,7 +453,7 @@ class EventDetailScreen extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: const Text('Delete Event'),
         content: const Text(
-            'Are you sure you want to delete this event? This action cannot be undone.'),
+            'Delete this event? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),

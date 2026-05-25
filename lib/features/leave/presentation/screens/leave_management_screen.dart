@@ -291,7 +291,7 @@ class _LeaveCard extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Cancel Leave?'),
         content: const Text(
-          'Are you sure you want to cancel this leave application?',
+          'Cancel this leave application?',
         ),
         actions: [
           TextButton(

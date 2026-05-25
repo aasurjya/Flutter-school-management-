@@ -299,7 +299,7 @@ class _QuickActionsTab extends StatelessWidget {
         title: Text('Initiate $title?'),
         content: const Text(
           'This will send an emergency alert to all staff, teachers, and parents. '
-          'Are you sure you want to proceed?',
+          'Proceed?',
         ),
         actions: [
           TextButton(

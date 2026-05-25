@@ -13,7 +13,7 @@ Future<void> confirmLogout(BuildContext context, WidgetRef ref) async {
     context: context,
     builder: (ctx) => AlertDialog(
       title: const Text('Sign Out'),
-      content: const Text('Are you sure you want to sign out?'),
+      content: const Text('Sign out?'),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx, false),

@@ -229,7 +229,7 @@ class CategoryManagementScreen extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Category?'),
         content: Text(
-            'Are you sure you want to delete "${category.name}"? Assets in this category will be uncategorized.'),
+            'Delete "${category.name}"? Assets in this category will be uncategorized.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),

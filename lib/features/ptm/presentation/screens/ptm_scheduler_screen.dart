@@ -478,7 +478,7 @@ class _AppointmentCard extends ConsumerWidget {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Cancel Appointment?'),
         content: const Text(
-          'Are you sure you want to cancel this appointment?',
+          'Cancel this appointment?',
         ),
         actions: [
           TextButton(

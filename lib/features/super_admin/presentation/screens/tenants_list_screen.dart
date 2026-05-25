@@ -278,7 +278,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Suspend Tenant'),
         content: Text(
-            'Are you sure you want to suspend "${tenant.name}"? All users will lose access.'),
+            'Suspend "${tenant.name}"? All users will lose access.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
@@ -333,7 +333,7 @@ class _TenantsListScreenState extends ConsumerState<TenantsListScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Tenant'),
         content: Text(
-            'Are you sure you want to permanently delete "${tenant.name}"? This action cannot be undone.'),
+            'Permanently delete "${tenant.name}"? This action cannot be undone.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),

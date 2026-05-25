@@ -117,7 +117,7 @@ class GradingScaleScreen extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Grading Scale'),
         content: const Text(
-            'Are you sure? Templates using this scale will revert to default grading.'),
+            'Templates using this scale will revert to default grading.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),

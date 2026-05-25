@@ -612,8 +612,8 @@ class _BottomNavBar extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               unanswered > 0
-                  ? 'You have $unanswered unanswered questions. Are you sure you want to submit?'
-                  : 'Are you sure you want to submit your exam?',
+                  ? 'You have $unanswered unanswered questions. Submit?'
+                  : 'Submit your exam?',
               style: TextStyle(color: Colors.grey.shade600),
             ),
           ],

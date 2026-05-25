@@ -596,7 +596,7 @@ class ApplicationDetailScreen extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Are you sure you want to $action this application?'),
+            Text('${action[0].toUpperCase()}${action.substring(1)} this application?'),
             const SizedBox(height: 16),
             TextField(
               controller: notesController,

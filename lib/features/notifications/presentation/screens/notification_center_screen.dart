@@ -337,7 +337,7 @@ class _NotificationCenterScreenState
       builder: (context) => AlertDialog(
         title: const Text('Clear All Notifications'),
         content:
-            const Text('Are you sure you want to delete all notifications?'),
+            const Text('Delete all notifications?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

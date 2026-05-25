@@ -416,7 +416,7 @@ class _QuizContent extends ConsumerWidget {
                 style: const TextStyle(color: AppColors.warning),
               ),
             const SizedBox(height: 8),
-            const Text('Are you sure you want to submit?'),
+            const Text('Submit?'),
           ],
         ),
         actions: [

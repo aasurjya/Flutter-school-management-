@@ -282,7 +282,7 @@ class _OrderCard extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Cancel Order'),
-        content: const Text('Are you sure you want to cancel this order? The amount will be refunded to your wallet.'),
+        content: const Text('Cancel this order? The amount will be refunded to your wallet.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),

@@ -192,7 +192,7 @@ class _TemplateListScreenState extends ConsumerState<TemplateListScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Delete Template'),
         content: Text(
-            'Are you sure you want to delete "${template.name}"? This cannot be undone.'),
+            'Delete "${template.name}"? This cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

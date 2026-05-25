@@ -449,7 +449,7 @@ class _CourseBuilderScreenState extends ConsumerState<CourseBuilderScreen> {
           builder: (context) => AlertDialog(
             title: const Text('Delete Course'),
             content: const Text(
-                'Are you sure you want to delete this course? This cannot be undone.'),
+                'Delete this course? This cannot be undone.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),

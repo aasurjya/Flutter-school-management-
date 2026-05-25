@@ -138,7 +138,7 @@ class _CertificateTemplateScreenState
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Template?'),
         content: Text(
-            'Are you sure you want to delete "${template.name}"?'),
+            'Delete "${template.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

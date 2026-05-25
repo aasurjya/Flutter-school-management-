@@ -227,7 +227,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Announcement'),
-        content: Text('Are you sure you want to delete "${announcement.title}"?'),
+        content: Text('Delete "${announcement.title}"?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           ElevatedButton(

@@ -281,7 +281,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
       builder: (context) => AlertDialog(
         title: const Text('Deactivate Student'),
         content: Text(
-          'Are you sure you want to deactivate ${student.firstName} ${student.lastName ?? ''}? This action can be reversed later.',
+          'Deactivate ${student.firstName} ${student.lastName ?? ''}? This action can be reversed later.',
         ),
         actions: [
           TextButton(

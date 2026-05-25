@@ -81,7 +81,7 @@ class TemplateListScreen extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Template'),
         content:
-            const Text('Are you sure? This cannot be undone.'),
+            const Text('This cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

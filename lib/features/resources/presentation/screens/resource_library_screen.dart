@@ -524,7 +524,7 @@ class _ResourceCard extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Delete Resource?'),
         content: Text(
-          'Are you sure you want to delete "${resource.title}"? This action cannot be undone.',
+          'Delete "${resource.title}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(

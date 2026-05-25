@@ -545,7 +545,7 @@ class _ForumPostsViewState extends ConsumerState<_ForumPostsView> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Post'),
-        content: const Text('Are you sure you want to delete this post?'),
+        content: const Text('Delete this post?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),

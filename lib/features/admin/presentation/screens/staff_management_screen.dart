@@ -282,7 +282,7 @@ class _StaffListState extends ConsumerState<_StaffList> {
       builder: (ctx) => AlertDialog(
         title: const Text('Deactivate Staff'),
         content: Text(
-          'Are you sure you want to deactivate ${member.fullName}? '
+          'Deactivate ${member.fullName}? '
           'Their account will be disabled.',
         ),
         actions: [

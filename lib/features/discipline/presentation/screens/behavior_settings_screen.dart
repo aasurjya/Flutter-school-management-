@@ -487,7 +487,7 @@ class _CategoryList extends ConsumerWidget {
                           builder: (ctx) => AlertDialog(
                             title: const Text('Delete Category?'),
                             content: Text(
-                              'Are you sure you want to delete "${cat.name}"?',
+                              'Delete "${cat.name}"?',
                             ),
                             actions: [
                               TextButton(

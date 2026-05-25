@@ -425,7 +425,7 @@ class _SyllabusEditorScreenState extends ConsumerState<SyllabusEditorScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Topic?'),
         content: Text(
-          'Are you sure you want to delete "${topic.title}"? '
+          'Delete "${topic.title}"? '
           '${topic.hasChildren ? 'All child topics will also be deleted.' : 'This action cannot be undone.'}',
         ),
         actions: [

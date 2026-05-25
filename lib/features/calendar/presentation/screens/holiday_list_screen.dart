@@ -601,7 +601,7 @@ class _HolidayListScreenState extends ConsumerState<HolidayListScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Delete Holiday'),
         content: Text(
-            'Are you sure you want to delete "${holiday.name}"?'),
+            'Delete "${holiday.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),

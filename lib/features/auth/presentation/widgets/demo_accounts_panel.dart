@@ -78,14 +78,6 @@ const List<DemoAccount> kDemoAccounts = <DemoAccount>[
     icon: Icons.account_balance_wallet_outlined,
     accentColor: AppColors.secondary,
   ),
-  DemoAccount(
-    label: 'Super Admin',
-    email: 'superadmin@demoschool.edu',
-    password: 'Demo@2026',
-    hint: 'Cross-tenant view, AI usage dashboard',
-    icon: Icons.shield_outlined,
-    accentColor: AppColors.error,
-  ),
 ];
 
 /// Compact panel of tap-to-fill demo accounts shown below the login form

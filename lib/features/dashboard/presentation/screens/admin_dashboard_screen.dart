@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/preferences/ai_minimal_mode_provider.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
@@ -263,10 +264,11 @@ class _AcademicSection extends StatelessWidget {
 // Operations
 // ---------------------------------------------------------------------------
 
-class _OperationsSection extends StatelessWidget {
+class _OperationsSection extends ConsumerWidget {
   const _OperationsSection();
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final minimal = ref.watch(aiMinimalModeProvider);
     return AppleListSection(
       header: 'Operations',
       children: [
@@ -288,13 +290,15 @@ class _OperationsSection extends StatelessWidget {
           showChevron: true,
           onTap: () => context.push(AppRoutes.reports),
         ),
-        AppleListCell(
-          leading: const Icon(Icons.insights_outlined, size: 22),
-          title: 'AI insights',
-          subtitle: 'Risk, alerts, trends',
-          showChevron: true,
-          onTap: () => context.push(AppRoutes.riskDashboard),
-        ),
+        // AI insights row hides when the operator opted out of AI surfaces.
+        if (!minimal)
+          AppleListCell(
+            leading: const Icon(Icons.insights_outlined, size: 22),
+            title: 'AI insights',
+            subtitle: 'Risk, alerts, trends',
+            showChevron: true,
+            onTap: () => context.push(AppRoutes.riskDashboard),
+          ),
       ],
     );
   }

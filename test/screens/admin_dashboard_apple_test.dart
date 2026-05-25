@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:school_management/core/preferences/ai_minimal_mode_provider.dart';
 import 'package:school_management/data/models/user.dart';
 import 'package:school_management/features/auth/providers/auth_provider.dart';
 import 'package:school_management/features/dashboard/presentation/screens/admin_dashboard_screen.dart';
@@ -14,15 +16,22 @@ final _fakeAdmin = AppUser(
   updatedAt: DateTime(2026, 1, 1),
 );
 
-Future<void> _pump(WidgetTester tester) async {
+Future<void> _pump(WidgetTester tester, {bool minimal = false}) async {
   // Tall viewport so all four sections of the SliverList are built and
   // their cells are present in the widget tree (slivers lazy-build).
   await tester.binding.setSurfaceSize(const Size(400, 2200));
   addTearDown(() => tester.binding.setSurfaceSize(null));
+
+  SharedPreferences.setMockInitialValues(
+    minimal ? {aiMinimalModePrefsKey: true} : {},
+  );
+  final prefs = await SharedPreferences.getInstance();
+
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         currentUserProvider.overrideWithValue(_fakeAdmin),
+        sharedPreferencesProvider.overrideWithValue(prefs),
       ],
       child: const MaterialApp(home: AdminDashboardScreen()),
     ),
@@ -81,6 +90,19 @@ void main() {
       expect(find.textContaining('Failed'), findsNothing);
       expect(find.textContaining('Error'), findsNothing);
       expect(find.textContaining('Oops'), findsNothing);
+    });
+
+    testWidgets('AI insights row hides when AI minimal mode is enabled', (tester) async {
+      // Default: AI insights cell is present.
+      await _pump(tester);
+      expect(find.text('AI insights', skipOffstage: false), findsOneWidget);
+
+      // With minimal mode on, the cell is gone — every other operations cell stays.
+      await _pump(tester, minimal: true);
+      expect(find.text('AI insights', skipOffstage: false), findsNothing);
+      expect(find.text('Fees', skipOffstage: false), findsOneWidget);
+      expect(find.text('Announcements', skipOffstage: false), findsOneWidget);
+      expect(find.text('Reports', skipOffstage: false), findsOneWidget);
     });
   });
 }

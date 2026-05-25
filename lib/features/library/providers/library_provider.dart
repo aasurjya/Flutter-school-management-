@@ -57,6 +57,46 @@ final overdueBookssProvider = FutureProvider.autoDispose<List<BookIssue>>((ref) 
   return repository.getOverdueBooks();
 });
 
+/// All non-returned loans for the current tenant — librarian view.
+final activeLoansProvider = FutureProvider.autoDispose<List<BookIssue>>((ref) async {
+  final repository = ref.watch(libraryRepositoryProvider);
+  return repository.getActiveLoans();
+});
+
+/// Active loans for a single book — used on the book detail screen
+/// to surface the "Return" action when the book is currently issued.
+final activeLoansForBookProvider =
+    FutureProvider.autoDispose.family<List<BookIssue>, String>((ref, bookId) async {
+  final repository = ref.watch(libraryRepositoryProvider);
+  return repository.getActiveLoansForBook(bookId);
+});
+
+/// Per-day overdue fine for the current tenant.
+///
+/// Looks up an optional `library_fine_per_day` setting on the `tenants`
+/// row. Returns `null` if the column or value is missing — the librarian
+/// loans screen renders "₹ —" in that case. Intentionally tolerant of
+/// schema absence so we don't require a migration.
+final libraryFinePerDayProvider = FutureProvider.autoDispose<double?>((ref) async {
+  final repository = ref.watch(libraryRepositoryProvider);
+  final tenantId = repository.tenantId;
+  if (tenantId == null) return null;
+  try {
+    final row = await repository.client
+        .from('tenants')
+        .select('library_fine_per_day')
+        .eq('id', tenantId)
+        .maybeSingle();
+    if (row == null) return null;
+    final raw = row['library_fine_per_day'];
+    if (raw is num) return raw.toDouble();
+    return null;
+  } catch (_) {
+    // Column does not exist on this deployment — treat as unconfigured.
+    return null;
+  }
+});
+
 // Stats provider
 final libraryStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final repository = ref.watch(libraryRepositoryProvider);

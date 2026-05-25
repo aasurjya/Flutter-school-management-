@@ -340,6 +340,51 @@ class IssuedCertificate {
       'revoked_reason': revokedReason,
     };
   }
+
+  IssuedCertificate copyWith({
+    String? id,
+    String? tenantId,
+    String? templateId,
+    String? studentId,
+    String? certificateNumber,
+    DateTime? issuedDate,
+    String? issuedBy,
+    String? purpose,
+    Map<String, dynamic>? data,
+    String? pdfUrl,
+    CertificateStatus? status,
+    String? revokedReason,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    CertificateTemplate? template,
+    String? studentName,
+    String? studentAdmissionNumber,
+    String? className,
+    String? issuedByName,
+  }) {
+    return IssuedCertificate(
+      id: id ?? this.id,
+      tenantId: tenantId ?? this.tenantId,
+      templateId: templateId ?? this.templateId,
+      studentId: studentId ?? this.studentId,
+      certificateNumber: certificateNumber ?? this.certificateNumber,
+      issuedDate: issuedDate ?? this.issuedDate,
+      issuedBy: issuedBy ?? this.issuedBy,
+      purpose: purpose ?? this.purpose,
+      data: data ?? this.data,
+      pdfUrl: pdfUrl ?? this.pdfUrl,
+      status: status ?? this.status,
+      revokedReason: revokedReason ?? this.revokedReason,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      template: template ?? this.template,
+      studentName: studentName ?? this.studentName,
+      studentAdmissionNumber:
+          studentAdmissionNumber ?? this.studentAdmissionNumber,
+      className: className ?? this.className,
+      issuedByName: issuedByName ?? this.issuedByName,
+    );
+  }
 }
 
 /// Certificate number sequence

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/hr_provider.dart';
 import '../widgets/contract_status_badge.dart';
@@ -66,6 +67,7 @@ class _ContractManagementScreenState
 
   void _showCreateContractDialog(BuildContext context) {
     final formKey = GlobalKey<FormState>();
+    final staffIdController = TextEditingController();
     final basicController = TextEditingController();
     final hraController = TextEditingController(text: '0');
     final daController = TextEditingController(text: '0');
@@ -73,6 +75,7 @@ class _ContractManagementScreenState
     String contractType = 'permanent';
     DateTime startDate = DateTime.now();
     DateTime? endDate;
+    bool isSubmitting = false;
 
     showModalBottomSheet(
       context: context,
@@ -97,6 +100,19 @@ class _ContractManagementScreenState
                         ),
                   ),
                   const SizedBox(height: 24),
+                  // Staff ID field — required to associate contract with a staff member
+                  TextFormField(
+                    controller: staffIdController,
+                    decoration: const InputDecoration(
+                      labelText: 'Staff ID (UUID) *',
+                      helperText: 'Open the staff profile to copy the ID',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.person_search),
+                    ),
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     initialValue: contractType,
                     decoration: const InputDecoration(
@@ -227,20 +243,69 @@ class _ContractManagementScreenState
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
-                      onPressed: () {
-                        if (formKey.currentState!.validate()) {
-                          // In production, you'd also select the staff member
-                          Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Select a staff member first to create a contract'),
-                              backgroundColor: AppColors.info,
-                            ),
-                          );
-                        }
-                      },
-                      child: const Text('Create Contract'),
+                      onPressed: isSubmitting
+                          ? null
+                          : () async {
+                              if (!formKey.currentState!.validate()) return;
+                              setDialogState(() => isSubmitting = true);
+                              try {
+                                await ref
+                                    .read(hrNotifierProvider.notifier)
+                                    .createContract({
+                                  'staff_id': staffIdController.text.trim(),
+                                  'contract_type': contractType,
+                                  'basic_salary': double.tryParse(
+                                          basicController.text) ??
+                                      0,
+                                  'hra': double.tryParse(
+                                          hraController.text) ??
+                                      0,
+                                  'da': double.tryParse(
+                                          daController.text) ??
+                                      0,
+                                  'ta': double.tryParse(
+                                          taController.text) ??
+                                      0,
+                                  'start_date': startDate
+                                      .toIso8601String()
+                                      .split('T')[0],
+                                  if (endDate != null)
+                                    'end_date': endDate!
+                                        .toIso8601String()
+                                        .split('T')[0],
+                                  'status': 'active',
+                                });
+                                ref.invalidate(staffContractsProvider(
+                                    const StaffContractFilter()));
+                                ref.invalidate(staffContractsProvider(
+                                    const StaffContractFilter(
+                                        status: 'active')));
+                                ref.invalidate(staffContractsProvider(
+                                    const StaffContractFilter(
+                                        expiringOnly: true)));
+                                if (ctx.mounted) {
+                                  Navigator.pop(ctx);
+                                  context.showSuccessSnackBar(
+                                      'Contract created successfully');
+                                }
+                              } catch (e) {
+                                setDialogState(() => isSubmitting = false);
+                                if (ctx.mounted) {
+                                  context.showErrorSnackBar(
+                                      WarmCopy.genericError);
+                                }
+                              }
+                            },
+                      child: isSubmitting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Create Contract'),
                     ),
                   ),
                 ],

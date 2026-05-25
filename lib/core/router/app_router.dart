@@ -67,6 +67,7 @@ import '../../features/canteen/presentation/screens/wallet_screen.dart';
 import '../../features/canteen/presentation/screens/order_history_screen.dart';
 import '../../features/library/presentation/screens/library_screen.dart';
 import '../../features/library/presentation/screens/book_detail_screen.dart';
+import '../../features/library/presentation/screens/librarian_loans_screen.dart';
 import '../../features/library/presentation/screens/my_books_screen.dart';
 import '../../features/transport/presentation/screens/transport_screen.dart';
 import '../../features/transport/presentation/screens/route_detail_screen.dart';
@@ -328,6 +329,8 @@ class AppRoutes {
   static const String library = '/library';
   static const String libraryBookDetail = '/library/book/:bookId';
   static const String libraryMyBooks = '/library/my-books';
+  // Librarian-only loans dashboard (issue / return / overdue).
+  static const String libraryLoans = '/library/loans';
 
   // Transport routes
   static const String transport = '/transport';
@@ -771,6 +774,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         if (location.startsWith('/staff') && !operationalStaff.contains(role)) {
           return _getDashboardRoute(ref);
         }
+
+        // Librarian loans dashboard — only librarian / tenant_admin / principal
+        // are allowed to issue or return books.
+        if (location == AppRoutes.libraryLoans &&
+            !const ['librarian', 'tenant_admin', 'principal'].contains(role)) {
+          return _getDashboardRoute(ref);
+        }
       }
 
       return null;
@@ -1003,6 +1013,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.libraryMyBooks,
             builder: (context, state) => const MyBooksScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.libraryLoans,
+            builder: (context, state) => const LibrarianLoansScreen(),
           ),
 
           // ==================== TRANSPORT ====================

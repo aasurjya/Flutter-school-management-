@@ -277,6 +277,45 @@ class LibraryRepository extends BaseRepository {
     return (response as List).map((json) => BookIssue.fromJson(json)).toList();
   }
 
+  /// Returns every non-returned loan for the current tenant.
+  /// Used by the librarian "Active loans" tab.
+  Future<List<BookIssue>> getActiveLoans({int limit = 200}) async {
+    final response = await client
+        .from('book_issues')
+        .select('''
+          *,
+          library_books(*),
+          students(first_name, last_name),
+          staff(first_name, last_name)
+        ''')
+        .eq('tenant_id', requireTenantId)
+        .neq('status', 'returned')
+        .order('due_date')
+        .limit(limit);
+
+    return (response as List).map((json) => BookIssue.fromJson(json)).toList();
+  }
+
+  /// Returns the active (non-returned) loan(s) for a given book.
+  /// Library copies can be issued to different borrowers, so multiple
+  /// active loans for the same book are possible.
+  Future<List<BookIssue>> getActiveLoansForBook(String bookId) async {
+    final response = await client
+        .from('book_issues')
+        .select('''
+          *,
+          library_books(*),
+          students(first_name, last_name),
+          staff(first_name, last_name)
+        ''')
+        .eq('tenant_id', requireTenantId)
+        .eq('book_id', bookId)
+        .neq('status', 'returned')
+        .order('issue_date', ascending: false);
+
+    return (response as List).map((json) => BookIssue.fromJson(json)).toList();
+  }
+
   // ==================== STATISTICS ====================
 
   Future<Map<String, dynamic>> getLibraryStats() async {

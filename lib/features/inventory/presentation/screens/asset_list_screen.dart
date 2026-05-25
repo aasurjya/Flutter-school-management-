@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:printing/printing.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/inventory.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../providers/inventory_provider.dart';
+import '../../utils/inventory_register_pdf_builder.dart';
 import '../widgets/asset_card.dart';
 import '../../../../core/copy/warm_strings.dart';
 
@@ -20,12 +24,39 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
   String? _selectedLocation;
   String _searchQuery = '';
   bool _isGridView = true;
+  bool _isExporting = false;
   final _searchController = TextEditingController();
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _exportRegisterPdf(List<Asset> assets) async {
+    if (assets.isEmpty) {
+      context.showErrorSnackBar('No assets match the current filters');
+      return;
+    }
+    setState(() => _isExporting = true);
+    try {
+      final bytes = await InventoryRegisterPdfBuilder.build(
+        assets: assets,
+      );
+      await Printing.layoutPdf(
+        onLayout: (_) => bytes,
+        name:
+            'asset-register-${DateTime.now().toIso8601String().split('T')[0]}.pdf',
+      );
+      if (mounted) {
+        context.showSuccessSnackBar(
+            'Exported ${assets.length} assets to PDF');
+      }
+    } catch (e) {
+      if (mounted) context.showErrorSnackBar(WarmCopy.genericError);
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
   }
 
   AssetFilter get _currentFilter => AssetFilter(
@@ -56,6 +87,24 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
             tooltip: 'Scan Asset',
             onPressed: () => context.push('/inventory/scan'),
           ),
+          _isExporting
+              ? const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : IconButton(
+                  icon: const Icon(Icons.picture_as_pdf),
+                  tooltip: 'Export Asset Register (PDF)',
+                  onPressed: () {
+                    final currentAssets =
+                        assetsAsync.asData?.value ?? const <Asset>[];
+                    _exportRegisterPdf(currentAssets);
+                  },
+                ),
         ],
       ),
       body: Column(

@@ -23,7 +23,7 @@ class LibrarianDashboardScreen extends StatelessWidget {
             StaffPortalCell(
               title: 'Loans',
               icon: Icons.book_outlined,
-              route: AppRoutes.library,
+              route: AppRoutes.libraryLoans,
             ),
             StaffPortalCell(
               title: 'My loans',

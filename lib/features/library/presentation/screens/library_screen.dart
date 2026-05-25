@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/library.dart';
+import '../../../auth/providers/auth_provider.dart';
 import '../../providers/library_provider.dart';
 import '../../../../core/copy/warm_strings.dart';
+import '../widgets/issue_book_sheet.dart';
 
 class LibraryScreen extends ConsumerStatefulWidget {
   const LibraryScreen({super.key});
@@ -33,12 +36,37 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     super.dispose();
   }
 
+  bool _canManageLoans(WidgetRef ref) {
+    final user = ref.watch(currentUserProvider);
+    if (user == null) return false;
+    return user.isLibrarian || user.isAdmin;
+  }
+
+  Future<void> _openIssueSheet() async {
+    await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => const IssueBookSheet(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final canManage = _canManageLoans(ref);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Library'),
         actions: [
+          if (canManage)
+            IconButton(
+              icon: const Icon(Icons.list_alt_outlined),
+              onPressed: () => context.push(AppRoutes.libraryLoans),
+              tooltip: 'Manage loans',
+            ),
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () => context.push('/library/my-books'),
@@ -68,6 +96,15 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           ),
         ],
       ),
+      floatingActionButton: canManage
+          ? FloatingActionButton.extended(
+              onPressed: _openIssueSheet,
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.add),
+              label: const Text('Issue book'),
+            )
+          : null,
     );
   }
 }

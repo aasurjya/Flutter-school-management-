@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
+
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../data/models/library.dart';
+import '../../../auth/providers/auth_provider.dart';
 import '../../providers/library_provider.dart';
 import '../../../../core/copy/warm_strings.dart';
+import '../widgets/issue_book_sheet.dart';
+import '../widgets/loan_actions.dart';
 
 class BookDetailScreen extends ConsumerWidget {
   final String bookId;
@@ -12,6 +20,8 @@ class BookDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookAsync = ref.watch(bookByIdProvider(bookId));
+    final user = ref.watch(currentUserProvider);
+    final canManage = user != null && (user.isLibrarian || user.isAdmin);
 
     return Scaffold(
       appBar: AppBar(
@@ -92,14 +102,16 @@ class BookDetailScreen extends ConsumerWidget {
                             ),
                             decoration: BoxDecoration(
                               color: book.isAvailable
-                                  ? Colors.green.withValues(alpha: 0.1)
-                                  : Colors.red.withValues(alpha: 0.1),
+                                  ? AppColors.successLight
+                                  : AppColors.errorLight,
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
                               book.isAvailable ? 'Available' : 'Not Available',
                               style: TextStyle(
-                                color: book.isAvailable ? Colors.green : Colors.red,
+                                color: book.isAvailable
+                                    ? AppColors.success
+                                    : AppColors.error,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -114,6 +126,10 @@ class BookDetailScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+                if (canManage) ...[
+                  AppSpacing.gapMd,
+                  _LibrarianBookActions(book: book),
+                ],
                 const SizedBox(height: 24),
                 // Details section
                 Text(
@@ -148,6 +164,134 @@ class BookDetailScreen extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(WarmCopy.genericError)),
+      ),
+    );
+  }
+}
+
+/// Librarian-only block on the book detail screen.
+/// - "Issue this book" if at least one copy is available.
+/// - One "Return" tile per active loan against this book.
+class _LibrarianBookActions extends ConsumerWidget {
+  final LibraryBook book;
+
+  const _LibrarianBookActions({required this.book});
+
+  Future<void> _openIssueSheet(BuildContext context) async {
+    await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => IssueBookSheet(initialBook: book),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activeLoansAsync = ref.watch(activeLoansForBookProvider(book.id));
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (book.isAvailable)
+          FilledButton.icon(
+            onPressed: () => _openIssueSheet(context),
+            icon: const Icon(Icons.add),
+            label: const Text('Issue this book'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(44),
+            ),
+          ),
+        AppSpacing.gapSm,
+        activeLoansAsync.when(
+          loading: () => const SizedBox(
+            height: 24,
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          ),
+          error: (_, __) => const Text(
+            'Could not load loans for this book.',
+            style: TextStyle(color: AppColors.error),
+          ),
+          data: (loans) {
+            if (loans.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                  child: Text(
+                    'Currently issued',
+                    style: theme.textTheme.titleSmall,
+                  ),
+                ),
+                for (final loan in loans) _ActiveLoanTile(loan: loan),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _ActiveLoanTile extends ConsumerWidget {
+  final BookIssue loan;
+
+  const _ActiveLoanTile({required this.loan});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final overdue = loan.isOverdue;
+    final dueLabel = DateFormat('dd MMM yyyy').format(loan.dueDate);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+      padding: AppSpacing.cellPadding,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            overdue ? Icons.warning_amber_rounded : Icons.person_outline,
+            color: overdue ? AppColors.error : theme.colorScheme.onSurfaceVariant,
+          ),
+          AppSpacing.gapSm,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  loan.borrowerName ?? 'Unknown borrower',
+                  style: theme.textTheme.bodyMedium,
+                ),
+                Text(
+                  overdue
+                      ? 'Overdue by ${loan.daysOverdue} day(s) · due $dueLabel'
+                      : 'Due $dueLabel',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: overdue ? AppColors.error : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton.icon(
+            icon: const Icon(Icons.assignment_return_outlined),
+            label: const Text('Return'),
+            onPressed: () => LoanActions.confirmReturn(context, ref, loan),
+          ),
+        ],
       ),
     );
   }

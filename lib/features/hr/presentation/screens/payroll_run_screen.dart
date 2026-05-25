@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/extensions/context_extensions.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../data/models/hr_payroll.dart';
 import '../../providers/hr_provider.dart';
@@ -204,20 +208,253 @@ class _PayrollRunScreenState extends ConsumerState<PayrollRunScreen> {
   }
 }
 
-class _ExistingRunView extends ConsumerWidget {
+class _ExistingRunView extends ConsumerStatefulWidget {
   final String payrollRunId;
 
   const _ExistingRunView({required this.payrollRunId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final runAsync = ref.watch(payrollRunByIdProvider(payrollRunId));
+  ConsumerState<_ExistingRunView> createState() => _ExistingRunViewState();
+}
+
+class _ExistingRunViewState extends ConsumerState<_ExistingRunView> {
+  bool _isDownloading = false;
+
+  Future<void> _downloadAllSlips(PayrollRun run) async {
+    final items = run.items ?? [];
+    if (items.isEmpty) {
+      context.showErrorSnackBar('No payroll items to download');
+      return;
+    }
+
+    setState(() => _isDownloading = true);
+    try {
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
+      ];
+      final periodStr = '${monthNames[run.month - 1]} ${run.year}';
+      final currencyFormat =
+          NumberFormat.currency(locale: 'en_IN', symbol: '₹');
+
+      // Build a single multi-page PDF — one A4 page per staff member.
+      final pdf = pw.Document();
+      for (final item in items) {
+        pdf.addPage(
+          pw.Page(
+            pageFormat: PdfPageFormat.a4,
+            margin: const pw.EdgeInsets.all(40),
+            build: (_) => _buildSlipPage(item, periodStr, currencyFormat),
+          ),
+        );
+      }
+
+      final bytes = await pdf.save();
+
+      await Printing.layoutPdf(
+        onLayout: (_) => bytes,
+        name: 'Payroll-$periodStr-All-Slips.pdf',
+      );
+
+      if (mounted) {
+        context.showSuccessSnackBar(
+            'Downloaded ${items.length} salary slips');
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showErrorSnackBar(WarmCopy.genericError);
+      }
+    } finally {
+      if (mounted) setState(() => _isDownloading = false);
+    }
+  }
+
+  /// Builds a single salary-slip page widget for the merged PDF.
+  static pw.Widget _buildSlipPage(
+    PayrollItem item,
+    String periodStr,
+    NumberFormat fmt,
+  ) {
+    double toDouble(dynamic v) {
+      if (v is num) return v.toDouble();
+      if (v is String) return double.tryParse(v) ?? 0;
+      return 0;
+    }
+
+    pw.Widget labelRow(String label, String value,
+        {bool bold = false, PdfColor? color}) {
+      final style = bold
+          ? pw.TextStyle(fontWeight: pw.FontWeight.bold, color: color)
+          : pw.TextStyle(color: color);
+      return pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(vertical: 2),
+        child: pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text(label,
+                style: pw.TextStyle(
+                    fontSize: 10, color: PdfColors.grey700)),
+            pw.Text(value, style: style.copyWith(fontSize: 10)),
+          ],
+        ),
+      );
+    }
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+      children: [
+        // Header
+        pw.Container(
+          padding: const pw.EdgeInsets.all(14),
+          decoration: pw.BoxDecoration(
+            color: PdfColor.fromHex('#6366F1'),
+            borderRadius: pw.BorderRadius.circular(8),
+          ),
+          child: pw.Column(
+            children: [
+              pw.Text(
+                'Salary Slip — $periodStr',
+                style: pw.TextStyle(
+                  fontSize: 16,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+        pw.SizedBox(height: 16),
+        // Employee details
+        pw.Text('Employee Details',
+            style: pw.TextStyle(
+                fontSize: 12, fontWeight: pw.FontWeight.bold)),
+        pw.Divider(),
+        labelRow('Name', item.staffName ?? 'N/A'),
+        labelRow('Employee ID', item.staffEmployeeId ?? 'N/A'),
+        labelRow('Days Worked', '${item.daysWorked}'),
+        labelRow('Days Absent', '${item.daysAbsent}'),
+        pw.SizedBox(height: 12),
+        // Earnings
+        pw.Text('Earnings',
+            style: pw.TextStyle(
+                fontSize: 12, fontWeight: pw.FontWeight.bold)),
+        pw.Divider(),
+        ...item.earnings.entries.map(
+          (e) => labelRow(
+            e.key.replaceAll('_', ' ').toUpperCase(),
+            fmt.format(toDouble(e.value)),
+          ),
+        ),
+        if (item.overtimeAmount > 0)
+          labelRow('Overtime (${item.overtimeHours}h)',
+              fmt.format(item.overtimeAmount)),
+        labelRow('Gross Salary', fmt.format(item.grossSalary),
+            bold: true, color: PdfColor.fromHex('#2563EB')),
+        pw.SizedBox(height: 12),
+        // Deductions
+        pw.Text('Deductions',
+            style: pw.TextStyle(
+                fontSize: 12, fontWeight: pw.FontWeight.bold)),
+        pw.Divider(),
+        ...item.deductions.entries.map(
+          (e) => labelRow(
+            e.key.replaceAll('_', ' ').toUpperCase(),
+            fmt.format(toDouble(e.value)),
+          ),
+        ),
+        labelRow('Tax (TDS)', fmt.format(item.taxAmount)),
+        labelRow('Total Deductions', fmt.format(item.totalDeductions),
+            bold: true, color: PdfColors.red700),
+        pw.SizedBox(height: 12),
+        // Net pay
+        pw.Container(
+          padding: const pw.EdgeInsets.all(12),
+          decoration: pw.BoxDecoration(
+            color: PdfColor.fromHex('#6366F1'),
+            borderRadius: pw.BorderRadius.circular(8),
+          ),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text('NET PAY',
+                  style: pw.TextStyle(
+                      fontSize: 14,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.white)),
+              pw.Text(fmt.format(item.netSalary),
+                  style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.white)),
+            ],
+          ),
+        ),
+        pw.Spacer(),
+        // Signature row
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                pw.Container(
+                    width: 100, child: pw.Divider(thickness: 0.5)),
+                pw.Text('Employee Signature',
+                    style: const pw.TextStyle(fontSize: 9)),
+              ],
+            ),
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                pw.Container(
+                    width: 100, child: pw.Divider(thickness: 0.5)),
+                pw.Text('HR / Principal',
+                    style: const pw.TextStyle(fontSize: 9)),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final runAsync = ref.watch(payrollRunByIdProvider(widget.payrollRunId));
     final currencyFormat =
         NumberFormat.currency(locale: 'en_IN', symbol: '\u20B9');
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Payroll Details'),
+        actions: [
+          runAsync.whenOrNull(
+                data: (run) {
+                  if (run == null) return const SizedBox.shrink();
+                  final hasItems = (run.items ?? []).isNotEmpty;
+                  return _isDownloading
+                      ? const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child:
+                                CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : IconButton(
+                          icon: const Icon(Icons.download_for_offline),
+                          tooltip: hasItems
+                              ? 'Download all salary slips (${run.items!.length})'
+                              : 'No slips to download',
+                          onPressed: hasItems
+                              ? () => _downloadAllSlips(run)
+                              : null,
+                        );
+                },
+              ) ??
+              const SizedBox.shrink(),
+        ],
       ),
       body: runAsync.when(
         data: (run) {
@@ -234,23 +471,15 @@ class _ExistingRunView extends ConsumerWidget {
                       await ref
                           .read(hrNotifierProvider.notifier)
                           .approvePayroll(run.id);
-                      ref.invalidate(payrollRunByIdProvider(payrollRunId));
+                      ref.invalidate(
+                          payrollRunByIdProvider(widget.payrollRunId));
                       ref.invalidate(payrollRunsProvider(null));
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Payroll approved'),
-                            backgroundColor: AppColors.success,
-                          ),
-                        );
+                        context.showSuccessSnackBar('Payroll approved');
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(WarmCopy.genericError),
-                              backgroundColor: AppColors.error),
-                        );
+                        context.showErrorSnackBar(WarmCopy.genericError);
                       }
                     }
                   }

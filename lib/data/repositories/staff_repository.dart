@@ -2,7 +2,7 @@ import 'base_repository.dart';
 
 class StaffMember {
   final String id;
-  final String userId;
+  final String? userId;
   final String tenantId;
   final String employeeId;
   final String firstName;
@@ -17,7 +17,7 @@ class StaffMember {
 
   const StaffMember({
     required this.id,
-    required this.userId,
+    this.userId,
     required this.tenantId,
     required this.employeeId,
     required this.firstName,
@@ -42,9 +42,9 @@ class StaffMember {
         : null;
 
     return StaffMember(
-      id: json['id'] as String,
-      userId: json['user_id'] as String,
-      tenantId: json['tenant_id'] as String,
+      id: (json['id'] as String?) ?? '',
+      userId: json['user_id'] as String?,
+      tenantId: (json['tenant_id'] as String?) ?? '',
       employeeId: json['employee_id'] as String? ?? '',
       firstName: json['first_name'] as String? ?? '',
       lastName: json['last_name'] as String? ?? '',

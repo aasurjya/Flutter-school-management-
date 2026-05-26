@@ -343,6 +343,14 @@ class _StaffCard extends StatelessWidget {
   });
 
   Future<void> _resetPassword(BuildContext context) async {
+    final userId = member.userId;
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No login is linked to this staff record.')),
+      );
+      return;
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -369,7 +377,7 @@ class _StaffCard extends StatelessWidget {
 
     try {
       final service = AdminUserService(Supabase.instance.client);
-      final newPassword = await service.resetPassword(member.userId);
+      final newPassword = await service.resetPassword(userId);
       if (!context.mounted) return;
       await CredentialDisplayDialog.show(
         context,
@@ -542,9 +550,14 @@ class _StaffDetailSheetState extends State<_StaffDetailSheet> {
   }
 
   Future<void> _loadAudit() async {
+    final userId = widget.member.userId;
+    if (userId == null) {
+      if (mounted) setState(() => _auditLoading = false);
+      return;
+    }
     try {
       final service = CredentialService(Supabase.instance.client);
-      final audit = await service.auditLookup(widget.member.userId);
+      final audit = await service.auditLookup(userId);
       if (mounted) {
         setState(() {
           _audit = audit;
@@ -557,6 +570,14 @@ class _StaffDetailSheetState extends State<_StaffDetailSheet> {
   }
 
   Future<void> _resetPassword() async {
+    final userId = widget.member.userId;
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No login is linked to this staff record.')),
+      );
+      return;
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -584,7 +605,7 @@ class _StaffDetailSheetState extends State<_StaffDetailSheet> {
     setState(() => _resetting = true);
     try {
       final service = AdminUserService(Supabase.instance.client);
-      final newPassword = await service.resetPassword(widget.member.userId);
+      final newPassword = await service.resetPassword(userId);
       if (!mounted) return;
       await CredentialDisplayDialog.show(
         context,

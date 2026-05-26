@@ -7,6 +7,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/apple_list_section.dart';
+import '../../../ai_insights/presentation/widgets/admin_ai_narrative_card.dart';
 import '../../../auth/providers/auth_provider.dart';
 
 /// Overhauled, high-end Admin / Principal Dashboard.
@@ -24,6 +25,8 @@ class AdminDashboardScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final brightness = theme.brightness;
     final scaffoldBg = AppColors.groupedBackgroundFor(brightness);
+    // AI summary card respects the same minimal-mode toggle as the AI cells.
+    final minimal = ref.watch(aiMinimalModeProvider);
 
     return Scaffold(
       backgroundColor: scaffoldBg,
@@ -42,13 +45,17 @@ class AdminDashboardScreen extends ConsumerWidget {
                 AppSpacing.xl,
               ),
               sliver: SliverList.list(
-                children: const [
-                  _GreetingCard(),
-                  _InstitutionPulseGrid(),
-                  SizedBox(height: AppSpacing.lg),
-                  _PrincipalApprovalQueue(),
-                  SizedBox(height: AppSpacing.lg),
-                  _CommandLedgerSection(),
+                children: [
+                  const _GreetingCard(),
+                  const _InstitutionPulseGrid(),
+                  if (!minimal) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    const AdminAINarrativeCard(),
+                  ],
+                  const SizedBox(height: AppSpacing.lg),
+                  const _PrincipalApprovalQueue(),
+                  const SizedBox(height: AppSpacing.lg),
+                  const _CommandLedgerSection(),
                 ],
               ),
             ),

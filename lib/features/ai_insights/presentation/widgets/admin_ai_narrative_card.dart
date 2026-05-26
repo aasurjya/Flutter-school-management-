@@ -22,7 +22,10 @@ class AdminAINarrativeCard extends ConsumerWidget {
         theme,
         isLoading: true,
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      // Degrade gracefully rather than vanishing: show the card with a calm
+      // line. The provider already returns a data-backed fallback on AI
+      // failure, so this branch only fires on an upstream (e.g. data) error.
+      error: (_, __) => _buildCard(context, theme, narrative: _placeholderLine),
       data: (result) => _buildCard(
         context,
         theme,
@@ -31,6 +34,9 @@ class AdminAINarrativeCard extends ConsumerWidget {
       ),
     );
   }
+
+  static const String _placeholderLine =
+      'Your daily school health summary will appear here as today\'s data syncs.';
 
   Widget _buildCard(
     BuildContext context,
@@ -121,7 +127,7 @@ class AdminAINarrativeCard extends ConsumerWidget {
             )
           else
             Text(
-              'No data available yet for today.',
+              _placeholderLine,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: AppColors.textTertiaryLight,
                 fontStyle: FontStyle.italic,

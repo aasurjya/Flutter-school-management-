@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:school_management/core/preferences/ai_minimal_mode_provider.dart';
+import 'package:school_management/core/services/ai_text_generator.dart';
 import 'package:school_management/data/models/user.dart';
+import 'package:school_management/features/ai_insights/providers/school_health_provider.dart';
 import 'package:school_management/features/auth/providers/auth_provider.dart';
 import 'package:school_management/features/dashboard/presentation/screens/admin_dashboard_screen.dart';
 
@@ -32,6 +34,11 @@ Future<void> _pump(WidgetTester tester, {bool minimal = false}) async {
       overrides: [
         currentUserProvider.overrideWithValue(_fakeAdmin),
         sharedPreferencesProvider.overrideWithValue(prefs),
+        // Isolate from Supabase/AI network — the real provider reads
+        // Supabase.instance, which isn't initialized under test.
+        schoolHealthNarrativeProvider.overrideWith(
+          (ref) async => const AITextResult(text: 'Attendance steady today.'),
+        ),
       ],
       child: const MaterialApp(home: AdminDashboardScreen()),
     ),
@@ -86,13 +93,16 @@ void main() {
     });
 
     testWidgets('AI insights row hides when AI minimal mode is enabled', (tester) async {
-      // Default: the Early Warning AI Insights cell is present.
+      // Default: the Early Warning AI Insights cell + the AI summary card show.
       await _pump(tester);
       expect(find.text('Early Warning AI Insights', skipOffstage: false), findsOneWidget);
+      expect(find.text('School Health Summary', skipOffstage: false), findsOneWidget);
 
-      // With minimal mode on, the cell is gone — every other operations cell stays.
+      // With minimal mode on, both the cell and the AI card are gone — every
+      // other operations cell stays.
       await _pump(tester, minimal: true);
       expect(find.text('Early Warning AI Insights', skipOffstage: false), findsNothing);
+      expect(find.text('School Health Summary', skipOffstage: false), findsNothing);
       expect(find.text('Financial Fee Accounts', skipOffstage: false), findsOneWidget);
       expect(find.text('School-Wide Announcements', skipOffstage: false), findsOneWidget);
       expect(find.text('Institutional Analytics', skipOffstage: false), findsOneWidget);

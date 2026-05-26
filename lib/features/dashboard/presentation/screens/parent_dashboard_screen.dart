@@ -121,12 +121,35 @@ class _AppBar extends StatelessWidget {
 }
 
 String _weekdayLong(int weekday) {
-  const w = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const w = [
+    '',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday'
+  ];
   return w[weekday];
 }
 
 String _monthShort(int month) {
-  const m = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const m = [
+    '',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
+  ];
   return m[month];
 }
 
@@ -165,7 +188,8 @@ class _ChildrenReassuranceSection extends ConsumerWidget {
             decoration: BoxDecoration(
               color: AppColors.groupedCellFor(brightness),
               borderRadius: AppRadius.card,
-              border: Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
+              border: Border.all(
+                  color: AppColors.separatorFor(brightness), width: 0.5),
             ),
             child: const Column(
               children: [
@@ -188,9 +212,12 @@ class _ChildrenReassuranceSection extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
+              padding: const EdgeInsets.only(
+                  left: AppSpacing.xs, bottom: AppSpacing.xs),
               child: Text(
-                children.length == 1 ? 'YOUR CHILD\'S DAILY LEDGER' : 'YOUR CHILDREN\'S DAILY LEDGERS',
+                children.length == 1
+                    ? 'YOUR CHILD\'S DAILY LEDGER'
+                    : 'YOUR CHILDREN\'S DAILY LEDGERS',
                 style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.labelFor(brightness, tier: 2),
@@ -198,7 +225,8 @@ class _ChildrenReassuranceSection extends ConsumerWidget {
                 ),
               ),
             ),
-            ...children.map((c) => _ChildLedgerCard(childMap: c, brightness: brightness)),
+            ...children.map(
+                (c) => _ChildLedgerCard(childMap: c, brightness: brightness)),
           ],
         );
       },
@@ -224,12 +252,16 @@ class _ChildLedgerCard extends StatelessWidget {
     final first = childMap['first_name']?.toString() ?? 'Student';
     final last = childMap['last_name']?.toString() ?? '';
     final fullName = '$first $last'.trim();
-    final section = childMap['student_enrollments']?[0]?['section']?['name']?.toString() ?? 'Class';
+    final section =
+        childMap['student_enrollments']?[0]?['section']?['name']?.toString() ??
+            'Class';
 
     // Warm academic paper inspired palette
     final cardBg = isDark ? const Color(0xFF1E1E1C) : const Color(0xFFFAF9F5);
-    final borderCol = isDark ? const Color(0xFF3A3A36) : const Color(0xFFE8E6DF);
-    final secondaryText = isDark ? const Color(0xFFB5B3AD) : const Color(0xFF706E67);
+    final borderCol =
+        isDark ? const Color(0xFF3A3A36) : const Color(0xFFE8E6DF);
+    final secondaryText =
+        isDark ? const Color(0xFFB5B3AD) : const Color(0xFF706E67);
 
     // Mock realistic pulse indicators representing peace-of-mind metrics
     final isPresent = childMap['is_active'] as bool? ?? true;
@@ -262,7 +294,8 @@ class _ChildLedgerCard extends StatelessWidget {
                   ),
                   Text(
                     'Grade $section',
-                    style: theme.textTheme.bodySmall?.copyWith(color: secondaryText),
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: secondaryText),
                   ),
                 ],
               ),
@@ -272,13 +305,16 @@ class _ChildLedgerCard extends StatelessWidget {
                 ),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: borderCol),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   minimumSize: const Size(0, 32),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppRadius.xs),
                   ),
                 ),
-                child: Text('Performance', style: TextStyle(fontSize: 12, color: AppColors.labelFor(brightness))),
+                child: Text('Performance',
+                    style: TextStyle(
+                        fontSize: 12, color: AppColors.labelFor(brightness))),
               ),
             ],
           ),
@@ -334,7 +370,10 @@ class _ChildLedgerCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Active period: Chemistry lab (with Mrs. Sen)',
-                  style: TextStyle(fontSize: 12, color: secondaryText, fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: secondaryText,
+                      fontStyle: FontStyle.italic),
                 ),
               ),
             ],
@@ -360,7 +399,8 @@ class _NeedsAttentionLedger extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
+          padding:
+              const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
           child: Text(
             'PARENTAL ACTION REQUIRED',
             style: theme.textTheme.labelSmall?.copyWith(
@@ -374,52 +414,67 @@ class _NeedsAttentionLedger extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.groupedCellFor(brightness),
             borderRadius: AppRadius.card,
-            border: Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
+            border: Border.all(
+                color: AppColors.separatorFor(brightness), width: 0.5),
           ),
-          child: Column(
-            children: [
-              ListTile(
-                dense: true,
-                leading: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
+          clipBehavior: Clip.antiAlias,
+          // Material ancestor below the colored decoration so ListTile ink/bg
+          // paints correctly (Flutter 3.44+ asserts otherwise).
+          child: Material(
+            type: MaterialType.transparency,
+            child: Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  leading: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.account_balance_wallet_outlined,
+                        size: 18, color: AppColors.error),
                   ),
-                  child: const Icon(Icons.account_balance_wallet_outlined, size: 18, color: AppColors.error),
+                  title: const Text('Term 2 Tuition Fees',
+                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text('Statement amount: \$450.00'),
+                  trailing: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'Due in 4 days',
+                      style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.error),
+                    ),
+                  ),
+                  onTap: () => context.push(AppRoutes.fees),
                 ),
-                title: const Text('Term 2 Tuition Fees', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Statement amount: \$450.00'),
-                trailing: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(4),
+                const Divider(height: 0.5),
+                ListTile(
+                  dense: true,
+                  leading: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.warning.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.mark_email_unread_outlined,
+                        size: 18, color: AppColors.warning),
                   ),
-                  child: const Text(
-                    'Due in 4 days',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.error),
-                  ),
+                  title: const Text('Unread Feedback note',
+                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text('From: Mr. Barua (Mathematics)'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.push(AppRoutes.messages),
                 ),
-                onTap: () => context.push(AppRoutes.fees),
-              ),
-              const Divider(height: 0.5),
-              ListTile(
-                dense: true,
-                leading: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: AppColors.warning.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.mark_email_unread_outlined, size: 18, color: AppColors.warning),
-                ),
-                title: const Text('Unread Feedback note', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('From: Mr. Barua (Mathematics)'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => context.push(AppRoutes.messages),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

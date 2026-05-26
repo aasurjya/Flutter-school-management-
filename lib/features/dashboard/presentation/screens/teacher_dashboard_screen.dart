@@ -6,7 +6,6 @@ import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
-import '../../../../core/widgets/apple_list_section.dart';
 import '../../../academic/providers/academic_provider.dart';
 import '../../../ai_insights/providers/early_warning_provider.dart';
 import '../../../attendance/presentation/widgets/quick_mark_sheet.dart';

@@ -4,6 +4,58 @@ import 'base_repository.dart';
 class TimetableRepository extends BaseRepository {
   TimetableRepository(super.client);
 
+  // Supabase returns snake_case columns, but the Freezed models' generated
+  // fromJson expects camelCase keys — and Timetable's joined fields
+  // (subject/teacher/section names) live in nested objects the generated
+  // parser can't read. So map rows manually here, null-safe throughout.
+
+  TimetableSlot _slotFromRow(Map<String, dynamic> j) => TimetableSlot(
+        id: (j['id'] as String?) ?? '',
+        tenantId: (j['tenant_id'] as String?) ?? '',
+        name: (j['name'] as String?) ?? '',
+        startTime: (j['start_time'] as String?) ?? '',
+        endTime: (j['end_time'] as String?) ?? '',
+        slotType: (j['slot_type'] as String?) ?? 'class',
+        sequenceOrder: (j['sequence_order'] as num?)?.toInt() ?? 0,
+        createdAt: j['created_at'] != null
+            ? DateTime.tryParse(j['created_at'] as String)
+            : null,
+      );
+
+  Timetable _timetableFromRow(Map<String, dynamic> j) {
+    final subject = j['subjects'] as Map<String, dynamic>?;
+    final teacher = j['users'] as Map<String, dynamic>?;
+    final section = j['sections'] as Map<String, dynamic>?;
+    final cls = section?['classes'] as Map<String, dynamic>?;
+    final slotJson = j['timetable_slots'] as Map<String, dynamic>?;
+    return Timetable(
+      id: (j['id'] as String?) ?? '',
+      tenantId: (j['tenant_id'] as String?) ?? '',
+      sectionId: (j['section_id'] as String?) ?? '',
+      subjectId: j['subject_id'] as String?,
+      teacherId: j['teacher_id'] as String?,
+      slotId: (j['slot_id'] as String?) ?? '',
+      dayOfWeek: (j['day_of_week'] as num?)?.toInt() ?? 0,
+      roomNumber: j['room_number'] as String?,
+      academicYearId: (j['academic_year_id'] as String?) ?? '',
+      effectiveFrom: j['effective_from'] != null
+          ? DateTime.tryParse(j['effective_from'] as String)
+          : null,
+      effectiveUntil: j['effective_until'] != null
+          ? DateTime.tryParse(j['effective_until'] as String)
+          : null,
+      createdAt: j['created_at'] != null
+          ? DateTime.tryParse(j['created_at'] as String)
+          : null,
+      slot: slotJson != null ? _slotFromRow(slotJson) : null,
+      subjectName: subject?['name'] as String?,
+      subjectCode: subject?['code'] as String?,
+      teacherName: teacher?['full_name'] as String?,
+      sectionName: section?['name'] as String?,
+      className: cls?['name'] as String?,
+    );
+  }
+
   Future<List<TimetableSlot>> getTimetableSlots() async {
     final response = await client
         .from('timetable_slots')
@@ -12,7 +64,7 @@ class TimetableRepository extends BaseRepository {
         .order('sequence_order');
 
     return (response as List)
-        .map((json) => TimetableSlot.fromJson(json))
+        .map((json) => _slotFromRow(json as Map<String, dynamic>))
         .toList();
   }
 
@@ -25,7 +77,7 @@ class TimetableRepository extends BaseRepository {
         .select()
         .single();
 
-    return TimetableSlot.fromJson(response);
+    return _slotFromRow(response);
   }
 
   Future<List<Timetable>> getTimetables({
@@ -52,7 +104,9 @@ class TimetableRepository extends BaseRepository {
     }
 
     final response = await query.order('day_of_week').order('timetable_slots(sequence_order)');
-    return (response as List).map((json) => Timetable.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => _timetableFromRow(json as Map<String, dynamic>))
+        .toList();
   }
 
   Future<WeeklyTimetable> getWeeklyTimetable({
@@ -116,8 +170,9 @@ class TimetableRepository extends BaseRepository {
 
     return WeeklyTimetable(
       sectionId: sectionId,
-      sectionName: sectionInfo['name'] as String,
-      className: sectionInfo['classes']['name'] as String,
+      sectionName: (sectionInfo['name'] as String?) ?? '',
+      className:
+          ((sectionInfo['classes'] as Map<String, dynamic>?)?['name'] as String?) ?? '',
       academicYearId: academicYearId ?? '',
       days: days,
     );
@@ -194,7 +249,9 @@ class TimetableRepository extends BaseRepository {
     }
 
     final response = await query.order('day_of_week').order('timetable_slots(sequence_order)');
-    return (response as List).map((json) => Timetable.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => _timetableFromRow(json as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Timetable> createTimetableEntry(Map<String, dynamic> data) async {
@@ -206,7 +263,7 @@ class TimetableRepository extends BaseRepository {
         .select()
         .single();
 
-    return Timetable.fromJson(response);
+    return _timetableFromRow(response);
   }
 
   Future<Timetable> updateTimetableEntry(
@@ -220,7 +277,7 @@ class TimetableRepository extends BaseRepository {
         .select()
         .single();
 
-    return Timetable.fromJson(response);
+    return _timetableFromRow(response);
   }
 
   Future<void> deleteTimetableEntry(String timetableId) async {

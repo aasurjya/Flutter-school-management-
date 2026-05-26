@@ -42,13 +42,13 @@ class AdminDashboardScreen extends ConsumerWidget {
                 AppSpacing.xl,
               ),
               sliver: SliverList.list(
-                children: [
-                  const _GreetingCard(),
-                  const _InstitutionPulseGrid(),
-                  const SizedBox(height: AppSpacing.lg),
-                  const _PrincipalApprovalQueue(),
-                  const SizedBox(height: AppSpacing.lg),
-                  const _CommandLedgerSection(),
+                children: const [
+                  _GreetingCard(),
+                  _InstitutionPulseGrid(),
+                  SizedBox(height: AppSpacing.lg),
+                  _PrincipalApprovalQueue(),
+                  SizedBox(height: AppSpacing.lg),
+                  _CommandLedgerSection(),
                 ],
               ),
             ),
@@ -353,10 +353,10 @@ class _PrincipalApprovalQueue extends StatelessWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: AppColors.info.withOpacity(0.1),
+                    color: AppColors.info.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.badge_outlined, size: 18, color: AppColors.info),
+                  child: const Icon(Icons.badge_outlined, size: 18, color: AppColors.info),
                 ),
                 title: const Text('Leave Request: Mrs. Barua', style: TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: const Text('Mathematics Dept · 1 day medical leave'),
@@ -371,10 +371,10 @@ class _PrincipalApprovalQueue extends StatelessWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.1),
+                    color: AppColors.warning.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.school_outlined, size: 18, color: AppColors.warning),
+                  child: const Icon(Icons.school_outlined, size: 18, color: AppColors.warning),
                 ),
                 title: const Text('New Admission Sign-Off', style: TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: const Text('Grade X admission roll review pending'),

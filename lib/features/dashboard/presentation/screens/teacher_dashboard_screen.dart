@@ -55,11 +55,11 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 AppSpacing.xl,
               ),
               sliver: SliverList.list(
-                children: [
-                  const _RollCallDeck(),
-                  const _TimetableRhythmSection(),
-                  const SizedBox(height: AppSpacing.lg),
-                  const _WorkloadLedgerSection(),
+                children: const [
+                  _RollCallDeck(),
+                  _TimetableRhythmSection(),
+                  SizedBox(height: AppSpacing.lg),
+                  _WorkloadLedgerSection(),
                 ],
               ),
             ),
@@ -442,7 +442,7 @@ class _TimetableRhythmSection extends ConsumerWidget {
                       children: [
                         const SizedBox(height: 2),
                         Text(
-                          'Time: $time' + (slot.roomNumber != null ? ' · Room ${slot.roomNumber}' : ''),
+                          'Time: $time${slot.roomNumber != null ? ' · Room ${slot.roomNumber}' : ''}',
                           style: TextStyle(color: AppColors.labelFor(brightness, tier: 2), fontSize: 12),
                         ),
                         const SizedBox(height: 4),

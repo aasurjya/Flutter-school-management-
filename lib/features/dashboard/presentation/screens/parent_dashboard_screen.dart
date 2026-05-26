@@ -46,12 +46,12 @@ class ParentDashboardScreen extends ConsumerWidget {
                 AppSpacing.xl,
               ),
               sliver: SliverList.list(
-                children: [
-                  const _ChildrenReassuranceSection(),
-                  const SizedBox(height: AppSpacing.md),
-                  const _NeedsAttentionLedger(),
-                  const SizedBox(height: AppSpacing.lg),
-                  const _AcademicTrackingSection(),
+                children: const [
+                  _ChildrenReassuranceSection(),
+                  SizedBox(height: AppSpacing.md),
+                  _NeedsAttentionLedger(),
+                  SizedBox(height: AppSpacing.lg),
+                  _AcademicTrackingSection(),
                 ],
               ),
             ),
@@ -198,7 +198,7 @@ class _ChildrenReassuranceSection extends ConsumerWidget {
                 ),
               ),
             ),
-            ...children.map((c) => _ChildLedgerCard(childMap: c, brightness: brightness)).toList(),
+            ...children.map((c) => _ChildLedgerCard(childMap: c, brightness: brightness)),
           ],
         );
       },
@@ -234,7 +234,7 @@ class _ChildLedgerCard extends StatelessWidget {
     // Mock realistic pulse indicators representing peace-of-mind metrics
     final isPresent = childMap['is_active'] as bool? ?? true;
     final attendanceColor = isPresent ? AppColors.success : AppColors.error;
-    final checkInTime = "08:14 AM";
+    const checkInTime = '08:14 AM';
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -383,20 +383,20 @@ class _NeedsAttentionLedger extends StatelessWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: AppColors.error.withOpacity(0.1),
+                    color: AppColors.error.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.account_balance_wallet_outlined, size: 18, color: AppColors.error),
+                  child: const Icon(Icons.account_balance_wallet_outlined, size: 18, color: AppColors.error),
                 ),
                 title: const Text('Term 2 Tuition Fees', style: TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: const Text('Statement amount: \$450.00'),
                 trailing: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.error.withOpacity(0.15),
+                    color: AppColors.error.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Due in 4 days',
                     style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.error),
                   ),
@@ -409,10 +409,10 @@ class _NeedsAttentionLedger extends StatelessWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.1),
+                    color: AppColors.warning.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.mark_email_unread_outlined, size: 18, color: AppColors.warning),
+                  child: const Icon(Icons.mark_email_unread_outlined, size: 18, color: AppColors.warning),
                 ),
                 title: const Text('Unread Feedback note', style: TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: const Text('From: Mr. Barua (Mathematics)'),

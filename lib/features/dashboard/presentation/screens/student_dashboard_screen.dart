@@ -576,7 +576,7 @@ class _AssignmentSubGroup extends StatelessWidget {
         borderRadius: AppRadius.card,
         border: Border.all(
           color: isUrgent
-              ? AppColors.error.withOpacity(0.3)
+              ? AppColors.error.withValues(alpha: 0.3)
               : AppColors.separatorFor(brightness),
           width: isUrgent ? 1 : 0.5,
         ),
@@ -589,7 +589,7 @@ class _AssignmentSubGroup extends StatelessWidget {
             child: Row(
               children: [
                 if (isUrgent) ...[
-                  Icon(Icons.alarm_on, size: 14, color: AppColors.error),
+                  const Icon(Icons.alarm_on, size: 14, color: AppColors.error),
                   const SizedBox(width: 4),
                 ],
                 Text(

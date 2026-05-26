@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../data/models/academic.dart';
@@ -701,8 +702,8 @@ class _AssignPeriodSheetState extends ConsumerState<_AssignPeriodSheet> {
           // Subject picker
           subjectsAsync.when(
             loading: () => const LinearProgressIndicator(),
-            error: (e, _) =>
-                Text('Error: $e', style: const TextStyle(color: AppColors.error)),
+            error: (e, _) => Text(WarmCopy.loadFailed('subjects'),
+                style: const TextStyle(color: AppColors.error)),
             data: (subjects) => _Dropdown<Subject>(
               label: 'Subject',
               value: _subject,
@@ -716,8 +717,8 @@ class _AssignPeriodSheetState extends ConsumerState<_AssignPeriodSheet> {
           // Teacher picker
           teachersAsync.when(
             loading: () => const LinearProgressIndicator(),
-            error: (e, _) =>
-                Text('Error: $e', style: const TextStyle(color: AppColors.error)),
+            error: (e, _) => Text(WarmCopy.loadFailed('teachers'),
+                style: const TextStyle(color: AppColors.error)),
             data: (teachers) => DropdownButtonFormField<Map<String, dynamic>>(
               initialValue: _teacher,
               decoration: const InputDecoration(
@@ -968,7 +969,7 @@ class _EditPeriodSheetState extends ConsumerState<_EditPeriodSheet> {
                 // Subject
                 subjectsAsync.when(
                   loading: () => const LinearProgressIndicator(),
-                  error: (e, _) => Text('Error: $e',
+                  error: (e, _) => Text(WarmCopy.loadFailed('subjects'),
                       style: const TextStyle(color: AppColors.error)),
                   data: (subjects) {
                     _subject ??= subjects
@@ -989,7 +990,7 @@ class _EditPeriodSheetState extends ConsumerState<_EditPeriodSheet> {
                 // Teacher
                 teachersAsync.when(
                   loading: () => const LinearProgressIndicator(),
-                  error: (e, _) => Text('Error: $e',
+                  error: (e, _) => Text(WarmCopy.loadFailed('teachers'),
                       style: const TextStyle(color: AppColors.error)),
                   data: (teachers) {
                     _teacher ??= teachers

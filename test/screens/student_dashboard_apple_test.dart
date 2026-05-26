@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:school_management/data/models/student.dart';
 import 'package:school_management/data/models/user.dart';
 import 'package:school_management/features/auth/providers/auth_provider.dart';
 import 'package:school_management/features/dashboard/presentation/screens/student_dashboard_screen.dart';
@@ -15,12 +16,25 @@ final _fakeStudent = AppUser(
   updatedAt: DateTime(2026, 1, 1),
 );
 
+// No currentEnrollment → the live timetable/assignment sections (which need
+// network providers) are skipped, leaving the greeting + academic record.
+final _fakeStudentRecord = Student(
+  id: 'stu-1',
+  tenantId: 't-1',
+  admissionNumber: 'ADM-1',
+  firstName: 'Aarav',
+  dateOfBirth: DateTime(2010, 1, 1),
+  admissionDate: DateTime(2020, 1, 1),
+  createdAt: DateTime(2026, 1, 1),
+  updatedAt: DateTime(2026, 1, 1),
+);
+
 Future<void> _pump(WidgetTester tester) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         currentUserProvider.overrideWithValue(_fakeStudent),
-        currentStudentProvider.overrideWith((_) async => null),
+        currentStudentProvider.overrideWith((_) async => _fakeStudentRecord),
       ],
       child: const MaterialApp(home: StudentDashboardScreen()),
     ),
@@ -30,42 +44,23 @@ Future<void> _pump(WidgetTester tester) async {
 
 void main() {
   group('StudentDashboardScreen v2', () {
-    testWidgets('renders the "Today" large title without a gradient hero', (tester) async {
+    testWidgets('renders the "Academy" large title', (tester) async {
       await _pump(tester);
-      expect(find.text('Today'), findsOneWidget);
-      final gradients = find.byWidgetPredicate((w) {
-        if (w is DecoratedBox) {
-          final dec = w.decoration;
-          if (dec is BoxDecoration && dec.gradient is LinearGradient) {
-            return true;
-          }
-        }
-        return false;
-      });
-      expect(gradients, findsNothing);
+      expect(find.text('Academy'), findsOneWidget);
     });
 
     testWidgets('greeting uses the student first name', (tester) async {
       await _pump(tester);
-      expect(find.text('Hi Aarav.'), findsOneWidget);
-      expect(find.text('Here is what your day looks like.'), findsOneWidget);
+      expect(find.text('Good morning, Aarav.'), findsOneWidget);
+      expect(find.text('Enrollment active · Welcome to class'), findsOneWidget);
     });
 
-    testWidgets('three sections present with their canonical cells', (tester) async {
+    testWidgets('academic record section present with its canonical cells', (tester) async {
       await _pump(tester);
-      // Today
-      expect(find.text('TODAY'), findsOneWidget);
-      expect(find.text('Homework'), findsOneWidget);
-      expect(find.text('My timetable'), findsOneWidget);
-      // School
-      expect(find.text('SCHOOL'), findsOneWidget);
-      expect(find.text('Attendance'), findsOneWidget);
-      expect(find.text('Results'), findsOneWidget);
-      expect(find.text('Fees'), findsOneWidget);
-      // Coming up (may be below the fold in a 600pt viewport)
-      expect(find.text('COMING UP', skipOffstage: false), findsOneWidget);
-      expect(find.text('Assignments', skipOffstage: false), findsOneWidget);
-      expect(find.text('Exams', skipOffstage: false), findsOneWidget);
+      expect(find.text('ACADEMIC RECORD', skipOffstage: false), findsOneWidget);
+      expect(find.text('Attendance Ledger', skipOffstage: false), findsOneWidget);
+      expect(find.text('Academic Results', skipOffstage: false), findsOneWidget);
+      expect(find.text('Financial Statements', skipOffstage: false), findsOneWidget);
     });
 
     testWidgets('no cold-tone copy on the home tab', (tester) async {

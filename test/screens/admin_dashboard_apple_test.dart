@@ -41,48 +41,41 @@ Future<void> _pump(WidgetTester tester, {bool minimal = false}) async {
 
 void main() {
   group('AdminDashboardScreen v2', () {
-    testWidgets('renders "Today" large title without a gradient hero', (tester) async {
+    testWidgets('renders the "Console" large title', (tester) async {
       await _pump(tester);
-      expect(find.text('Today'), findsOneWidget);
-      final gradients = find.byWidgetPredicate((w) {
-        if (w is DecoratedBox) {
-          final dec = w.decoration;
-          if (dec is BoxDecoration && dec.gradient is LinearGradient) {
-            return true;
-          }
-        }
-        return false;
-      });
-      expect(gradients, findsNothing);
+      expect(find.text('Console'), findsOneWidget);
     });
 
     testWidgets('greeting uses the admin first name', (tester) async {
       await _pump(tester);
-      expect(find.text('Hi Priya.'), findsOneWidget);
-      expect(find.text('Manage your school from here.'), findsOneWidget);
+      expect(find.text('Welcome back, Priya.'), findsOneWidget);
+      expect(
+        find.text('Institution Operational Console · Active Session'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('four sections appear with their canonical cells', (tester) async {
       await _pump(tester);
-      // People
-      expect(find.text('PEOPLE', skipOffstage: false), findsOneWidget);
-      expect(find.text('Students', skipOffstage: false), findsOneWidget);
-      expect(find.text('Staff', skipOffstage: false), findsOneWidget);
-      expect(find.text('Admissions', skipOffstage: false), findsOneWidget);
-      // Academic
-      expect(find.text('ACADEMIC', skipOffstage: false), findsOneWidget);
-      expect(find.text('Classes', skipOffstage: false), findsOneWidget);
-      expect(find.text('Timetable', skipOffstage: false), findsOneWidget);
-      expect(find.text('Exams', skipOffstage: false), findsOneWidget);
-      // Operations
-      expect(find.text('OPERATIONS', skipOffstage: false), findsOneWidget);
-      expect(find.text('Fees', skipOffstage: false), findsOneWidget);
-      expect(find.text('Announcements', skipOffstage: false), findsOneWidget);
-      expect(find.text('AI insights', skipOffstage: false), findsOneWidget);
-      // School
-      expect(find.text('SCHOOL', skipOffstage: false), findsOneWidget);
-      expect(find.text('School branding', skipOffstage: false), findsOneWidget);
-      expect(find.text('Payment gateways', skipOffstage: false), findsOneWidget);
+      // People management
+      expect(find.text('PEOPLE MANAGEMENT', skipOffstage: false), findsOneWidget);
+      expect(find.text('Student Registrar', skipOffstage: false), findsOneWidget);
+      expect(find.text('Faculty & Staff Registry', skipOffstage: false), findsOneWidget);
+      expect(find.text('Admissions Panel', skipOffstage: false), findsOneWidget);
+      // Academic operations
+      expect(find.text('ACADEMIC OPERATIONS', skipOffstage: false), findsOneWidget);
+      expect(find.text('Class & Section Structure', skipOffstage: false), findsOneWidget);
+      expect(find.text('Master Timetable Grid', skipOffstage: false), findsOneWidget);
+      expect(find.text('Examination Scheduling', skipOffstage: false), findsOneWidget);
+      // Operations & stats
+      expect(find.text('OPERATIONS & STATS', skipOffstage: false), findsOneWidget);
+      expect(find.text('Financial Fee Accounts', skipOffstage: false), findsOneWidget);
+      expect(find.text('School-Wide Announcements', skipOffstage: false), findsOneWidget);
+      expect(find.text('Early Warning AI Insights', skipOffstage: false), findsOneWidget);
+      // Infrastructure config
+      expect(find.text('INFRASTRUCTURE CONFIG', skipOffstage: false), findsOneWidget);
+      expect(find.text('Portal Custom Branding', skipOffstage: false), findsOneWidget);
+      expect(find.text('Merchant Gateways', skipOffstage: false), findsOneWidget);
     });
 
     testWidgets('no cold-tone copy on the home tab', (tester) async {
@@ -93,16 +86,16 @@ void main() {
     });
 
     testWidgets('AI insights row hides when AI minimal mode is enabled', (tester) async {
-      // Default: AI insights cell is present.
+      // Default: the Early Warning AI Insights cell is present.
       await _pump(tester);
-      expect(find.text('AI insights', skipOffstage: false), findsOneWidget);
+      expect(find.text('Early Warning AI Insights', skipOffstage: false), findsOneWidget);
 
       // With minimal mode on, the cell is gone — every other operations cell stays.
       await _pump(tester, minimal: true);
-      expect(find.text('AI insights', skipOffstage: false), findsNothing);
-      expect(find.text('Fees', skipOffstage: false), findsOneWidget);
-      expect(find.text('Announcements', skipOffstage: false), findsOneWidget);
-      expect(find.text('Reports', skipOffstage: false), findsOneWidget);
+      expect(find.text('Early Warning AI Insights', skipOffstage: false), findsNothing);
+      expect(find.text('Financial Fee Accounts', skipOffstage: false), findsOneWidget);
+      expect(find.text('School-Wide Announcements', skipOffstage: false), findsOneWidget);
+      expect(find.text('Institutional Analytics', skipOffstage: false), findsOneWidget);
     });
   });
 }

@@ -33,7 +33,7 @@ Future<void> _pump(
 
 void main() {
   group('ParentDashboardScreen v2', () {
-    testWidgets('renders the "Today" large title without a gradient hero', (tester) async {
+    testWidgets('renders the "Parent Portal" large title', (tester) async {
       await _pump(tester, children: const [
         {
           'id': 'stu-1',
@@ -45,17 +45,7 @@ void main() {
         },
       ]);
 
-      expect(find.text('Today'), findsOneWidget);
-      final gradients = find.byWidgetPredicate((w) {
-        if (w is DecoratedBox) {
-          final dec = w.decoration;
-          if (dec is BoxDecoration && dec.gradient is LinearGradient) {
-            return true;
-          }
-        }
-        return false;
-      });
-      expect(gradients, findsNothing);
+      expect(find.text('Parent Portal'), findsOneWidget);
     });
 
     testWidgets('renders a child cell with name and section', (tester) async {
@@ -70,21 +60,20 @@ void main() {
         },
       ]);
 
-      // Section headers are uppercased by AppleListSection's _SectionLabel.
-      expect(find.text('YOUR CHILD'), findsOneWidget);
-      expect(find.text('Aarav Kumar'), findsOneWidget);
-      expect(find.text('10-A'), findsOneWidget);
+      expect(find.text("YOUR CHILD'S DAILY LEDGER", skipOffstage: false), findsOneWidget);
+      expect(find.text('Aarav Kumar', skipOffstage: false), findsOneWidget);
+      expect(find.text('Grade 10-A', skipOffstage: false), findsOneWidget);
     });
 
     testWidgets('shows calm empty state when no child is linked', (tester) async {
       await _pump(tester, children: const []);
-      expect(find.text('No child linked yet.'), findsOneWidget);
+      expect(find.text('No student linked to this account.'), findsOneWidget);
       // Never accuse the user or use cold tone.
       expect(find.textContaining('Error'), findsNothing);
       expect(find.textContaining('Failed'), findsNothing);
     });
 
-    testWidgets('Today + Needs attention sections appear with their canonical cells', (tester) async {
+    testWidgets('action + tracking sections appear with their canonical cells', (tester) async {
       await _pump(tester, children: const [
         {
           'id': 'stu-1',
@@ -92,10 +81,11 @@ void main() {
           'last_name': 'B',
         },
       ]);
-      expect(find.text('Homework'), findsOneWidget);
-      expect(find.text('Today at school'), findsOneWidget);
-      expect(find.text('Messages from teachers'), findsOneWidget);
-      expect(find.text('Fees'), findsOneWidget);
+      expect(find.text('PARENTAL ACTION REQUIRED', skipOffstage: false), findsOneWidget);
+      expect(find.text('Term 2 Tuition Fees', skipOffstage: false), findsOneWidget);
+      expect(find.text('ACADEMIC TRACKING', skipOffstage: false), findsOneWidget);
+      expect(find.text('Homework & Assignments', skipOffstage: false), findsOneWidget);
+      expect(find.text('Classes & Timetables', skipOffstage: false), findsOneWidget);
     });
   });
 }

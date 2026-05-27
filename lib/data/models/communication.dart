@@ -418,7 +418,7 @@ class CommunicationCampaign {
       completedAt: json['completed_at'] != null ? DateTime.parse(json['completed_at'] as String) : null,
       status: CampaignStatus.fromString(json['status'] as String? ?? 'draft'),
       stats: parsedStats,
-      createdBy: json['created_by'] as String,
+      createdBy: json['created_by'] as String? ?? '',
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at'] as String) : null,
       createdByName: createdByName,

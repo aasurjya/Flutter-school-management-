@@ -4,6 +4,207 @@ import 'base_repository.dart';
 class ExamRepository extends BaseRepository {
   ExamRepository(super.client);
 
+  // Null-safe snake_case row mappers — the Freezed generated fromJson reads
+  // camelCase keys that don't match Supabase's snake_case columns / views and
+  // can't read nested joins.
+  static String _s(Object? v) => (v as String?) ?? '';
+  static double _d(Object? v) => (v as num?)?.toDouble() ?? 0;
+  static double? _dN(Object? v) => (v as num?)?.toDouble();
+  static int _i(Object? v) => (v as num?)?.toInt() ?? 0;
+  static bool _b(Object? v) => v as bool? ?? false;
+  static DateTime? _dt(Object? v) => v is String ? DateTime.tryParse(v) : null;
+
+  Exam _examFromRow(Map<String, dynamic> j) {
+    final term = j['terms'] as Map<String, dynamic>?;
+    final year = j['academic_years'] as Map<String, dynamic>?;
+    return Exam(
+      id: _s(j['id']),
+      tenantId: _s(j['tenant_id']),
+      academicYearId: _s(j['academic_year_id']),
+      termId: j['term_id'] as String?,
+      name: _s(j['name']),
+      examType: _s(j['exam_type']),
+      startDate: _dt(j['start_date']),
+      endDate: _dt(j['end_date']),
+      description: j['description'] as String?,
+      isPublished: _b(j['is_published']),
+      createdAt: _dt(j['created_at']),
+      termName: term?['name'] as String?,
+      academicYearName: year?['name'] as String?,
+    );
+  }
+
+  ExamSubject _examSubjectFromRow(Map<String, dynamic> j) {
+    final subject = j['subjects'] as Map<String, dynamic>?;
+    final cls = j['classes'] as Map<String, dynamic>?;
+    return ExamSubject(
+      id: _s(j['id']),
+      tenantId: _s(j['tenant_id']),
+      examId: _s(j['exam_id']),
+      subjectId: _s(j['subject_id']),
+      classId: _s(j['class_id']),
+      examDate: _dt(j['exam_date']),
+      startTime: j['start_time'] as String?,
+      endTime: j['end_time'] as String?,
+      maxMarks: _d(j['max_marks']),
+      passingMarks: _d(j['passing_marks']),
+      weightage: (j['weightage'] as num?)?.toDouble() ?? 1.0,
+      syllabus: j['syllabus'] as String?,
+      createdAt: _dt(j['created_at']),
+      subjectName: subject?['name'] as String?,
+      subjectCode: subject?['code'] as String?,
+      className: cls?['name'] as String?,
+    );
+  }
+
+  Mark _markFromRow(Map<String, dynamic> j) {
+    final student = j['students'] as Map<String, dynamic>?;
+    final examSubject = j['exam_subjects'] as Map<String, dynamic>?;
+    final subject = examSubject?['subjects'] as Map<String, dynamic>?;
+    String? studentName;
+    if (student != null) {
+      final full =
+          '${student['first_name'] ?? ''} ${student['last_name'] ?? ''}'.trim();
+      studentName = full.isEmpty ? null : full;
+    }
+    return Mark(
+      id: _s(j['id']),
+      tenantId: _s(j['tenant_id']),
+      examSubjectId: _s(j['exam_subject_id']),
+      studentId: _s(j['student_id']),
+      marksObtained: _dN(j['marks_obtained']),
+      isAbsent: _b(j['is_absent']),
+      remarks: j['remarks'] as String?,
+      enteredBy: j['entered_by'] as String?,
+      enteredAt: _dt(j['entered_at']),
+      updatedAt: _dt(j['updated_at']),
+      studentName: studentName,
+      admissionNumber: student?['admission_number'] as String?,
+      subjectName: subject?['name'] as String?,
+      maxMarks: _dN(examSubject?['max_marks']),
+      passingMarks: _dN(examSubject?['passing_marks']),
+    );
+  }
+
+  StudentPerformance _performanceFromRow(Map<String, dynamic> j) =>
+      StudentPerformance(
+        tenantId: _s(j['tenant_id']),
+        studentId: _s(j['student_id']),
+        studentName: _s(j['student_name']),
+        admissionNumber: _s(j['admission_number']),
+        sectionId: _s(j['section_id']),
+        sectionName: _s(j['section_name']),
+        classId: _s(j['class_id']),
+        className: _s(j['class_name']),
+        examId: _s(j['exam_id']),
+        examName: _s(j['exam_name']),
+        examType: _s(j['exam_type']),
+        subjectId: _s(j['subject_id']),
+        subjectName: _s(j['subject_name']),
+        subjectCode: j['subject_code'] as String?,
+        marksObtained: _d(j['marks_obtained']),
+        maxMarks: _d(j['max_marks']),
+        passingMarks: _d(j['passing_marks']),
+        percentage: _d(j['percentage']),
+        isPassed: _b(j['is_passed']),
+        isAbsent: _b(j['is_absent']),
+        academicYearId: _s(j['academic_year_id']),
+        termId: j['term_id'] as String?,
+      );
+
+  StudentRank _rankFromRow(Map<String, dynamic> j) => StudentRank(
+        tenantId: _s(j['tenant_id']),
+        studentId: _s(j['student_id']),
+        studentName: _s(j['student_name']),
+        admissionNumber: _s(j['admission_number']),
+        sectionId: _s(j['section_id']),
+        sectionName: _s(j['section_name']),
+        classId: _s(j['class_id']),
+        className: _s(j['class_name']),
+        examId: _s(j['exam_id']),
+        examName: _s(j['exam_name']),
+        examType: _s(j['exam_type']),
+        subjectId: _s(j['subject_id']),
+        subjectName: _s(j['subject_name']),
+        marksObtained: _d(j['marks_obtained']),
+        maxMarks: _d(j['max_marks']),
+        percentage: _d(j['percentage']),
+        subjectRank: _i(j['subject_rank']),
+        totalInSubject: _i(j['total_in_subject']),
+        academicYearId: _s(j['academic_year_id']),
+      );
+
+  StudentOverallRank _overallRankFromRow(Map<String, dynamic> j) =>
+      StudentOverallRank(
+        tenantId: _s(j['tenant_id']),
+        studentId: _s(j['student_id']),
+        studentName: _s(j['student_name']),
+        admissionNumber: _s(j['admission_number']),
+        sectionId: _s(j['section_id']),
+        sectionName: _s(j['section_name']),
+        classId: _s(j['class_id']),
+        className: _s(j['class_name']),
+        examId: _s(j['exam_id']),
+        examName: _s(j['exam_name']),
+        examType: _s(j['exam_type']),
+        academicYearId: _s(j['academic_year_id']),
+        totalObtained: _d(j['total_obtained']),
+        totalMaxMarks: _d(j['total_max_marks']),
+        overallPercentage: _d(j['overall_percentage']),
+        subjectsCount: _i(j['subjects_count']),
+        subjectsPassed: _i(j['subjects_passed']),
+        classRank: _i(j['class_rank']),
+      );
+
+  ClassExamStats _classStatsFromRow(Map<String, dynamic> j) => ClassExamStats(
+        tenantId: _s(j['tenant_id']),
+        examId: _s(j['exam_id']),
+        examName: _s(j['exam_name']),
+        examType: _s(j['exam_type']),
+        sectionId: _s(j['section_id']),
+        sectionName: _s(j['section_name']),
+        classId: _s(j['class_id']),
+        className: _s(j['class_name']),
+        subjectId: _s(j['subject_id']),
+        subjectName: _s(j['subject_name']),
+        academicYearId: _s(j['academic_year_id']),
+        totalStudents: _i(j['total_students']),
+        studentsAppeared: _i(j['students_appeared']),
+        classAverage: _d(j['class_average']),
+        highestPercentage: _d(j['highest_percentage']),
+        lowestPercentage: _d(j['lowest_percentage']),
+        passedCount: _i(j['passed_count']),
+        failedCount: _i(j['failed_count']),
+        absentCount: _i(j['absent_count']),
+        passPercentage: _d(j['pass_percentage']),
+      );
+
+  GradeScaleItem _gradeScaleItemFromRow(Map<String, dynamic> j) =>
+      GradeScaleItem(
+        id: _s(j['id']),
+        gradeScaleId: _s(j['grade_scale_id']),
+        grade: _s(j['grade']),
+        minPercentage: _d(j['min_percentage']),
+        maxPercentage: _d(j['max_percentage']),
+        gradePoint: _dN(j['grade_point']),
+        description: j['description'] as String?,
+      );
+
+  GradeScale _gradeScaleFromRow(Map<String, dynamic> j) {
+    final items = j['grade_scale_items'] as List?;
+    return GradeScale(
+      id: _s(j['id']),
+      tenantId: _s(j['tenant_id']),
+      name: _s(j['name']),
+      isDefault: _b(j['is_default']),
+      createdAt: _dt(j['created_at']),
+      items: items
+          ?.whereType<Map>()
+          .map((e) => _gradeScaleItemFromRow(e.cast<String, dynamic>()))
+          .toList(),
+    );
+  }
+
   Future<List<Exam>> getExams({
     String? academicYearId,
     String? termId,
@@ -31,7 +232,7 @@ class ExamRepository extends BaseRepository {
     }
 
     final response = await query.order('start_date', ascending: false).range(offset, offset + limit - 1);
-    return (response as List).map((json) => Exam.fromJson(json)).toList();
+    return (response as List).map((json) => _examFromRow(json as Map<String, dynamic>)).toList();
   }
 
   Future<Exam?> getExamById(String examId) async {
@@ -50,7 +251,7 @@ class ExamRepository extends BaseRepository {
         .eq('id', examId)
         .single();
 
-    return Exam.fromJson(response);
+    return _examFromRow(response);
   }
 
   Future<Exam> createExam(Map<String, dynamic> data) async {
@@ -62,7 +263,7 @@ class ExamRepository extends BaseRepository {
         .select()
         .single();
 
-    return Exam.fromJson(response);
+    return _examFromRow(response);
   }
 
   Future<Exam> updateExam(String examId, Map<String, dynamic> data) async {
@@ -73,7 +274,7 @@ class ExamRepository extends BaseRepository {
         .select()
         .single();
 
-    return Exam.fromJson(response);
+    return _examFromRow(response);
   }
 
   Future<void> publishExam(String examId) async {
@@ -156,7 +357,7 @@ class ExamRepository extends BaseRepository {
         .eq('exam_id', examId)
         .order('exam_date');
 
-    return (response as List).map((json) => ExamSubject.fromJson(json)).toList();
+    return (response as List).map((json) => _examSubjectFromRow(json as Map<String, dynamic>)).toList();
   }
 
   Future<ExamSubject> createExamSubject(Map<String, dynamic> data) async {
@@ -168,7 +369,7 @@ class ExamRepository extends BaseRepository {
         .select()
         .single();
 
-    return ExamSubject.fromJson(response);
+    return _examSubjectFromRow(response);
   }
 
   Future<List<Mark>> getMarks({
@@ -191,7 +392,7 @@ class ExamRepository extends BaseRepository {
     }
 
     final response = await query.range(offset, offset + limit - 1);
-    return (response as List).map((json) => Mark.fromJson(json)).toList();
+    return (response as List).map((json) => _markFromRow(json as Map<String, dynamic>)).toList();
   }
 
   Future<void> enterMark({
@@ -248,7 +449,7 @@ class ExamRepository extends BaseRepository {
 
     final response = await query.range(offset, offset + limit - 1);
     return (response as List)
-        .map((json) => StudentPerformance.fromJson(json))
+        .map((json) => _performanceFromRow(json as Map<String, dynamic>))
         .toList();
   }
 
@@ -266,7 +467,7 @@ class ExamRepository extends BaseRepository {
     }
 
     final response = await query;
-    return (response as List).map((json) => StudentRank.fromJson(json)).toList();
+    return (response as List).map((json) => _rankFromRow(json as Map<String, dynamic>)).toList();
   }
 
   Future<StudentOverallRank?> getStudentOverallRank({
@@ -281,7 +482,7 @@ class ExamRepository extends BaseRepository {
         .maybeSingle();
 
     if (response == null) return null;
-    return StudentOverallRank.fromJson(response);
+    return _overallRankFromRow(response);
   }
 
   Future<List<ClassExamStats>> getClassExamStats({
@@ -303,7 +504,7 @@ class ExamRepository extends BaseRepository {
 
     final response = await query;
     return (response as List)
-        .map((json) => ClassExamStats.fromJson(json))
+        .map((json) => _classStatsFromRow(json as Map<String, dynamic>))
         .toList();
   }
 
@@ -317,7 +518,7 @@ class ExamRepository extends BaseRepository {
         .eq('tenant_id', requireTenantId)
         .order('name');
 
-    return (response as List).map((json) => GradeScale.fromJson(json)).toList();
+    return (response as List).map((json) => _gradeScaleFromRow(json as Map<String, dynamic>)).toList();
   }
 
   Future<void> refreshAnalytics() async {
@@ -343,7 +544,7 @@ class ExamRepository extends BaseRepository {
         .limit(limit);
 
     return (response as List)
-        .map((json) => StudentOverallRank.fromJson(json))
+        .map((json) => _overallRankFromRow(json as Map<String, dynamic>))
         .toList();
   }
 }

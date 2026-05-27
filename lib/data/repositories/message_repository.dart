@@ -8,6 +8,71 @@ import 'base_repository.dart';
 class MessageRepository extends BaseRepository {
   MessageRepository(super.client);
 
+  // Null-safe snake_case row mappers — the Freezed generated fromJson reads
+  // camelCase keys which don't match Supabase's snake_case columns, and can't
+  // read the nested join objects.
+  static DateTime? _date(Object? v) =>
+      v is String ? DateTime.tryParse(v) : null;
+
+  Message _messageFromRow(Map<String, dynamic> j) {
+    final sender = j['users'] as Map<String, dynamic>?;
+    return Message(
+      id: (j['id'] as String?) ?? '',
+      tenantId: (j['tenant_id'] as String?) ?? '',
+      threadId: (j['thread_id'] as String?) ?? '',
+      senderId: (j['sender_id'] as String?) ?? '',
+      content: (j['content'] as String?) ?? '',
+      attachments: (j['attachments'] as List?)
+              ?.whereType<Map>()
+              .map((e) => e.cast<String, dynamic>())
+              .toList() ??
+          const [],
+      isEdited: j['is_edited'] as bool? ?? false,
+      replyToId: j['reply_to_id'] as String?,
+      createdAt: _date(j['created_at']),
+      updatedAt: _date(j['updated_at']),
+      senderName: sender?['full_name'] as String?,
+      senderAvatar: sender?['avatar_url'] as String?,
+    );
+  }
+
+  ThreadParticipant _participantFromRow(Map<String, dynamic> j) {
+    final user = j['users'] as Map<String, dynamic>?;
+    return ThreadParticipant(
+      id: (j['id'] as String?) ?? '',
+      threadId: (j['thread_id'] as String?) ?? '',
+      userId: (j['user_id'] as String?) ?? '',
+      joinedAt: _date(j['joined_at']),
+      lastReadAt: _date(j['last_read_at']),
+      isMuted: j['is_muted'] as bool? ?? false,
+      userName: user?['full_name'] as String?,
+      userAvatar: user?['avatar_url'] as String?,
+    );
+  }
+
+  Thread _threadFromRow(Map<String, dynamic> j) {
+    final user = j['users'] as Map<String, dynamic>?;
+    final section = j['sections'] as Map<String, dynamic>?;
+    final parts = j['thread_participants'] as List?;
+    return Thread(
+      id: (j['id'] as String?) ?? '',
+      tenantId: (j['tenant_id'] as String?) ?? '',
+      threadType: (j['thread_type'] as String?) ?? 'private',
+      title: j['title'] as String?,
+      sectionId: j['section_id'] as String?,
+      createdBy: (j['created_by'] as String?) ?? '',
+      isActive: j['is_active'] as bool? ?? true,
+      lastMessageAt: _date(j['last_message_at']),
+      createdAt: _date(j['created_at']),
+      createdByName: user?['full_name'] as String?,
+      sectionName: section?['name'] as String?,
+      participants: parts
+          ?.whereType<Map>()
+          .map((e) => _participantFromRow(e.cast<String, dynamic>()))
+          .toList(),
+    );
+  }
+
   Future<List<Thread>> getThreads({int limit = 50, int offset = 0}) async {
     final response = await client
         .from('threads')
@@ -26,7 +91,9 @@ class MessageRepository extends BaseRepository {
         .order('last_message_at', ascending: false)
         .range(offset, offset + limit - 1);
 
-    return (response as List).map((json) => Thread.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => _threadFromRow(json as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Thread?> getThreadById(String threadId) async {
@@ -44,7 +111,7 @@ class MessageRepository extends BaseRepository {
         .eq('id', threadId)
         .single();
 
-    return Thread.fromJson(response);
+    return _threadFromRow(response);
   }
 
   Future<Thread> createThread({
@@ -70,7 +137,7 @@ class MessageRepository extends BaseRepository {
 
     await client.from('thread_participants').insert(participants);
 
-    return Thread.fromJson(threadResponse);
+    return _threadFromRow(threadResponse);
   }
 
   Future<Thread?> getOrCreatePrivateThread(String otherUserId) async {
@@ -88,7 +155,7 @@ class MessageRepository extends BaseRepository {
       final participants = thread['thread_participants'] as List;
       final userIds = participants.map((p) => p['user_id']).toSet();
       if (userIds.contains(otherUserId) && userIds.length == 2) {
-        return Thread.fromJson(thread);
+        return _threadFromRow(thread);
       }
     }
 
@@ -124,7 +191,9 @@ class MessageRepository extends BaseRepository {
         .order('created_at', ascending: false)
         .limit(limit);
 
-    return (response as List).map((json) => Message.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => _messageFromRow(json as Map<String, dynamic>))
+        .toList();
   }
 
   /// Sends a message. Wrapped in [retryNetwork] + idempotency key (Stage 1
@@ -166,7 +235,7 @@ class MessageRepository extends BaseRepository {
       label: 'threads.bump',
     );
 
-    return Message.fromJson(response);
+    return _messageFromRow(response);
   }
 
   Future<Message> editMessage({
@@ -185,7 +254,7 @@ class MessageRepository extends BaseRepository {
         .select()
         .single();
 
-    return Message.fromJson(response);
+    return _messageFromRow(response);
   }
 
   Future<void> deleteMessage(String messageId) async {
@@ -229,6 +298,35 @@ class MessageRepository extends BaseRepository {
     return unreadCount;
   }
 
+  Announcement _announcementFromRow(Map<String, dynamic> j) {
+    final user = j['users'] as Map<String, dynamic>?;
+    return Announcement(
+      id: (j['id'] as String?) ?? '',
+      tenantId: (j['tenant_id'] as String?) ?? '',
+      title: (j['title'] as String?) ?? '',
+      content: (j['content'] as String?) ?? '',
+      attachments: (j['attachments'] as List?)
+              ?.whereType<Map>()
+              .map((e) => e.cast<String, dynamic>())
+              .toList() ??
+          const [],
+      targetRoles:
+          (j['target_roles'] as List?)?.map((e) => e.toString()).toList() ??
+              const [],
+      targetSections:
+          (j['target_sections'] as List?)?.map((e) => e.toString()).toList() ??
+              const [],
+      priority: (j['priority'] as String?) ?? 'normal',
+      publishAt: _date(j['publish_at']),
+      expiresAt: _date(j['expires_at']),
+      createdBy: (j['created_by'] as String?) ?? '',
+      isPublished: j['is_published'] as bool? ?? false,
+      createdAt: _date(j['created_at']),
+      createdByName:
+          (j['created_by_name'] as String?) ?? (user?['full_name'] as String?),
+    );
+  }
+
   Future<List<Announcement>> getAnnouncements({
     bool activeOnly = true,
     int limit = 50,
@@ -251,7 +349,7 @@ class MessageRepository extends BaseRepository {
 
     final response = await query.order('publish_at', ascending: false).range(offset, offset + limit - 1);
     return (response as List)
-        .map((json) => Announcement.fromJson(json))
+        .map((json) => _announcementFromRow(json as Map<String, dynamic>))
         .toList();
   }
 
@@ -265,7 +363,7 @@ class MessageRepository extends BaseRepository {
         .eq('id', announcementId)
         .single();
 
-    return Announcement.fromJson(response);
+    return _announcementFromRow(response);
   }
 
   Future<Announcement> createAnnouncement(Map<String, dynamic> data) async {
@@ -278,7 +376,7 @@ class MessageRepository extends BaseRepository {
         .select()
         .single();
 
-    return Announcement.fromJson(response);
+    return _announcementFromRow(response);
   }
 
   Future<Announcement> updateAnnouncement(
@@ -292,7 +390,7 @@ class MessageRepository extends BaseRepository {
         .select()
         .single();
 
-    return Announcement.fromJson(response);
+    return _announcementFromRow(response);
   }
 
   Future<void> publishAnnouncement(String announcementId) async {

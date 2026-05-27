@@ -5,6 +5,43 @@ import 'base_repository.dart';
 class AnnouncementRepository extends BaseRepository {
   AnnouncementRepository(super.client);
 
+  // Null-safe snake_case row mapper — the Freezed generated fromJson reads
+  // camelCase keys which don't match Supabase's snake_case columns.
+  Announcement _fromRow(Map<String, dynamic> j) {
+    final user = j['users'] as Map<String, dynamic>?;
+    return Announcement(
+      id: (j['id'] as String?) ?? '',
+      tenantId: (j['tenant_id'] as String?) ?? '',
+      title: (j['title'] as String?) ?? '',
+      content: (j['content'] as String?) ?? '',
+      attachments: (j['attachments'] as List?)
+              ?.whereType<Map>()
+              .map((e) => e.cast<String, dynamic>())
+              .toList() ??
+          const [],
+      targetRoles:
+          (j['target_roles'] as List?)?.map((e) => e.toString()).toList() ??
+              const [],
+      targetSections:
+          (j['target_sections'] as List?)?.map((e) => e.toString()).toList() ??
+              const [],
+      priority: (j['priority'] as String?) ?? 'normal',
+      publishAt: j['publish_at'] is String
+          ? DateTime.tryParse(j['publish_at'] as String)
+          : null,
+      expiresAt: j['expires_at'] is String
+          ? DateTime.tryParse(j['expires_at'] as String)
+          : null,
+      createdBy: (j['created_by'] as String?) ?? '',
+      isPublished: j['is_published'] as bool? ?? false,
+      createdAt: j['created_at'] is String
+          ? DateTime.tryParse(j['created_at'] as String)
+          : null,
+      createdByName:
+          (j['created_by_name'] as String?) ?? (user?['full_name'] as String?),
+    );
+  }
+
   /// Get all announcements for the tenant
   Future<List<Announcement>> getAnnouncements({
     String? targetRole,
@@ -32,13 +69,9 @@ class AnnouncementRepository extends BaseRepository {
         .order('created_at', ascending: false)
         .range(offset, offset + limit - 1);
 
-    return (response as List).map((json) {
-      // Handle joined user data
-      if (json['users'] != null) {
-        json['created_by_name'] = json['users']['full_name'];
-      }
-      return Announcement.fromJson(json);
-    }).toList();
+    return (response as List)
+        .map((json) => _fromRow(json as Map<String, dynamic>))
+        .toList();
   }
 
   /// Get published announcements for a specific role
@@ -61,12 +94,9 @@ class AnnouncementRepository extends BaseRepository {
         .order('created_at', ascending: false)
         .limit(limit);
 
-    return (response as List).map((json) {
-      if (json['users'] != null) {
-        json['created_by_name'] = json['users']['full_name'];
-      }
-      return Announcement.fromJson(json);
-    }).toList();
+    return (response as List)
+        .map((json) => _fromRow(json as Map<String, dynamic>))
+        .toList();
   }
 
   /// Get announcement by ID
@@ -81,11 +111,7 @@ class AnnouncementRepository extends BaseRepository {
         .maybeSingle();
 
     if (response == null) return null;
-    
-    if (response['users'] != null) {
-      response['created_by_name'] = response['users']['full_name'];
-    }
-    return Announcement.fromJson(response);
+    return _fromRow(response);
   }
 
   /// Create a new announcement
@@ -118,7 +144,7 @@ class AnnouncementRepository extends BaseRepository {
         .select()
         .single();
 
-    return Announcement.fromJson(response);
+    return _fromRow(response);
   }
 
   /// Update an announcement
@@ -133,7 +159,7 @@ class AnnouncementRepository extends BaseRepository {
         .select()
         .single();
 
-    return Announcement.fromJson(response);
+    return _fromRow(response);
   }
 
   /// Publish an announcement
@@ -190,9 +216,9 @@ class AnnouncementRepository extends BaseRepository {
       ),
       callback: (payload) {
         if (payload.eventType == PostgresChangeEvent.insert) {
-          onInsert(Announcement.fromJson(payload.newRecord));
+          onInsert(_fromRow(payload.newRecord));
         } else if (payload.eventType == PostgresChangeEvent.update) {
-          onUpdate(Announcement.fromJson(payload.newRecord));
+          onUpdate(_fromRow(payload.newRecord));
         } else if (payload.eventType == PostgresChangeEvent.delete) {
           onDelete(payload.oldRecord['id'] as String);
         }

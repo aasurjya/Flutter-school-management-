@@ -5,6 +5,7 @@ import '../ai/adapters/ai_adapter.dart';
 import '../ai/adapters/claude_adapter.dart';
 import '../ai/adapters/deepseek_adapter.dart';
 import '../ai/adapters/openrouter_adapter.dart';
+import '../ai/adapters/openrouter_text_chain_adapter.dart';
 import '../ai/ai_gateway_client.dart';
 import '../ai/agents/ai_agent.dart';
 import '../ai/agents/tools/compose_message_tool.dart';
@@ -24,6 +25,16 @@ import '../services/ai_staff_text_generator.dart';
 import '../services/ai_text_generator.dart';
 import '../services/deepseek_service.dart';
 import '../services/openrouter_image_service.dart';
+
+// Ordered chain of free OpenRouter text models (mirrors the gateway's
+// feature_routes seed). The chain adapter tries each in turn until one
+// succeeds, else AITextGenerator falls back to its local data-backed string.
+const List<String> _openRouterFreeTextChain = [
+  'deepseek/deepseek-v4-flash:free',
+  'nvidia/nemotron-3-super-120b-a12b:free',
+  'meta-llama/llama-4-maverick:free',
+  'mistralai/mistral-small-3.1:free',
+];
 
 // =============================================================================
 // Legacy providers — kept as aliases for backward compatibility
@@ -124,6 +135,18 @@ final aiRouterProvider = Provider<AIRouter?>((ref) {
     );
     adapters[AICapability.imageGeneration] = adapter;
     ref.onDispose(() => adapter.dispose());
+
+    // OpenRouter free-model chain for TEXT generation. Preferred text path in
+    // production (the Supabase ai-gateway is undeployed). Walks free models
+    // one-by-one; overrides DeepSeek/Claude as the text provider per product
+    // direction to use free OpenRouter models.
+    final textChain = OpenRouterTextChainAdapter(
+      apiKey: openRouterKey,
+      modelChain: _openRouterFreeTextChain,
+    );
+    adapters[AICapability.textGeneration] = textChain;
+    adapters.putIfAbsent(AICapability.jsonMode, () => textChain);
+    ref.onDispose(() => textChain.dispose());
   }
 
   if (adapters.isEmpty) return null;

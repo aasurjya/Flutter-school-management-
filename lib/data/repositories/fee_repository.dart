@@ -7,6 +7,171 @@ import 'base_repository.dart';
 class FeeRepository extends BaseRepository {
   FeeRepository(super.client);
 
+  // ---------------------------------------------------------------------------
+  // Null-safe row mappers.
+  //
+  // Supabase returns snake_case columns, but the Freezed models' generated
+  // fromJson expects camelCase — and the joined display fields live in nested
+  // objects the generated parser can't read. So map rows manually, null-safe,
+  // mirroring the timetable repository's approach.
+  // ---------------------------------------------------------------------------
+
+  static String _str(Object? v) => (v as String?) ?? '';
+  static double _dbl(Object? v) => (v as num?)?.toDouble() ?? 0;
+  static int _int(Object? v) => (v as num?)?.toInt() ?? 0;
+  static DateTime? _date(Object? v) =>
+      v is String ? DateTime.tryParse(v) : null;
+
+  FeeHead _feeHeadFromRow(Map<String, dynamic> j) => FeeHead(
+        id: _str(j['id']),
+        tenantId: _str(j['tenant_id']),
+        name: _str(j['name']),
+        code: j['code'] as String?,
+        description: j['description'] as String?,
+        isRecurring: j['is_recurring'] as bool? ?? true,
+        createdAt: _date(j['created_at']),
+      );
+
+  FeeStructure _feeStructureFromRow(Map<String, dynamic> j) {
+    final feeHead = j['fee_heads'] as Map<String, dynamic>?;
+    final cls = j['classes'] as Map<String, dynamic>?;
+    final year = j['academic_years'] as Map<String, dynamic>?;
+    final term = j['terms'] as Map<String, dynamic>?;
+    return FeeStructure(
+      id: _str(j['id']),
+      tenantId: _str(j['tenant_id']),
+      academicYearId: _str(j['academic_year_id']),
+      classId: _str(j['class_id']),
+      feeHeadId: _str(j['fee_head_id']),
+      amount: _dbl(j['amount']),
+      dueDate: _date(j['due_date']),
+      termId: j['term_id'] as String?,
+      isMandatory: j['is_mandatory'] as bool? ?? true,
+      createdAt: _date(j['created_at']),
+      feeHeadName: feeHead?['name'] as String?,
+      className: cls?['name'] as String?,
+      academicYearName: year?['name'] as String?,
+      termName: term?['name'] as String?,
+    );
+  }
+
+  InvoiceItem _invoiceItemFromRow(Map<String, dynamic> j) {
+    final feeHead = j['fee_heads'] as Map<String, dynamic>?;
+    return InvoiceItem(
+      id: _str(j['id']),
+      invoiceId: _str(j['invoice_id']),
+      feeHeadId: _str(j['fee_head_id']),
+      description: j['description'] as String?,
+      amount: _dbl(j['amount']),
+      discount: _dbl(j['discount']),
+      feeHeadName: feeHead?['name'] as String?,
+    );
+  }
+
+  Invoice _invoiceFromRow(Map<String, dynamic> j) {
+    final student = j['students'] as Map<String, dynamic>?;
+    final year = j['academic_years'] as Map<String, dynamic>?;
+    final term = j['terms'] as Map<String, dynamic>?;
+    // section/class come via student_enrollments (only on getInvoiceById).
+    final enrollments = student?['student_enrollments'] as List?;
+    final firstEnroll = (enrollments != null && enrollments.isNotEmpty)
+        ? enrollments.first as Map<String, dynamic>?
+        : null;
+    final section = firstEnroll?['sections'] as Map<String, dynamic>?;
+    final cls = section?['classes'] as Map<String, dynamic>?;
+
+    String? studentName;
+    if (student != null) {
+      final full =
+          '${student['first_name'] ?? ''} ${student['last_name'] ?? ''}'.trim();
+      studentName = full.isEmpty ? null : full;
+    }
+
+    final itemsRaw = j['invoice_items'] as List?;
+    final paymentsRaw = j['payments'] as List?;
+
+    return Invoice(
+      id: _str(j['id']),
+      tenantId: _str(j['tenant_id']),
+      invoiceNumber: _str(j['invoice_number']),
+      studentId: _str(j['student_id']),
+      academicYearId: _str(j['academic_year_id']),
+      termId: j['term_id'] as String?,
+      totalAmount: _dbl(j['total_amount']),
+      discountAmount: _dbl(j['discount_amount']),
+      paidAmount: _dbl(j['paid_amount']),
+      dueDate: _date(j['due_date']) ?? DateTime.now(),
+      status: (j['status'] as String?) ?? 'pending',
+      notes: j['notes'] as String?,
+      generatedBy: j['generated_by'] as String?,
+      createdAt: _date(j['created_at']),
+      updatedAt: _date(j['updated_at']),
+      studentName: studentName,
+      admissionNumber: student?['admission_number'] as String?,
+      sectionName: section?['name'] as String?,
+      className: cls?['name'] as String?,
+      academicYearName: year?['name'] as String?,
+      termName: term?['name'] as String?,
+      items: itemsRaw
+          ?.map((e) => _invoiceItemFromRow(e as Map<String, dynamic>))
+          .toList(),
+      payments: paymentsRaw
+          ?.map((e) => _paymentFromRow(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  Payment _paymentFromRow(Map<String, dynamic> j) {
+    final receivedByUser = j['users'] as Map<String, dynamic>?;
+    final invoice = j['invoices'] as Map<String, dynamic>?;
+    final invoiceStudent = invoice?['students'] as Map<String, dynamic>?;
+    String? studentName;
+    if (invoiceStudent != null) {
+      final full =
+          '${invoiceStudent['first_name'] ?? ''} ${invoiceStudent['last_name'] ?? ''}'
+              .trim();
+      studentName = full.isEmpty ? null : full;
+    }
+    return Payment(
+      id: _str(j['id']),
+      tenantId: _str(j['tenant_id']),
+      invoiceId: _str(j['invoice_id']),
+      paymentNumber: _str(j['payment_number']),
+      amount: _dbl(j['amount']),
+      paymentMethod: _str(j['payment_method']),
+      status: (j['status'] as String?) ?? 'pending',
+      transactionId: j['transaction_id'] as String?,
+      gatewayResponse: j['gateway_response'] as Map<String, dynamic>?,
+      paidAt: _date(j['paid_at']),
+      receivedBy: j['received_by'] as String?,
+      remarks: j['remarks'] as String?,
+      createdAt: _date(j['created_at']),
+      receivedByName: receivedByUser?['full_name'] as String?,
+      invoiceNumber: invoice?['invoice_number'] as String?,
+      studentName: studentName,
+    );
+  }
+
+  FeeSummary _feeSummaryFromRow(Map<String, dynamic> j) => FeeSummary(
+        tenantId: _str(j['tenant_id']),
+        studentId: _str(j['student_id']),
+        studentName: _str(j['student_name']),
+        admissionNumber: _str(j['admission_number']),
+        sectionId: _str(j['section_id']),
+        sectionName: _str(j['section_name']),
+        className: _str(j['class_name']),
+        academicYearId: _str(j['academic_year_id']),
+        academicYearName: _str(j['academic_year_name']),
+        totalFee: _dbl(j['total_fee']),
+        totalDiscount: _dbl(j['total_discount']),
+        totalPaid: _dbl(j['total_paid']),
+        totalPending: _dbl(j['total_pending']),
+        totalInvoices: _int(j['total_invoices']),
+        paidInvoices: _int(j['paid_invoices']),
+        pendingInvoices: _int(j['pending_invoices']),
+        overdueInvoices: _int(j['overdue_invoices']),
+      );
+
   Future<List<FeeHead>> getFeeHeads() async {
     final response = await client
         .from('fee_heads')
@@ -14,7 +179,9 @@ class FeeRepository extends BaseRepository {
         .eq('tenant_id', requireTenantId)
         .order('name');
 
-    return (response as List).map((json) => FeeHead.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => _feeHeadFromRow(json as Map<String, dynamic>))
+        .toList();
   }
 
   Future<FeeHead> createFeeHead(Map<String, dynamic> data) async {
@@ -26,7 +193,7 @@ class FeeRepository extends BaseRepository {
         .select()
         .single();
 
-    return FeeHead.fromJson(response);
+    return _feeHeadFromRow(response);
   }
 
   Future<FeeHead> updateFeeHead(
@@ -40,7 +207,7 @@ class FeeRepository extends BaseRepository {
         .eq('tenant_id', requireTenantId)
         .select()
         .single();
-    return FeeHead.fromJson(response);
+    return _feeHeadFromRow(response);
   }
 
   /// Apply a discount/concession to a specific invoice.
@@ -61,7 +228,7 @@ class FeeRepository extends BaseRepository {
         .eq('tenant_id', requireTenantId)
         .select()
         .single();
-    return Invoice.fromJson(response);
+    return _invoiceFromRow(response);
   }
 
   Future<List<FeeStructure>> getFeeStructures({
@@ -90,7 +257,7 @@ class FeeRepository extends BaseRepository {
 
     final response = await query;
     return (response as List)
-        .map((json) => FeeStructure.fromJson(json))
+        .map((json) => _feeStructureFromRow(json as Map<String, dynamic>))
         .toList();
   }
 
@@ -103,7 +270,7 @@ class FeeRepository extends BaseRepository {
         .select()
         .single();
 
-    return FeeStructure.fromJson(response);
+    return _feeStructureFromRow(response);
   }
 
   Future<List<Invoice>> getInvoices({
@@ -136,7 +303,9 @@ class FeeRepository extends BaseRepository {
     }
 
     final response = await query.order('created_at', ascending: false).range(offset, offset + limit - 1);
-    return (response as List).map((json) => Invoice.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => _invoiceFromRow(json as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Invoice?> getInvoiceById(String invoiceId) async {
@@ -159,7 +328,7 @@ class FeeRepository extends BaseRepository {
         .eq('id', invoiceId)
         .single();
 
-    return Invoice.fromJson(response);
+    return _invoiceFromRow(response);
   }
 
   Future<Invoice> createInvoice(Map<String, dynamic> data) async {
@@ -172,7 +341,7 @@ class FeeRepository extends BaseRepository {
         .select()
         .single();
 
-    return Invoice.fromJson(response);
+    return _invoiceFromRow(response);
   }
 
   Future<void> addInvoiceItems(
@@ -259,7 +428,7 @@ class FeeRepository extends BaseRepository {
       () => client.from('payments').insert(data).select().single(),
       label: 'payments.record',
     );
-    return Payment.fromJson(response);
+    return _paymentFromRow(response);
   }
 
   Future<List<Payment>> getPayments({
@@ -282,7 +451,9 @@ class FeeRepository extends BaseRepository {
     }
 
     final response = await query.order('created_at', ascending: false).range(offset, offset + limit - 1);
-    return (response as List).map((json) => Payment.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => _paymentFromRow(json as Map<String, dynamic>))
+        .toList();
   }
 
   Future<List<FeeSummary>> getFeeSummaries({
@@ -305,7 +476,9 @@ class FeeRepository extends BaseRepository {
     }
 
     final response = await query.range(offset, offset + limit - 1);
-    return (response as List).map((json) => FeeSummary.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => _feeSummaryFromRow(json as Map<String, dynamic>))
+        .toList();
   }
 
   Future<FeeSummary?> getStudentFeeSummary({
@@ -323,7 +496,7 @@ class FeeRepository extends BaseRepository {
 
     final response = await query.maybeSingle();
     if (response == null) return null;
-    return FeeSummary.fromJson(response);
+    return _feeSummaryFromRow(response);
   }
 
   Future<Map<String, double>> getFeeCollectionStats({
@@ -340,11 +513,42 @@ class FeeRepository extends BaseRepository {
       totalPaid += summary.totalPaid;
       totalPending += summary.totalPending;
     }
-    
+
+    // Overdue: outstanding balance on past-due unpaid invoices. Defensive —
+    // never let a stats sub-query break the whole screen.
+    double totalOverdue = 0;
+    try {
+      final overdue = await getOverdueInvoices(limit: 1000);
+      for (final inv in overdue) {
+        totalOverdue += (inv.totalAmount - inv.discountAmount - inv.paidAmount);
+      }
+    } catch (_) {}
+
+    // Today's collections: completed payments dated today.
+    double todayCollected = 0;
+    try {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day).toIso8601String();
+      final pays = await client
+          .from('payments')
+          .select('amount, paid_at, status')
+          .eq('tenant_id', requireTenantId)
+          .eq('status', 'completed')
+          .gte('paid_at', startOfDay);
+      for (final p in pays as List) {
+        todayCollected += ((p as Map)['amount'] as num?)?.toDouble() ?? 0;
+      }
+    } catch (_) {}
+
     return {
+      // Canonical keys the screen reads.
+      'total_collected': totalPaid,
+      'total_pending': totalPending,
+      'total_overdue': totalOverdue < 0 ? 0 : totalOverdue,
+      'today_collected': todayCollected,
+      // Retained for any other consumers.
       'total_fee': totalFee,
       'total_paid': totalPaid,
-      'total_pending': totalPending,
       'collection_percentage': totalFee > 0 ? (totalPaid / totalFee) * 100 : 0,
     };
   }
@@ -362,7 +566,9 @@ class FeeRepository extends BaseRepository {
         .order('due_date')
         .range(offset, offset + limit - 1);
 
-    return (response as List).map((json) => Invoice.fromJson(json)).toList();
+    return (response as List)
+        .map((json) => _invoiceFromRow(json as Map<String, dynamic>))
+        .toList();
   }
 
   // ==================== PREDICTIVE FEE COLLECTION ====================

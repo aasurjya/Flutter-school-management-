@@ -202,12 +202,16 @@ class CanteenOrder {
       totalAmount: (json['total_amount'] as num).toDouble(),
       status: json['status'],
       notes: json['notes'],
-      orderedAt: DateTime.parse(json['ordered_at']),
+      // ordered_at is nullable in the DB even though the model field is
+      // non-null — guard the parse and fall back to a sentinel epoch so a
+      // missing timestamp doesn't crash the whole Canteen screen.
+      orderedAt: DateTime.tryParse((json['ordered_at'] as String?) ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
       confirmedAt: json['confirmed_at'] != null
-          ? DateTime.parse(json['confirmed_at'])
+          ? DateTime.tryParse(json['confirmed_at'] as String)
           : null,
       deliveredAt: json['delivered_at'] != null
-          ? DateTime.parse(json['delivered_at'])
+          ? DateTime.tryParse(json['delivered_at'] as String)
           : null,
       confirmedBy: json['confirmed_by'],
       items: items,

@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../data/models/timetable.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../auth/providers/auth_provider.dart';
+import '../../../timetable/providers/timetable_provider.dart';
 
 class TeacherTimetableScreen extends ConsumerStatefulWidget {
   const TeacherTimetableScreen({super.key});
@@ -32,27 +36,45 @@ class _TeacherTimetableScreenState extends ConsumerState<TeacherTimetableScreen>
     super.dispose();
   }
 
-  // Mock timetable data for teacher
-  List<Map<String, dynamic>> _getSchedule(String day) {
-    if (day == 'Saturday') {
-      return [
-        {'period': 1, 'startTime': '08:00', 'endTime': '08:45', 'class': '10-A', 'subject': 'Mathematics', 'room': '101'},
-        {'period': 2, 'startTime': '08:45', 'endTime': '09:30', 'class': '10-B', 'subject': 'Mathematics', 'room': '102'},
-      ];
-    }
+  // Map a teacher's Timetable rows for a single day into the period-card
+  // shape the UI consumes. Sorts by slot sequence order; classes the teacher
+  // doesn't teach that period are omitted (we don't have a slot-set join here).
+  List<Map<String, dynamic>> _scheduleForDay(List<Timetable> week, int dayOfWeek) {
+    final rows = week.where((t) => t.dayOfWeek == dayOfWeek).toList()
+      ..sort((a, b) {
+        final ao = a.slot?.sequenceOrder ?? 0;
+        final bo = b.slot?.sequenceOrder ?? 0;
+        return ao.compareTo(bo);
+      });
     return [
-      {'period': 1, 'startTime': '08:00', 'endTime': '08:45', 'class': '10-A', 'subject': 'Mathematics', 'room': '101'},
-      {'period': 2, 'startTime': '08:45', 'endTime': '09:30', 'class': '10-B', 'subject': 'Mathematics', 'room': '102'},
-      {'period': 3, 'startTime': '09:30', 'endTime': '10:15', 'class': null, 'subject': 'Free Period', 'room': null},
-      {'period': 4, 'startTime': '10:15', 'endTime': '10:30', 'class': null, 'subject': 'Break', 'room': null, 'isBreak': true},
-      {'period': 5, 'startTime': '10:30', 'endTime': '11:15', 'class': '11-A', 'subject': 'Mathematics', 'room': '201'},
-      {'period': 6, 'startTime': '11:15', 'endTime': '12:00', 'class': '9-A', 'subject': 'Physics', 'room': '103'},
-      {'period': 7, 'startTime': '12:00', 'endTime': '12:45', 'class': '9-B', 'subject': 'Physics', 'room': 'Lab 1'},
+      for (final t in rows)
+        {
+          'period': t.slot?.sequenceOrder ?? 0,
+          'startTime': _trimSeconds(t.slot?.startTime ?? ''),
+          'endTime': _trimSeconds(t.slot?.endTime ?? ''),
+          'class': t.sectionName ?? t.className,
+          'subject': t.subjectName ?? 'Class',
+          'room': t.roomNumber,
+        },
     ];
+  }
+
+  // Supabase TIME columns return "HH:MM:SS"; the formatter expects "HH:MM".
+  String _trimSeconds(String t) {
+    final parts = t.split(':');
+    if (parts.length >= 2) return '${parts[0]}:${parts[1]}';
+    return t;
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(currentUserProvider);
+    final weekAsync = user == null
+        ? const AsyncValue<List<Timetable>>.data([])
+        : ref.watch(teacherTimetableProvider(
+            TeacherTimetableFilter(teacherId: user.id),
+          ));
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Timetable'),
@@ -67,26 +89,32 @@ class _TeacherTimetableScreenState extends ConsumerState<TeacherTimetableScreen>
           tabs: _days.map((day) => Tab(text: day)).toList(),
         ),
       ),
-      body: Column(
-        children: [
-          _buildTodaySummary(),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: List.generate(6, (index) {
-                final schedule = _getSchedule(_fullDays[index]);
-                return _buildDaySchedule(schedule, _fullDays[index]);
-              }),
+      body: weekAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, __) => Center(child: Text(WarmCopy.loadFailed('your timetable'))),
+        data: (week) => Column(
+          children: [
+            _buildTodaySummary(week),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: List.generate(6, (index) {
+                  // _fullDays index 0 = Monday → dayOfWeek 1, …, index 5 = Saturday → 6.
+                  final dayOfWeek = index + 1;
+                  final schedule = _scheduleForDay(week, dayOfWeek);
+                  return _buildDaySchedule(schedule, _fullDays[index]);
+                }),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildTodaySummary() {
-    final today = DateFormat('EEEE').format(DateTime.now());
-    final todaySchedule = _getSchedule(today);
+  Widget _buildTodaySummary(List<Timetable> week) {
+    final todayWeekday = DateTime.now().weekday; // 1=Mon … 7=Sun
+    final todaySchedule = _scheduleForDay(week, todayWeekday);
     final classCount = todaySchedule.where((s) => s['class'] != null && s['isBreak'] != true).length;
     final freeCount = todaySchedule.where((s) => s['class'] == null && s['isBreak'] != true).length;
 

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../data/models/student.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../students/providers/students_provider.dart';
 
 class ClassStudentsScreen extends ConsumerStatefulWidget {
   final String sectionId;
@@ -24,39 +27,54 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
   String _searchQuery = '';
   String _sortBy = 'name';
 
-  // Mock students data
-  final List<Map<String, dynamic>> _students = [
-    {'id': '1', 'name': 'Aarav Sharma', 'rollNo': '01', 'attendance': 92.5, 'lastExamScore': 85, 'photoUrl': null},
-    {'id': '2', 'name': 'Aditi Patel', 'rollNo': '02', 'attendance': 88.0, 'lastExamScore': 92, 'photoUrl': null},
-    {'id': '3', 'name': 'Arjun Kumar', 'rollNo': '03', 'attendance': 95.0, 'lastExamScore': 78, 'photoUrl': null},
-    {'id': '4', 'name': 'Diya Singh', 'rollNo': '04', 'attendance': 78.5, 'lastExamScore': 88, 'photoUrl': null},
-    {'id': '5', 'name': 'Ishaan Gupta', 'rollNo': '05', 'attendance': 90.0, 'lastExamScore': 72, 'photoUrl': null},
-    {'id': '6', 'name': 'Kavya Reddy', 'rollNo': '06', 'attendance': 85.5, 'lastExamScore': 95, 'photoUrl': null},
-    {'id': '7', 'name': 'Mihir Joshi', 'rollNo': '07', 'attendance': 68.0, 'lastExamScore': 65, 'photoUrl': null},
-    {'id': '8', 'name': 'Nisha Agarwal', 'rollNo': '08', 'attendance': 94.0, 'lastExamScore': 89, 'photoUrl': null},
-    {'id': '9', 'name': 'Pranav Verma', 'rollNo': '09', 'attendance': 91.5, 'lastExamScore': 82, 'photoUrl': null},
-    {'id': '10', 'name': 'Riya Malhotra', 'rollNo': '10', 'attendance': 87.0, 'lastExamScore': 91, 'photoUrl': null},
-  ];
+  // Map a real Student into the rendering shape this screen consumes.
+  // attendance and lastExamScore are nullable — joining those at scale is a
+  // dedicated follow-up; until then, cards render "—" for missing metrics.
+  Map<String, dynamic> _mapStudent(Student s) {
+    final last = (s.lastName ?? '').trim();
+    final full = ('${s.firstName} $last').trim();
+    return {
+      'id': s.id,
+      'name': full.isEmpty ? 'Student' : full,
+      'rollNo': s.rollNumber ?? '',
+      'attendance': null, // double? — to be wired to attendance stats
+      'lastExamScore': null, // int? — to be wired to latest exam result
+      'photoUrl': s.photoUrl,
+    };
+  }
 
-  List<Map<String, dynamic>> get filteredStudents {
-    final students = _students.where((s) {
-      if (_searchQuery.isEmpty) return true;
-      return s['name'].toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          s['rollNo'].contains(_searchQuery);
+  List<Map<String, dynamic>> _filterAndSort(List<Map<String, dynamic>> source) {
+    final q = _searchQuery.toLowerCase();
+    final students = source.where((s) {
+      if (q.isEmpty) return true;
+      final name = (s['name'] as String).toLowerCase();
+      final roll = s['rollNo'] as String;
+      return name.contains(q) || roll.contains(_searchQuery);
     }).toList();
+
+    int cmpNullableNum(num? a, num? b) {
+      if (a == null && b == null) return 0;
+      if (a == null) return 1; // nulls last
+      if (b == null) return -1;
+      return b.compareTo(a); // descending
+    }
 
     switch (_sortBy) {
       case 'name':
-        students.sort((a, b) => a['name'].compareTo(b['name']));
+        students.sort((a, b) =>
+            (a['name'] as String).compareTo(b['name'] as String));
         break;
       case 'roll':
-        students.sort((a, b) => a['rollNo'].compareTo(b['rollNo']));
+        students.sort((a, b) =>
+            (a['rollNo'] as String).compareTo(b['rollNo'] as String));
         break;
       case 'attendance':
-        students.sort((a, b) => (b['attendance'] as double).compareTo(a['attendance'] as double));
+        students.sort((a, b) =>
+            cmpNullableNum(a['attendance'] as double?, b['attendance'] as double?));
         break;
       case 'performance':
-        students.sort((a, b) => (b['lastExamScore'] as int).compareTo(a['lastExamScore'] as int));
+        students.sort((a, b) =>
+            cmpNullableNum(a['lastExamScore'] as int?, b['lastExamScore'] as int?));
         break;
     }
     return students;
@@ -64,6 +82,9 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final studentsAsync =
+        ref.watch(studentsBySectionProvider(widget.sectionId));
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.className ?? 'Class Students'),
@@ -82,55 +103,75 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: AppColors.primary.withValues(alpha: 0.05),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search students...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+      body: studentsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, __) => Center(child: Text(WarmCopy.loadFailed('students'))),
+        data: (real) {
+          final filtered = _filterAndSort(real.map(_mapStudent).toList());
+          return Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                color: AppColors.primary.withValues(alpha: 0.05),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Search students...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+                  ),
+                  onChanged: (v) => setState(() => _searchQuery = v),
                 ),
-                filled: true,
-                fillColor: Theme.of(context).inputDecorationTheme.fillColor,
               ),
-              onChanged: (v) => setState(() => _searchQuery = v),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                Text(
-                  '${filteredStudents.length} students',
-                  style: TextStyle(color: Colors.grey[600]),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    Text(
+                      '${filtered.length} student${filtered.length == 1 ? '' : 's'}',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                    const Spacer(),
+                    Text(
+                      'Sorted by: ${_getSortLabel()}',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                Text(
-                  'Sorted by: ${_getSortLabel()}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: filteredStudents.length,
-              itemBuilder: (context, index) {
-                final student = filteredStudents[index];
-                return _StudentCard(
-                  student: student,
-                  onTap: () => _showStudentDetail(student),
-                );
-              },
-            ),
-          ),
-        ],
+              ),
+              Expanded(
+                child: filtered.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            real.isEmpty
+                                ? 'No students enrolled in this section yet.'
+                                : 'No students match your search.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) {
+                          final student = filtered[index];
+                          return _StudentCard(
+                            student: student,
+                            onTap: () => _showStudentDetail(student),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -179,10 +220,10 @@ class _StudentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final attendance = student['attendance'] as double;
-    final score = student['lastExamScore'] as int;
-    final isLowAttendance = attendance < 75;
-    final isWeakPerformance = score < 40;
+    final attendance = student['attendance'] as double?;
+    final score = student['lastExamScore'] as int?;
+    final isLowAttendance = attendance != null && attendance < 75;
+    final isWeakPerformance = score != null && score < 40;
 
     return GlassCard(
       margin: const EdgeInsets.only(bottom: 8),
@@ -242,14 +283,20 @@ class _StudentCard extends StatelessWidget {
                       Icon(
                         Icons.check_circle,
                         size: 14,
-                        color: isLowAttendance ? AppColors.error : AppColors.success,
+                        color: attendance == null
+                            ? Colors.grey
+                            : (isLowAttendance ? AppColors.error : AppColors.success),
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${attendance.toStringAsFixed(0)}%',
+                        attendance == null
+                            ? '— %'
+                            : '${attendance.toStringAsFixed(0)}%',
                         style: TextStyle(
                           fontSize: 12,
-                          color: isLowAttendance ? AppColors.error : AppColors.success,
+                          color: attendance == null
+                              ? Colors.grey[600]
+                              : (isLowAttendance ? AppColors.error : AppColors.success),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -261,14 +308,18 @@ class _StudentCard extends StatelessWidget {
                       Icon(
                         Icons.grade,
                         size: 14,
-                        color: isWeakPerformance ? AppColors.warning : AppColors.info,
+                        color: score == null
+                            ? Colors.grey
+                            : (isWeakPerformance ? AppColors.warning : AppColors.info),
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '$score/100',
+                        score == null ? '—/100' : '$score/100',
                         style: TextStyle(
                           fontSize: 12,
-                          color: isWeakPerformance ? AppColors.warning : AppColors.info,
+                          color: score == null
+                              ? Colors.grey[600]
+                              : (isWeakPerformance ? AppColors.warning : AppColors.info),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -357,22 +408,32 @@ class _StudentDetailSheet extends StatelessWidget {
                       Expanded(
                         child: _StatCard(
                           title: 'Attendance',
-                          value: '${(student['attendance'] as double).toStringAsFixed(1)}%',
+                          value: () {
+                            final a = student['attendance'] as double?;
+                            return a == null ? '— %' : '${a.toStringAsFixed(1)}%';
+                          }(),
                           icon: Icons.calendar_today,
-                          color: (student['attendance'] as double) >= 75
-                              ? AppColors.success
-                              : AppColors.error,
+                          color: () {
+                            final a = student['attendance'] as double?;
+                            if (a == null) return Colors.grey;
+                            return a >= 75 ? AppColors.success : AppColors.error;
+                          }(),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: _StatCard(
                           title: 'Last Exam',
-                          value: '${student['lastExamScore']}/100',
+                          value: () {
+                            final s = student['lastExamScore'] as int?;
+                            return s == null ? '—/100' : '$s/100';
+                          }(),
                           icon: Icons.grade,
-                          color: (student['lastExamScore'] as int) >= 40
-                              ? AppColors.info
-                              : AppColors.warning,
+                          color: () {
+                            final s = student['lastExamScore'] as int?;
+                            if (s == null) return Colors.grey;
+                            return s >= 40 ? AppColors.info : AppColors.warning;
+                          }(),
                         ),
                       ),
                     ],

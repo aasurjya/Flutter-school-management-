@@ -54,3 +54,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local E2E / Playwright verification artifacts — not source.
+.playwright-mcp/
+live-*.png
+live-*.jpeg
+*-apple.png

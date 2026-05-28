@@ -51,6 +51,19 @@
 -keepattributes EnclosingMethod
 -keepattributes SourceFile,LineNumberTable
 
+# ─── Flutter Play Store split / deferred-components ────────────────────────
+# Flutter's embedding still references the old monolithic com.google.android.
+# play.core.* classes (splitcompat, tasks) even when we don't use deferred
+# components. We're not depending on play-feature-delivery, so tell R8 to
+# stop warning + don't try to follow these classes. Without this, R8 fails
+# with "Missing class com.google.android.play.core.splitcompat.*" / .tasks.*.
+-dontwarn com.google.android.play.core.**
+-keep class com.google.android.play.core.splitcompat.** { *; }
+-keep class com.google.android.play.core.splitinstall.** { *; }
+-keep class com.google.android.play.core.tasks.** { *; }
+-keep class io.flutter.embedding.android.FlutterPlayStoreSplitApplication { *; }
+-keep class io.flutter.embedding.engine.deferredcomponents.** { *; }
+
 # ─── Stack traces ──────────────────────────────────────────────────────────
 # Map obfuscated class names back to readable names — `flutter build apk
 # --split-debug-info` writes the symbol map; this directive ensures R8 also

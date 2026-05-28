@@ -211,6 +211,43 @@ class AttendanceRepository extends BaseRepository {
     }).eq('id', attendanceId);
   }
 
+  /// Returns a map of studentId → attendance percentage (0–100) for every
+  /// student in [sectionId] over the last [window] days. Single round-trip;
+  /// aggregation done client-side to keep this row-level-safe under RLS.
+  /// Treats present + late + excused as "attended" (matches v_attendance_summary).
+  Future<Map<String, double>> getSectionAttendancePercents({
+    required String sectionId,
+    Duration window = const Duration(days: 60),
+  }) async {
+    final since =
+        DateTime.now().subtract(window).toIso8601String().split('T').first;
+    final response = await client
+        .from('attendance')
+        .select('student_id, status')
+        .eq('section_id', sectionId)
+        .gte('date', since);
+
+    final attended = <String, int>{};
+    final total = <String, int>{};
+    for (final row in response as List) {
+      final m = row as Map<String, dynamic>;
+      final sid = m['student_id'] as String?;
+      final status = (m['status'] as String?) ?? '';
+      if (sid == null) continue;
+      total[sid] = (total[sid] ?? 0) + 1;
+      if (status == 'present' || status == 'late' || status == 'excused') {
+        attended[sid] = (attended[sid] ?? 0) + 1;
+      }
+    }
+    final out = <String, double>{};
+    for (final sid in total.keys) {
+      final t = total[sid]!;
+      final a = attended[sid] ?? 0;
+      out[sid] = t == 0 ? 0 : (a / t) * 100;
+    }
+    return out;
+  }
+
   Future<Map<String, int>> getAttendanceStats({
     required String studentId,
     String? academicYearId,

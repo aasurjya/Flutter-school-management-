@@ -7,6 +7,8 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/student.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../attendance/providers/attendance_provider.dart';
+import '../../../exams/providers/exams_provider.dart';
 import '../../../students/providers/students_provider.dart';
 
 class ClassStudentsScreen extends ConsumerStatefulWidget {
@@ -28,17 +30,24 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
   String _sortBy = 'name';
 
   // Map a real Student into the rendering shape this screen consumes.
-  // attendance and lastExamScore are nullable — joining those at scale is a
-  // dedicated follow-up; until then, cards render "—" for missing metrics.
-  Map<String, dynamic> _mapStudent(Student s) {
+  // attendance% comes from a bulk section query; lastExamScore comes from a
+  // section-scoped overall-ranks lookup. Either may be missing (loading,
+  // error, or no data for that student) — cards render "—" gracefully.
+  Map<String, dynamic> _mapStudent(
+    Student s, {
+    Map<String, double>? attendance,
+    Map<String, double>? scores,
+  }) {
     final last = (s.lastName ?? '').trim();
     final full = ('${s.firstName} $last').trim();
+    final att = attendance?[s.id];
+    final score = scores?[s.id];
     return {
       'id': s.id,
       'name': full.isEmpty ? 'Student' : full,
       'rollNo': s.rollNumber ?? '',
-      'attendance': null, // double? — to be wired to attendance stats
-      'lastExamScore': null, // int? — to be wired to latest exam result
+      'attendance': att,
+      'lastExamScore': score?.round(),
       'photoUrl': s.photoUrl,
     };
   }
@@ -84,6 +93,13 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
   Widget build(BuildContext context) {
     final studentsAsync =
         ref.watch(studentsBySectionProvider(widget.sectionId));
+    // Optional enrichments — failures or pending states fall back to "—".
+    final attendanceMap = ref
+        .watch(sectionAttendancePercentsProvider(widget.sectionId))
+        .maybeWhen(data: (m) => m, orElse: () => const <String, double>{});
+    final scoresMap = ref
+        .watch(sectionLatestExamScoresProvider(widget.sectionId))
+        .maybeWhen(data: (m) => m, orElse: () => const <String, double>{});
 
     return Scaffold(
       appBar: AppBar(
@@ -107,7 +123,10 @@ class _ClassStudentsScreenState extends ConsumerState<ClassStudentsScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => Center(child: Text(WarmCopy.loadFailed('students'))),
         data: (real) {
-          final filtered = _filterAndSort(real.map(_mapStudent).toList());
+          final filtered = _filterAndSort(real
+              .map((s) => _mapStudent(s,
+                  attendance: attendanceMap, scores: scoresMap))
+              .toList());
           return Column(
             children: [
               Container(

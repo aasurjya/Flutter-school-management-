@@ -354,3 +354,14 @@ final marksEntryNotifierProvider =
   final repository = ref.watch(examRepositoryProvider);
   return MarksEntryNotifier(repository);
 });
+
+/// Bulk per-student latest-exam overall percentages for a section.
+/// Single feature wraps two repo round-trips (overall_ranks + exams.end_date)
+/// — feeds the teacher's class roster card.
+final sectionLatestExamScoresProvider =
+    FutureProvider.autoDispose.family<Map<String, double>, String>(
+  (ref, sectionId) async {
+    final repository = ref.watch(examRepositoryProvider);
+    return repository.getSectionLatestExamScores(sectionId: sectionId);
+  },
+);

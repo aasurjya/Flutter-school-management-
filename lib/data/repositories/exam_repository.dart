@@ -525,6 +525,71 @@ class ExamRepository extends BaseRepository {
     await client.rpc('refresh_analytics');
   }
 
+  /// Returns a map of studentId → overall percentage (0–100) for each student
+  /// in [sectionId] for the most recent published exam they sat. Two bulk
+  /// queries (no N+1): fetch all overall ranks for the section, then fetch
+  /// the corresponding exams' end_dates to identify "latest" per student.
+  Future<Map<String, double>> getSectionLatestExamScores({
+    required String sectionId,
+  }) async {
+    final ranks = await client
+        .from('v_student_overall_ranks')
+        .select('student_id, exam_id, overall_percentage')
+        .eq('section_id', sectionId);
+    final rankRows = (ranks as List).cast<Map<String, dynamic>>();
+    if (rankRows.isEmpty) return const {};
+
+    final examIds =
+        rankRows.map((r) => r['exam_id'] as String?).whereType<String>().toSet().toList();
+    if (examIds.isEmpty) return const {};
+
+    final exams = await client
+        .from('exams')
+        .select('id, end_date, start_date, created_at')
+        .inFilter('id', examIds);
+
+    DateTime? recencyFor(Map<String, dynamic> e) {
+      for (final k in ['end_date', 'start_date', 'created_at']) {
+        final v = e[k];
+        if (v is String) {
+          final parsed = DateTime.tryParse(v);
+          if (parsed != null) return parsed;
+        }
+      }
+      return null;
+    }
+
+    final examRecency = <String, DateTime>{};
+    for (final e in exams as List) {
+      final m = e as Map<String, dynamic>;
+      final id = m['id'] as String?;
+      final when = recencyFor(m);
+      if (id != null && when != null) examRecency[id] = when;
+    }
+
+    // For each student, pick the rank row with the latest exam recency.
+    final bestRowPerStudent = <String, Map<String, dynamic>>{};
+    final bestTimePerStudent = <String, DateTime>{};
+    for (final row in rankRows) {
+      final sid = row['student_id'] as String?;
+      final eid = row['exam_id'] as String?;
+      if (sid == null || eid == null) continue;
+      final when = examRecency[eid];
+      if (when == null) continue;
+      final prev = bestTimePerStudent[sid];
+      if (prev == null || when.isAfter(prev)) {
+        bestTimePerStudent[sid] = when;
+        bestRowPerStudent[sid] = row;
+      }
+    }
+
+    return {
+      for (final entry in bestRowPerStudent.entries)
+        entry.key:
+            (entry.value['overall_percentage'] as num?)?.toDouble() ?? 0,
+    };
+  }
+
   Future<List<StudentOverallRank>> getExamToppers({
     required String examId,
     String? sectionId,

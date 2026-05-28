@@ -47,6 +47,16 @@ final attendanceStatsProvider = FutureProvider.autoDispose.family<Map<String, in
   },
 );
 
+/// Bulk per-student attendance percentages for a whole section over the
+/// recent window. Single round-trip — feeds the teacher's class roster.
+final sectionAttendancePercentsProvider =
+    FutureProvider.autoDispose.family<Map<String, double>, String>(
+  (ref, sectionId) async {
+    final repository = ref.watch(attendanceRepositoryProvider);
+    return repository.getSectionAttendancePercents(sectionId: sectionId);
+  },
+);
+
 final todayAttendancePercentageProvider = FutureProvider.autoDispose<double>((ref) async {
   final repository = ref.watch(attendanceRepositoryProvider);
   return repository.getTodayAttendancePercentage();

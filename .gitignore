@@ -60,3 +60,6 @@ app.*.map.json
 live-*.png
 live-*.jpeg
 *-apple.png
+
+# Locally-downloaded release artifacts from `gh run download`.
+/apk/

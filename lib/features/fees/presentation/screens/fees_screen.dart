@@ -309,11 +309,7 @@ class _AdminOverviewState extends ConsumerState<_AdminOverview> {
                 icon: Icons.settings,
                 label: 'Fee\nStructure',
                 color: AppColors.info,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Fee structure coming soon')),
-                  );
-                },
+                onTap: () => context.push(AppRoutes.feeStructures),
               ),
             ],
           ),

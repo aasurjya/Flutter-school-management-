@@ -368,7 +368,7 @@ class _PrincipalApprovalQueue extends StatelessWidget {
                 title: const Text('Leave Request: Mrs. Barua', style: TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: const Text('Mathematics Dept · 1 day medical leave'),
                 trailing: TextButton(
-                  onPressed: () {},
+                  onPressed: () => context.push(AppRoutes.leave),
                   child: const Text('Approve', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),

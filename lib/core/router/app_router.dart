@@ -28,6 +28,7 @@ import '../../features/attendance/presentation/screens/mark_attendance_screen.da
 import '../../features/exams/presentation/screens/exams_screen.dart';
 import '../../features/exams/presentation/screens/marks_entry_screen.dart';
 import '../../features/exams/presentation/screens/exam_analytics_screen.dart' as exam_analytics;
+import '../../features/fees/presentation/screens/fee_structures_screen.dart';
 import '../../features/fees/presentation/screens/fees_screen.dart';
 import '../../features/messaging/presentation/screens/messages_screen.dart';
 import '../../features/student/presentation/screens/student_results_screen.dart';
@@ -428,6 +429,7 @@ class AppRoutes {
   // Admin routes (additional)
   static const String examManagement = '/admin/exams';
   static const String feeManagement = '/admin/fees';
+  static const String feeStructures = '/admin/fee-structures';
   static const String announcements = '/admin/announcements';
 
   // Teacher routes (additional)
@@ -1332,6 +1334,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.feeManagement,
             builder: (context, state) => const FeeManagementScreen(),
+          ),
+
+          // Admin Fee Structures (per-class fee head listing)
+          GoRoute(
+            path: AppRoutes.feeStructures,
+            builder: (context, state) => const FeeStructuresScreen(),
           ),
 
           // Admin Announcements

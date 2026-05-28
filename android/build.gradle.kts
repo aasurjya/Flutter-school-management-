@@ -19,6 +19,21 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+// Pin Kotlin language/api version to 1.8 across every subproject (including
+// transitive Flutter plugins) so plugins still targeting the now-unsupported
+// 1.6 (e.g. posthog_flutter ≤4.x) compile under the current Kotlin Gradle
+// pipeline. Cheaper + safer than bumping every plugin's major version.
+subprojects {
+    afterEvaluate {
+        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+            kotlinOptions {
+                languageVersion = "1.8"
+                apiVersion = "1.8"
+            }
+        }
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }

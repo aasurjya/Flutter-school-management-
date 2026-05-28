@@ -1,5 +1,24 @@
 // Report Card Model
 
+/// Picks the relevant enrollment row from `json['student']['enrollments']`
+/// (a list returned by PostgREST embed). Prefers the one whose
+/// `academic_year_id` matches the report card's `academic_year_id`; falls
+/// back to the first enrollment; returns null if no enrollments embedded.
+Map<String, dynamic>? _pickEnrollment(Map<String, dynamic> json) {
+  final list = json['student']?['enrollments'];
+  if (list is! List || list.isEmpty) return null;
+  final yearId = json['academic_year_id'] as String?;
+  if (yearId != null) {
+    for (final e in list) {
+      if (e is Map && e['academic_year_id'] == yearId) {
+        return Map<String, dynamic>.from(e);
+      }
+    }
+  }
+  final first = list.first;
+  return first is Map ? Map<String, dynamic>.from(first) : null;
+}
+
 class ReportCard {
   final String id;
   final String tenantId;
@@ -66,10 +85,16 @@ class ReportCard {
           json['student_name'],
       studentRollNumber:
           json['student']?['roll_number'] ?? json['student_roll_number'],
-      className: json['student']?['section']?['class']?['name'] ??
+      // Section/class come through student_enrollments (no direct FK from
+      // students→sections). Prefer the enrollment whose academic_year_id
+      // matches this report's; otherwise the first enrollment; otherwise
+      // legacy/embedded flat fields.
+      className: _pickEnrollment(json)?['section']?['class']?['name'] ??
+          json['student']?['section']?['class']?['name'] ??
           json['class_name'],
-      sectionName:
-          json['student']?['section']?['name'] ?? json['section_name'],
+      sectionName: _pickEnrollment(json)?['section']?['name'] ??
+          json['student']?['section']?['name'] ??
+          json['section_name'],
       academicYearName:
           json['academic_year']?['name'] ?? json['academic_year_name'],
       termName: json['term']?['name'] ?? json['term_name'],

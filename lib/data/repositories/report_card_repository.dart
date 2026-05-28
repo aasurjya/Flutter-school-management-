@@ -21,9 +21,12 @@ class ReportCardRepository extends BaseRepository {
           student:students(
             roll_number,
             user:users(full_name),
-            section:sections(
-              name,
-              class:classes(name)
+            enrollments:student_enrollments(
+              academic_year_id,
+              section:sections(
+                name,
+                class:classes(name)
+              )
             )
           ),
           academic_year:academic_years(name),
@@ -70,9 +73,12 @@ class ReportCardRepository extends BaseRepository {
           student:students(
             roll_number,
             user:users(full_name),
-            section:sections(
-              name,
-              class:classes(name)
+            enrollments:student_enrollments(
+              academic_year_id,
+              section:sections(
+                name,
+                class:classes(name)
+              )
             )
           ),
           academic_year:academic_years(name),
@@ -97,9 +103,12 @@ class ReportCardRepository extends BaseRepository {
           student:students(
             roll_number,
             user:users(full_name),
-            section:sections(
-              name,
-              class:classes(name)
+            enrollments:student_enrollments(
+              academic_year_id,
+              section:sections(
+                name,
+                class:classes(name)
+              )
             )
           ),
           academic_year:academic_years(name),
@@ -127,10 +136,13 @@ class ReportCardRepository extends BaseRepository {
           roll_number,
           photo_url,
           user:users(full_name),
-          section:sections(
-            id,
-            name,
-            class:classes(id, name)
+          enrollments:student_enrollments(
+            academic_year_id,
+            section:sections(
+              id,
+              name,
+              class:classes(id, name)
+            )
           )
         ''')
         .eq('id', studentId)
@@ -222,7 +234,21 @@ class ReportCardRepository extends BaseRepository {
         totalMaxMarks > 0 ? (totalMarks / totalMaxMarks) * 100 : 0.0;
     final attendancePercentage = total > 0 ? (present / total) * 100 : 0.0;
 
-    final section = studentResponse['section'];
+    // Section/class come via student_enrollments — prefer the enrollment
+    // matching this report's academic_year_id; fall back to the first.
+    Map<String, dynamic>? pickEnrollment() {
+      final list = studentResponse['enrollments'];
+      if (list is! List || list.isEmpty) return null;
+      for (final e in list) {
+        if (e is Map && e['academic_year_id'] == academicYearId) {
+          return Map<String, dynamic>.from(e);
+        }
+      }
+      final first = list.first;
+      return first is Map ? Map<String, dynamic>.from(first) : null;
+    }
+    final enrollment = pickEnrollment();
+    final section = enrollment?['section'];
     final studentClass = section?['class'];
 
     return ReportCardData(

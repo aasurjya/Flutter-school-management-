@@ -23,12 +23,15 @@ subprojects {
 // transitive Flutter plugins) so plugins still targeting the now-unsupported
 // 1.6 (e.g. posthog_flutter ≤4.x) compile under the current Kotlin Gradle
 // pipeline. Cheaper + safer than bumping every plugin's major version.
+// (Newer KGP requires the compilerOptions DSL — `kotlinOptions {}` is removed.)
 subprojects {
     afterEvaluate {
         tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-            kotlinOptions {
-                languageVersion = "1.8"
-                apiVersion = "1.8"
+            compilerOptions {
+                languageVersion.set(
+                    org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_8)
+                apiVersion.set(
+                    org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_8)
             }
         }
     }

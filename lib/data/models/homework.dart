@@ -136,17 +136,22 @@ class Homework {
       assignedByName = (json['users'] as Map<String, dynamic>)['full_name'] as String?;
     }
 
+    // Null-safe: legacy rows can have null required FKs / dates; fall back
+    // to empty / epoch instead of crashing the whole homework list.
+    DateTime tryDate(Object? v) =>
+        DateTime.tryParse(v is String ? v : '') ??
+        DateTime.fromMillisecondsSinceEpoch(0);
     return Homework(
-      id: json['id'] as String,
-      tenantId: json['tenant_id'] as String,
-      title: json['title'] as String,
+      id: (json['id'] as String?) ?? '',
+      tenantId: (json['tenant_id'] as String?) ?? '',
+      title: (json['title'] as String?) ?? '',
       description: json['description'] as String?,
       instructions: json['instructions'] as String?,
-      subjectId: json['subject_id'] as String,
-      sectionId: json['section_id'] as String,
-      assignedBy: json['assigned_by'] as String,
-      assignedDate: DateTime.parse(json['assigned_date'] as String),
-      dueDate: DateTime.parse(json['due_date'] as String),
+      subjectId: (json['subject_id'] as String?) ?? '',
+      sectionId: (json['section_id'] as String?) ?? '',
+      assignedBy: (json['assigned_by'] as String?) ?? '',
+      assignedDate: tryDate(json['assigned_date']),
+      dueDate: tryDate(json['due_date']),
       status: HomeworkStatus.fromString(json['status'] as String? ?? 'draft'),
       priority: HomeworkPriority.fromString(json['priority'] as String? ?? 'medium'),
       maxMarks: (json['max_marks'] as num?)?.toInt(),
@@ -284,9 +289,9 @@ class HomeworkSubmission {
     }
 
     return HomeworkSubmission(
-      id: json['id'] as String,
-      homeworkId: json['homework_id'] as String,
-      studentId: json['student_id'] as String,
+      id: (json['id'] as String?) ?? '',
+      homeworkId: (json['homework_id'] as String?) ?? '',
+      studentId: (json['student_id'] as String?) ?? '',
       content: json['content'] as String?,
       attachmentUrls: parsedAttachments,
       status: SubmissionStatus.fromString(json['status'] as String? ?? 'pending'),

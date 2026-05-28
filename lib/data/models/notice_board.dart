@@ -112,24 +112,32 @@ class Notice {
   });
 
   factory Notice.fromJson(Map<String, dynamic> json) {
+    // Null-safe: legacy rows / partial joins can have null required FKs or
+    // missing timestamps; fall back to empty/epoch instead of crashing.
+    DateTime tryDate(Object? v) =>
+        DateTime.tryParse(v is String ? v : '') ??
+        DateTime.fromMillisecondsSinceEpoch(0);
     return Notice(
-      id: json['id'] as String,
-      tenantId: json['tenant_id'] as String,
-      title: json['title'] as String,
-      body: json['body'] as String,
-      category: NoticeCategory.fromString(json['category'] as String? ?? 'general'),
-      audience: NoticeAudience.fromString(json['audience'] as String? ?? 'all'),
+      id: (json['id'] as String?) ?? '',
+      tenantId: (json['tenant_id'] as String?) ?? '',
+      title: (json['title'] as String?) ?? '',
+      body: (json['body'] as String?) ?? '',
+      category:
+          NoticeCategory.fromString(json['category'] as String? ?? 'general'),
+      audience:
+          NoticeAudience.fromString(json['audience'] as String? ?? 'all'),
       isPinned: json['is_pinned'] as bool? ?? false,
       isPublished: json['is_published'] as bool? ?? true,
       attachmentUrl: json['attachment_url'] as String?,
       attachmentName: json['attachment_name'] as String?,
-      createdBy: json['created_by'] as String,
-      expiresAt: json['expires_at'] != null
-          ? DateTime.parse(json['expires_at'] as String)
+      createdBy: (json['created_by'] as String?) ?? '',
+      expiresAt: json['expires_at'] is String
+          ? DateTime.tryParse(json['expires_at'] as String)
           : null,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-      authorName: (json['author'] as Map<String, dynamic>?)?['full_name'] as String?,
+      createdAt: tryDate(json['created_at']),
+      updatedAt: tryDate(json['updated_at']),
+      authorName:
+          (json['author'] as Map<String, dynamic>?)?['full_name'] as String?,
     );
   }
 

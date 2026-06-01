@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -189,7 +191,9 @@ class _ApplicationFormScreenState extends ConsumerState<ApplicationFormScreen> {
         );
         context.pop();
       }
-    } catch (e) {
+    } catch (e, st) {
+      developer.log('Admission application submit failed',
+          name: 'AdmissionForm', error: e, stackTrace: st);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

@@ -405,6 +405,8 @@ class DisciplineRepository extends BaseRepository {
   // ─── BEHAVIOR SCORE ───────────────────────────────────────
 
   Future<BehaviorScore> getStudentBehaviorScore(String studentId) async {
+    // Empty id (no student selected yet) would send '' as a UUID filter -> 400.
+    if (studentId.isEmpty) return BehaviorScore(studentId: studentId);
     final data = await client
         .from('v_student_behavior_score')
         .select()

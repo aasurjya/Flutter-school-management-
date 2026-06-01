@@ -13,6 +13,8 @@ class ParentDigestRepository extends BaseRepository {
     String? studentId,
     int limit = 20,
   }) async {
+    // Guard against an empty UUID filter (PostgREST 400) when no parent context.
+    if (parentId.isEmpty) return [];
     try {
       var query = client
           .from('parent_digests')

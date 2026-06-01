@@ -33,7 +33,7 @@ class LeaveRepository extends BaseRepository {
       query = query.eq('status', 'pending');
     }
 
-    final response = await query.order('created_at', ascending: false).range(offset, offset + limit - 1);
+    final response = await query.order('applied_at', ascending: false).range(offset, offset + limit - 1);
     return (response as List)
         .map((json) => LeaveApplication.fromJson(json))
         .toList();

@@ -14,10 +14,7 @@ class PTMRepository extends BaseRepository {
   }) async {
     var query = client
         .from('ptm_schedules')
-        .select('''
-          *,
-          academic_year:academic_years(name)
-        ''')
+        .select('*')
         .eq('tenant_id', requireTenantId);
 
     if (status != null) {
@@ -26,20 +23,17 @@ class PTMRepository extends BaseRepository {
 
     if (upcomingOnly) {
       final today = DateTime.now().toIso8601String().split('T')[0];
-      query = query.gte('date', today);
+      query = query.gte('ptm_date', today);
     }
 
-    final response = await query.order('date', ascending: false).range(offset, offset + limit - 1);
+    final response = await query.order('ptm_date', ascending: false).range(offset, offset + limit - 1);
     return (response as List).map((json) => PTMSchedule.fromJson(json)).toList();
   }
 
   Future<PTMSchedule?> getPTMScheduleById(String scheduleId) async {
     final response = await client
         .from('ptm_schedules')
-        .select('''
-          *,
-          academic_year:academic_years(name)
-        ''')
+        .select('*')
         .eq('id', scheduleId)
         .maybeSingle();
 

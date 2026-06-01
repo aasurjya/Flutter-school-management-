@@ -8,6 +8,9 @@ class RiskScoreRepository extends BaseRepository {
     String sectionId,
     String academicYearId,
   ) async {
+    // Avoid sending an empty string as a UUID filter (PostgREST 400) when the
+    // screen loads before a section/year is selected.
+    if (sectionId.isEmpty || academicYearId.isEmpty) return [];
     try {
       final response = await client
           .from('student_risk_scores')

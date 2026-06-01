@@ -1598,16 +1598,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.admissionApplications,
             builder: (context, state) => const ApplicationListScreen(),
           ),
-          GoRoute(
-            path: AppRoutes.admissionApplicationDetail,
-            builder: (context, state) => ApplicationDetailScreen(
-              applicationId: state.pathParameters['applicationId']!,
-            ),
-          ),
+          // NOTE: the static `/form` route MUST be registered before the
+          // dynamic `/:applicationId` route. GoRouter matches in declaration
+          // order, so if `:applicationId` came first it would capture the
+          // literal "form" as an id and the detail query would fail with an
+          // invalid-UUID error ("Couldn't load that").
           GoRoute(
             path: AppRoutes.admissionApplicationForm,
             builder: (context, state) => ApplicationFormScreen(
               inquiryId: state.uri.queryParameters['inquiryId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.admissionApplicationDetail,
+            builder: (context, state) => ApplicationDetailScreen(
+              applicationId: state.pathParameters['applicationId']!,
             ),
           ),
           GoRoute(
@@ -2095,15 +2100,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.inventoryAssets,
         builder: (context, state) => const AssetListScreen(),
       ),
+      // NOTE: static `/form` before dynamic `/:assetId` — see the admissions
+      // route note above. Otherwise "form" is captured as an asset id.
+      GoRoute(
+        path: AppRoutes.inventoryAssetForm,
+        builder: (context, state) => const AssetFormScreen(),
+      ),
       GoRoute(
         path: AppRoutes.inventoryAssetDetail,
         builder: (context, state) => AssetDetailScreen(
           assetId: state.pathParameters['assetId']!,
         ),
-      ),
-      GoRoute(
-        path: AppRoutes.inventoryAssetForm,
-        builder: (context, state) => const AssetFormScreen(),
       ),
       GoRoute(
         path: AppRoutes.inventoryAssetScan,
@@ -2149,6 +2156,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.homeworkCreate,
         builder: (context, state) => const HomeworkCreateScreen(),
       ),
+      // NOTE: static `/calendar` before dynamic `/:homeworkId` — see the
+      // admissions route note above. Otherwise "calendar" is captured as a
+      // homework id.
+      GoRoute(
+        path: AppRoutes.homeworkCalendar,
+        builder: (context, state) => const HomeworkCalendarScreen(),
+      ),
       GoRoute(
         path: AppRoutes.homeworkDetail,
         builder: (context, state) => HomeworkDetailScreen(
@@ -2166,10 +2180,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => HomeworkSubmissionsScreen(
           homeworkId: state.pathParameters['homeworkId']!,
         ),
-      ),
-      GoRoute(
-        path: AppRoutes.homeworkCalendar,
-        builder: (context, state) => const HomeworkCalendarScreen(),
       ),
 
       // ==================== NOTICE BOARD ====================

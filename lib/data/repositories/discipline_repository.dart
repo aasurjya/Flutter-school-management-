@@ -505,12 +505,33 @@ class DisciplineRepository extends BaseRepository {
   Future<List<Map<String, dynamic>>> getTopPositiveStudents({
     int limit = 10,
   }) async {
+    // v_student_behavior_score is a VIEW, so PostgREST can't resolve an
+    // embedded students relationship (no FK) — that 400s. Fetch the scores,
+    // then attach student names from a separate query under a `students` key
+    // so callers can keep reading row['students']['first_name'].
     final data = await client
         .from('v_student_behavior_score')
-        .select('*, students!student_id(first_name, last_name, photo_url)')
+        .select('*')
         .eq('tenant_id', requireTenantId)
         .order('positive_points', ascending: false)
         .limit(limit);
-    return List<Map<String, dynamic>>.from(data);
+    final rows = List<Map<String, dynamic>>.from(data);
+    final ids = rows
+        .map((r) => r['student_id'])
+        .where((e) => e != null)
+        .toList();
+    if (ids.isNotEmpty) {
+      final students = await client
+          .from('students')
+          .select('id, first_name, last_name, photo_url')
+          .inFilter('id', ids);
+      final byId = {
+        for (final s in List<Map<String, dynamic>>.from(students)) s['id']: s
+      };
+      for (final r in rows) {
+        r['students'] = byId[r['student_id']];
+      }
+    }
+    return rows;
   }
 }

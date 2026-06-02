@@ -50,6 +50,7 @@ class RiskScoreRepository extends BaseRepository {
     String studentId,
     String academicYearId,
   ) async {
+    if (studentId.isEmpty || academicYearId.isEmpty) return null;
     try {
       final response = await client
           .from('student_risk_scores')
@@ -70,6 +71,8 @@ class RiskScoreRepository extends BaseRepository {
     String? riskLevel,
     int limit = 20,
   }) async {
+    // Empty year (screen opened before a year is selected) -> '' UUID -> 400.
+    if (academicYearId.isEmpty) return [];
     try {
       var query = client
           .from('student_risk_scores')
@@ -126,6 +129,11 @@ class RiskScoreRepository extends BaseRepository {
     String academicYearId, {
     String? sectionId,
   }) async {
+    // Empty year (screen opened before a year is selected) would send '' as a
+    // UUID filter -> PostgREST 400. Return the zeroed distribution instead.
+    if (academicYearId.isEmpty) {
+      return {'low': 0, 'medium': 0, 'high': 0, 'critical': 0};
+    }
     try {
       final distribution = <String, int>{
         'low': 0,

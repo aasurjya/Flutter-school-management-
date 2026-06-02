@@ -66,13 +66,13 @@ class PTMRepository extends BaseRepository {
   Future<void> openPTMSchedule(String scheduleId) async {
     await client
         .from('ptm_schedules')
-        .update({'status': 'open'}).eq('id', scheduleId);
+        .update({'status': 'scheduled'}).eq('id', scheduleId);
   }
 
   Future<void> closePTMSchedule(String scheduleId) async {
     await client
         .from('ptm_schedules')
-        .update({'status': 'closed'}).eq('id', scheduleId);
+        .update({'status': 'completed'}).eq('id', scheduleId);
   }
 
   Future<void> deletePTMSchedule(String scheduleId) async {

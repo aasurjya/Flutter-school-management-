@@ -220,25 +220,73 @@ class _PremiumBottomNav extends ConsumerWidget {
     }
   }
 
+  /// Role-aware "More" overflow. Surfaces the role's secondary modules plus the
+  /// AI screens relevant to that role. Only param-free AI routes are listed here;
+  /// routes that require an id (risk dashboard, parent digests, class
+  /// intelligence) are reached from in-context screens, not this menu.
   List<_NavItemData> _getMoreItems(String role) {
-    return const [
-      _NavItemData(
-          icon: Icons.library_books_outlined,
-          activeIcon: Icons.library_books,
-          label: 'Library'),
-      _NavItemData(
-          icon: Icons.directions_bus_outlined,
-          activeIcon: Icons.directions_bus,
-          label: 'Transport'),
-      _NavItemData(
-          icon: Icons.apartment_outlined,
-          activeIcon: Icons.apartment,
-          label: 'Hostel'),
-      _NavItemData(
-          icon: Icons.restaurant_outlined,
-          activeIcon: Icons.restaurant,
-          label: 'Canteen'),
-    ];
+    switch (role) {
+      case 'tenant_admin':
+      case 'principal':
+        return const [
+          _aiTrendsItem,
+          _aiAlertsItem,
+          _aiRemarksItem,
+          _aiComposeItem,
+          _aiAlertRulesItem,
+          _libraryItem,
+          _transportItem,
+          _hostelItem,
+          _canteenItem,
+          _noticesItem,
+          _calendarItem,
+        ];
+      case 'teacher':
+        return const [
+          _aiTrendsItem,
+          _aiAlertsItem,
+          _aiRemarksItem,
+          _aiComposeItem,
+          _libraryItem,
+          _noticesItem,
+          _calendarItem,
+        ];
+      case 'student':
+        return const [
+          _aiTutorItem,
+          _aiStudyTipsItem,
+          _libraryItem,
+          _noticesItem,
+          _calendarItem,
+        ];
+      case 'parent':
+        return const [
+          _noticesItem,
+          _calendarItem,
+        ];
+      case 'accountant':
+        return const [
+          _reportsItem,
+          _noticesItem,
+          _calendarItem,
+        ];
+      case 'librarian':
+      case 'transport_manager':
+      case 'hostel_warden':
+      case 'canteen_staff':
+        return const [
+          _calendarItem,
+        ];
+      case 'receptionist':
+        return const [
+          _libraryItem,
+        ];
+      default:
+        return const [
+          _noticesItem,
+          _calendarItem,
+        ];
+    }
   }
 
   List<String> _getPrimaryRoutes(String role) {
@@ -393,13 +441,6 @@ class _MoreSheet extends StatelessWidget {
 
   const _MoreSheet({required this.items, required this.role});
 
-  static const _moreRoutes = [
-    AppRoutes.library,
-    AppRoutes.transport,
-    AppRoutes.hostel,
-    AppRoutes.canteen,
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -447,8 +488,9 @@ class _MoreSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   onTap: () {
                     Navigator.pop(context);
-                    if (index < _moreRoutes.length) {
-                      context.go(_moreRoutes[index]);
+                    final route = item.route;
+                    if (route != null) {
+                      context.go(route);
                     }
                   },
                   child: Column(
@@ -494,10 +536,16 @@ class _NavItemData {
   final IconData activeIcon;
   final String label;
 
+  /// Destination route. Required for "More" sheet items (each item navigates
+  /// to its own route). Primary nav items leave this null because their route
+  /// is role-dependent and resolved positionally via [_getPrimaryRoutes].
+  final String? route;
+
   const _NavItemData({
     required this.icon,
     required this.activeIcon,
     required this.label,
+    this.route,
   });
 }
 
@@ -547,26 +595,31 @@ const _reportsItem = _NavItemData(
   icon: Icons.analytics_outlined,
   activeIcon: Icons.analytics,
   label: 'Reports',
+  route: AppRoutes.reports,
 );
 const _libraryItem = _NavItemData(
   icon: Icons.library_books_outlined,
   activeIcon: Icons.library_books,
   label: 'Library',
+  route: AppRoutes.library,
 );
 const _myBooksItem = _NavItemData(
   icon: Icons.bookmark_outlined,
   activeIcon: Icons.bookmark,
   label: 'My Books',
+  route: AppRoutes.libraryMyBooks,
 );
 const _noticesItem = _NavItemData(
   icon: Icons.campaign_outlined,
   activeIcon: Icons.campaign,
   label: 'Notices',
+  route: AppRoutes.noticeBoard,
 );
 const _transportItem = _NavItemData(
   icon: Icons.directions_bus_outlined,
   activeIcon: Icons.directions_bus,
   label: 'Transport',
+  route: AppRoutes.transport,
 );
 const _busTrackingItem = _NavItemData(
   icon: Icons.gps_fixed_outlined,
@@ -577,6 +630,7 @@ const _hostelItem = _NavItemData(
   icon: Icons.apartment_outlined,
   activeIcon: Icons.apartment,
   label: 'Hostel',
+  route: AppRoutes.hostel,
 );
 const _allocationItem = _NavItemData(
   icon: Icons.meeting_room_outlined,
@@ -587,6 +641,7 @@ const _canteenItem = _NavItemData(
   icon: Icons.restaurant_outlined,
   activeIcon: Icons.restaurant,
   label: 'Canteen',
+  route: AppRoutes.canteen,
 );
 const _ordersItem = _NavItemData(
   icon: Icons.receipt_long_outlined,
@@ -602,5 +657,51 @@ const _calendarItem = _NavItemData(
   icon: Icons.calendar_month_outlined,
   activeIcon: Icons.calendar_month,
   label: 'Calendar',
+  route: AppRoutes.calendar,
+);
+
+// ─── AI nav items (param-free AI routes only) ──────────────────────────────────
+
+const _aiTrendsItem = _NavItemData(
+  icon: Icons.insights_outlined,
+  activeIcon: Icons.insights,
+  label: 'AI Trends',
+  route: AppRoutes.trendDashboard,
+);
+const _aiAlertsItem = _NavItemData(
+  icon: Icons.warning_amber_outlined,
+  activeIcon: Icons.warning_amber,
+  label: 'Risk Alerts',
+  route: AppRoutes.earlyWarningAlerts,
+);
+const _aiAlertRulesItem = _NavItemData(
+  icon: Icons.tune_outlined,
+  activeIcon: Icons.tune,
+  label: 'Alert Rules',
+  route: AppRoutes.alertRulesConfig,
+);
+const _aiRemarksItem = _NavItemData(
+  icon: Icons.rate_review_outlined,
+  activeIcon: Icons.rate_review,
+  label: 'AI Remarks',
+  route: AppRoutes.generateRemarks,
+);
+const _aiComposeItem = _NavItemData(
+  icon: Icons.auto_awesome_outlined,
+  activeIcon: Icons.auto_awesome,
+  label: 'AI Compose',
+  route: AppRoutes.aiMessageComposer,
+);
+const _aiStudyTipsItem = _NavItemData(
+  icon: Icons.tips_and_updates_outlined,
+  activeIcon: Icons.tips_and_updates,
+  label: 'Study Tips',
+  route: AppRoutes.studyRecommendations,
+);
+const _aiTutorItem = _NavItemData(
+  icon: Icons.school_outlined,
+  activeIcon: Icons.school,
+  label: 'AI Tutor',
+  route: AppRoutes.aiTutor,
 );
 

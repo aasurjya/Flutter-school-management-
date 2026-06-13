@@ -116,6 +116,8 @@ import '../../features/ai_insights/presentation/screens/study_recommendations_sc
 import '../../features/ai_insights/presentation/screens/generate_remarks_screen.dart';
 import '../../features/ai_insights/presentation/screens/ai_message_composer_screen.dart';
 import '../../features/ai_insights/presentation/screens/class_intelligence_screen.dart';
+import '../../features/ai_tutoring/presentation/screens/ai_tutor_screen.dart';
+import '../../features/ai_tutoring/presentation/screens/ai_tutor_chat_screen.dart';
 import '../../features/syllabus/presentation/screens/syllabus_list_screen.dart';
 import '../../features/syllabus/presentation/screens/syllabus_editor_screen.dart';
 import '../../features/syllabus/presentation/screens/topic_detail_screen.dart';
@@ -464,6 +466,11 @@ class AppRoutes {
   static const String generateRemarks = '/ai/report-remarks';
   static const String aiMessageComposer = '/ai/compose-message';
   static const String classIntelligence = '/ai/class-intelligence/:sectionId';
+
+  // AI Tutor (student-facing). Static list route MUST precede the :sessionId
+  // detail route (GoRouter matches in order).
+  static const String aiTutor = '/ai/tutor';
+  static const String aiTutorChat = '/ai/tutor/:sessionId';
 
   // Syllabus & Topics routes
   static const String syllabusList = '/syllabus';
@@ -1465,6 +1472,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => ClassIntelligenceScreen(
               sectionId: state.pathParameters['sectionId']!,
               sectionName: state.uri.queryParameters['name'],
+            ),
+          ),
+          // AI Tutor — static list route first, then the :sessionId chat.
+          GoRoute(
+            path: AppRoutes.aiTutor,
+            builder: (context, state) => const AiTutorScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.aiTutorChat,
+            builder: (context, state) => AiTutorChatScreen(
+              sessionId: state.pathParameters['sessionId']!,
+              topic: state.uri.queryParameters['topic'] ?? 'AI Tutor',
             ),
           ),
 

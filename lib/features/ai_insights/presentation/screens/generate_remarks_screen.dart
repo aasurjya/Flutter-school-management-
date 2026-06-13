@@ -158,27 +158,32 @@ class _GenerateRemarksScreenState extends ConsumerState<GenerateRemarksScreen> {
     setState(() => _isSaving = true);
 
     final repo = ref.read(rcFullRepositoryProvider);
+    final examId = _selectedExamId;
     int saved = 0;
     int skipped = 0;
 
     for (final remark in approved) {
       try {
-        // Find the student's most recent report card to attach the comment to.
-        // TODO(scope: Phase 14.x): when generate_remarks is wired end-to-end,
-        // pass exam_id through so we can match the exact report card row.
         final reportCards =
             await repo.getStudentReportCards(remark.studentId);
 
-        if (reportCards.isEmpty) {
-          // No report card exists yet for this student — skip gracefully.
+        // Attach the remark to the report card for the SELECTED exam. Report
+        // cards reference their exams via [examIds]; misattributing a remark to
+        // a different exam's card is worse than skipping, so when no card covers
+        // the selected exam (or none exist at all) we skip this student.
+        final candidates = examId == null
+            ? reportCards
+            : reportCards
+                .where((rc) => rc.examIds.contains(examId))
+                .toList();
+
+        if (candidates.isEmpty) {
           skipped++;
           continue;
         }
 
-        // Use the most recent report card.
-        final reportCardId = reportCards.first.id;
         await repo.upsertComment(
-          reportCardId: reportCardId,
+          reportCardId: candidates.first.id,
           commentType: 'class_teacher',
           commentText: remark.remark,
           isAiGenerated: remark.isLLMGenerated,
@@ -196,8 +201,8 @@ class _GenerateRemarksScreenState extends ConsumerState<GenerateRemarksScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Could not save remarks — no report cards found for '
-            '$skipped student(s). Generate report cards first.',
+            'Could not save remarks — no report card for the selected exam '
+            'was found for $skipped student(s). Generate report cards first.',
           ),
           backgroundColor: AppColors.warning,
         ),
@@ -207,7 +212,7 @@ class _GenerateRemarksScreenState extends ConsumerState<GenerateRemarksScreen> {
         SnackBar(
           content: Text(
             '$saved remark(s) saved. '
-            '$skipped skipped (no report card found).',
+            '$skipped skipped (no report card for the selected exam).',
           ),
           backgroundColor: AppColors.warning,
         ),

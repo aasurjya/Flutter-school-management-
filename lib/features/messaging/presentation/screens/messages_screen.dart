@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/message.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/messages_provider.dart';
+import '../../../auth/providers/auth_provider.dart';
 import '../../../../core/copy/warm_strings.dart';
 
 class MessagesScreen extends ConsumerStatefulWidget {
@@ -81,13 +82,13 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
             ),
           Expanded(
             child: TabBarView(
-        controller: _tabController,
-        children: [
-          _ChatsTab(),
-          _AnnouncementsTab(),
-          _NotificationsTab(),
-        ],
-      ),
+              controller: _tabController,
+              children: [
+                _ChatsTab(),
+                _AnnouncementsTab(),
+                _NotificationsTab(),
+              ],
+            ),
           ),
         ],
       ),
@@ -124,7 +125,8 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
                   ),
                   const SizedBox(height: 20),
                   // Message Type
-                  const Text('Message Type', style: TextStyle(fontWeight: FontWeight.w500)),
+                  const Text('Message Type',
+                      style: TextStyle(fontWeight: FontWeight.w500)),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -185,7 +187,8 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
                         tooltip: 'Attach file',
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('File attachment coming soon')),
+                            const SnackBar(
+                                content: Text('File attachment coming soon')),
                           );
                         },
                       ),
@@ -195,7 +198,8 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
                           Navigator.pop(context);
                         },
                         icon: const Icon(Icons.send, color: Colors.white),
-                        label: const Text('Send', style: TextStyle(color: Colors.white)),
+                        label: const Text('Send',
+                            style: TextStyle(color: Colors.white)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                         ),
@@ -231,8 +235,7 @@ class _ChatsTabState extends ConsumerState<_ChatsTab> {
     });
     _scrollListener = PaginationScrollListener(
       controller: _scrollController,
-      onLoadMore: () =>
-          ref.read(paginatedThreadsProvider.notifier).loadMore(),
+      onLoadMore: () => ref.read(paginatedThreadsProvider.notifier).loadMore(),
     );
   }
 
@@ -290,8 +293,7 @@ class _ChatsTabState extends ConsumerState<_ChatsTab> {
 
     final threads = state.items;
     return RefreshIndicator(
-      onRefresh: () =>
-          ref.read(paginatedThreadsProvider.notifier).refresh(),
+      onRefresh: () => ref.read(paginatedThreadsProvider.notifier).refresh(),
       child: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.all(16),
@@ -342,10 +344,7 @@ class _ChatsTabState extends ConsumerState<_ChatsTab> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => _ChatDetailScreen(
-          name: thread.displayTitle,
-          isGroup: thread.isGroup || thread.isClass,
-        ),
+        builder: (context) => _ChatDetailScreen(thread: thread),
       ),
     );
   }
@@ -410,8 +409,18 @@ class _AnnouncementsTab extends ConsumerWidget {
 
   String _monthName(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return months[month - 1];
   }
@@ -546,7 +555,8 @@ class _AnnouncementCard extends StatelessWidget {
             children: [
               if (priority == 'high')
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   margin: const EdgeInsets.only(right: 8),
                   decoration: BoxDecoration(
                     color: AppColors.error.withValues(alpha: 0.1),
@@ -603,15 +613,63 @@ class _AnnouncementCard extends StatelessWidget {
   }
 }
 
+class _ChatDetailScreen extends ConsumerStatefulWidget {
+  final Thread thread;
 
-class _ChatDetailScreen extends StatelessWidget {
-  final String name;
-  final bool isGroup;
+  const _ChatDetailScreen({required this.thread});
 
-  const _ChatDetailScreen({required this.name, required this.isGroup});
+  @override
+  ConsumerState<_ChatDetailScreen> createState() => _ChatDetailScreenState();
+}
+
+class _ChatDetailScreenState extends ConsumerState<_ChatDetailScreen> {
+  final _controller = TextEditingController();
+  bool _sending = false;
+
+  bool get _isGroup => widget.thread.isGroup || widget.thread.isClass;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load this thread's real messages into the shared notifier on open.
+    Future.microtask(() => ref
+        .read(messagesNotifierProvider.notifier)
+        .loadMessages(threadId: widget.thread.id));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty || _sending) return;
+    setState(() => _sending = true);
+    try {
+      await ref
+          .read(messagesNotifierProvider.notifier)
+          .sendMessage(content: text);
+      _controller.clear();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Couldn't send. Tap send to try again."),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final messagesAsync = ref.watch(messagesNotifierProvider);
+    final myId = ref.watch(currentUserProvider)?.id;
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -620,186 +678,155 @@ class _ChatDetailScreen extends StatelessWidget {
               radius: 18,
               backgroundColor: AppColors.primary.withValues(alpha: 0.1),
               child: Icon(
-                isGroup ? Icons.group : Icons.person,
+                _isGroup ? Icons.group : Icons.person,
                 color: AppColors.primary,
                 size: 20,
               ),
             ),
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: const TextStyle(fontSize: 16)),
-                if (isGroup)
-                  Text(
-                    '42 members',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[400]),
-                  ),
-              ],
+            Expanded(
+              child: Text(
+                widget.thread.displayTitle,
+                style: const TextStyle(fontSize: 16),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.call),
-            tooltip: 'Call',
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Calling coming soon')),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            tooltip: 'More options',
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (context) => SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.person),
-                        title: const Text('View Profile'),
-                        onTap: () {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('View profile coming soon')),
-                          );
-                        },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.notifications_off),
-                        title: const Text('Mute Notifications'),
-                        onTap: () {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Mute notifications coming soon')),
-                          );
-                        },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.block),
-                        title: const Text('Block User'),
-                        onTap: () {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Block user coming soon')),
-                          );
-                        },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.delete_outline, color: Colors.red),
-                        title: const Text('Delete Chat', style: TextStyle(color: Colors.red)),
-                        onTap: () {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Delete chat coming soon')),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: Column(
         children: [
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: const [
-                _MessageBubble(
-                  message: 'Hello! How is Arjun doing in class?',
-                  time: '10:30 AM',
-                  isMe: false,
-                  senderName: 'Parent',
+            child: messagesAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    "Couldn't load messages.",
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
                 ),
-                _MessageBubble(
-                  message: 'Hi! Arjun is doing very well. He\'s been very attentive in class lately.',
-                  time: '10:32 AM',
-                  isMe: true,
-                ),
-                _MessageBubble(
-                  message: 'That\'s great to hear! We\'ve been helping him with his studies at home.',
-                  time: '10:35 AM',
-                  isMe: false,
-                  senderName: 'Parent',
-                ),
-                _MessageBubble(
-                  message: 'It shows! His recent test scores have improved significantly. Keep up the good work!',
-                  time: '10:38 AM',
-                  isMe: true,
-                ),
-              ],
+              ),
+              data: (messages) {
+                if (messages.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No messages yet. Say hello.',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  );
+                }
+                // Repository returns newest-first; reverse so the latest sits
+                // at the bottom and the view opens scrolled to it.
+                return ListView.builder(
+                  reverse: true,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final m = messages[index];
+                    final isMe = myId != null && m.senderId == myId;
+                    return _MessageBubble(
+                      message: m.content,
+                      time: _formatTime(m.createdAt),
+                      isMe: isMe,
+                      senderName: isMe ? null : m.senderName,
+                    );
+                  },
+                );
+              },
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -5),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.attach_file),
-                    tooltip: 'Attach file',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('File attachment coming soon')),
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Type a message...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey.withValues(alpha: 0.1),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  CircleAvatar(
-                    backgroundColor: AppColors.primary,
-                    child: IconButton(
-                      icon: const Icon(Icons.send, color: Colors.white, size: 20),
-                      tooltip: 'Send',
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Message sending coming soon')),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          _Composer(
+            controller: _controller,
+            sending: _sending,
+            onSend: _send,
           ),
         ],
+      ),
+    );
+  }
+
+  String _formatTime(DateTime? dt) {
+    if (dt == null) return '';
+    final local = dt.toLocal();
+    final m = local.minute.toString().padLeft(2, '0');
+    final ampm = local.hour < 12 ? 'AM' : 'PM';
+    final hour12 = local.hour % 12 == 0 ? 12 : local.hour % 12;
+    return '$hour12:$m $ampm';
+  }
+}
+
+class _Composer extends StatelessWidget {
+  final TextEditingController controller;
+  final bool sending;
+  final VoidCallback onSend;
+
+  const _Composer({
+    required this.controller,
+    required this.sending,
+    required this.onSend,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                minLines: 1,
+                maxLines: 5,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => onSend(),
+                decoration: InputDecoration(
+                  hintText: 'Type a message…',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.withValues(alpha: 0.1),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            CircleAvatar(
+              backgroundColor: AppColors.primary,
+              child: IconButton(
+                icon: sending
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.send, color: Colors.white, size: 20),
+                tooltip: 'Send',
+                onPressed: sending ? null : onSend,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -872,4 +899,3 @@ class _MessageBubble extends StatelessWidget {
     );
   }
 }
-

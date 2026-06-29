@@ -54,16 +54,38 @@ flows. Higher-risk "wire the dead data layer" items are staged as a second pass
 - `flutter test test/core/validators_test.dart` → 4/4 pass.
 - Full `flutter analyze` → 0 errors project-wide (pre-existing info-lints unchanged).
 
-## Deferred — second pass (wire the real data layer; verify in-app)
-- **Messaging** — chat detail shows canned messages & Send is "coming soon";
-  compose creates nothing; chat list previews/unread always blank; notifications
-  tab is a dead placeholder. The `MessageRepository` already works — wire it.
-- **Admin dashboard** — mount `MvBackedKpiStrip`/`adminKpisProvider` (finished,
-  unwired) over the fabricated metrics; add a real pending-approvals queue.
-- **Student weekly attendance calendar** — hardcoded `['P','P','P','A','P','-']`;
-  drive from `studentAttendanceProvider`.
+## Second pass — shipped (wire the real data layer)
+
+Analyze-clean; UI wiring is best verified in-app (no runtime test run here).
+
+- **Admin dashboard KPIs** — replaced the fabricated `_InstitutionPulseGrid`
+  (hardcoded 94.2% / "2 on leave") with `MvBackedKpiStrip`, which reads the real
+  `adminKpisProvider` (`v_my_admin_kpis`) and auto-hides pre-migration. Deleted
+  the dead grid classes; `onRefresh` now invalidates `adminKpisProvider`.
+- **Admin approval queue** — `_PrincipalApprovalQueue` rewired from invented
+  "Mrs. Barua" rows to real pending leave requests
+  (`leaveApplicationsProvider(LeaveFilter(pendingOnly: true))`) with
+  loading / empty ("All caught up") / error states and a "View all N" overflow.
+- **Student weekly attendance calendar** — replaced hardcoded
+  `['P','P','P','A','P','-']` with the real current-week strip derived from
+  `studentAttendanceProvider`; "today" is computed from the date, future days
+  and no-record days show an em-dash; late/half-day/excused now render distinctly.
+- **Messaging chat detail** — `_ChatDetailScreen` rebuilt as a stateful consumer
+  bound to the real thread: loads `messagesNotifierProvider` messages
+  (newest-first, rendered reversed), renders real bubbles with loading/empty/error,
+  and Send actually calls `sendMessage(...)` with in-flight + failure handling.
+  Removed the canned bubbles and the "coming soon" call/profile/mute/block stubs.
+
+## Deferred — still faked / not yet wired (next pass; verify in-app)
+- **Messaging compose** — the "New Message" sheet still only `Navigator.pop`s;
+  needs a recipient search-select + `getOrCreatePrivateThread`/`createThread`.
+- **Messaging chat list previews/unread** — `_threadFromRow` never sets
+  `lastMessage`/`unreadCount`; needs a last-message-per-thread query.
+- **Notifications tab** — still a static "No notifications yet"; wire to
+  `lib/features/notifications`.
 - **Teacher/parent dashboard ledgers** — "32/40 graded", "$450 due", "unread note"
-  are static; back with real providers.
+  are still static; back with `teacherClassSummaryProvider` /
+  `parentChildOverviewProvider` + real submissions/invoice providers.
 
 ## Deferred — larger infrastructure
 - Real payment gateway SDK (razorpay) + server order-create + `recordPayment`

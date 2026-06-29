@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../data/models/attendance.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../academic/providers/academic_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
@@ -173,15 +174,18 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
 
                   final dailyData = dailyAsync.valueOrNull;
                   if (dailyData != null) {
-                    final total = (dailyData['total_students'] as num?)?.toInt() ?? 0;
-                    final present = (dailyData['present_count'] as num?)?.toInt() ?? 0;
-                    final lateCount = (dailyData['late_count'] as num?)?.toInt() ?? 0;
+                    final total =
+                        (dailyData['total_students'] as num?)?.toInt() ?? 0;
+                    final present =
+                        (dailyData['present_count'] as num?)?.toInt() ?? 0;
+                    final lateCount =
+                        (dailyData['late_count'] as num?)?.toInt() ?? 0;
                     statusText = total > 0 ? 'Marked' : 'Pending';
-                    percentage = total > 0
-                        ? ((present + lateCount) * 100 ~/ total)
-                        : 0;
+                    percentage =
+                        total > 0 ? ((present + lateCount) * 100 ~/ total) : 0;
                   } else {
-                    statusText = dailyAsync.isLoading ? 'Loading...' : 'Pending';
+                    statusText =
+                        dailyAsync.isLoading ? 'Loading...' : 'Pending';
                     percentage = 0;
                   }
 
@@ -311,7 +315,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
           const SizedBox(height: 12),
-          _buildWeeklyCalendar(),
+          _buildWeeklyCalendar(
+              historyAsync.valueOrNull ?? const <Attendance>[]),
           const SizedBox(height: 24),
 
           // Recent Attendance
@@ -363,19 +368,30 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     );
   }
 
-  Widget _buildWeeklyCalendar() {
-    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    final statuses = ['P', 'P', 'P', 'A', 'P', '-'];
+  /// Real Mon–Sat strip for the current week, derived from [records].
+  /// Future days and days with no record show an em-dash; "today" is computed
+  /// from the actual date, not a fixed index.
+  Widget _buildWeeklyCalendar(List<Attendance> records) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final monday = today.subtract(Duration(days: now.weekday - 1));
+
+    String key(DateTime d) => '${d.year}-${d.month}-${d.day}';
+    final byDay = <String, AttendanceStatus>{};
+    for (final r in records) {
+      byDay[key(DateTime(r.date.year, r.date.month, r.date.day))] = r.status;
+    }
 
     return GlassCard(
       padding: const EdgeInsets.all(16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(days.length, (index) {
-          final status = statuses[index];
-          final isPresent = status == 'P';
-          final isAbsent = status == 'A';
-          final isToday = index == 4;
+          final date = monday.add(Duration(days: index));
+          final isToday = date == today;
+          final isFuture = date.isAfter(today);
+          final status = isFuture ? null : byDay[key(date)];
 
           return Column(
             children: [
@@ -388,31 +404,58 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: isPresent
-                      ? AppColors.success.withValues(alpha: 0.1)
-                      : isAbsent
-                          ? AppColors.error.withValues(alpha: 0.1)
-                          : Colors.grey.withValues(alpha: 0.1),
+                  color: _weeklyCellColor(status).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                   border: isToday
                       ? Border.all(color: AppColors.primary, width: 2)
                       : null,
                 ),
-                child: Center(
-                  child: status == '-'
-                      ? Text('-', style: TextStyle(color: Colors.grey[400]))
-                      : Icon(
-                          isPresent ? Icons.check : Icons.close,
-                          color: isPresent ? AppColors.success : AppColors.error,
-                          size: 20,
-                        ),
-                ),
+                child: Center(child: _weeklyCellMark(status)),
               ),
             ],
           );
         }),
       ),
     );
+  }
+
+  Color _weeklyCellColor(AttendanceStatus? status) {
+    switch (status) {
+      case AttendanceStatus.present:
+        return AppColors.success;
+      case AttendanceStatus.absent:
+        return AppColors.error;
+      case AttendanceStatus.late:
+      case AttendanceStatus.halfDay:
+        return AppColors.warning;
+      case AttendanceStatus.excused:
+        return AppColors.info;
+      case null:
+        return Colors.grey;
+    }
+  }
+
+  Widget _weeklyCellMark(AttendanceStatus? status) {
+    switch (status) {
+      case AttendanceStatus.present:
+        return const Icon(Icons.check, color: AppColors.success, size: 20);
+      case AttendanceStatus.absent:
+        return const Icon(Icons.close, color: AppColors.error, size: 20);
+      case AttendanceStatus.late:
+        return const Text('L',
+            style: TextStyle(
+                color: AppColors.warning, fontWeight: FontWeight.bold));
+      case AttendanceStatus.halfDay:
+        return const Text('½',
+            style: TextStyle(
+                color: AppColors.warning, fontWeight: FontWeight.bold));
+      case AttendanceStatus.excused:
+        return const Text('E',
+            style:
+                TextStyle(color: AppColors.info, fontWeight: FontWeight.bold));
+      case null:
+        return Text('-', style: TextStyle(color: Colors.grey[400]));
+    }
   }
 
   Widget _buildReportsTab(BuildContext context) {
@@ -431,9 +474,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
             data: (sections) {
               final classNames = ['All Classes'];
               for (final s in sections) {
-                final name = s.className != null
-                    ? '${s.className} - ${s.name}'
-                    : s.name;
+                final name =
+                    s.className != null ? '${s.className} - ${s.name}' : s.name;
                 if (!classNames.contains(name)) {
                   classNames.add(name);
                 }
@@ -451,8 +493,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                         ),
                       ),
                       items: ['Today', 'This Week', 'This Month', 'This Term']
-                          .map((e) =>
-                              DropdownMenuItem(value: e, child: Text(e)))
+                          .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)))
                           .toList(),
                       onChanged: (value) {},
                     ),
@@ -469,8 +511,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                         ),
                       ),
                       items: classNames
-                          .map((e) =>
-                              DropdownMenuItem(value: e, child: Text(e)))
+                          .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)))
                           .toList(),
                       onChanged: (value) {},
                     ),
@@ -605,9 +647,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                           (data['present_count'] as num?)?.toInt() ?? 0;
                       final absent =
                           (data['absent_count'] as num?)?.toInt() ?? 0;
-                      final pct = (data['attendance_percentage'] as num?)
-                              ?.toDouble() ??
-                          0;
+                      final pct =
+                          (data['attendance_percentage'] as num?)?.toDouble() ??
+                              0;
                       return _ClassReportItem(
                         className: displayName,
                         present: present,
@@ -639,8 +681,18 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
 
   String _formatDate(DateTime date) {
     final months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
@@ -695,7 +747,8 @@ class _ClassAttendanceCard extends StatelessWidget {
               children: [
                 Text(
                   className,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 16),
                 ),
                 Text(
                   '$studentCount students',
@@ -897,7 +950,8 @@ class _ClassReportItem extends StatelessWidget {
         children: [
           Expanded(
             flex: 2,
-            child: Text(className, style: const TextStyle(fontWeight: FontWeight.w500)),
+            child: Text(className,
+                style: const TextStyle(fontWeight: FontWeight.w500)),
           ),
           Expanded(
             child: Text(
@@ -932,4 +986,3 @@ class _ClassReportItem extends StatelessWidget {
     );
   }
 }
-

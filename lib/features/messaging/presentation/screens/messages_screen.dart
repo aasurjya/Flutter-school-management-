@@ -8,6 +8,8 @@ import '../../../../data/models/message.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/messages_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../notifications/providers/notification_provider.dart';
+import '../../../notifications/presentation/widgets/notification_card.dart';
 import '../../../../core/copy/warm_strings.dart';
 
 class MessagesScreen extends ConsumerStatefulWidget {
@@ -182,20 +184,23 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.attach_file),
-                        tooltip: 'Attach file',
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('File attachment coming soon')),
-                          );
-                        },
-                      ),
                       const Spacer(),
                       ElevatedButton.icon(
+                        // Starting a brand-new conversation needs a recipient
+                        // user_id, but there is no users-search provider yet and
+                        // the student<->parent<->user linkage is incomplete
+                        // (see ai_message_composer_screen.dart:195). Be honest
+                        // instead of silently pretending the message was sent.
                         onPressed: () {
                           Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'New conversations are not available yet. '
+                                'Open an existing chat to reply.',
+                              ),
+                            ),
+                          );
                         },
                         icon: const Icon(Icons.send, color: Colors.white),
                         label: const Text('Send',
@@ -426,24 +431,56 @@ class _AnnouncementsTab extends ConsumerWidget {
   }
 }
 
-class _NotificationsTab extends StatelessWidget {
+class _NotificationsTab extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    // No notifications provider yet — show empty placeholder
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.notifications_none, size: 48, color: Colors.grey),
-          SizedBox(height: 12),
-          Text('No notifications yet'),
-          SizedBox(height: 4),
-          Text(
-            'You will see important alerts here',
-            style: TextStyle(color: Colors.grey, fontSize: 13),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notificationsAsync = ref.watch(notificationNotifierProvider);
+    return notificationsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            "Couldn't load notifications.",
+            style: TextStyle(color: Colors.grey[600]),
           ),
-        ],
+        ),
       ),
+      data: (items) {
+        if (items.isEmpty) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.notifications_none, size: 48, color: Colors.grey),
+                SizedBox(height: 12),
+                Text('No notifications yet'),
+                SizedBox(height: 4),
+                Text(
+                  'You will see important alerts here',
+                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                ),
+              ],
+            ),
+          );
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final n = items[index];
+            return NotificationCard(
+              notification: n,
+              onTap: () => ref
+                  .read(notificationNotifierProvider.notifier)
+                  .markAsRead(n.id),
+              onDismiss: () => ref
+                  .read(notificationNotifierProvider.notifier)
+                  .deleteNotification(n.id),
+            );
+          },
+        );
+      },
     );
   }
 }

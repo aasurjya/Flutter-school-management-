@@ -158,7 +158,21 @@ String _weekdayShort(int weekday) {
 }
 
 String _monthShort(int month) {
-  const m = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const m = [
+    '',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
+  ];
   return m[month];
 }
 
@@ -185,7 +199,8 @@ class _RollCallDeck extends ConsumerWidget {
         decoration: BoxDecoration(
           color: cellBg,
           borderRadius: AppRadius.card,
-          border: Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
+          border:
+              Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
         ),
         child: const Center(child: CircularProgressIndicator()),
       ),
@@ -195,7 +210,8 @@ class _RollCallDeck extends ConsumerWidget {
         decoration: BoxDecoration(
           color: cellBg,
           borderRadius: AppRadius.card,
-          border: Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
+          border:
+              Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
         ),
         child: Text(
           WarmCopy.loadFailed('today\'s schedule'),
@@ -205,9 +221,12 @@ class _RollCallDeck extends ConsumerWidget {
       data: (target) {
         if (target == null) {
           // Quiet, editorial welcome card when free.
-          final parchmentBg = isDark ? const Color(0xFF1E1E1C) : const Color(0xFFFAF9F5);
-          final parchmentBorder = isDark ? const Color(0xFF3A3A36) : const Color(0xFFE8E6DF);
-          final textMuted = isDark ? const Color(0xFFB5B3AD) : const Color(0xFF706E67);
+          final parchmentBg =
+              isDark ? const Color(0xFF1E1E1C) : const Color(0xFFFAF9F5);
+          final parchmentBorder =
+              isDark ? const Color(0xFF3A3A36) : const Color(0xFFE8E6DF);
+          final textMuted =
+              isDark ? const Color(0xFFB5B3AD) : const Color(0xFF706E67);
 
           return Container(
             margin: const EdgeInsets.only(bottom: AppSpacing.lg),
@@ -235,12 +254,15 @@ class _RollCallDeck extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.xs),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF2B2B28) : const Color(0xFFF3EFE6),
+                    color: isDark
+                        ? const Color(0xFF2B2B28)
+                        : const Color(0xFFF3EFE6),
                     borderRadius: BorderRadius.circular(AppRadius.xs),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.check_circle_outline, size: 16, color: textMuted),
+                      Icon(Icons.check_circle_outline,
+                          size: 16, color: textMuted),
                       const SizedBox(width: AppSpacing.xs),
                       Expanded(
                         child: Text(
@@ -260,8 +282,10 @@ class _RollCallDeck extends ConsumerWidget {
         }
 
         // Active class Roll Call Deck (parchment/ivory board style)
-        final ivoryBg = isDark ? const Color(0xFF172B20) : const Color(0xFFF0FDF4);
-        final borderAccent = isDark ? const Color(0xFF10B981) : const Color(0xFF047857);
+        final ivoryBg =
+            isDark ? const Color(0xFF172B20) : const Color(0xFFF0FDF4);
+        final borderAccent =
+            isDark ? const Color(0xFF10B981) : const Color(0xFF047857);
         final tagText = target.isNow ? 'ACTIVE NOW' : 'NEXT LECTURE';
 
         return Container(
@@ -287,7 +311,9 @@ class _RollCallDeck extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    target.roomNumber == null ? 'Schedule' : 'Room ${target.roomNumber}',
+                    target.roomNumber == null
+                        ? 'Schedule'
+                        : 'Room ${target.roomNumber}',
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: secondary,
                       fontWeight: FontWeight.bold,
@@ -373,7 +399,8 @@ class _TimetableRhythmSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
+          padding:
+              const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
           child: Text(
             'TODAY\'S LECTURE TIMELINE',
             style: theme.textTheme.labelSmall?.copyWith(
@@ -404,7 +431,8 @@ class _TimetableRhythmSection extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: AppColors.groupedCellFor(brightness),
                   borderRadius: AppRadius.card,
-                  border: Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
+                  border: Border.all(
+                      color: AppColors.separatorFor(brightness), width: 0.5),
                 ),
                 child: const Text(
                   'No lectures scheduled for today.',
@@ -417,13 +445,15 @@ class _TimetableRhythmSection extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: AppColors.groupedCellFor(brightness),
                 borderRadius: AppRadius.card,
-                border: Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
+                border: Border.all(
+                    color: AppColors.separatorFor(brightness), width: 0.5),
               ),
               child: ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: slots.length,
-                separatorBuilder: (context, index) => const Divider(height: 0.5),
+                separatorBuilder: (context, index) =>
+                    const Divider(height: 0.5),
                 itemBuilder: (context, index) {
                   final slot = slots[index];
                   final time = slot.slot?.startTime ?? '--:--';
@@ -432,10 +462,12 @@ class _TimetableRhythmSection extends ConsumerWidget {
 
                   return ListTile(
                     dense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     title: Text(
                       '$section · $subject',
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 14),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -443,26 +475,9 @@ class _TimetableRhythmSection extends ConsumerWidget {
                         const SizedBox(height: 2),
                         Text(
                           'Time: $time${slot.roomNumber != null ? ' · Room ${slot.roomNumber}' : ''}',
-                          style: TextStyle(color: AppColors.labelFor(brightness, tier: 2), fontSize: 12),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(Icons.assignment_outlined, size: 12, color: AppColors.labelFor(brightness, tier: 3)),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                'Topic: Prepare textbook Chapter ${index + 2} exercises',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontStyle: FontStyle.italic,
-                                  color: AppColors.labelFor(brightness, tier: 3),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
+                          style: TextStyle(
+                              color: AppColors.labelFor(brightness, tier: 2),
+                              fontSize: 12),
                         ),
                       ],
                     ),
@@ -502,7 +517,8 @@ class _WorkloadLedgerSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
+          padding:
+              const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
           child: Text(
             'WORKLOAD & RISKS ALERT LEDGER',
             style: theme.textTheme.labelSmall?.copyWith(
@@ -523,7 +539,8 @@ class _WorkloadLedgerSection extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: AppColors.groupedCellFor(brightness),
                   borderRadius: AppRadius.card,
-                  border: Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
+                  border: Border.all(
+                      color: AppColors.separatorFor(brightness), width: 0.5),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -537,22 +554,16 @@ class _WorkloadLedgerSection extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     sectionsAsync.when(
-                      loading: () => const Center(child: CircularProgressIndicator()),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
                       error: (_, __) => const Text('Error loading classes'),
                       data: (sections) => Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             '${sections.length} Active Courses',
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Grading Ledger: 32/40 submitted tasks graded.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.labelFor(brightness, tier: 2),
-                            ),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 16),
                           ),
                         ],
                       ),
@@ -563,7 +574,9 @@ class _WorkloadLedgerSection extends ConsumerWidget {
                       child: OutlinedButton(
                         onPressed: () => context.push(AppRoutes.teacherClasses),
                         style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.sm)),
                         ),
                         child: const Text('My Classes'),
                       ),
@@ -580,7 +593,8 @@ class _WorkloadLedgerSection extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: AppColors.groupedCellFor(brightness),
                   borderRadius: AppRadius.card,
-                  border: Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
+                  border: Border.all(
+                      color: AppColors.separatorFor(brightness), width: 0.5),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -594,7 +608,8 @@ class _WorkloadLedgerSection extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     alertsAsync.when(
-                      loading: () => const Center(child: CircularProgressIndicator()),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
                       error: (_, __) => const Text('Error'),
                       data: (alerts) {
                         final isAlert = alerts.isNotEmpty;
@@ -608,17 +623,23 @@ class _WorkloadLedgerSection extends ConsumerWidget {
                                   height: 8,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: isAlert ? AppColors.error : AppColors.success,
+                                    color: isAlert
+                                        ? AppColors.error
+                                        : AppColors.success,
                                   ),
                                 ),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    isAlert ? '${alerts.length} Risks' : 'All Clear',
+                                    isAlert
+                                        ? '${alerts.length} Risks'
+                                        : 'All Clear',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 15,
-                                      color: isAlert ? AppColors.error : AppColors.success,
+                                      color: isAlert
+                                          ? AppColors.error
+                                          : AppColors.success,
                                     ),
                                   ),
                                 ),
@@ -626,7 +647,9 @@ class _WorkloadLedgerSection extends ConsumerWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              isAlert ? 'Students flagged with attendance issues.' : 'No anomalies flagged.',
+                              isAlert
+                                  ? 'Students flagged with attendance issues.'
+                                  : 'No anomalies flagged.',
                               style: const TextStyle(fontSize: 10, height: 1.2),
                             ),
                           ],
@@ -637,12 +660,14 @@ class _WorkloadLedgerSection extends ConsumerWidget {
                     SizedBox(
                       width: double.infinity,
                       child: TextButton(
-                        onPressed: () => context.push(AppRoutes.earlyWarningAlerts),
+                        onPressed: () =>
+                            context.push(AppRoutes.earlyWarningAlerts),
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.zero,
                           minimumSize: const Size(0, 36),
                         ),
-                        child: const Text('View Risks', style: TextStyle(fontSize: 12)),
+                        child: const Text('View Risks',
+                            style: TextStyle(fontSize: 12)),
                       ),
                     ),
                   ],

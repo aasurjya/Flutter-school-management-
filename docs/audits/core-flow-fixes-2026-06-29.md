@@ -76,16 +76,37 @@ Analyze-clean; UI wiring is best verified in-app (no runtime test run here).
   and Send actually calls `sendMessage(...)` with in-flight + failure handling.
   Removed the canned bubbles and the "coming soon" call/profile/mute/block stubs.
 
-## Deferred — still faked / not yet wired (next pass; verify in-app)
-- **Messaging compose** — the "New Message" sheet still only `Navigator.pop`s;
-  needs a recipient search-select + `getOrCreatePrivateThread`/`createThread`.
-- **Messaging chat list previews/unread** — `_threadFromRow` never sets
-  `lastMessage`/`unreadCount`; needs a last-message-per-thread query.
-- **Notifications tab** — still a static "No notifications yet"; wire to
-  `lib/features/notifications`.
-- **Teacher/parent dashboard ledgers** — "32/40 graded", "$450 due", "unread note"
-  are still static; back with `teacherClassSummaryProvider` /
-  `parentChildOverviewProvider` + real submissions/invoice providers.
+## Third pass — shipped (finish faked surfaces)
+
+Analyze-clean; UI wiring best verified in-app.
+
+- **Chat-list unread badges** — `_threadFromRow` now derives `unreadCount` from
+  the current user's `last_read_at` vs `last_message_at` (data already fetched —
+  no query change). The existing bold-row/badge UI lights up.
+- **Notifications tab** — `_NotificationsTab` rebuilt as a consumer of the real
+  `notificationNotifierProvider` with loading/empty/error, `NotificationCard`
+  rows, tap-to-read and swipe-to-delete.
+- **Parent "action required" ledger** — `_NeedsAttentionLedger` rewired from the
+  invented "$450 due / unread note" to real data: outstanding fees from
+  `parentChildOverviewProvider` + unread count from messaging `unreadCountProvider`,
+  with an "All caught up" empty state. Removed the fabricated child-card
+  "homework due" / "Active period: Chemistry lab" lines.
+- **Teacher dashboard** — removed the fabricated "Grading Ledger: 32/40 graded"
+  and the index-derived "Topic: Chapter N" per-slot line (kept the real
+  "N Active Courses").
+
+## Deferred — genuinely blocked / next pass
+- **Messaging compose (new conversations)** — blocked on missing infrastructure:
+  there is no users-search provider, and the student↔parent↔user_id linkage is
+  incomplete (`ai_message_composer_screen.dart:195` TODO needs a DB migration).
+  Interim: the compose Send no longer *silently pretends to send* — it now states
+  new conversations aren't available yet and points to existing chats. Real fix
+  needs a recipient search provider + the linkage migration.
+- **Chat-list last-message preview text** — needs a latest-message-per-thread
+  embed/view/RPC; deferred to avoid an unverifiable blind query (unread badge,
+  the primary triage signal, is done).
+- **Teacher graded-count / per-slot topic** — no provider exists; needs a
+  submissions-graded aggregate + lesson_plans/topic_coverage wiring.
 
 ## Deferred — larger infrastructure
 - Real payment gateway SDK (razorpay) + server order-create + `recordPayment`

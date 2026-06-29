@@ -8,7 +8,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/apple_list_section.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../messaging/providers/messages_provider.dart';
 import '../../../students/providers/students_provider.dart';
+import '../../providers/dashboard_kpis_provider.dart';
 
 /// Overhauled, high-end Parent Dashboard.
 ///
@@ -345,37 +347,6 @@ class _ChildLedgerCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xs),
-          // Homework / Academic Pulse row
-          Row(
-            children: [
-              Icon(Icons.assignment_outlined, size: 14, color: secondaryText),
-              const SizedBox(width: AppSpacing.xs),
-              Expanded(
-                child: Text(
-                  '2 homework assignments due this week · Syllabus on schedule',
-                  style: TextStyle(fontSize: 12, color: secondaryText),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          // Location / Current Period row
-          Row(
-            children: [
-              Icon(Icons.schedule_outlined, size: 14, color: secondaryText),
-              const SizedBox(width: AppSpacing.xs),
-              Expanded(
-                child: Text(
-                  'Active period: Chemistry lab (with Mrs. Sen)',
-                  style: TextStyle(
-                      fontSize: 12,
-                      color: secondaryText,
-                      fontStyle: FontStyle.italic),
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -385,13 +356,64 @@ class _ChildLedgerCard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // Attention Required Ledger — Structured payments & unread items
 // ---------------------------------------------------------------------------
-class _NeedsAttentionLedger extends StatelessWidget {
+class _NeedsAttentionLedger extends ConsumerWidget {
   const _NeedsAttentionLedger();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final brightness = theme.brightness;
+
+    final overview = ref.watch(parentChildOverviewProvider).valueOrNull ??
+        const <ParentChildOverview>[];
+    final outstanding =
+        overview.fold<double>(0, (sum, c) => sum + c.outstandingAmount);
+    final unreadMessages = ref.watch(unreadCountProvider).valueOrNull ?? 0;
+
+    final tiles = <Widget>[];
+    if (outstanding > 0) {
+      tiles.add(ListTile(
+        dense: true,
+        leading: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: AppColors.error.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.account_balance_wallet_outlined,
+              size: 18, color: AppColors.error),
+        ),
+        title: const Text('Fees due',
+            style: TextStyle(fontWeight: FontWeight.w600)),
+        subtitle:
+            Text('Outstanding balance: ₹${outstanding.toStringAsFixed(0)}'),
+        trailing: const Icon(Icons.chevron_right_rounded),
+        onTap: () => context.push(AppRoutes.fees),
+      ));
+    }
+    if (unreadMessages > 0) {
+      if (tiles.isNotEmpty) tiles.add(const Divider(height: 0.5));
+      tiles.add(ListTile(
+        dense: true,
+        leading: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: AppColors.warning.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.mark_email_unread_outlined,
+              size: 18, color: AppColors.warning),
+        ),
+        title: Text(
+          unreadMessages == 1
+              ? '1 unread message'
+              : '$unreadMessages unread messages',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        trailing: const Icon(Icons.chevron_right_rounded),
+        onTap: () => context.push(AppRoutes.messages),
+      ));
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -420,59 +442,27 @@ class _NeedsAttentionLedger extends StatelessWidget {
           // paints correctly (Flutter 3.44+ asserts otherwise).
           child: Material(
             type: MaterialType.transparency,
-            child: Column(
-              children: [
-                ListTile(
-                  dense: true,
-                  leading: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
+            child: tiles.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 18),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle_outline,
+                            size: 18, color: AppColors.success),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'All caught up — nothing needs your attention.',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.labelFor(brightness, tier: 2),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    child: const Icon(Icons.account_balance_wallet_outlined,
-                        size: 18, color: AppColors.error),
-                  ),
-                  title: const Text('Term 2 Tuition Fees',
-                      style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text('Statement amount: \$450.00'),
-                  trailing: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'Due in 4 days',
-                      style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.error),
-                    ),
-                  ),
-                  onTap: () => context.push(AppRoutes.fees),
-                ),
-                const Divider(height: 0.5),
-                ListTile(
-                  dense: true,
-                  leading: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppColors.warning.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.mark_email_unread_outlined,
-                        size: 18, color: AppColors.warning),
-                  ),
-                  title: const Text('Unread Feedback note',
-                      style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text('From: Mr. Barua (Mathematics)'),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.push(AppRoutes.messages),
-                ),
-              ],
-            ),
+                  )
+                : Column(children: tiles),
           ),
         ),
       ],

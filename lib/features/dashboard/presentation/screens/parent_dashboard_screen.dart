@@ -263,11 +263,6 @@ class _ChildLedgerCard extends StatelessWidget {
     final secondaryText =
         isDark ? const Color(0xFFB5B3AD) : const Color(0xFF706E67);
 
-    // Mock realistic pulse indicators representing peace-of-mind metrics
-    final isPresent = childMap['is_active'] as bool? ?? true;
-    final attendanceColor = isPresent ? AppColors.success : AppColors.error;
-    const checkInTime = '08:14 AM';
-
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -321,7 +316,12 @@ class _ChildLedgerCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           const Divider(height: 1),
           const SizedBox(height: AppSpacing.sm),
-          // Safety & Attendance row
+          // Safety & Attendance row.
+          // Today's attendance is not yet wired to a real per-child read, so we
+          // must NOT derive presence from the enrollment is_active flag or show
+          // a fabricated arrival time — that is false reassurance on the most
+          // safety-critical line a parent reads. Show a neutral pending state
+          // until a real today's-attendance lookup is wired in.
           Row(
             children: [
               Container(
@@ -329,19 +329,17 @@ class _ChildLedgerCard extends StatelessWidget {
                 height: 8,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: attendanceColor,
+                  color: secondaryText,
                 ),
               ),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
-                  isPresent
-                      ? 'Present at school · Safe arrival at $checkInTime'
-                      : 'Not checked in yet today',
+                  "Today's attendance hasn't synced yet",
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: isPresent ? attendanceColor : AppColors.error,
+                    fontWeight: FontWeight.w600,
+                    color: secondaryText,
                   ),
                 ),
               ),

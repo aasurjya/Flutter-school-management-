@@ -18,14 +18,12 @@ class PaymentCheckoutScreen extends ConsumerStatefulWidget {
       _PaymentCheckoutScreenState();
 }
 
-class _PaymentCheckoutScreenState
-    extends ConsumerState<PaymentCheckoutScreen> {
+class _PaymentCheckoutScreenState extends ConsumerState<PaymentCheckoutScreen> {
   String? _selectedGateway;
 
   @override
   Widget build(BuildContext context) {
-    final invoiceAsync =
-        ref.watch(invoiceByIdProvider(widget.invoiceId));
+    final invoiceAsync = ref.watch(invoiceByIdProvider(widget.invoiceId));
     final gatewaysAsync = ref.watch(gatewaysProvider);
     final paymentFlow = ref.watch(initiatePaymentProvider);
 
@@ -35,6 +33,14 @@ class _PaymentCheckoutScreenState
         transaction: paymentFlow.transaction!,
         onDone: () {
           ref.read(initiatePaymentProvider.notifier).reset();
+          // Drop cached fee data so the parent returns to fresh amounts/status
+          // instead of a stale 'pending' / 'Pay Now' view.
+          ref.invalidate(invoiceByIdProvider(widget.invoiceId));
+          ref.invalidate(invoicesProvider);
+          ref.invalidate(paginatedInvoicesProvider);
+          ref.invalidate(studentFeeSummaryProvider);
+          ref.invalidate(paymentsProvider);
+          ref.invalidate(recentPaymentsProvider);
           Navigator.of(context).pop(true);
         },
       );
@@ -54,8 +60,7 @@ class _PaymentCheckoutScreenState
       ),
       body: invoiceAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) =>
-            AppErrorWidget(message: e.toString()),
+        error: (e, _) => AppErrorWidget(message: e.toString()),
         data: (invoice) {
           if (invoice == null) {
             return const AppErrorWidget(message: 'Invoice not found.');
@@ -64,15 +69,13 @@ class _PaymentCheckoutScreenState
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => AppErrorWidget(message: e.toString()),
             data: (gateways) {
-              final activeGateways =
-                  gateways.where((g) => g.isActive).toList();
+              final activeGateways = gateways.where((g) => g.isActive).toList();
               return _CheckoutBody(
                 invoice: invoice,
                 activeGateways: activeGateways,
                 selectedGateway: _selectedGateway,
                 paymentFlow: paymentFlow,
-                onGatewaySelected: (g) =>
-                    setState(() => _selectedGateway = g),
+                onGatewaySelected: (g) => setState(() => _selectedGateway = g),
                 onPay: () => _handlePay(invoice),
               );
             },
@@ -91,7 +94,9 @@ class _PaymentCheckoutScreenState
     }
 
     final studentId = invoice.studentId as String? ?? '';
-    final amount = (invoice.totalAmount as num?)?.toDouble() ?? 0.0;
+    // Charge what is still owed, not the original total — paying a
+    // partially-paid invoice would otherwise over-charge the parent.
+    final amount = (invoice.pendingAmount as num?)?.toDouble() ?? 0.0;
 
     await ref.read(initiatePaymentProvider.notifier).pay(
           invoiceId: widget.invoiceId,
@@ -123,7 +128,7 @@ class _CheckoutBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final isProcessing = paymentFlow.state == PaymentFlowState.processing;
     final hasFailed = paymentFlow.state == PaymentFlowState.failure;
-    final currFmt = NumberFormat.currency(symbol: '\$');
+    final currFmt = NumberFormat.currency(symbol: '₹');
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -133,6 +138,38 @@ class _CheckoutBody extends StatelessWidget {
           // Invoice summary card
           _InvoiceSummaryCard(invoice: invoice, currFmt: currFmt),
           const SizedBox(height: 20),
+
+          // Honesty notice: the gateway flow is currently simulated and does
+          // not move money or mark the invoice paid. Remove once a real
+          // gateway SDK is wired into InitiatePaymentNotifier.pay().
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.warning.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(12),
+              border:
+                  Border.all(color: AppColors.warning.withValues(alpha: 0.4)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.info_outline,
+                    color: AppColors.warning, size: 18),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Demo checkout — no real payment is processed yet, and the '
+                    'invoice will not be marked as paid.',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.3,
+                      color: AppColors.grey900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
 
           // Error state
           if (hasFailed && paymentFlow.errorMessage != null) ...[
@@ -171,8 +208,7 @@ class _CheckoutBody extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: FilledButton(
-              onPressed:
-                  isProcessing || activeGateways.isEmpty ? null : onPay,
+              onPressed: isProcessing || activeGateways.isEmpty ? null : onPay,
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
@@ -198,7 +234,7 @@ class _CheckoutBody extends StatelessWidget {
                       ],
                     )
                   : Text(
-                      'Pay ${currFmt.format((invoice.totalAmount as num?)?.toDouble() ?? 0)}',
+                      'Pay ${currFmt.format((invoice.pendingAmount as num?)?.toDouble() ?? 0)}',
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w700),
                     ),
@@ -214,8 +250,7 @@ class _InvoiceSummaryCard extends StatelessWidget {
   final dynamic invoice;
   final NumberFormat currFmt;
 
-  const _InvoiceSummaryCard(
-      {required this.invoice, required this.currFmt});
+  const _InvoiceSummaryCard({required this.invoice, required this.currFmt});
 
   @override
   Widget build(BuildContext context) {
@@ -226,9 +261,8 @@ class _InvoiceSummaryCard extends StatelessWidget {
     final dueDate = invoice.dueDate != null
         ? DateFormat.yMMMd().format(invoice.dueDate as DateTime)
         : 'N/A';
-    final amount = (invoice.totalAmount as num?)?.toDouble() ?? 0.0;
-    final invoiceNumber =
-        invoice.invoiceNumber as String? ?? 'N/A';
+    final amount = (invoice.pendingAmount as num?)?.toDouble() ?? 0.0;
+    final invoiceNumber = invoice.invoiceNumber as String? ?? 'N/A';
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -325,7 +359,8 @@ class _GatewayRadioCard extends StatelessWidget {
                 color: brandColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(gateway.gatewayName.icon, color: brandColor, size: 20),
+              child:
+                  Icon(gateway.gatewayName.icon, color: brandColor, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -403,7 +438,7 @@ class _SuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currFmt = NumberFormat.currency(symbol: '\$');
+    final currFmt = NumberFormat.currency(symbol: '₹');
     final dateStr = transaction.paidAt != null
         ? DateFormat.yMMMd().add_jm().format(transaction.paidAt!)
         : DateFormat.yMMMd().add_jm().format(transaction.createdAt);
@@ -456,10 +491,12 @@ class _SuccessScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               // Receipt details
-              _ReceiptRow(label: 'Transaction ID',
+              _ReceiptRow(
+                  label: 'Transaction ID',
                   value: transaction.gatewayTransactionId ?? transaction.id),
               const Divider(height: 24),
-              _ReceiptRow(label: 'Gateway',
+              _ReceiptRow(
+                  label: 'Gateway',
                   value: transaction.gatewayName.toUpperCase()),
               const Divider(height: 24),
               _ReceiptRow(label: 'Date & Time', value: dateStr),
@@ -483,8 +520,7 @@ class _SuccessScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     'Done',
-                    style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w700),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),

@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/app_environment.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/loading_button.dart';
 import '../../providers/auth_provider.dart';
 import '../widgets/demo_accounts_panel.dart';
@@ -147,7 +148,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final profileComplete = currentUser?.profileComplete ?? false;
 
     if (kDebugMode) {
-      developer.log('Navigating to dashboard for role: $primaryRole, profileComplete: $profileComplete',
+      developer.log(
+          'Navigating to dashboard for role: $primaryRole, profileComplete: $profileComplete',
           name: 'LoginScreen');
     }
 
@@ -272,12 +274,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-          
+
           SafeArea(
             child: Align(
               alignment: Alignment.topCenter,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 450),
                   child: Column(
@@ -317,7 +320,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 20),
+          const Icon(Icons.error_outline_rounded,
+              color: AppColors.error, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -331,7 +335,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
           IconButton(
             onPressed: () => setState(() => _errorMessage = null),
-            icon: const Icon(Icons.close_rounded, color: AppColors.error, size: 16),
+            icon: const Icon(Icons.close_rounded,
+                color: AppColors.error, size: 16),
             tooltip: 'Dismiss error',
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -397,62 +402,67 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             Text(
               'Sign In',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.5,
-              ),
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.5,
+                  ),
             ),
             const SizedBox(height: 24),
             AutofillGroup(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-            // Email Field
-            TextFormField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              autofillHints: const [AutofillHints.email],
-              decoration: const InputDecoration(
-                labelText: 'Email Address',
-                prefixIcon: Icon(Icons.mail_outline_rounded, size: 20),
-              ),
-              validator: (value) {
-                final email = value?.trim() ?? '';
-                if (email.isEmpty) return 'Email is required';
-                if (!RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,}$').hasMatch(email)) {
-                  return 'Enter a valid email address';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 24),
-            // Password Field
-            TextFormField(
-              controller: _passwordController,
-              obscureText: _obscurePassword,
-              textInputAction: TextInputAction.done,
-              autofillHints: const [AutofillHints.password],
-              onFieldSubmitted: (_) => _handleLogin(),
-              decoration: InputDecoration(
-                labelText: 'Password',
-                prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                    size: 20,
+                  // Email Field
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.email],
+                    decoration: const InputDecoration(
+                      labelText: 'Email Address',
+                      prefixIcon: Icon(Icons.mail_outline_rounded, size: 20),
+                    ),
+                    validator: (value) {
+                      final email = value?.trim() ?? '';
+                      if (email.isEmpty) return 'Email is required';
+                      if (!Validators.isValidEmail(email)) {
+                        return 'Enter a valid email address';
+                      }
+                      return null;
+                    },
                   ),
-                  tooltip: _obscurePassword ? 'Show password' : 'Hide password',
-                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) return 'Password is required';
-                if (value.length < 8) return 'Minimum 8 characters';
-                return null;
-              },
-            ),
+                  const SizedBox(height: 24),
+                  // Password Field
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.password],
+                    onFieldSubmitted: (_) => _handleLogin(),
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon:
+                          const Icon(Icons.lock_outline_rounded, size: 20),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          size: 20,
+                        ),
+                        tooltip: _obscurePassword
+                            ? 'Show password'
+                            : 'Hide password',
+                        onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return 'Password is required';
+                      if (value.length < 8) return 'Minimum 8 characters';
+                      return null;
+                    },
+                  ),
                 ],
               ),
             ),
@@ -469,7 +479,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 foregroundColor: Theme.of(context).colorScheme.secondary,
                 minimumSize: const Size(double.infinity, 48),
               ),
-              child: const Text('Forgot Password?', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: const Text('Forgot Password?',
+                  style: TextStyle(fontWeight: FontWeight.w600)),
             ),
           ],
         ),
@@ -531,8 +542,7 @@ class _ForgotPasswordDialogState extends ConsumerState<_ForgotPasswordDialog> {
 
   Future<void> _handleResetPassword() async {
     final email = _emailController.text.trim();
-    if (email.isEmpty ||
-        !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+    if (!Validators.isValidEmail(email)) {
       setState(() {
         _message = 'Please enter a valid email address';
         _isSuccess = false;
@@ -545,17 +555,19 @@ class _ForgotPasswordDialogState extends ConsumerState<_ForgotPasswordDialog> {
     try {
       final authRepo = ref.read(authRepositoryProvider);
       await authRepo.resetPassword(email);
+      if (!mounted) return;
       setState(() {
-        _message = 'Password reset email sent. Please check your inbox.';
+        _message = 'Reset link sent. Check your inbox.';
         _isSuccess = true;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _message = 'Failed to send reset email. Please try again.';
+        _message = "Couldn't send the reset link. Please try again.";
         _isSuccess = false;
       });
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

@@ -55,11 +55,12 @@ class AttendanceRepository extends BaseRepository {
         ''')
         .eq('section_id', sectionId)
         .eq('date', date.toIso8601String().split('T')[0])
-        .limit(100);
+        // One row per student for a single section+date. Capped high enough to
+        // never truncate a roster — a low cap (was 100) silently dropped
+        // existing records, which then got overwritten as 'present' on submit.
+        .limit(1000);
 
-    return (response as List)
-        .map((json) => Attendance.fromJson(json))
-        .toList();
+    return (response as List).map((json) => Attendance.fromJson(json)).toList();
   }
 
   Future<List<Attendance>> getStudentAttendance({
@@ -69,10 +70,8 @@ class AttendanceRepository extends BaseRepository {
     int limit = 100,
     int offset = 0,
   }) async {
-    var query = client
-        .from('attendance')
-        .select('*')
-        .eq('student_id', studentId);
+    var query =
+        client.from('attendance').select('*').eq('student_id', studentId);
 
     if (startDate != null) {
       query = query.gte('date', startDate.toIso8601String().split('T')[0]);
@@ -81,10 +80,10 @@ class AttendanceRepository extends BaseRepository {
       query = query.lte('date', endDate.toIso8601String().split('T')[0]);
     }
 
-    final response = await query.order('date', ascending: false).range(offset, offset + limit - 1);
-    return (response as List)
-        .map((json) => Attendance.fromJson(json))
-        .toList();
+    final response = await query
+        .order('date', ascending: false)
+        .range(offset, offset + limit - 1);
+    return (response as List).map((json) => Attendance.fromJson(json)).toList();
   }
 
   Future<List<Map<String, dynamic>>> getAttendanceSummary({
@@ -179,21 +178,23 @@ class AttendanceRepository extends BaseRepository {
     }
 
     // Online path — direct upsert
-    final records = attendanceRecords.map((record) => {
-      'tenant_id': tenantId,
-      'student_id': record['student_id'],
-      'section_id': sectionId,
-      'date': dateStr,
-      'status': record['status'],
-      'remarks': record['remarks'],
-      'marked_by': currentUserId,
-      'marked_at': now,
-    }).toList();
+    final records = attendanceRecords
+        .map((record) => {
+              'tenant_id': tenantId,
+              'student_id': record['student_id'],
+              'section_id': sectionId,
+              'date': dateStr,
+              'status': record['status'],
+              'remarks': record['remarks'],
+              'marked_by': currentUserId,
+              'marked_at': now,
+            })
+        .toList();
 
     await client.from('attendance').upsert(
-      records,
-      onConflict: 'student_id,date',
-    );
+          records,
+          onConflict: 'student_id,date',
+        );
     return true; // true = saved online
   }
 
@@ -253,27 +254,26 @@ class AttendanceRepository extends BaseRepository {
     String? academicYearId,
   }) async {
     final summary = await getAttendanceSummary(studentId: studentId);
-    
+
     int totalDays = 0;
     int presentDays = 0;
     int absentDays = 0;
     int lateDays = 0;
-    
+
     for (final month in summary) {
       totalDays += (month['total_days'] as num).toInt();
       presentDays += (month['present_days'] as num).toInt();
       absentDays += (month['absent_days'] as num).toInt();
       lateDays += (month['late_days'] as num).toInt();
     }
-    
+
     return {
       'total_days': totalDays,
       'present_days': presentDays,
       'absent_days': absentDays,
       'late_days': lateDays,
-      'attendance_percentage': totalDays > 0 
-          ? ((presentDays + lateDays) * 100 ~/ totalDays) 
-          : 0,
+      'attendance_percentage':
+          totalDays > 0 ? ((presentDays + lateDays) * 100 ~/ totalDays) : 0,
     };
   }
 
@@ -311,7 +311,7 @@ class AttendanceRepository extends BaseRepository {
     int total = 0;
     for (final row in (response as List)) {
       present += (row['present_count'] as num? ?? 0).toInt();
-      total   += (row['total_students'] as num? ?? 0).toInt();
+      total += (row['total_students'] as num? ?? 0).toInt();
     }
     return {'present': present, 'total': total};
   }

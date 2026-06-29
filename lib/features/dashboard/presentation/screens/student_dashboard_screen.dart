@@ -6,6 +6,8 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/apple_list_section.dart';
+import '../../../../core/widgets/app_error_widget.dart';
+import '../../../../shared/widgets/loading_state.dart';
 import '../../../../data/models/student.dart';
 import '../../../../data/models/timetable.dart';
 import '../../../assignments/providers/assignments_provider.dart';
@@ -37,8 +39,22 @@ class StudentDashboardScreen extends ConsumerWidget {
           ref.invalidate(currentUserProvider);
         },
         child: studentAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, st) => Center(child: Text('Error loading dashboard: $err')),
+          loading: () => const LoadingState(),
+          error: (err, st) => LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: AppErrorWidget.fromError(
+                  err,
+                  onRetry: () {
+                    ref.invalidate(currentStudentProvider);
+                    ref.invalidate(currentUserProvider);
+                  },
+                ),
+              ),
+            ),
+          ),
           data: (student) {
             if (student == null) {
               return const Center(child: Text('Student profile not found.'));
@@ -141,12 +157,35 @@ class _AppBar extends StatelessWidget {
 }
 
 String _weekdayLong(int weekday) {
-  const w = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const w = [
+    '',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday'
+  ];
   return w[weekday];
 }
 
 String _monthShort(int month) {
-  const m = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const m = [
+    '',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
+  ];
   return m[month];
 }
 
@@ -165,8 +204,10 @@ class _GreetingBanner extends StatelessWidget {
 
     // Academic neutral, parchment inspired coloring
     final bgColor = isDark ? const Color(0xFF1E1E1C) : const Color(0xFFFAF9F5);
-    final borderColor = isDark ? const Color(0xFF3A3A36) : const Color(0xFFE8E6DF);
-    final secondaryText = isDark ? const Color(0xFFB5B3AD) : const Color(0xFF706E67);
+    final borderColor =
+        isDark ? const Color(0xFF3A3A36) : const Color(0xFFE8E6DF);
+    final secondaryText =
+        isDark ? const Color(0xFFB5B3AD) : const Color(0xFF706E67);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
@@ -201,7 +242,8 @@ class _GreetingBanner extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.xs),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF2B2B28) : const Color(0xFFF3EFE6),
+                color:
+                    isDark ? const Color(0xFF2B2B28) : const Color(0xFFF3EFE6),
                 borderRadius: BorderRadius.circular(AppRadius.xs),
               ),
               child: Row(
@@ -243,7 +285,8 @@ class _TimetableTimelineSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final brightness = theme.brightness;
-    final timetableAsync = ref.watch(todayTimetableProvider(TodayTimetableFilter(
+    final timetableAsync =
+        ref.watch(todayTimetableProvider(TodayTimetableFilter(
       sectionId: sectionId,
       academicYearId: academicYearId,
     )));
@@ -252,7 +295,8 @@ class _TimetableTimelineSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
+          padding:
+              const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
           child: Text(
             'TODAY\'S TIMETABLE RHYTHM',
             style: theme.textTheme.labelSmall?.copyWith(
@@ -279,11 +323,13 @@ class _TimetableTimelineSection extends ConsumerWidget {
             if (entries.isEmpty) {
               return Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg, horizontal: AppSpacing.md),
+                padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.lg, horizontal: AppSpacing.md),
                 decoration: BoxDecoration(
                   color: AppColors.groupedCellFor(brightness),
                   borderRadius: AppRadius.card,
-                  border: Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
+                  border: Border.all(
+                      color: AppColors.separatorFor(brightness), width: 0.5),
                 ),
                 child: Column(
                   children: [
@@ -311,10 +357,12 @@ class _TimetableTimelineSection extends ConsumerWidget {
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 itemCount: entries.length,
-                separatorBuilder: (context, index) => const SizedBox(width: AppSpacing.sm),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(width: AppSpacing.sm),
                 itemBuilder: (context, index) {
                   final entry = entries[index];
-                  final isCurrent = _isCurrentSlot(entry.startTime, entry.endTime);
+                  final isCurrent =
+                      _isCurrentSlot(entry.startTime, entry.endTime);
 
                   return _TimelineCard(
                     entry: entry,
@@ -336,8 +384,10 @@ class _TimetableTimelineSection extends ConsumerWidget {
       final today = DateTime(now.year, now.month, now.day);
       final startParts = startStr.split(':');
       final endParts = endStr.split(':');
-      final start = today.add(Duration(hours: int.parse(startParts[0]), minutes: int.parse(startParts[1])));
-      final end = today.add(Duration(hours: int.parse(endParts[0]), minutes: int.parse(endParts[1])));
+      final start = today.add(Duration(
+          hours: int.parse(startParts[0]), minutes: int.parse(startParts[1])));
+      final end = today.add(Duration(
+          hours: int.parse(endParts[0]), minutes: int.parse(endParts[1])));
       return now.isAfter(start) && now.isBefore(end);
     } catch (_) {
       return false;
@@ -365,10 +415,10 @@ class _TimelineCard extends StatelessWidget {
     final cardBg = isCurrent
         ? (isDark ? const Color(0xFF152A1E) : const Color(0xFFECFDF5))
         : baseBg;
-    final activeBorderColor = isDark ? const Color(0xFF10B981) : const Color(0xFF059669);
-    final borderColor = isCurrent
-        ? activeBorderColor
-        : AppColors.separatorFor(brightness);
+    final activeBorderColor =
+        isDark ? const Color(0xFF10B981) : const Color(0xFF059669);
+    final borderColor =
+        isCurrent ? activeBorderColor : AppColors.separatorFor(brightness);
 
     return Container(
       width: 172,
@@ -396,7 +446,8 @@ class _TimelineCard extends StatelessWidget {
               ),
               if (isCurrent)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: activeBorderColor,
                     borderRadius: BorderRadius.circular(4),
@@ -460,7 +511,8 @@ class _AssignmentsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final brightness = theme.brightness;
-    final assignmentsAsync = ref.watch(studentAssignmentsProvider(StudentAssignmentsFilter(
+    final assignmentsAsync =
+        ref.watch(studentAssignmentsProvider(StudentAssignmentsFilter(
       sectionId: sectionId,
       pendingOnly: true,
     )));
@@ -469,7 +521,8 @@ class _AssignmentsSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
+          padding:
+              const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
           child: Text(
             'ACTIVE TASKS & ASSIGNMENTS',
             style: theme.textTheme.labelSmall?.copyWith(
@@ -497,7 +550,8 @@ class _AssignmentsSection extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: AppColors.groupedCellFor(brightness),
                   borderRadius: AppRadius.card,
-                  border: Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
+                  border: Border.all(
+                      color: AppColors.separatorFor(brightness), width: 0.5),
                 ),
                 child: const Text(
                   'No pending tasks. You\'re fully caught up!',
@@ -566,9 +620,8 @@ class _AssignmentSubGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final labelColor = isUrgent
-        ? AppColors.error
-        : AppColors.labelFor(brightness, tier: 2);
+    final labelColor =
+        isUrgent ? AppColors.error : AppColors.labelFor(brightness, tier: 2);
 
     return Container(
       decoration: BoxDecoration(
@@ -615,7 +668,8 @@ class _AssignmentSubGroup extends StatelessWidget {
                 dense: true,
                 title: Text(
                   a.title,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
                 ),
                 subtitle: Text(
                   a.subjectName ?? 'Subject',
@@ -646,7 +700,9 @@ class _AssignmentSubGroup extends StatelessWidget {
     if (due.year == now.year && due.month == now.month && due.day == now.day) {
       return 'Today';
     }
-    if (due.year == now.year && due.month == now.month && due.day == now.day + 1) {
+    if (due.year == now.year &&
+        due.month == now.month &&
+        due.day == now.day + 1) {
       return 'Tomorrow';
     }
     return '${due.day} ${_monthShort(due.month)}';

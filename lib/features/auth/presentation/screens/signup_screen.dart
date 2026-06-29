@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/app_environment.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/loading_button.dart';
 import '../../providers/auth_provider.dart';
 
@@ -317,8 +318,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           ),
           GestureDetector(
             onTap: () => setState(() => _errorMessage = null),
-            child:
-                const Icon(Icons.close_rounded, color: AppColors.error, size: 16),
+            child: const Icon(Icons.close_rounded,
+                color: AppColors.error, size: 16),
           ),
         ],
       ),
@@ -359,8 +360,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               textInputAction: TextInputAction.next,
               decoration: const InputDecoration(
                 labelText: 'Full Name',
-                prefixIcon:
-                    Icon(Icons.person_outline_rounded, size: 20),
+                prefixIcon: Icon(Icons.person_outline_rounded, size: 20),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
@@ -384,11 +384,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 prefixIcon: Icon(Icons.mail_outline_rounded, size: 20),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) {
+                if (value == null || value.trim().isEmpty) {
                   return 'Email is required';
                 }
-                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                    .hasMatch(value)) {
+                if (!Validators.isValidEmail(value)) {
                   return 'Enter a valid email address';
                 }
                 return null;
@@ -457,8 +456,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     size: 20,
                   ),
                   tooltip: 'Toggle visibility',
-                  onPressed: () => setState(() =>
-                      _obscureConfirmPassword = !_obscureConfirmPassword),
+                  onPressed: () => setState(
+                      () => _obscureConfirmPassword = !_obscureConfirmPassword),
                 ),
               ),
               validator: (value) {
@@ -491,8 +490,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       children: [
         Text(
           'Already have an account? ',
-          style: theme.textTheme.bodyMedium
-              ?.copyWith(color: Colors.grey.shade600),
+          style:
+              theme.textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
         ),
         GestureDetector(
           onTap: () => context.go(AppRoutes.login),

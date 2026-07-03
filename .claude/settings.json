@@ -10,8 +10,7 @@
       "MultiEdit(*)",
       "WebFetch(*)",
       "WebSearch(*)",
-      "TodoWrite(*)",
-      "mcp__*"
+      "TodoWrite(*)"
     ],
     "deny": [
       "Bash(sudo *)",

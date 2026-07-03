@@ -73,6 +73,52 @@ class PaymentGatewayService {
     return _completer!.future;
   }
 
+  /// Opens Razorpay checkout for a SaaS subscription plan upgrade.
+  ///
+  /// Distinct from [openCheckout] (student fees): the `notes` carry the
+  /// tenant_id + plan_id so the `razorpay-webhook` edge function can
+  /// reconcile the payment to `subscription_invoices` and bump the tenant's
+  /// plan. The Flutter client also upserts a `subscription_invoices` row
+  /// with status=pending immediately after a successful checkout so the
+  /// webhook (or a manual reconcile) can flip it to paid.
+  Future<PaymentResult> openSubscriptionCheckout({
+    required int amountInPaise,
+    required String tenantId,
+    required String planId,
+    required String planDisplayName,
+    String? email,
+    String? phone,
+  }) {
+    _completer = Completer<PaymentResult>();
+
+    final options = <String, dynamic>{
+      'key': AppEnvironment.razorpayKeyId,
+      'amount': amountInPaise,
+      'name': 'School Management SaaS',
+      'description': '$planDisplayName plan (yearly)',
+      'prefill': <String, String>{
+        if (email != null) 'email': email,
+        if (phone != null) 'contact': phone,
+      },
+      'notes': <String, String>{
+        'tenant_id': tenantId,
+        'plan_id': planId,
+        'kind': 'subscription',
+      },
+      'theme': <String, String>{
+        'color': '#1565C0',
+      },
+    };
+
+    developer.log(
+      'Opening subscription checkout for tenant=$tenantId plan=$planId ₹${amountInPaise / 100}',
+      name: 'PaymentGatewayService',
+    );
+
+    _razorpay.open(options);
+    return _completer!.future;
+  }
+
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     developer.log(
       'Payment success: ${response.paymentId}',

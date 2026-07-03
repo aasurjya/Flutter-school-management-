@@ -57,6 +57,7 @@ import '../../features/super_admin/presentation/screens/super_admin_dashboard_sc
 import '../../features/super_admin/presentation/screens/tenants_list_screen.dart';
 import '../../features/super_admin/presentation/screens/create_tenant_screen.dart';
 import '../../features/super_admin/presentation/screens/tenant_detail_screen.dart';
+import '../../features/super_admin/presentation/screens/subscription_checkout_screen.dart';
 import '../../features/qr_scan/presentation/screens/qr_scanner_screen.dart';
 import '../../features/qr_scan/presentation/screens/student_id_card_screen.dart';
 import '../../features/teacher/presentation/screens/class_teacher_dashboard_screen.dart';
@@ -447,6 +448,7 @@ class AppRoutes {
   static const String tenantsList = '/super-admin/tenants';
   static const String createTenant = '/super-admin/tenants/create';
   static const String tenantDetail = '/super-admin/tenants/:tenantId';
+  static const String subscriptionCheckout = '/super-admin/tenants/:tenantId/billing';
 
   // AI Insights routes
   static const String riskDashboard = '/ai/risk-dashboard';
@@ -821,6 +823,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.tenantDetail,
         builder: (context, state) => TenantDetailScreen(
+          tenantId: state.pathParameters['tenantId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.subscriptionCheckout,
+        builder: (context, state) => SubscriptionCheckoutScreen(
           tenantId: state.pathParameters['tenantId']!,
         ),
       ),

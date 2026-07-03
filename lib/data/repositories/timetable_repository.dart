@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/timetable.dart';
 import 'base_repository.dart';
 
@@ -107,6 +108,41 @@ class TimetableRepository extends BaseRepository {
     return (response as List)
         .map((json) => _timetableFromRow(json as Map<String, dynamic>))
         .toList();
+  }
+
+  /// Paginated variant of [getTimetables].
+  Future<PaginatedResult<Timetable>> getTimetablesPaginated({
+    required String sectionId,
+    String? academicYearId,
+    int? dayOfWeek,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'timetables',
+      select: '''
+        *,
+        timetable_slots(*),
+        subjects(id, name, code),
+        users!teacher_id(id, full_name),
+        sections(id, name, classes(id, name))
+      ''',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) {
+        var query = q.eq('section_id', sectionId);
+        if (academicYearId != null) {
+          query = query.eq('academic_year_id', academicYearId);
+        }
+        if (dayOfWeek != null) {
+          query = query.eq('day_of_week', dayOfWeek);
+        }
+        return query
+            .order('day_of_week')
+            .order('timetable_slots(sequence_order)');
+      },
+    );
+    return result.map((json) => _timetableFromRow(json));
   }
 
   Future<WeeklyTimetable> getWeeklyTimetable({

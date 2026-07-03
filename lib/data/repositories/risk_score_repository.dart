@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/student_risk_score.dart';
 import 'base_repository.dart';
 
@@ -112,6 +113,68 @@ class RiskScoreRepository extends BaseRepository {
       }).toList();
     } catch (e) {
       return [];
+    }
+  }
+
+  /// Paginated variant of [getAtRiskStudents].
+  Future<PaginatedResult<StudentRiskScore>> getAtRiskStudentsPaginated(
+    String academicYearId, {
+    String? riskLevel,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    if (academicYearId.isEmpty) {
+      return PaginatedResult(
+        items: const [],
+        totalCount: 0,
+        page: page,
+        pageSize: pageSize,
+      );
+    }
+    try {
+      final result = await queryPaginated(
+        table: 'student_risk_scores',
+        select: '''
+          *,
+          students!inner(
+            id, first_name, last_name, admission_number,
+            student_enrollments!inner(
+              section_id,
+              sections!inner(name, classes!inner(name))
+            )
+          )
+        ''',
+        page: page,
+        pageSize: pageSize,
+        builder: (q) {
+          var query = q.eq('academic_year_id', academicYearId);
+          if (riskLevel != null) {
+            query = query.eq('risk_level', riskLevel);
+          } else {
+            query = query.inFilter('risk_level', ['high', 'critical']);
+          }
+          return query.order('overall_risk_score', ascending: false);
+        },
+      );
+      return result.map((json) {
+        final student = json['students'];
+        final enrollment =
+            (student['student_enrollments'] as List?)?.firstOrNull;
+        final section = enrollment?['sections'];
+        json['student_name'] =
+            '${student['first_name']} ${student['last_name'] ?? ''}'.trim();
+        json['admission_number'] = student['admission_number'];
+        json['section_name'] = section?['name'];
+        json['class_name'] = section?['classes']?['name'];
+        return StudentRiskScore.fromJson(json);
+      });
+    } catch (e) {
+      return PaginatedResult(
+        items: const [],
+        totalCount: 0,
+        page: page,
+        pageSize: pageSize,
+      );
     }
   }
 

@@ -6,7 +6,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/config/app_environment.dart';
 import '../../../core/providers/supabase_provider.dart';
+import '../../../core/services/realtime_manager.dart';
 import '../../../data/models/user.dart';
+import '../../../data/repositories/base_repository.dart' show clearAllRepoCache;
 
 /// Auth state provider (Supabase session)
 final authStateProvider = StreamProvider<Session?>((ref) {
@@ -243,9 +245,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
   // All production methods guard via the non-null assertion (!) — this field
   // is only null when the forTest constructor is used.
   final AuthRepository? _repository;
+  final Ref? _ref;
 
   AuthNotifier(AuthRepository repository, Ref ref)
       : _repository = repository,
+        _ref = ref,
         super(const AsyncValue.loading()) {
     _init();
   }
@@ -254,7 +258,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
   /// predetermined [AsyncValue] without touching the network.
   @visibleForTesting
   AuthNotifier.forTest(super.initialState)
-      : _repository = null;
+      : _repository = null,
+        _ref = null;
 
   Future<void> _init() async {
     final user = _repository!.currentUser;
@@ -355,6 +360,18 @@ class AuthNotifier extends StateNotifier<AsyncValue<AppUser?>> {
   }
 
   Future<void> signOut() async {
+    // Phase 2.2 — clean up all realtime channels before signing out so
+    // no channel survives the session end and leaks connections.
+    if (_ref != null) {
+      try {
+        await _ref.read(realtimeManagerProvider).cleanupAll();
+      } catch (_) {
+        // Best-effort cleanup — don't block logout on channel removal.
+      }
+      // Phase 2.1 — clear the repo TTL cache so stale data from the
+      // previous tenant doesn't leak into the next session.
+      clearAllRepoCache();
+    }
     await _repository!.signOut();
     state = const AsyncValue.data(null);
     // currentUserProvider and currentTenantIdProvider derive from this state;

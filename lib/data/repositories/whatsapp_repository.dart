@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/whatsapp_config.dart';
 import 'base_repository.dart';
 
@@ -58,6 +59,23 @@ class WhatsAppRepository extends BaseRepository {
     return (response as List<dynamic>)
         .map((e) => NotificationLog.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  /// Paginated variant of [getLogs].
+  Future<PaginatedResult<NotificationLog>> getLogsPaginated({
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final tid = requireTenantId;
+    final result = await queryPaginated(
+      table: _logsTable,
+      select: '*',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) =>
+          q.eq('tenant_id', tid).order('sent_at', ascending: false),
+    );
+    return result.map((e) => NotificationLog.fromJson(e));
   }
 
   // ----------------------------------------------------------------

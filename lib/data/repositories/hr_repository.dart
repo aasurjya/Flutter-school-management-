@@ -4,6 +4,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../models/hr_payroll.dart';
+import '../models/paginated_result.dart';
 import 'base_repository.dart';
 
 class HRRepository extends BaseRepository {
@@ -137,6 +138,43 @@ class HRRepository extends BaseRepository {
         .toList();
   }
 
+  /// Paginated variant of [getStaffContracts].
+  Future<PaginatedResult<StaffContract>> getStaffContractsPaginated({
+    String? staffId,
+    String? status,
+    bool expiringOnly = false,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'staff_contracts',
+      select: '*, staff(employee_id, designation, first_name, last_name)',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) {
+        var query = q.eq('tenant_id', requireTenantId);
+        if (staffId != null) {
+          query = query.eq('staff_id', staffId);
+        }
+        if (status != null) {
+          query = query.eq('status', status);
+        }
+        if (expiringOnly) {
+          final thirtyDaysOut = DateTime.now()
+              .add(const Duration(days: 30))
+              .toIso8601String()
+              .split('T')[0];
+          query = query
+              .eq('status', 'active')
+              .not('end_date', 'is', null)
+              .lte('end_date', thirtyDaysOut);
+        }
+        return query.order('created_at', ascending: false);
+      },
+    );
+    return result.map((json) => StaffContract.fromJson(json));
+  }
+
   Future<StaffContract?> getActiveContract(String staffId) async {
     final response = await client
         .from('staff_contracts')
@@ -244,6 +282,30 @@ class HRRepository extends BaseRepository {
     return (response as List)
         .map((json) => PayrollRun.fromJson(json))
         .toList();
+  }
+
+  /// Paginated variant of [getPayrollRuns].
+  Future<PaginatedResult<PayrollRun>> getPayrollRunsPaginated({
+    int? year,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'payroll_runs',
+      select: '*, approver:users!approved_by(full_name), payroll_items(*,staff(employee_id, designation, first_name, last_name))',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) {
+        var query = q.eq('tenant_id', requireTenantId);
+        if (year != null) {
+          query = query.eq('year', year);
+        }
+        return query
+            .order('year', ascending: false)
+            .order('month', ascending: false);
+      },
+    );
+    return result.map((json) => PayrollRun.fromJson(json));
   }
 
   Future<PayrollRun?> getPayrollRunById(String id) async {
@@ -624,6 +686,31 @@ class HRRepository extends BaseRepository {
         .toList();
   }
 
+  /// Paginated variant of [getStaffAttendance].
+  Future<PaginatedResult<StaffAttendanceDaily>> getStaffAttendancePaginated({
+    required DateTime date,
+    String? staffId,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'staff_attendance_daily',
+      select: '*, staff(employee_id, designation, first_name, last_name)',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) {
+        var query = q
+            .eq('tenant_id', requireTenantId)
+            .eq('date', date.toIso8601String().split('T')[0]);
+        if (staffId != null) {
+          query = query.eq('staff_id', staffId);
+        }
+        return query.order('created_at');
+      },
+    );
+    return result.map((json) => StaffAttendanceDaily.fromJson(json));
+  }
+
   Future<List<StaffAttendanceDaily>> getStaffAttendanceRange({
     required String staffId,
     required DateTime startDate,
@@ -719,6 +806,32 @@ class HRRepository extends BaseRepository {
     return (response as List)
         .map((json) => TaxDeclaration.fromJson(json))
         .toList();
+  }
+
+  /// Paginated variant of [getTaxDeclarations].
+  Future<PaginatedResult<TaxDeclaration>> getTaxDeclarationsPaginated({
+    String? staffId,
+    String? financialYear,
+    String? status,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'tax_declarations',
+      select: '*, staff(employee_id, designation, first_name, last_name), verifier:users!verified_by(full_name)',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) {
+        var query = q.eq('tenant_id', requireTenantId);
+        if (staffId != null) query = query.eq('staff_id', staffId);
+        if (financialYear != null) {
+          query = query.eq('financial_year', financialYear);
+        }
+        if (status != null) query = query.eq('status', status);
+        return query.order('created_at', ascending: false);
+      },
+    );
+    return result.map((json) => TaxDeclaration.fromJson(json));
   }
 
   Future<TaxDeclaration> createTaxDeclaration(

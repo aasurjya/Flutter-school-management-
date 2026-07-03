@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/school_event.dart';
 import 'base_repository.dart';
 
@@ -33,6 +34,37 @@ class CalendarRepository extends BaseRepository {
     return (response as List)
         .map((json) => SchoolEvent.fromJson(json))
         .toList();
+  }
+
+  /// Paginated variant of [getEvents].
+  Future<PaginatedResult<SchoolEvent>> getEventsPaginated({
+    required DateTime startDate,
+    required DateTime endDate,
+    EventType? eventType,
+    EventStatus? status,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'school_events',
+      select: '*, users!created_by(full_name)',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) {
+        var query = q
+            .eq('tenant_id', requireTenantId)
+            .gte('start_date', startDate.toIso8601String().split('T')[0])
+            .lte('start_date', endDate.toIso8601String().split('T')[0]);
+        if (eventType != null) {
+          query = query.eq('event_type', eventType.value);
+        }
+        if (status != null) {
+          query = query.eq('status', status.value);
+        }
+        return query.order('start_date', ascending: true);
+      },
+    );
+    return result.map((json) => SchoolEvent.fromJson(json));
   }
 
   /// Fetch upcoming events (from today onwards)

@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/trend_prediction.dart';
 import '../../features/ai_insights/utils/linear_regression.dart';
 import 'base_repository.dart';
@@ -23,6 +24,35 @@ class TrendPredictionRepository extends BaseRepository {
       }).toList();
     } catch (e) {
       return [];
+    }
+  }
+
+  /// Paginated variant of [getStudentExamHistory].
+  Future<PaginatedResult<DataPoint>> getStudentExamHistoryPaginated(
+    String studentId, {
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    try {
+      final result = await queryPaginated(
+        table: 'v_student_overall_ranks',
+        select: 'exam_name, overall_percentage',
+        page: page,
+        pageSize: pageSize,
+        builder: (q) => q.eq('student_id', studentId).order('exam_id'),
+      );
+      return result.map((record) => DataPoint(
+            x: 0,
+            y: (record['overall_percentage'] as num?)?.toDouble() ?? 0,
+            label: record['exam_name'] as String?,
+          ));
+    } catch (e) {
+      return PaginatedResult(
+        items: const [],
+        totalCount: 0,
+        page: page,
+        pageSize: pageSize,
+      );
     }
   }
 

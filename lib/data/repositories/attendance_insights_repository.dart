@@ -1,4 +1,5 @@
 import '../models/attendance_insights.dart';
+import '../models/paginated_result.dart';
 import 'base_repository.dart';
 
 class AttendanceInsightsRepository extends BaseRepository {
@@ -33,6 +34,32 @@ class AttendanceInsightsRepository extends BaseRepository {
           .toList();
     } catch (e) {
       return [];
+    }
+  }
+
+  /// Paginated variant of [getChronicAbsentees].
+  Future<PaginatedResult<ChronicAbsentee>> getChronicAbsenteesPaginated(
+    String sectionId, {
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    try {
+      final result = await queryPaginated(
+        table: 'v_chronic_absentees',
+        select: '*',
+        page: page,
+        pageSize: pageSize,
+        builder: (q) =>
+            q.eq('section_id', sectionId).order('absence_rate', ascending: false),
+      );
+      return result.map((json) => ChronicAbsentee.fromJson(json));
+    } catch (e) {
+      return PaginatedResult(
+        items: const [],
+        totalCount: 0,
+        page: page,
+        pageSize: pageSize,
+      );
     }
   }
 

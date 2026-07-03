@@ -1,5 +1,6 @@
 import '../models/ai_tutor_message.dart';
 import '../models/ai_tutor_session.dart';
+import '../models/paginated_result.dart';
 import 'base_repository.dart';
 
 /// Data access for the AI tutoring module (`ai_tutor_sessions`,
@@ -21,6 +22,33 @@ class AiTutorRepository extends BaseRepository {
     return (rows as List)
         .map((j) => AiTutorSession.fromJson(j as Map<String, dynamic>))
         .toList();
+  }
+
+  /// Paginated variant of [getSessionsForStudent].
+  Future<PaginatedResult<AiTutorSession>> getSessionsForStudentPaginated(
+    String studentId, {
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    if (studentId.trim().isEmpty) {
+      return PaginatedResult(
+        items: const [],
+        totalCount: 0,
+        page: page,
+        pageSize: pageSize,
+      );
+    }
+    final result = await queryPaginated(
+      table: 'ai_tutor_sessions',
+      select: '*',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) => q
+          .eq('tenant_id', requireTenantId)
+          .eq('student_id', studentId)
+          .order('started_at', ascending: false),
+    );
+    return result.map((j) => AiTutorSession.fromJson(j));
   }
 
   /// Create a new active session and return it.

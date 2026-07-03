@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../models/paginated_result.dart';
 import '../models/student.dart';
 import 'base_repository.dart';
 
@@ -67,6 +68,70 @@ class StudentRepository extends BaseRepository {
         .range(offset, offset + limit - 1);
 
     return (response as List).map((json) => Student.fromJson(json)).toList();
+  }
+
+  /// Paginated variant of [getStudents] — returns a [PaginatedResult] with
+  /// totalCount + hasMore so list screens can drive infinite-scroll without
+  /// a separate count call.
+  ///
+  /// This is the recommended pattern for all list screens that can grow
+  /// beyond ~100 rows per tenant. Migrate other repos to follow this shape.
+  Future<PaginatedResult<Student>> getStudentsPaginated({
+    String? sectionId,
+    String? classId,
+    String? searchQuery,
+    bool activeOnly = true,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final needsEnrollmentFilter = sectionId != null || classId != null;
+
+    final enrollJoin = needsEnrollmentFilter
+        ? '''student_enrollments!inner(
+            id, tenant_id, student_id, section_id, academic_year_id,
+            roll_number, status, enrollment_date, created_at,
+            sections!inner(id, name, classes!inner(id, name)),
+            academic_years!inner(id, name, is_current)
+          )'''
+        : '''student_enrollments(
+            id, tenant_id, student_id, section_id, academic_year_id,
+            roll_number, status, enrollment_date, created_at,
+            sections(id, name, classes(id, name)),
+            academic_years(id, name, is_current)
+          )''';
+
+    final result = await queryPaginated(
+      table: 'students',
+      select: '*, $enrollJoin',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) {
+        var query = q.eq('tenant_id', requireTenantId);
+        if (activeOnly) {
+          query = query.eq('is_active', true);
+        }
+        if (needsEnrollmentFilter) {
+          query = query
+              .eq('student_enrollments.academic_years.is_current', true);
+        }
+        if (sectionId != null) {
+          query = query.eq('student_enrollments.section_id', sectionId);
+        }
+        if (classId != null) {
+          query = query.eq('student_enrollments.sections.class_id', classId);
+        }
+        if (searchQuery != null && searchQuery.isNotEmpty) {
+          query = query.or(
+            'first_name.ilike.%$searchQuery%,'
+            'last_name.ilike.%$searchQuery%,'
+            'admission_number.ilike.%$searchQuery%',
+          );
+        }
+        return query.order('first_name');
+      },
+    );
+
+    return result.map((json) => Student.fromJson(json));
   }
 
   Future<int> getStudentCount({

@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/student_checkin.dart';
 import 'base_repository.dart';
 
@@ -61,6 +62,36 @@ class CheckinRepository extends BaseRepository {
         .toList();
   }
 
+  /// Paginated variant of [getStudentCheckins].
+  Future<PaginatedResult<StudentCheckin>> getStudentCheckinsPaginated({
+    required String studentId,
+    DateTime? date,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'student_checkins',
+      select: '''
+        *,
+        students(id, first_name, last_name, photo_url),
+        users(full_name)
+      ''',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) {
+        var query = q.eq('student_id', studentId);
+        if (date != null) {
+          final dateStr = date.toIso8601String().split('T')[0];
+          query = query
+              .gte('checked_at', '${dateStr}T00:00:00')
+              .lte('checked_at', '${dateStr}T23:59:59');
+        }
+        return query.order('checked_at', ascending: false);
+      },
+    );
+    return result.map((json) => StudentCheckin.fromJson(json));
+  }
+
   /// Get all check-ins for a section on a given date.
   Future<List<StudentCheckin>> getSectionCheckins({
     required String sectionId,
@@ -86,5 +117,35 @@ class CheckinRepository extends BaseRepository {
     return (response as List)
         .map((json) => StudentCheckin.fromJson(json))
         .toList();
+  }
+
+  /// Paginated variant of [getSectionCheckins].
+  Future<PaginatedResult<StudentCheckin>> getSectionCheckinsPaginated({
+    required String sectionId,
+    DateTime? date,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'student_checkins',
+      select: '''
+        *,
+        students(id, first_name, last_name, photo_url),
+        users(full_name)
+      ''',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) {
+        var query = q.eq('section_id', sectionId);
+        if (date != null) {
+          final dateStr = date.toIso8601String().split('T')[0];
+          query = query
+              .gte('checked_at', '${dateStr}T00:00:00')
+              .lte('checked_at', '${dateStr}T23:59:59');
+        }
+        return query.order('checked_at', ascending: false);
+      },
+    );
+    return result.map((json) => StudentCheckin.fromJson(json));
   }
 }

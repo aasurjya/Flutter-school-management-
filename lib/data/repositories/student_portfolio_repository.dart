@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/student_portfolio.dart';
 import 'base_repository.dart';
 
@@ -182,6 +183,55 @@ class StudentPortfolioRepository extends BaseRepository {
       }).toList();
     } catch (_) {
       return [];
+    }
+  }
+
+  /// Paginated variant of [getPortfolioWork].
+  Future<PaginatedResult<PortfolioWork>> getPortfolioWorkPaginated(
+    String studentId, {
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    try {
+      final result = await queryPaginated(
+        table: 'submissions',
+        select: '''
+          id, file_url, created_at, grade,
+          assignments!inner(title, description, subject_id,
+            subjects(name)
+          )
+        ''',
+        page: page,
+        pageSize: pageSize,
+        builder: (q) => q
+            .eq('student_id', studentId)
+            .not('file_url', 'is', null)
+            .order('created_at', ascending: false),
+      );
+      return result.map((json) {
+        final raw = json;
+        final assignment =
+            raw['assignments'] as Map<String, dynamic>? ?? {};
+        return PortfolioWork(
+          id: raw['id'] as String,
+          title: assignment['title'] as String? ?? 'Work',
+          description: assignment['description'] as String?,
+          workType: 'assignment',
+          fileUrl: raw['file_url'] as String?,
+          submittedAt: DateTime.parse(raw['created_at'] as String),
+          subjectName:
+              (assignment['subjects'] as Map<String, dynamic>?)?['name']
+                  as String?,
+          grade: raw['grade'] as String?,
+        );
+      });
+    } catch (_) {
+      return PaginatedResult(
+        items: const [],
+        totalCount: 0,
+        page: page,
+        pageSize: pageSize,
+      );
     }
   }
 

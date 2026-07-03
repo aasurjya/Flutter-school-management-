@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/student.dart';
 import 'base_repository.dart';
 
@@ -29,6 +30,41 @@ class ParentRepository extends BaseRepository {
     return (response as List)
         .map((json) => Parent.fromJson(json as Map<String, dynamic>))
         .toList();
+  }
+
+  /// Paginated variant of [searchParents].
+  Future<PaginatedResult<Parent>> searchParentsPaginated(
+    String query, {
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
+      return PaginatedResult(
+        items: const [],
+        totalCount: 0,
+        page: page,
+        pageSize: pageSize,
+      );
+    }
+
+    final pattern = '%$trimmed%';
+    final result = await queryPaginated(
+      table: 'parents',
+      select: '*',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) => q
+          .eq('tenant_id', requireTenantId)
+          .or(
+            'first_name.ilike.$pattern,'
+            'last_name.ilike.$pattern,'
+            'phone.ilike.$pattern,'
+            'email.ilike.$pattern',
+          )
+          .order('first_name'),
+    );
+    return result.map((json) => Parent.fromJson(json));
   }
 
   /// Returns all parents linked to [studentId], joining through student_parents.

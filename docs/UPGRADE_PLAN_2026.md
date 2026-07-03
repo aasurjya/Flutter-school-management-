@@ -147,8 +147,7 @@ Break-even at ~1 paying tenant. AI costs capped per-tenant by existing `tenant_a
 
 ---
 
-**STATUS: WAITING FOR USER CONFIRMATION**
-Reply `proceed` to start Phase 1, or `modify: ...` to adjust.
+**STATUS: ALL PHASES SHIPPED (2026-07-03)** — see the implementation log below. Remaining items are deploy-time steps (migrations, function deploys, secrets) tracked in PR #24's test plan.
 
 ---
 

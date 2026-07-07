@@ -23,6 +23,11 @@
 -- unchanged. Re-runnable (IF NOT EXISTS + ON CONFLICT).
 -- ============================================================================
 
+-- All four defaults are non-volatile constants (false/1/4/'[]'::jsonb) —
+-- Postgres 11+ (Supabase runs 15+) adds these without a table rewrite, and
+-- feature_routes is a tiny admin-config table (one row per feature type)
+-- regardless. See tool/squawk_lint.sh's adding-field-with-default exclude
+-- for why CI doesn't flag this.
 ALTER TABLE public.feature_routes
   ADD COLUMN IF NOT EXISTS agentic_mode        BOOLEAN NOT NULL DEFAULT false,
   ADD COLUMN IF NOT EXISTS tools               JSONB   NOT NULL DEFAULT '[]'::jsonb,

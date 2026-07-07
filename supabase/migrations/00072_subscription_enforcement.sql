@@ -89,10 +89,10 @@ CREATE TABLE IF NOT EXISTS public.subscription_invoices (
   updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_sub_invoices_razorpay_payment
+CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS uq_sub_invoices_razorpay_payment
   ON public.subscription_invoices (razorpay_payment_id)
   WHERE razorpay_payment_id IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_sub_invoices_tenant
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_sub_invoices_tenant
   ON public.subscription_invoices (tenant_id, created_at DESC);
 
 COMMENT ON TABLE public.subscription_invoices IS
@@ -122,6 +122,11 @@ GRANT INSERT, UPDATE, DELETE ON public.subscription_invoices TO authenticated;
 -- ----------------------------------------------------------------------------
 -- 3. tenants.enforcement_enabled — per-tenant hard-gate flag (default OFF)
 -- ----------------------------------------------------------------------------
+-- Constant `false` default — Postgres 11+ (Supabase runs 15+) adds this
+-- without a table rewrite, and tenants is a one-row-per-school table
+-- (hundreds, not millions, at this SaaS's scale) regardless. See
+-- tool/squawk_lint.sh's adding-field-with-default exclude for why CI
+-- doesn't flag this.
 ALTER TABLE public.tenants
   ADD COLUMN IF NOT EXISTS enforcement_enabled BOOL NOT NULL DEFAULT false;
 

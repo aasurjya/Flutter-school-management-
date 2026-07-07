@@ -80,10 +80,24 @@ confusion when nesting CREATE FUNCTION inside DO.
 
 ## When Squawk blocks you and you're sure it's safe
 
-```sql
--- squawk-ignore-next-statement: ban-drop-column
-ALTER TABLE foo DROP COLUMN bar;
-```
+**Correction (2026-07-08):** this doc previously suggested an inline
+`-- squawk-ignore-next-statement: <rule>` comment. That syntax doesn't
+exist. Squawk's real inline syntax is `-- squawk-ignore <rule>` (no colon,
+no "-next-statement"), documented at squawkhq.com/docs/cli — but even that
+did not suppress a warning in local testing against squawk-cli 1.5.4
+(tested against `adding-field-with-default` on migrations 00068/00072).
+Don't spend time re-trying inline-comment variants; use one of the two
+options below instead.
 
-Put a comment **above** the squawk-ignore explaining why. Reviewer must
-approve. Ignored rules are surfaced in CI logs for audit.
+**For a rule that's a genuine false positive for this codebase** (not just
+this one migration): add it to the `EXCLUDE` list in `tool/squawk_lint.sh`,
+with a comment explaining why, following the existing `prefer-big-int` /
+`adding-field-with-default` entries as examples. This is a project-wide
+policy change — get it reviewed, don't add it solo in a PR that also needs
+the exclude to pass its own CI check.
+
+**For a rule that's flagging a real risk you're accepting knowingly, just
+this once:** there's no working per-statement ignore. Get explicit sign-off
+in the PR description on why this specific instance is safe, and merge with
+the risk documented — don't add it to squawk_lint.sh's EXCLUDE (that would
+silence the rule for every future migration, not just this one).

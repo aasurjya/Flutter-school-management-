@@ -113,6 +113,10 @@ class AiGatewayClient {
   ///   • [AiGatewayExhaustedException] when status='blocked_all_exhausted'.
   ///   • [AiGatewayTransportException] for any other non-200 outcome after
   ///     retries are exhausted.
+  /// [agentic] opts the call into the gateway's bounded read-only tool loop.
+  /// It only takes effect when the matched feature_route has agentic_mode=true
+  /// AND supports_tools=true; otherwise the gateway falls back to single-shot.
+  /// The result shape is identical (text/model/status/tokens).
   Future<AiGatewayResult> complete({
     required String featureType,
     required String systemPrompt,
@@ -121,6 +125,7 @@ class AiGatewayClient {
     int? maxTokens,
     double? temperature,
     String? idempotencyKey,
+    bool agentic = false,
   }) async {
     final key = idempotencyKey ?? IdempotencyKey.generate();
     final body = <String, dynamic>{
@@ -131,6 +136,7 @@ class AiGatewayClient {
       if (responseFormat != null) 'response_format': responseFormat,
       if (maxTokens != null) 'max_tokens': maxTokens,
       if (temperature != null) 'temperature': temperature,
+      if (agentic) 'mode': 'agentic',
     };
 
     return retryNetwork(

@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/student_risk_score.dart';
 import 'base_repository.dart';
 
@@ -8,6 +9,9 @@ class RiskScoreRepository extends BaseRepository {
     String sectionId,
     String academicYearId,
   ) async {
+    // Avoid sending an empty string as a UUID filter (PostgREST 400) when the
+    // screen loads before a section/year is selected.
+    if (sectionId.isEmpty || academicYearId.isEmpty) return [];
     try {
       final response = await client
           .from('student_risk_scores')
@@ -47,6 +51,7 @@ class RiskScoreRepository extends BaseRepository {
     String studentId,
     String academicYearId,
   ) async {
+    if (studentId.isEmpty || academicYearId.isEmpty) return null;
     try {
       final response = await client
           .from('student_risk_scores')
@@ -67,6 +72,8 @@ class RiskScoreRepository extends BaseRepository {
     String? riskLevel,
     int limit = 20,
   }) async {
+    // Empty year (screen opened before a year is selected) -> '' UUID -> 400.
+    if (academicYearId.isEmpty) return [];
     try {
       var query = client
           .from('student_risk_scores')
@@ -109,6 +116,68 @@ class RiskScoreRepository extends BaseRepository {
     }
   }
 
+  /// Paginated variant of [getAtRiskStudents].
+  Future<PaginatedResult<StudentRiskScore>> getAtRiskStudentsPaginated(
+    String academicYearId, {
+    String? riskLevel,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    if (academicYearId.isEmpty) {
+      return PaginatedResult(
+        items: const [],
+        totalCount: 0,
+        page: page,
+        pageSize: pageSize,
+      );
+    }
+    try {
+      final result = await queryPaginated(
+        table: 'student_risk_scores',
+        select: '''
+          *,
+          students!inner(
+            id, first_name, last_name, admission_number,
+            student_enrollments!inner(
+              section_id,
+              sections!inner(name, classes!inner(name))
+            )
+          )
+        ''',
+        page: page,
+        pageSize: pageSize,
+        builder: (q) {
+          var query = q.eq('academic_year_id', academicYearId);
+          if (riskLevel != null) {
+            query = query.eq('risk_level', riskLevel);
+          } else {
+            query = query.inFilter('risk_level', ['high', 'critical']);
+          }
+          return query.order('overall_risk_score', ascending: false);
+        },
+      );
+      return result.map((json) {
+        final student = json['students'];
+        final enrollment =
+            (student['student_enrollments'] as List?)?.firstOrNull;
+        final section = enrollment?['sections'];
+        json['student_name'] =
+            '${student['first_name']} ${student['last_name'] ?? ''}'.trim();
+        json['admission_number'] = student['admission_number'];
+        json['section_name'] = section?['name'];
+        json['class_name'] = section?['classes']?['name'];
+        return StudentRiskScore.fromJson(json);
+      });
+    } catch (e) {
+      return PaginatedResult(
+        items: const [],
+        totalCount: 0,
+        page: page,
+        pageSize: pageSize,
+      );
+    }
+  }
+
   Future<void> computeRiskScore(
     String studentId,
     String academicYearId,
@@ -123,6 +192,11 @@ class RiskScoreRepository extends BaseRepository {
     String academicYearId, {
     String? sectionId,
   }) async {
+    // Empty year (screen opened before a year is selected) would send '' as a
+    // UUID filter -> PostgREST 400. Return the zeroed distribution instead.
+    if (academicYearId.isEmpty) {
+      return {'low': 0, 'medium': 0, 'high': 0, 'critical': 0};
+    }
     try {
       final distribution = <String, int>{
         'low': 0,

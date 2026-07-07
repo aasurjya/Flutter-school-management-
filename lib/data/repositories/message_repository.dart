@@ -54,6 +54,20 @@ class MessageRepository extends BaseRepository {
     final user = j['users'] as Map<String, dynamic>?;
     final section = j['sections'] as Map<String, dynamic>?;
     final parts = j['thread_participants'] as List?;
+    final participants = parts
+        ?.whereType<Map>()
+        .map((e) => _participantFromRow(e.cast<String, dynamic>()))
+        .toList();
+    final lastMessageAt = _date(j['last_message_at']);
+    // Unread = there's a message newer than the current user's last read.
+    // getThreads() filters thread_participants to the current user, so the
+    // participant row carried here holds *their* last_read_at. (For callers
+    // that fetch all participants this is best-effort and unused for badges.)
+    final myReadAt = (participants != null && participants.isNotEmpty)
+        ? participants.first.lastReadAt
+        : null;
+    final isUnread = lastMessageAt != null &&
+        (myReadAt == null || lastMessageAt.isAfter(myReadAt));
     return Thread(
       id: (j['id'] as String?) ?? '',
       tenantId: (j['tenant_id'] as String?) ?? '',
@@ -62,14 +76,12 @@ class MessageRepository extends BaseRepository {
       sectionId: j['section_id'] as String?,
       createdBy: (j['created_by'] as String?) ?? '',
       isActive: j['is_active'] as bool? ?? true,
-      lastMessageAt: _date(j['last_message_at']),
+      lastMessageAt: lastMessageAt,
       createdAt: _date(j['created_at']),
       createdByName: user?['full_name'] as String?,
       sectionName: section?['name'] as String?,
-      participants: parts
-          ?.whereType<Map>()
-          .map((e) => _participantFromRow(e.cast<String, dynamic>()))
-          .toList(),
+      participants: participants,
+      unreadCount: isUnread ? 1 : 0,
     );
   }
 
@@ -97,9 +109,7 @@ class MessageRepository extends BaseRepository {
   }
 
   Future<Thread?> getThreadById(String threadId) async {
-    final response = await client
-        .from('threads')
-        .select('''
+    final response = await client.from('threads').select('''
           *,
           users!created_by(id, full_name),
           sections(id, name),
@@ -107,9 +117,7 @@ class MessageRepository extends BaseRepository {
             *,
             users(id, full_name, avatar_url)
           )
-        ''')
-        .eq('id', threadId)
-        .single();
+        ''').eq('id', threadId).single();
 
     return _threadFromRow(response);
   }
@@ -120,20 +128,26 @@ class MessageRepository extends BaseRepository {
     String? sectionId,
     required List<String> participantIds,
   }) async {
-    final threadResponse = await client.from('threads').insert({
-      'tenant_id': tenantId,
-      'thread_type': threadType,
-      'title': title,
-      'section_id': sectionId,
-      'created_by': currentUserId,
-    }).select().single();
+    final threadResponse = await client
+        .from('threads')
+        .insert({
+          'tenant_id': tenantId,
+          'thread_type': threadType,
+          'title': title,
+          'section_id': sectionId,
+          'created_by': currentUserId,
+        })
+        .select()
+        .single();
 
     final threadId = threadResponse['id'] as String;
 
-    final participants = [requireUserId, ...participantIds].map((userId) => {
-      'thread_id': threadId,
-      'user_id': userId,
-    }).toList();
+    final participants = [requireUserId, ...participantIds]
+        .map((userId) => {
+              'thread_id': threadId,
+              'user_id': userId,
+            })
+        .toList();
 
     await client.from('thread_participants').insert(participants);
 
@@ -170,13 +184,10 @@ class MessageRepository extends BaseRepository {
     int limit = 50,
     String? beforeId,
   }) async {
-    var query = client
-        .from('messages')
-        .select('''
+    var query = client.from('messages').select('''
           *,
           users!sender_id(id, full_name, avatar_url)
-        ''')
-        .eq('thread_id', threadId);
+        ''').eq('thread_id', threadId);
 
     if (beforeId != null) {
       final beforeMessage = await client
@@ -187,9 +198,8 @@ class MessageRepository extends BaseRepository {
       query = query.lt('created_at', beforeMessage['created_at']);
     }
 
-    final response = await query
-        .order('created_at', ascending: false)
-        .limit(limit);
+    final response =
+        await query.order('created_at', ascending: false).limit(limit);
 
     return (response as List)
         .map((json) => _messageFromRow(json as Map<String, dynamic>))
@@ -212,15 +222,19 @@ class MessageRepository extends BaseRepository {
   }) async {
     final key = clientRequestId ?? IdempotencyKey.generate();
     final response = await retryNetwork(
-      () => client.from('messages').insert({
-        'tenant_id': tenantId,
-        'thread_id': threadId,
-        'sender_id': currentUserId,
-        'content': content,
-        'attachments': attachments ?? [],
-        'reply_to_id': replyToId,
-        'client_request_id': key,
-      }).select().single(),
+      () => client
+          .from('messages')
+          .insert({
+            'tenant_id': tenantId,
+            'thread_id': threadId,
+            'sender_id': currentUserId,
+            'content': content,
+            'attachments': attachments ?? [],
+            'reply_to_id': replyToId,
+            'client_request_id': key,
+          })
+          .select()
+          .single(),
       label: 'messages.send',
     );
 
@@ -266,15 +280,23 @@ class MessageRepository extends BaseRepository {
   }
 
   Future<void> markThreadAsRead(String threadId) async {
-    await client.from('thread_participants').update({
-      'last_read_at': DateTime.now().toIso8601String(),
-    }).eq('thread_id', threadId).eq('user_id', requireUserId);
+    await client
+        .from('thread_participants')
+        .update({
+          'last_read_at': DateTime.now().toIso8601String(),
+        })
+        .eq('thread_id', threadId)
+        .eq('user_id', requireUserId);
   }
 
   Future<void> muteThread(String threadId, bool muted) async {
-    await client.from('thread_participants').update({
-      'is_muted': muted,
-    }).eq('thread_id', threadId).eq('user_id', requireUserId);
+    await client
+        .from('thread_participants')
+        .update({
+          'is_muted': muted,
+        })
+        .eq('thread_id', threadId)
+        .eq('user_id', requireUserId);
   }
 
   Future<int> getUnreadCount() async {
@@ -332,13 +354,10 @@ class MessageRepository extends BaseRepository {
     int limit = 50,
     int offset = 0,
   }) async {
-    var query = client
-        .from('announcements')
-        .select('''
+    var query = client.from('announcements').select('''
           *,
           users!created_by(id, full_name)
-        ''')
-        .eq('tenant_id', requireTenantId);
+        ''').eq('tenant_id', requireTenantId);
 
     if (activeOnly) {
       query = query
@@ -347,21 +366,19 @@ class MessageRepository extends BaseRepository {
           .or('expires_at.is.null,expires_at.gt.${DateTime.now().toIso8601String()}');
     }
 
-    final response = await query.order('publish_at', ascending: false).range(offset, offset + limit - 1);
+    final response = await query
+        .order('publish_at', ascending: false)
+        .range(offset, offset + limit - 1);
     return (response as List)
         .map((json) => _announcementFromRow(json as Map<String, dynamic>))
         .toList();
   }
 
   Future<Announcement?> getAnnouncementById(String announcementId) async {
-    final response = await client
-        .from('announcements')
-        .select('''
+    final response = await client.from('announcements').select('''
           *,
           users!created_by(id, full_name)
-        ''')
-        .eq('id', announcementId)
-        .single();
+        ''').eq('id', announcementId).single();
 
     return _announcementFromRow(response);
   }
@@ -370,11 +387,8 @@ class MessageRepository extends BaseRepository {
     data['tenant_id'] = tenantId;
     data['created_by'] = currentUserId;
 
-    final response = await client
-        .from('announcements')
-        .insert(data)
-        .select()
-        .single();
+    final response =
+        await client.from('announcements').insert(data).select().single();
 
     return _announcementFromRow(response);
   }

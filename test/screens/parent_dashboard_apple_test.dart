@@ -82,7 +82,13 @@ void main() {
         },
       ]);
       expect(find.text('PARENTAL ACTION REQUIRED', skipOffstage: false), findsOneWidget);
-      expect(find.text('Term 2 Tuition Fees', skipOffstage: false), findsOneWidget);
+      // With no outstanding fees or unread messages, the ledger shows the
+      // honest all-caught-up state instead of fabricated line items.
+      expect(
+        find.text('All caught up — nothing needs your attention.',
+            skipOffstage: false),
+        findsOneWidget,
+      );
       expect(find.text('ACADEMIC TRACKING', skipOffstage: false), findsOneWidget);
       expect(find.text('Homework & Assignments', skipOffstage: false), findsOneWidget);
       expect(find.text('Classes & Timetables', skipOffstage: false), findsOneWidget);

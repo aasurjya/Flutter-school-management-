@@ -21,6 +21,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { executeTool, toolDefsFor } from './tools.ts';
 
 // ---- Config -----------------------------------------------------------------
 
@@ -68,6 +69,10 @@ interface GatewayRequest {
   max_tokens?: number;
   temperature?: number;
   idempotency_key?: string;
+  // 'agentic' opts into the bounded read-only tool loop. Only honored when the
+  // matched feature_route has agentic_mode=true AND supports_tools=true;
+  // otherwise the request falls through to the normal single-shot path.
+  mode?: 'single' | 'agentic';
 }
 
 interface GatewayResponse {
@@ -209,7 +214,10 @@ serve(async (req: Request) => {
   // ---- 5. Chain lookup -------------------------------------------------------
   const { data: route, error: routeErr } = await db
     .from('feature_routes')
-    .select('model_chain, response_format, max_tokens, temperature, supports_tools')
+    .select(
+      'model_chain, response_format, max_tokens, temperature, supports_tools, ' +
+        'agentic_mode, tools, max_tool_iterations',
+    )
     .eq('feature_type', body.feature_type)
     .maybeSingle();
   if (routeErr || !route) {
@@ -221,7 +229,11 @@ serve(async (req: Request) => {
       400,
     );
   }
-  const chain = (route.model_chain as ChainEntry[]) ?? [];
+  // `route` is typed as a union that includes Supabase's GenericStringError;
+  // we've guarded `!route` above, so cast through unknown to a plain record for
+  // property access (avoids GenericStringError "property does not exist" noise).
+  const r = route as unknown as Record<string, unknown>;
+  const chain = (r.model_chain as ChainEntry[]) ?? [];
   if (chain.length === 0) {
     return jsonResponse(
       { status: 'error_invalid_request', message: 'feature has no models configured' },
@@ -230,9 +242,38 @@ serve(async (req: Request) => {
   }
 
   // ---- 6. Walk chain ---------------------------------------------------------
-  const responseFormat = body.response_format ?? (route.response_format as string);
-  const maxTokens = body.max_tokens ?? (route.max_tokens as number);
-  const temperature = body.temperature ?? (route.temperature as number);
+  const responseFormat = body.response_format ?? (r.response_format as string);
+  const maxTokens = body.max_tokens ?? (r.max_tokens as number);
+  const temperature = body.temperature ?? (r.temperature as number);
+
+  // ---- 6a. Agentic path (opt-in, additive — single-shot path unchanged) ------
+  // Single agent + bounded read-only tool loop. Branch/merge (orchestrator-
+  // workers + evaluator, branch_cap>1) is the Phase-C escalation and is NOT
+  // implemented here on purpose: the research eval found a single well-prompted
+  // tool-using call beats multi-agent on most tasks at ~1/15th the token cost.
+  if (
+    body.mode === 'agentic' &&
+    r.agentic_mode === true &&
+    r.supports_tools === true
+  ) {
+    const allowedTools = ((r.tools as unknown[]) ?? []).filter(
+      (t): t is string => typeof t === 'string',
+    );
+    const maxIter = (r.max_tool_iterations as number) ?? 4;
+    return await runAgentic({
+      db,
+      tenantId,
+      chain,
+      allowedTools,
+      maxIter,
+      featureType: body.feature_type,
+      systemPrompt: body.system_prompt,
+      userPrompt: body.user_prompt,
+      maxTokens,
+      temperature,
+      idempotencyKey,
+    });
+  }
 
   let lastError: string | undefined;
   for (let i = 0; i < chain.length; i++) {
@@ -361,6 +402,248 @@ async function callOpenRouter(opts: {
       throw new Error('openrouter empty content');
     }
     return { text, usage: j?.usage };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+// ---- Agentic path -----------------------------------------------------------
+
+interface AgenticArgs {
+  db: SupabaseClient;
+  tenantId: string;
+  chain: ChainEntry[];
+  allowedTools: string[];
+  maxIter: number;
+  featureType: string;
+  systemPrompt: string;
+  userPrompt: string;
+  maxTokens: number;
+  temperature: number;
+  idempotencyKey: string | null;
+}
+
+/// Walks the model chain like the single-shot path, but each attempt runs a
+/// bounded tool loop. Preserves the same circuit-breaker, fallback, and
+/// idempotency semantics. Every model call (including tool-using steps) is
+/// logged to tenant_ai_usage so the quota gate counts agentic fan-out honestly
+/// (an agentic request is N calls, not 1).
+async function runAgentic(opts: AgenticArgs): Promise<Response> {
+  const toolDefs = toolDefsFor(opts.allowedTools);
+  let lastError: string | undefined;
+
+  for (let i = 0; i < opts.chain.length; i++) {
+    const { model } = opts.chain[i];
+    if (isDegraded(model)) {
+      lastError = `model ${model} is degraded; skipped`;
+      continue;
+    }
+
+    const t0 = Date.now();
+    try {
+      const out = await agenticToolLoop({
+        db: opts.db,
+        tenantId: opts.tenantId,
+        model,
+        toolDefs,
+        allowedTools: opts.allowedTools,
+        maxIter: opts.maxIter,
+        featureType: opts.featureType,
+        systemPrompt: opts.systemPrompt,
+        userPrompt: opts.userPrompt,
+        maxTokens: opts.maxTokens,
+        temperature: opts.temperature,
+      });
+      const latency = Date.now() - t0;
+      const status: GatewayResponse['status'] = i === 0 ? 'success' : 'fallback';
+
+      // Terminal row carries the idempotency key; tool-loop steps were logged
+      // with a null key inside agenticToolLoop to avoid the unique-index clash.
+      await logUsage(opts.db, {
+        tenantId: opts.tenantId,
+        featureType: opts.featureType,
+        model,
+        status,
+        tokensIn: out.promptTokens,
+        tokensOut: out.completionTokens,
+        latencyMs: latency,
+        idempotencyKey: opts.idempotencyKey,
+      });
+
+      return jsonResponse(
+        {
+          text: out.text,
+          model,
+          status,
+          tokens_in: out.promptTokens,
+          tokens_out: out.completionTokens,
+          latency_ms: latency,
+        } as GatewayResponse,
+        200,
+      );
+    } catch (e) {
+      lastError = e instanceof Error ? e.message : String(e);
+      const recentFailures = await countRecentFailures(opts.db, model);
+      if (recentFailures + 1 >= DEGRADED_THRESHOLD) {
+        markDegraded(model);
+      }
+      await logUsage(opts.db, {
+        tenantId: opts.tenantId,
+        featureType: opts.featureType,
+        model,
+        status: i === opts.chain.length - 1 ? 'blocked_all_exhausted' : 'fallback',
+        latencyMs: Date.now() - t0,
+        idempotencyKey: i === opts.chain.length - 1 ? opts.idempotencyKey : null,
+        errorMessage: lastError,
+      });
+    }
+  }
+
+  return jsonResponse(
+    { text: '', model: 'none', status: 'blocked_all_exhausted', latency_ms: 0 } as GatewayResponse,
+    503,
+  );
+}
+
+interface ToolCall {
+  id?: string;
+  function?: { name?: string; arguments?: string };
+}
+
+/// Bounded read-only tool loop for one model. Returns the final assistant text
+/// plus aggregate token usage. Throws on transport failure (so runAgentic can
+/// fall back to the next model in the chain).
+async function agenticToolLoop(opts: {
+  db: SupabaseClient;
+  tenantId: string;
+  model: string;
+  toolDefs: unknown[];
+  allowedTools: string[];
+  maxIter: number;
+  featureType: string;
+  systemPrompt: string;
+  userPrompt: string;
+  maxTokens: number;
+  temperature: number;
+}): Promise<{ text: string; promptTokens: number; completionTokens: number; iterations: number }> {
+  const messages: Array<Record<string, unknown>> = [];
+  if (opts.systemPrompt) messages.push({ role: 'system', content: opts.systemPrompt });
+  messages.push({ role: 'user', content: opts.userPrompt });
+
+  let promptTokens = 0;
+  let completionTokens = 0;
+
+  for (let iter = 0; iter < opts.maxIter; iter++) {
+    const { message, usage } = await callOpenRouterRaw({
+      model: opts.model,
+      messages,
+      tools: opts.toolDefs,
+      maxTokens: opts.maxTokens,
+      temperature: opts.temperature,
+    });
+    promptTokens += usage?.prompt_tokens ?? 0;
+    completionTokens += usage?.completion_tokens ?? 0;
+
+    const toolCalls = (message.tool_calls as ToolCall[] | undefined) ?? [];
+    messages.push(message);
+
+    if (toolCalls.length === 0) {
+      const text = (message.content as string) ?? '';
+      if (!text) throw new Error('agentic model returned empty content and no tool calls');
+      return { text, promptTokens, completionTokens, iterations: iter + 1 };
+    }
+
+    // Count this tool-using step as a budget unit (null idempotency key — the
+    // terminal answer row carries the real key).
+    await logUsage(opts.db, {
+      tenantId: opts.tenantId,
+      featureType: opts.featureType,
+      model: opts.model,
+      status: 'success',
+      tokensIn: usage?.prompt_tokens,
+      tokensOut: usage?.completion_tokens,
+      idempotencyKey: null,
+    });
+
+    for (const tc of toolCalls) {
+      const name = tc.function?.name ?? '';
+      let args: Record<string, unknown> = {};
+      try {
+        args = JSON.parse(tc.function?.arguments ?? '{}') as Record<string, unknown>;
+      } catch (_) {
+        args = {};
+      }
+      const result = await executeTool(name, args, opts.db, opts.tenantId, opts.allowedTools);
+      messages.push({
+        role: 'tool',
+        tool_call_id: tc.id,
+        content: JSON.stringify(result),
+      });
+    }
+  }
+
+  // Iteration budget spent — make one final tool-free call to force an answer.
+  const { message, usage } = await callOpenRouterRaw({
+    model: opts.model,
+    messages,
+    maxTokens: opts.maxTokens,
+    temperature: opts.temperature,
+  });
+  promptTokens += usage?.prompt_tokens ?? 0;
+  completionTokens += usage?.completion_tokens ?? 0;
+  const text = (message.content as string) ?? '';
+  if (!text) throw new Error('agentic loop hit max iterations without a final answer');
+  return { text, promptTokens, completionTokens, iterations: opts.maxIter };
+}
+
+/// Like callOpenRouter but returns the raw assistant message (so tool_calls
+/// survive) and forwards an optional `tools` array. Used only by the agentic
+/// loop; the single-shot path keeps using callOpenRouter unchanged.
+async function callOpenRouterRaw(opts: {
+  model: string;
+  messages: Array<Record<string, unknown>>;
+  tools?: unknown[];
+  maxTokens: number;
+  temperature: number;
+}): Promise<{
+  message: Record<string, unknown>;
+  usage?: { prompt_tokens?: number; completion_tokens?: number };
+}> {
+  const requestBody: Record<string, unknown> = {
+    model: opts.model,
+    messages: opts.messages,
+    max_tokens: opts.maxTokens,
+    temperature: opts.temperature,
+  };
+  if (opts.tools && opts.tools.length > 0) {
+    requestBody.tools = opts.tools;
+    requestBody.tool_choice = 'auto';
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    const res = await fetch(OPENROUTER_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://school-management.app',
+        'X-Title': 'School Management SaaS',
+      },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const errBody = await res.text();
+      throw new Error(`openrouter ${res.status}: ${errBody.slice(0, 200)}`);
+    }
+    const j = await res.json();
+    const message = j?.choices?.[0]?.message as Record<string, unknown> | undefined;
+    if (!message) {
+      throw new Error('openrouter response missing message');
+    }
+    return { message, usage: j?.usage };
   } finally {
     clearTimeout(timeoutId);
   }

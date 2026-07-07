@@ -69,7 +69,7 @@ class _UpcomingPTMsTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final schedulesAsync = ref.watch(
       ptmSchedulesProvider(const PTMSchedulesFilter(
-        status: 'open',
+        status: 'scheduled',
         upcomingOnly: true,
       )),
     );
@@ -312,13 +312,16 @@ class _StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     Color color;
     switch (status) {
-      case 'draft':
-        color = AppColors.grey500;
-        break;
-      case 'open':
+      case 'scheduled':
         color = AppColors.success;
         break;
-      case 'closed':
+      case 'in_progress':
+        color = AppColors.warning;
+        break;
+      case 'completed':
+        color = AppColors.grey500;
+        break;
+      case 'cancelled':
         color = AppColors.error;
         break;
       default:

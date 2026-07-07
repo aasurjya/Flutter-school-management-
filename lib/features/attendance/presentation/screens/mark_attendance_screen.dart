@@ -22,7 +22,8 @@ class MarkAttendanceScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<MarkAttendanceScreen> createState() => _MarkAttendanceScreenState();
+  ConsumerState<MarkAttendanceScreen> createState() =>
+      _MarkAttendanceScreenState();
 }
 
 class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
@@ -52,9 +53,8 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
       final studentRepo = ref.read(studentRepositoryProvider);
       final attendanceRepo = ref.read(attendanceRepositoryProvider);
 
-      final date = widget.date != null
-          ? DateTime.parse(widget.date!)
-          : DateTime.now();
+      final date =
+          widget.date != null ? DateTime.parse(widget.date!) : DateTime.now();
 
       // Load active students for this section from Supabase
       final students = await studentRepo.getStudentsBySection(widget.sectionId);
@@ -115,184 +115,197 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
       );
     }
 
-    final presentCount = _students.where((s) => s.status == AttendanceStatus.present).length;
-    final absentCount = _students.where((s) => s.status == AttendanceStatus.absent).length;
-    final lateCount = _students.where((s) => s.status == AttendanceStatus.late).length;
+    final presentCount =
+        _students.where((s) => s.status == AttendanceStatus.present).length;
+    final absentCount =
+        _students.where((s) => s.status == AttendanceStatus.absent).length;
+    final lateCount =
+        _students.where((s) => s.status == AttendanceStatus.late).length;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mark Attendance'),
-        actions: [
-          TextButton(
-            onPressed: _markAllPresent,
-            child: const Text('All Present'),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Offline Banner
-          Consumer(
-            builder: (context, ref, _) {
-              final isOnline = ref.watch(isOnlineProvider);
-              final pendingCount = ref.watch(pendingSyncCountProvider);
-              final online = isOnline.valueOrNull ?? true;
-              final pending = pendingCount.valueOrNull ?? 0;
+    return PopScope(
+      canPop: !_hasChanges,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _handleDiscard();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Mark Attendance'),
+          actions: [
+            TextButton(
+              onPressed: _markAllPresent,
+              child: const Text('All Present'),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            // Offline Banner
+            Consumer(
+              builder: (context, ref, _) {
+                final isOnline = ref.watch(isOnlineProvider);
+                final pendingCount = ref.watch(pendingSyncCountProvider);
+                final online = isOnline.valueOrNull ?? true;
+                final pending = pendingCount.valueOrNull ?? 0;
 
-              if (online && pending == 0) return const SizedBox.shrink();
+                if (online && pending == 0) return const SizedBox.shrink();
 
-              return Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                color: online ? AppColors.info : Colors.orange[700],
-                child: Row(
-                  children: [
-                    Icon(
-                      online ? Icons.sync : Icons.cloud_off,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        online
-                            ? 'Syncing $pending pending record${pending == 1 ? '' : 's'}...'
-                            : 'Offline — changes will sync when connected',
-                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                return Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  color: online ? AppColors.info : Colors.orange[700],
+                  child: Row(
+                    children: [
+                      Icon(
+                        online ? Icons.sync : Icons.cloud_off,
+                        color: Colors.white,
+                        size: 20,
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-
-          // Summary Bar
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.black12
-                : Colors.grey[100],
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _SummaryChip(
-                  label: 'Present',
-                  count: presentCount,
-                  color: AppColors.success,
-                ),
-                _SummaryChip(
-                  label: 'Absent',
-                  count: absentCount,
-                  color: AppColors.error,
-                ),
-                _SummaryChip(
-                  label: 'Late',
-                  count: lateCount,
-                  color: AppColors.warning,
-                ),
-                _SummaryChip(
-                  label: 'Total',
-                  count: _students.length,
-                  color: AppColors.primary,
-                ),
-              ],
-            ),
-          ),
-
-          // Quick Actions
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _markAllPresent,
-                    icon: const Icon(Icons.check_circle_outline),
-                    label: const Text('All Present'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.success,
-                      side: const BorderSide(color: AppColors.success),
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          online
+                              ? 'Syncing $pending pending record${pending == 1 ? '' : 's'}...'
+                              : 'Offline — changes will sync when connected',
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 13),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _markAllAbsent,
-                    icon: const Icon(Icons.cancel_outlined),
-                    label: const Text('All Absent'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      side: const BorderSide(color: AppColors.error),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Student List
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _students.length,
-              itemBuilder: (context, index) {
-                final student = _students[index];
-                return _StudentAttendanceCard(
-                  student: student,
-                  onStatusChanged: (status) {
-                    setState(() {
-                      student.status = status;
-                      _hasChanges = true;
-                    });
-                  },
-                  onRemarksChanged: (remarks) {
-                    student.remarks = remarks;
-                    _hasChanges = true;
-                  },
                 );
               },
             ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        onPressed: () => context.push(
-          '/qr-scanner?mode=attendance&sectionId=${widget.sectionId}',
-        ),
-        child: const Icon(Icons.qr_code_scanner, color: Colors.white),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: ElevatedButton(
-            onPressed: _hasChanges && !_isSubmitting ? _submitAttendance : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+
+            // Summary Bar
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black12
+                  : Colors.grey[100],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _SummaryChip(
+                    label: 'Present',
+                    count: presentCount,
+                    color: AppColors.success,
+                  ),
+                  _SummaryChip(
+                    label: 'Absent',
+                    count: absentCount,
+                    color: AppColors.error,
+                  ),
+                  _SummaryChip(
+                    label: 'Late',
+                    count: lateCount,
+                    color: AppColors.warning,
+                  ),
+                  _SummaryChip(
+                    label: 'Total',
+                    count: _students.length,
+                    color: AppColors.primary,
+                  ),
+                ],
               ),
             ),
-            child: _isSubmitting
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(Colors.white),
-                    ),
-                  )
-                : const Text(
-                    'Submit Attendance',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+
+            // Quick Actions
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _markAllPresent,
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: const Text('All Present'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.success,
+                        side: const BorderSide(color: AppColors.success),
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _markAllAbsent,
+                      icon: const Icon(Icons.cancel_outlined),
+                      label: const Text('All Absent'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.error,
+                        side: const BorderSide(color: AppColors.error),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Student List
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: _students.length,
+                itemBuilder: (context, index) {
+                  final student = _students[index];
+                  return _StudentAttendanceCard(
+                    student: student,
+                    onStatusChanged: (status) {
+                      setState(() {
+                        student.status = status;
+                        _hasChanges = true;
+                      });
+                    },
+                    onRemarksChanged: (remarks) {
+                      student.remarks = remarks;
+                      _hasChanges = true;
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: AppColors.primary,
+          onPressed: () => context.push(
+            '/qr-scanner?mode=attendance&sectionId=${widget.sectionId}',
+          ),
+          child: const Icon(Icons.qr_code_scanner, color: Colors.white),
+        ),
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: ElevatedButton(
+              onPressed:
+                  _hasChanges && !_isSubmitting ? _submitAttendance : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: _isSubmitting
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(Colors.white),
+                      ),
+                    )
+                  : const Text(
+                      'Submit Attendance',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
           ),
         ),
       ),
@@ -317,6 +330,31 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
     });
   }
 
+  /// Confirm before discarding unsaved marks (triggered by the back gesture
+  /// via [PopScope] when [_hasChanges] is true).
+  Future<void> _handleDiscard() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(WarmCopy.discardChangesTitle),
+        content: const Text('Your attendance changes have not been saved.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(WarmCopy.discardChangesCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(WarmCopy.discardChangesConfirm),
+          ),
+        ],
+      ),
+    );
+    if (result == true && mounted) {
+      Navigator.pop(context);
+    }
+  }
+
   Future<void> _submitAttendance() async {
     // Snapshot the prior server state so Undo can restore it byte-for-byte.
     // Read BEFORE we overwrite; if the read fails the undo simply won't be
@@ -324,9 +362,8 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
     List<Map<String, dynamic>>? priorPayload;
     try {
       final attendanceRepo = ref.read(attendanceRepositoryProvider);
-      final date = widget.date != null
-          ? DateTime.parse(widget.date!)
-          : DateTime.now();
+      final date =
+          widget.date != null ? DateTime.parse(widget.date!) : DateTime.now();
       final prior = await attendanceRepo.getAttendanceBySection(
         sectionId: widget.sectionId,
         date: date,
@@ -345,13 +382,68 @@ class _MarkAttendanceScreenState extends ConsumerState<MarkAttendanceScreen> {
       priorPayload = null;
     }
 
+    // Confirm before committing. Makes the present-by-default rule explicit and
+    // warns when this submit will replace records already saved for the date.
+    final presentCount =
+        _students.where((s) => s.status == AttendanceStatus.present).length;
+    final absentCount =
+        _students.where((s) => s.status == AttendanceStatus.absent).length;
+    final lateCount =
+        _students.where((s) => s.status == AttendanceStatus.late).length;
+    final overwriteCount = priorPayload?.length ?? 0;
+
+    if (!mounted) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Submit attendance?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$presentCount present · $absentCount absent · $lateCount late',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Students you did not change are recorded as present.',
+              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+            ),
+            if (overwriteCount > 0) ...[
+              const SizedBox(height: 12),
+              Text(
+                'This replaces $overwriteCount record${overwriteCount == 1 ? '' : 's'} already saved for this date.',
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.warning,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (!mounted) return;
+
     setState(() => _isSubmitting = true);
 
     try {
       final attendanceRepo = ref.read(attendanceRepositoryProvider);
-      final date = widget.date != null
-          ? DateTime.parse(widget.date!)
-          : DateTime.now();
+      final date =
+          widget.date != null ? DateTime.parse(widget.date!) : DateTime.now();
 
       final savedOnline = await attendanceRepo.markBulkAttendance(
         sectionId: widget.sectionId,
@@ -488,7 +580,9 @@ class _StudentAttendanceCard extends StatelessWidget {
                 CircleAvatar(
                   backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                   child: Text(
-                    student.studentName.substring(0, 1),
+                    student.studentName.trim().isNotEmpty
+                        ? student.studentName.trim()[0].toUpperCase()
+                        : '?',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
@@ -582,7 +676,8 @@ class _StudentAttendanceCard extends StatelessWidget {
             children: [
               Text(
                 student.studentName,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -636,36 +731,48 @@ class _StatusButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? color : color.withValues(alpha: 0.1),
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        label: label,
+        child: Material(
+          color: isSelected ? color : color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+          child: InkWell(
+            onTap: onTap,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: color,
-              width: isSelected ? 0 : 1,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color: isSelected ? Colors.white : color,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: isSelected ? Colors.white : color,
+            child: Container(
+              // WCAG: keep the tap target at least 48dp tall.
+              constraints: const BoxConstraints(minHeight: 48),
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: color,
+                  width: isSelected ? 0 : 1,
                 ),
               ),
-            ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 18,
+                    color: isSelected ? Colors.white : color,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: isSelected ? Colors.white : color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

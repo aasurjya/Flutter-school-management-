@@ -26,7 +26,7 @@ class ResourceRepository extends BaseRepository {
           uploader:users!uploaded_by(full_name)
         ''')
         .eq('tenant_id', requireTenantId)
-        .eq('is_public', true);
+        .eq('is_active', true);
 
     if (subjectId != null) {
       query = query.eq('subject_id', subjectId);

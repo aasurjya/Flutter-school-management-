@@ -41,7 +41,8 @@ class AppUser {
     List<String> extractedRoles = [];
     if (json['user_roles'] != null) {
       extractedRoles = (json['user_roles'] as List)
-          .map((r) => r['role'] as String)
+          .map((r) => r['role'] as String?)
+          .whereType<String>()
           .toList();
     } else if (json['roles'] != null) {
       extractedRoles = List<String>.from(json['roles']);
@@ -59,7 +60,7 @@ class AppUser {
     return AppUser(
       id: json['id'],
       tenantId: json['tenant_id'],
-      email: json['email'],
+      email: json['email'] as String? ?? '',
       fullName: json['full_name'],
       phone: json['phone'],
       avatarUrl: json['avatar_url'],
@@ -75,8 +76,10 @@ class AppUser {
       lastLoginAt: json['last_login_at'] != null
           ? DateTime.parse(json['last_login_at'])
           : null,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 
@@ -180,7 +183,7 @@ class AppUser {
   /// Get user initials
   String get initials {
     if (fullName == null || fullName!.isEmpty) {
-      return email[0].toUpperCase();
+      return email.isNotEmpty ? email[0].toUpperCase() : '?';
     }
     final parts = fullName!.split(' ');
     if (parts.length >= 2) {

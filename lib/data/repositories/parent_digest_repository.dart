@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/parent_digest.dart';
 import '../../core/services/ai_text_generator.dart';
 import '../../features/ai_insights/utils/digest_template_engine.dart';
@@ -13,6 +14,8 @@ class ParentDigestRepository extends BaseRepository {
     String? studentId,
     int limit = 20,
   }) async {
+    // Guard against an empty UUID filter (PostgREST 400) when no parent context.
+    if (parentId.isEmpty) return [];
     try {
       var query = client
           .from('parent_digests')
@@ -32,6 +35,46 @@ class ParentDigestRepository extends BaseRepository {
           .toList();
     } catch (e) {
       return [];
+    }
+  }
+
+  /// Paginated variant of [getDigestsForParent].
+  Future<PaginatedResult<ParentDigest>> getDigestsForParentPaginated(
+    String parentId, {
+    String? studentId,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    if (parentId.isEmpty) {
+      return PaginatedResult(
+        items: const [],
+        totalCount: 0,
+        page: page,
+        pageSize: pageSize,
+      );
+    }
+    try {
+      final result = await queryPaginated(
+        table: 'parent_digests',
+        select: '*',
+        page: page,
+        pageSize: pageSize,
+        builder: (q) {
+          var query = q.eq('parent_id', parentId);
+          if (studentId != null) {
+            query = query.eq('student_id', studentId);
+          }
+          return query.order('week_start', ascending: false);
+        },
+      );
+      return result.map((json) => ParentDigest.fromJson(json));
+    } catch (e) {
+      return PaginatedResult(
+        items: const [],
+        totalCount: 0,
+        page: page,
+        pageSize: pageSize,
+      );
     }
   }
 

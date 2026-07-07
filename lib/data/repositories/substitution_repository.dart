@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/substitution.dart';
 import 'base_repository.dart';
 
@@ -184,6 +185,35 @@ class SubstitutionRepository extends BaseRepository {
     return (response as List)
         .map((j) => SubstitutionAssignment.fromJson(j))
         .toList();
+  }
+
+  /// Paginated variant of [getAssignmentsByDate].
+  Future<PaginatedResult<SubstitutionAssignment>>
+      getAssignmentsByDatePaginated(
+    DateTime date, {
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final dateStr = date.toIso8601String().split('T')[0];
+    final result = await queryPaginated(
+      table: 'substitution_assignments',
+      select: '''
+        *,
+        timetable_slots!slot_id(name, start_time, end_time),
+        sections!section_id(name, classes(name)),
+        subjects!subject_id(name),
+        absent_teacher:users!absent_teacher_id(full_name),
+        substitute_teacher:users!substitute_teacher_id(full_name)
+      ''',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) => q
+          .eq('tenant_id', requireTenantId)
+          .eq('substitution_date', dateStr)
+          .eq('status', 'confirmed')
+          .order('created_at'),
+    );
+    return result.map((j) => SubstitutionAssignment.fromJson(j));
   }
 
   /// Get substitute duties assigned to a specific teacher.

@@ -151,6 +151,47 @@ FROM (VALUES
 ) AS v(id, role_name)
 ON CONFLICT (user_id, tenant_id, role) DO NOTHING;
 
+-- 6. Domain rows for the two student accounts the login panel actually
+--    advertises (student4=Noah, student5=Ava) plus the parent (parent3=
+--    Michael) who is supposed to see both as a multi-child view.
+--    Without these, the accounts can authenticate but the app shows
+--    "Student profile not found." — auth.users/public.users/user_roles
+--    alone aren't enough to render a student or parent dashboard.
+INSERT INTO students (
+    id, tenant_id, user_id, admission_number, first_name, last_name,
+    date_of_birth, gender, nationality, admission_date, is_active
+) VALUES
+    ('55555555-5555-5555-5555-555555555560', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+     '20000000-0000-0000-0000-000000000103', 'DEMO2024006', 'Noah', 'Student',
+     '2009-08-20', 'Male', 'Indian', '2024-04-01', true),
+    ('55555555-5555-5555-5555-555555555561', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+     '20000000-0000-0000-0000-000000000104', 'DEMO2024007', 'Ava', 'Student',
+     '2011-02-11', 'Female', 'Indian', '2024-04-01', true)
+ON CONFLICT (id) DO UPDATE SET user_id = EXCLUDED.user_id;
+
+INSERT INTO student_enrollments (
+    tenant_id, student_id, section_id, academic_year_id, roll_number, status
+) VALUES
+    ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '55555555-5555-5555-5555-555555555560',
+     'dddddddd-dddd-dddd-dddd-dddddddddd01', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '6', 'active'),
+    ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '55555555-5555-5555-5555-555555555561',
+     'dddddddd-dddd-dddd-dddd-dddddddddd02', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '7', 'active')
+ON CONFLICT (student_id, academic_year_id) DO NOTHING;
+
+INSERT INTO parents (
+    id, tenant_id, user_id, first_name, last_name, relation, email, phone
+) VALUES
+    ('66666666-6666-6666-6666-666666666670', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+     '20000000-0000-0000-0000-000000000202', 'Michael', 'Parent', 'father',
+     'parent3@demoschool.edu', '9800000202')
+ON CONFLICT (id) DO UPDATE SET user_id = EXCLUDED.user_id;
+
+INSERT INTO student_parents (student_id, parent_id, is_primary, can_pickup)
+VALUES
+    ('55555555-5555-5555-5555-555555555560', '66666666-6666-6666-6666-666666666670', true, true),
+    ('55555555-5555-5555-5555-555555555561', '66666666-6666-6666-6666-666666666670', true, true)
+ON CONFLICT DO NOTHING;
+
 COMMIT;
 
 DO $$

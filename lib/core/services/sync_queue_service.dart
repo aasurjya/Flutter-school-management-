@@ -15,6 +15,7 @@ class PendingOperation {
   final String operation; // 'insert' | 'update' | 'upsert' | 'delete'
   final Map<String, dynamic> data;
   final DateTime enqueuedAt;
+  final int retries;
 
   const PendingOperation({
     required this.id,
@@ -22,7 +23,18 @@ class PendingOperation {
     required this.operation,
     required this.data,
     required this.enqueuedAt,
+    this.retries = 0,
   });
+
+  /// Increment retry counter (used when an op fails).
+  PendingOperation withRetry() => PendingOperation(
+        id: id,
+        table: table,
+        operation: operation,
+        data: data,
+        enqueuedAt: enqueuedAt,
+        retries: retries + 1,
+      );
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -30,6 +42,7 @@ class PendingOperation {
         'operation': operation,
         'data': data,
         'enqueued_at': enqueuedAt.toIso8601String(),
+        'retries': retries,
       };
 
   factory PendingOperation.fromJson(Map<String, dynamic> json) =>
@@ -39,12 +52,13 @@ class PendingOperation {
         operation: json['operation'] as String,
         data: Map<String, dynamic>.from(json['data'] as Map),
         enqueuedAt: DateTime.parse(json['enqueued_at'] as String),
+        retries: (json['retries'] as num?)?.toInt() ?? 0,
       );
 
   @override
   String toString() =>
       'PendingOperation(id: $id, table: $table, op: $operation, '
-      'enqueuedAt: $enqueuedAt)';
+      'enqueuedAt: $enqueuedAt, retries: $retries)';
 }
 
 /// General-purpose offline sync queue backed by [SharedPreferences].
@@ -53,14 +67,48 @@ class PendingOperation {
 /// as a JSON list so they survive app restarts.  When [processQueue] is
 /// called with an active [SupabaseClient] every pending op is replayed in
 /// insertion order.
+///
+/// Phase 2.3 — added connectivity-driven auto-processing + retry limits:
+///   • [attachConnectivity] wires the queue to a connectivity stream so
+///     pending ops are replayed automatically when the device comes back
+///     online — no manual `processQueue()` call needed.
+///   • Ops that fail [_maxRetries] times are dropped (dead-letter) to
+///     prevent a poison-pill op from blocking the queue forever.
+///   • Ops older than [_maxAge] are dropped on read.
 class SyncQueueService {
   static const _queueKey = 'offline_sync_general_queue';
+  static const _maxRetries = 5;
+  static const _maxAge = Duration(days: 7);
 
   final SharedPreferences _prefs;
+  StreamSubscription<bool>? _onlineSub;
+  bool _isProcessing = false;
 
   SyncQueueService({required SharedPreferences prefs}) : _prefs = prefs;
 
   // ─── Public API ──────────────────────────────────────────────────────────
+
+  /// Wire the queue to a connectivity stream + Supabase client so pending
+  /// ops are replayed automatically when the device comes back online.
+  /// Call once at app startup. The [onlineStream] should emit `true` when
+  /// the device has connectivity and `false` when it doesn't.
+  void attachConnectivity({
+    required SupabaseClient client,
+    required Stream<bool> onlineStream,
+  }) {
+    _onlineSub?.cancel();
+    _onlineSub = onlineStream.listen((isOnline) {
+      if (isOnline) {
+        processQueue(client);
+      }
+    });
+  }
+
+  /// Detach from the connectivity stream. Call on logout.
+  void detachConnectivity() {
+    _onlineSub?.cancel();
+    _onlineSub = null;
+  }
 
   /// Adds a new operation to the persistent queue.
   void addToQueue(
@@ -107,19 +155,38 @@ class SyncQueueService {
   }
 
   /// Replays all pending operations against [client] and clears each one on
-  /// success. Failed operations are kept for the next attempt.
+  /// success. Failed operations are kept for the next attempt with retries+1.
+  /// Ops that exceed [_maxRetries] or [_maxAge] are dropped (dead-letter).
   Future<void> processQueue(SupabaseClient client) async {
+    if (_isProcessing) return;
     final ops = getPendingOps();
     if (ops.isEmpty) return;
 
+    _isProcessing = true;
     developer.log(
       'Processing ${ops.length} pending sync operations',
       name: 'SyncQueueService',
     );
 
     final failed = <PendingOperation>[];
+    final now = DateTime.now();
 
     for (final op in ops) {
+      // Drop ops that are too old or have exceeded retry limit.
+      if (now.difference(op.enqueuedAt) > _maxAge) {
+        developer.log(
+          'Dropping dead-letter op (expired): ${op.id} on ${op.table}',
+          name: 'SyncQueueService',
+        );
+        continue;
+      }
+      if (op.retries >= _maxRetries) {
+        developer.log(
+          'Dropping dead-letter op (max retries): ${op.id} on ${op.table}',
+          name: 'SyncQueueService',
+        );
+        continue;
+      }
       try {
         await _executeOp(client, op);
         developer.log(
@@ -128,16 +195,17 @@ class SyncQueueService {
         );
       } catch (e) {
         developer.log(
-          'Failed to sync ${op.operation} on ${op.table}: $e',
+          'Failed to sync ${op.operation} on ${op.table} (retry ${op.retries + 1}): $e',
           name: 'SyncQueueService',
           error: e,
         );
-        failed.add(op);
+        failed.add(op.withRetry());
       }
     }
 
-    // Persist only the operations that failed
+    // Persist only the operations that failed (with incremented retries).
     _saveOps(failed);
+    _isProcessing = false;
   }
 
   /// Removes a single operation by its [id].

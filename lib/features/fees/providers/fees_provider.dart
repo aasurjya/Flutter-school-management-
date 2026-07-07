@@ -250,8 +250,13 @@ class FeesNotifier extends StateNotifier<AsyncValue<List<Invoice>>> {
         status: status,
         academicYearId: academicYearId,
       );
+      // The provider is autoDispose; if the screen was popped while the fetch
+      // was in flight the notifier is already disposed and assigning state
+      // would throw "used after dispose".
+      if (!mounted) return;
       state = AsyncValue.data(invoices);
     } catch (e, st) {
+      if (!mounted) return;
       state = AsyncValue.error(e, st);
     }
   }

@@ -1,5 +1,6 @@
 
 import '../models/academic.dart';
+import '../models/paginated_result.dart';
 import 'base_repository.dart';
 
 class AcademicRepository extends BaseRepository {
@@ -17,6 +18,22 @@ class AcademicRepository extends BaseRepository {
     return (response as List)
         .map((json) => SchoolClass.fromJson(json))
         .toList();
+  }
+
+  /// Paginated variant of [getClasses].
+  Future<PaginatedResult<SchoolClass>> getClassesPaginated({
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'classes',
+      select: '*',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) =>
+          q.eq('tenant_id', requireTenantId).order('sequence_order'),
+    );
+    return result.map((json) => SchoolClass.fromJson(json));
   }
 
   Future<SchoolClass> createClass({
@@ -95,6 +112,40 @@ class AcademicRepository extends BaseRepository {
       }
       return Section.fromJson(json);
     }).toList();
+  }
+
+  /// Paginated variant of [getSections].
+  Future<PaginatedResult<Section>> getSectionsPaginated({
+    String? classId,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'sections',
+      select: '''
+        *,
+        classes!inner(id, name),
+        users!class_teacher_id(id, full_name)
+      ''',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) {
+        var query = q.eq('tenant_id', requireTenantId);
+        if (classId != null) {
+          query = query.eq('class_id', classId);
+        }
+        return query.order('name');
+      },
+    );
+    return result.map((json) {
+      if (json['classes'] != null) {
+        json['class'] = json['classes'];
+      }
+      if (json['users'] != null) {
+        json['class_teacher'] = json['users'];
+      }
+      return Section.fromJson(json);
+    });
   }
 
   Future<Section> createSection({
@@ -183,6 +234,23 @@ class AcademicRepository extends BaseRepository {
         .toList();
   }
 
+  /// Paginated variant of [getAcademicYears].
+  Future<PaginatedResult<AcademicYear>> getAcademicYearsPaginated({
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'academic_years',
+      select: '*',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) => q
+          .eq('tenant_id', requireTenantId)
+          .order('start_date', ascending: false),
+    );
+    return result.map((json) => AcademicYear.fromJson(json));
+  }
+
   Future<AcademicYear> createAcademicYear({
     required String name,
     required DateTime startDate,
@@ -246,6 +314,25 @@ class AcademicRepository extends BaseRepository {
         .toList();
   }
 
+  /// Paginated variant of [getTerms].
+  Future<PaginatedResult<Term>> getTermsPaginated(
+    String academicYearId, {
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'terms',
+      select: '*',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) => q
+          .eq('tenant_id', requireTenantId)
+          .eq('academic_year_id', academicYearId)
+          .order('sequence_order'),
+    );
+    return result.map((json) => Term.fromJson(json));
+  }
+
   Future<Term> createTerm({
     required String academicYearId,
     required String name,
@@ -285,6 +372,21 @@ class AcademicRepository extends BaseRepository {
     return (response as List)
         .map((json) => Subject.fromJson(json))
         .toList();
+  }
+
+  /// Paginated variant of [getSubjects].
+  Future<PaginatedResult<Subject>> getSubjectsPaginated({
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'subjects',
+      select: '*',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) => q.eq('tenant_id', requireTenantId).order('name'),
+    );
+    return result.map((json) => Subject.fromJson(json));
   }
 
   Future<Subject> createSubject({

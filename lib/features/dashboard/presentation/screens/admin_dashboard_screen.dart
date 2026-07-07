@@ -6,9 +6,14 @@ import '../../../../core/preferences/ai_minimal_mode_provider.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/utils/name_utils.dart';
 import '../../../../core/widgets/apple_list_section.dart';
+import '../../../../data/models/leave.dart';
 import '../../../ai_insights/presentation/widgets/admin_ai_narrative_card.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../leave/providers/leave_provider.dart';
+import '../../providers/dashboard_kpis_provider.dart';
+import '../../widgets/mv_backed_kpi_strip.dart';
 
 /// Overhauled, high-end Admin / Principal Dashboard.
 ///
@@ -33,6 +38,7 @@ class AdminDashboardScreen extends ConsumerWidget {
       body: RefreshIndicator.adaptive(
         onRefresh: () async {
           ref.invalidate(currentUserProvider);
+          ref.invalidate(adminKpisProvider);
         },
         child: CustomScrollView(
           slivers: [
@@ -47,7 +53,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               sliver: SliverList.list(
                 children: [
                   const _GreetingCard(),
-                  const _InstitutionPulseGrid(),
+                  const MvBackedKpiStrip(),
                   if (!minimal) ...[
                     const SizedBox(height: AppSpacing.lg),
                     const AdminAINarrativeCard(),
@@ -130,12 +136,35 @@ class _AppBar extends StatelessWidget {
 }
 
 String _weekdayLong(int weekday) {
-  const w = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const w = [
+    '',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday'
+  ];
   return w[weekday];
 }
 
 String _monthShort(int month) {
-  const m = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const m = [
+    '',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
+  ];
   return m[month];
 }
 
@@ -152,12 +181,15 @@ class _GreetingCard extends ConsumerWidget {
     final isDark = brightness == Brightness.dark;
 
     final user = ref.watch(currentUserProvider);
-    final firstName = (user?.fullName ?? 'Administrator').split(' ').first;
+    final firstName =
+        NameUtils.firstNameOf(user?.fullName, fallback: 'Administrator');
 
     // Academic ivory/parchment neutral theme
     final cardBg = isDark ? const Color(0xFF1E1E1C) : const Color(0xFFFAF9F5);
-    final borderCol = isDark ? const Color(0xFF3A3A36) : const Color(0xFFE8E6DF);
-    final secondaryText = isDark ? const Color(0xFFB5B3AD) : const Color(0xFF706E67);
+    final borderCol =
+        isDark ? const Color(0xFF3A3A36) : const Color(0xFFE8E6DF);
+    final secondaryText =
+        isDark ? const Color(0xFFB5B3AD) : const Color(0xFF706E67);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
@@ -181,142 +213,11 @@ class _GreetingCard extends ConsumerWidget {
             const SizedBox(height: 2),
             Text(
               'Institution Operational Console · Active Session',
-              style: theme.textTheme.bodyMedium?.copyWith(color: secondaryText, fontWeight: FontWeight.w500),
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: secondaryText, fontWeight: FontWeight.w500),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Institution Pulse Grid — Asymmetric overview metrics
-// ---------------------------------------------------------------------------
-class _InstitutionPulseGrid extends StatelessWidget {
-  const _InstitutionPulseGrid();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final brightness = theme.brightness;
-    final secondary = AppColors.labelFor(brightness, tier: 2);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
-          child: Text(
-            'INSTITUTION OPERATIONAL HEALTH',
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: secondary,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ),
-        Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: _PulseCard(
-                title: 'SCHOOL ATTENDANCE',
-                value: '94.2%',
-                statusLabel: 'Normal pulse',
-                statusColor: AppColors.success,
-                brightness: brightness,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              flex: 2,
-              child: _PulseCard(
-                title: 'FACULTY ON LEAVE',
-                value: '2',
-                statusLabel: 'Cover duties set',
-                statusColor: AppColors.warning,
-                brightness: brightness,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _PulseCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final String statusLabel;
-  final Color statusColor;
-  final Brightness brightness;
-
-  const _PulseCard({
-    required this.title,
-    required this.value,
-    required this.statusLabel,
-    required this.statusColor,
-    required this.brightness,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.groupedCellFor(brightness),
-        borderRadius: AppRadius.card,
-        border: Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              fontSize: 10,
-              color: AppColors.labelFor(brightness, tier: 2),
-              letterSpacing: 0.3,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            style: theme.textTheme.displayMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              height: 1.1,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: statusColor,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  statusLabel,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: statusColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -325,19 +226,23 @@ class _PulseCard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // Principal's Approval Queue — Active operational actions
 // ---------------------------------------------------------------------------
-class _PrincipalApprovalQueue extends StatelessWidget {
+class _PrincipalApprovalQueue extends ConsumerWidget {
   const _PrincipalApprovalQueue();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final brightness = theme.brightness;
+    final pendingAsync = ref.watch(
+      leaveApplicationsProvider(const LeaveFilter(pendingOnly: true)),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
+          padding:
+              const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
           child: Text(
             'PENDING SIGN-OFFS & APPROVALS',
             style: theme.textTheme.labelSmall?.copyWith(
@@ -351,49 +256,119 @@ class _PrincipalApprovalQueue extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.groupedCellFor(brightness),
             borderRadius: AppRadius.card,
-            border: Border.all(color: AppColors.separatorFor(brightness), width: 0.5),
+            border: Border.all(
+                color: AppColors.separatorFor(brightness), width: 0.5),
           ),
-          child: Column(
-            children: [
-              ListTile(
-                dense: true,
-                leading: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: AppColors.info.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.badge_outlined, size: 18, color: AppColors.info),
-                ),
-                title: const Text('Leave Request: Mrs. Barua', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Mathematics Dept · 1 day medical leave'),
-                trailing: TextButton(
-                  onPressed: () => context.push(AppRoutes.leave),
-                  child: const Text('Approve', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: pendingAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.symmetric(vertical: 22),
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
               ),
-              const Divider(height: 0.5),
-              ListTile(
-                dense: true,
-                leading: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: AppColors.warning.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.school_outlined, size: 18, color: AppColors.warning),
-                ),
-                title: const Text('New Admission Sign-Off', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Grade X admission roll review pending'),
-                trailing: TextButton(
-                  onPressed: () => context.push(AppRoutes.admissionDashboard),
-                  child: const Text('Review', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
+            ),
+            error: (_, __) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+              child: Text(
+                "Couldn't load approvals.",
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: AppColors.grey500),
               ),
-            ],
+            ),
+            data: (applications) {
+              if (applications.isEmpty) {
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle_outline,
+                          size: 18, color: AppColors.success),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'All caught up — no pending leave requests.',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: AppColors.labelFor(brightness, tier: 2),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final shown = applications.take(3).toList();
+              return Column(
+                children: [
+                  for (var i = 0; i < shown.length; i++) ...[
+                    if (i > 0) const Divider(height: 0.5),
+                    _LeaveApprovalTile(application: shown[i]),
+                  ],
+                  if (applications.length > shown.length) ...[
+                    const Divider(height: 0.5),
+                    ListTile(
+                      dense: true,
+                      title: Text(
+                        'View all ${applications.length} pending requests',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.chevron_right,
+                          size: 18, color: AppColors.primary),
+                      onTap: () => context.push(AppRoutes.leave),
+                    ),
+                  ],
+                ],
+              );
+            },
           ),
         ),
       ],
+    );
+  }
+}
+
+/// A single pending leave request in the principal's approval queue.
+class _LeaveApprovalTile extends StatelessWidget {
+  final LeaveApplication application;
+  const _LeaveApprovalTile({required this.application});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasName = application.applicantName?.trim().isNotEmpty ?? false;
+    final name = hasName ? application.applicantName!.trim() : 'Leave request';
+    final days = application.duration;
+    final klass = application.className;
+    final subtitle = [
+      if (klass != null && klass.trim().isNotEmpty) klass.trim(),
+      application.leaveTypeDisplay,
+      '$days day${days == 1 ? '' : 's'}',
+    ].join(' · ');
+
+    return ListTile(
+      dense: true,
+      leading: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: AppColors.info.withValues(alpha: 0.1),
+          shape: BoxShape.circle,
+        ),
+        child:
+            const Icon(Icons.badge_outlined, size: 18, color: AppColors.info),
+      ),
+      title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: Text(subtitle),
+      trailing: TextButton(
+        onPressed: () => context.push(AppRoutes.leave),
+        child:
+            const Text('Review', style: TextStyle(fontWeight: FontWeight.bold)),
+      ),
     );
   }
 }
@@ -472,7 +447,8 @@ class _CommandLedgerSection extends ConsumerWidget {
           header: 'OPERATIONS & STATS',
           children: [
             AppleListCell(
-              leading: const Icon(Icons.account_balance_wallet_outlined, size: 20),
+              leading:
+                  const Icon(Icons.account_balance_wallet_outlined, size: 20),
               title: 'Financial Fee Accounts',
               showChevron: true,
               onTap: () => context.push(AppRoutes.feeManagement),

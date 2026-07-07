@@ -1,11 +1,28 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../models/paginated_result.dart';
+
+/// In-memory TTL cache entry for read-heavy, low-change data.
+class _CacheEntry<T> {
+  final T value;
+  final DateTime expiresAt;
+  _CacheEntry(this.value, this.expiresAt);
+  bool get isExpired => DateTime.now().isAfter(expiresAt);
+}
+
+/// Global per-tenant cache store. Keyed by (tenantId, cacheKey).
+/// Static so cache survives provider recreation within a session.
+final Map<String, _CacheEntry<dynamic>> _globalCache = {};
+
+/// Clear the entire global cache. Call on logout / tenant switch.
+void clearAllRepoCache() => _globalCache.clear();
+
 abstract class BaseRepository {
   final SupabaseClient _client;
-  
+
   BaseRepository(this._client);
-  
+
   SupabaseClient get client => _client;
   
   String? get currentUserId => _client.auth.currentUser?.id;
@@ -36,6 +53,45 @@ abstract class BaseRepository {
   /// Returns tenantId or null — does NOT throw.
   String? get tenantIdOrNull => tenantId;
 
+  /// Runs a paginated query against [table] and returns a [PaginatedResult].
+  ///
+  /// [builder] receives the base filter builder (from `.from(table).select(select)`)
+  /// and applies filters/order before returning it. This helper then appends
+  /// `.range(page*pageSize, (page+1)*pageSize - 1)` and runs a parallel count
+  /// query to populate [PaginatedResult.totalCount].
+  ///
+  /// Use this for any list that can grow beyond ~100 rows per tenant.
+  Future<PaginatedResult<Map<String, dynamic>>> queryPaginated({
+    required String table,
+    required String select,
+    required int page,
+    required int pageSize,
+    required PostgrestTransformBuilder<PostgrestList> Function(
+            PostgrestFilterBuilder<PostgrestList> query)
+        builder,
+  }) async {
+    final offset = page * pageSize;
+
+    // Data query — apply filters, then range.
+    final dataQuery = builder(client.from(table).select(select));
+    final response = await dataQuery.range(offset, offset + pageSize - 1);
+
+    // Count query — same filters, head-only count. Reusing the same select
+    // is fine; count() ignores returned columns.
+    final countQuery = builder(client.from(table).select(select));
+    final countRes = await countQuery.count(CountOption.exact);
+    final totalCount = countRes.count;
+
+    final items =
+        (response as List).map((e) => e as Map<String, dynamic>).toList();
+    return PaginatedResult<Map<String, dynamic>>(
+      items: items,
+      totalCount: totalCount,
+      page: page,
+      pageSize: pageSize,
+    );
+  }
+
   String get requireUserId {
     final id = currentUserId;
     if (id == null) {
@@ -45,6 +101,43 @@ abstract class BaseRepository {
       );
     }
     return id;
+  }
+
+  // ---- TTL cache for read-heavy, low-change data ---------------------------
+  // Phase 2.1 — reduces repeated DB round-trips for data that rarely changes
+  // (classes, sections, subjects, fee_heads, academic_years). Each entry
+  // survives for [ttl] and is scoped to the current tenant so there's no
+  // cross-tenant leakage.
+
+  /// Read from the cache, or call [loader] and store the result.
+  /// [key] should be table-specific (e.g. 'classes:all').
+  /// [ttl] defaults to 5 minutes.
+  Future<T> cached<T>({
+    required String key,
+    required Future<T> Function() loader,
+    Duration ttl = const Duration(minutes: 5),
+  }) async {
+    final cacheKey = '${tenantId ?? 'global'}:$key';
+    final entry = _globalCache[cacheKey];
+    if (entry != null && !entry.isExpired) {
+      return entry.value as T;
+    }
+    final value = await loader();
+    _globalCache[cacheKey] = _CacheEntry<T>(value, DateTime.now().add(ttl));
+    return value;
+  }
+
+  /// Invalidate a specific cache entry (call after a write to that table).
+  void invalidateCache(String key) {
+    final cacheKey = '${tenantId ?? 'global'}:$key';
+    _globalCache.remove(cacheKey);
+  }
+
+  /// Invalidate all cache entries for the current tenant.
+  /// Call on logout or when switching tenants.
+  void invalidateAllCache() {
+    final prefix = '${tenantId ?? 'global'}:';
+    _globalCache.removeWhere((k, _) => k.startsWith(prefix));
   }
   
   RealtimeChannel subscribeToTable(

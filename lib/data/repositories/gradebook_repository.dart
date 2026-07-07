@@ -1,4 +1,5 @@
 import '../models/gradebook.dart';
+import '../models/paginated_result.dart';
 import 'base_repository.dart';
 
 class GradebookRepository extends BaseRepository {
@@ -58,6 +59,31 @@ class GradebookRepository extends BaseRepository {
     return (response as List)
         .map((json) => GradeEntry.fromJson(json))
         .toList();
+  }
+
+  /// Paginated variant of [getGradeEntries].
+  Future<PaginatedResult<GradeEntry>> getGradeEntriesPaginated(
+    String categoryId, {
+    String? studentId,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'grade_entries',
+      select: '*',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) {
+        var query = q
+            .eq('tenant_id', requireTenantId)
+            .eq('category_id', categoryId);
+        if (studentId != null) {
+          query = query.eq('student_id', studentId);
+        }
+        return query.order('graded_at', ascending: false);
+      },
+    );
+    return result.map((json) => GradeEntry.fromJson(json));
   }
 
   /// Load all grade entries for all categories of a subject at once.

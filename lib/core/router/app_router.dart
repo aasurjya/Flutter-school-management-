@@ -57,6 +57,7 @@ import '../../features/super_admin/presentation/screens/super_admin_dashboard_sc
 import '../../features/super_admin/presentation/screens/tenants_list_screen.dart';
 import '../../features/super_admin/presentation/screens/create_tenant_screen.dart';
 import '../../features/super_admin/presentation/screens/tenant_detail_screen.dart';
+import '../../features/super_admin/presentation/screens/subscription_checkout_screen.dart';
 import '../../features/qr_scan/presentation/screens/qr_scanner_screen.dart';
 import '../../features/qr_scan/presentation/screens/student_id_card_screen.dart';
 import '../../features/teacher/presentation/screens/class_teacher_dashboard_screen.dart';
@@ -116,6 +117,8 @@ import '../../features/ai_insights/presentation/screens/study_recommendations_sc
 import '../../features/ai_insights/presentation/screens/generate_remarks_screen.dart';
 import '../../features/ai_insights/presentation/screens/ai_message_composer_screen.dart';
 import '../../features/ai_insights/presentation/screens/class_intelligence_screen.dart';
+import '../../features/ai_tutoring/presentation/screens/ai_tutor_screen.dart';
+import '../../features/ai_tutoring/presentation/screens/ai_tutor_chat_screen.dart';
 import '../../features/syllabus/presentation/screens/syllabus_list_screen.dart';
 import '../../features/syllabus/presentation/screens/syllabus_editor_screen.dart';
 import '../../features/syllabus/presentation/screens/topic_detail_screen.dart';
@@ -445,6 +448,7 @@ class AppRoutes {
   static const String tenantsList = '/super-admin/tenants';
   static const String createTenant = '/super-admin/tenants/create';
   static const String tenantDetail = '/super-admin/tenants/:tenantId';
+  static const String subscriptionCheckout = '/super-admin/tenants/:tenantId/billing';
 
   // AI Insights routes
   static const String riskDashboard = '/ai/risk-dashboard';
@@ -464,6 +468,11 @@ class AppRoutes {
   static const String generateRemarks = '/ai/report-remarks';
   static const String aiMessageComposer = '/ai/compose-message';
   static const String classIntelligence = '/ai/class-intelligence/:sectionId';
+
+  // AI Tutor (student-facing). Static list route MUST precede the :sessionId
+  // detail route (GoRouter matches in order).
+  static const String aiTutor = '/ai/tutor';
+  static const String aiTutorChat = '/ai/tutor/:sessionId';
 
   // Syllabus & Topics routes
   static const String syllabusList = '/syllabus';
@@ -814,6 +823,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.tenantDetail,
         builder: (context, state) => TenantDetailScreen(
+          tenantId: state.pathParameters['tenantId']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.subscriptionCheckout,
+        builder: (context, state) => SubscriptionCheckoutScreen(
           tenantId: state.pathParameters['tenantId']!,
         ),
       ),
@@ -1467,6 +1482,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               sectionName: state.uri.queryParameters['name'],
             ),
           ),
+          // AI Tutor — static list route first, then the :sessionId chat.
+          GoRoute(
+            path: AppRoutes.aiTutor,
+            builder: (context, state) => const AiTutorScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.aiTutorChat,
+            builder: (context, state) => AiTutorChatScreen(
+              sessionId: state.pathParameters['sessionId']!,
+              topic: state.uri.queryParameters['topic'] ?? 'AI Tutor',
+            ),
+          ),
 
           // ==================== SYLLABUS & TOPICS ====================
           GoRoute(
@@ -1598,16 +1625,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.admissionApplications,
             builder: (context, state) => const ApplicationListScreen(),
           ),
-          GoRoute(
-            path: AppRoutes.admissionApplicationDetail,
-            builder: (context, state) => ApplicationDetailScreen(
-              applicationId: state.pathParameters['applicationId']!,
-            ),
-          ),
+          // NOTE: the static `/form` route MUST be registered before the
+          // dynamic `/:applicationId` route. GoRouter matches in declaration
+          // order, so if `:applicationId` came first it would capture the
+          // literal "form" as an id and the detail query would fail with an
+          // invalid-UUID error ("Couldn't load that").
           GoRoute(
             path: AppRoutes.admissionApplicationForm,
             builder: (context, state) => ApplicationFormScreen(
               inquiryId: state.uri.queryParameters['inquiryId'],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.admissionApplicationDetail,
+            builder: (context, state) => ApplicationDetailScreen(
+              applicationId: state.pathParameters['applicationId']!,
             ),
           ),
           GoRoute(
@@ -2095,15 +2127,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.inventoryAssets,
         builder: (context, state) => const AssetListScreen(),
       ),
+      // NOTE: static `/form` before dynamic `/:assetId` — see the admissions
+      // route note above. Otherwise "form" is captured as an asset id.
+      GoRoute(
+        path: AppRoutes.inventoryAssetForm,
+        builder: (context, state) => const AssetFormScreen(),
+      ),
       GoRoute(
         path: AppRoutes.inventoryAssetDetail,
         builder: (context, state) => AssetDetailScreen(
           assetId: state.pathParameters['assetId']!,
         ),
-      ),
-      GoRoute(
-        path: AppRoutes.inventoryAssetForm,
-        builder: (context, state) => const AssetFormScreen(),
       ),
       GoRoute(
         path: AppRoutes.inventoryAssetScan,
@@ -2149,6 +2183,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.homeworkCreate,
         builder: (context, state) => const HomeworkCreateScreen(),
       ),
+      // NOTE: static `/calendar` before dynamic `/:homeworkId` — see the
+      // admissions route note above. Otherwise "calendar" is captured as a
+      // homework id.
+      GoRoute(
+        path: AppRoutes.homeworkCalendar,
+        builder: (context, state) => const HomeworkCalendarScreen(),
+      ),
       GoRoute(
         path: AppRoutes.homeworkDetail,
         builder: (context, state) => HomeworkDetailScreen(
@@ -2166,10 +2207,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => HomeworkSubmissionsScreen(
           homeworkId: state.pathParameters['homeworkId']!,
         ),
-      ),
-      GoRoute(
-        path: AppRoutes.homeworkCalendar,
-        builder: (context, state) => const HomeworkCalendarScreen(),
       ),
 
       // ==================== NOTICE BOARD ====================

@@ -44,12 +44,12 @@ class PTMSchedule {
       title: json['title'],
       description: json['description'],
       academicYearId: json['academic_year_id'],
-      date: DateTime.parse(json['date']),
+      date: DateTime.parse(json['ptm_date'] ?? json['date']),
       startTime: json['start_time'],
       endTime: json['end_time'],
-      slotDuration: json['slot_duration'] ?? 15,
+      slotDuration: json['slot_duration_minutes'] ?? 15,
       maxAppointmentsPerSlot: json['max_appointments_per_slot'] ?? 1,
-      status: json['status'] ?? 'draft',
+      status: json['status'] ?? 'scheduled',
       createdAt: DateTime.parse(json['created_at']),
       academicYearName: json['academic_year']?['name'],
       totalSlots: json['total_slots'],
@@ -62,28 +62,28 @@ class PTMSchedule {
       'tenant_id': tenantId,
       'title': title,
       'description': description,
-      'academic_year_id': academicYearId,
-      'date': date.toIso8601String().split('T')[0],
+      'ptm_date': date.toIso8601String().split('T')[0],
       'start_time': startTime,
       'end_time': endTime,
-      'slot_duration': slotDuration,
-      'max_appointments_per_slot': maxAppointmentsPerSlot,
+      'slot_duration_minutes': slotDuration,
       'status': status,
     };
   }
 
-  bool get isDraft => status == 'draft';
-  bool get isOpen => status == 'open';
-  bool get isClosed => status == 'closed';
+  bool get isDraft => false;
+  bool get isOpen => status == 'scheduled' || status == 'in_progress';
+  bool get isClosed => status == 'completed' || status == 'cancelled';
 
   String get statusDisplay {
     switch (status) {
-      case 'draft':
-        return 'Draft';
-      case 'open':
-        return 'Open for Booking';
-      case 'closed':
-        return 'Closed';
+      case 'scheduled':
+        return 'Scheduled';
+      case 'in_progress':
+        return 'In Progress';
+      case 'completed':
+        return 'Completed';
+      case 'cancelled':
+        return 'Cancelled';
       default:
         return status;
     }

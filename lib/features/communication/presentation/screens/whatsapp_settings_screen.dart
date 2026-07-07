@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/subscription_guard.dart';
 import '../../../../data/models/whatsapp_config.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../providers/whatsapp_provider.dart';
@@ -76,7 +77,12 @@ class _WhatsAppSettingsScreenState
       appBar: AppBar(
         title: const Text('WhatsApp & SMS Settings'),
       ),
-      body: configAsync.when(
+      body: SubscriptionGuard(
+        featureKey: 'whatsapp',
+        blockedMessage:
+            'WhatsApp notifications require a Pro or Elite plan. '
+            'Upgrade to enable automated absence, fee-due, and result alerts.',
+        child: configAsync.when(
         data: (config) {
           if (config != null && !_loaded) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -106,6 +112,7 @@ class _WhatsAppSettingsScreenState
               ),
             ],
           ),
+        ),
         ),
       ),
     );

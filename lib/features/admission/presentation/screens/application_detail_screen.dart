@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -278,7 +280,9 @@ class ApplicationDetailScreen extends ConsumerWidget {
                     ),
                   );
                 }
-              } catch (e) {
+              } catch (e, st) {
+                developer.log('Admission document verify failed',
+                    name: 'AdmissionDetail', error: e, stackTrace: st);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -697,7 +701,9 @@ class ApplicationDetailScreen extends ConsumerWidget {
       if (status == ApplicationStatus.accepted && context.mounted) {
         await _showEnrollmentLetterSheet(context, ref, updated);
       }
-    } catch (e) {
+    } catch (e, st) {
+      developer.log('Admission status update failed',
+          name: 'AdmissionDetail', error: e, stackTrace: st);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -800,7 +806,9 @@ class ApplicationDetailScreen extends ConsumerWidget {
         // Show credentials + offer to print enrollment letter.
         await _showPostEnrollSheet(context, ref, app, result);
       }
-    } catch (e) {
+    } catch (e, st) {
+      developer.log('Admission enroll failed',
+          name: 'AdmissionDetail', error: e, stackTrace: st);
       if (context.mounted) Navigator.pop(context);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1001,7 +1009,9 @@ class ApplicationDetailScreen extends ConsumerWidget {
           settings: settings,
         );
       }
-    } catch (e) {
+    } catch (e, st) {
+      developer.log('Admission enrollment letter failed',
+          name: 'AdmissionDetail', error: e, stackTrace: st);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

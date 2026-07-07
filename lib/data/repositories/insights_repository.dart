@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/student_insights.dart';
 import 'base_repository.dart';
 
@@ -531,5 +532,43 @@ class InsightsRepository extends BaseRepository {
         'section_name': section['name'],
       };
     }).toList();
+  }
+
+  /// Paginated variant of [getParentChildren].
+  Future<PaginatedResult<Map<String, dynamic>>> getParentChildrenPaginated(
+    String parentId, {
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'student_parents',
+      select: '''
+        student:students!inner(
+          id, first_name, last_name, photo_url,
+          student_enrollments!inner(
+            section:sections!inner(
+              name,
+              class:classes!inner(name)
+            )
+          )
+        )
+      ''',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) => q.eq('parent_id', parentId),
+    );
+    return result.map((record) {
+      final student = record['student'];
+      final enrollment = (student['student_enrollments'] as List).first;
+      final section = enrollment['section'];
+      return {
+        'id': student['id'],
+        'name':
+            '${student['first_name']} ${student['last_name'] ?? ''}'.trim(),
+        'photo_url': student['photo_url'],
+        'class_name': section['class']['name'],
+        'section_name': section['name'],
+      };
+    });
   }
 }

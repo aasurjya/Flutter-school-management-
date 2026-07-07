@@ -74,7 +74,20 @@ echo ""
 #     enum-like). These rules matter for PKs/FKs/counters, not for columns
 #     like `max_tokens INT CHECK (max_tokens BETWEEN 50 AND 8000)`. Manual
 #     review of new PK/FK definitions catches the real cases.
-EXCLUDE="--exclude prefer-big-int,prefer-bigint-over-int"
+#
+#   adding-field-with-default:
+#     Squawk's own rule text says it: "In Postgres versions 11+, non-VOLATILE
+#     DEFAULTs can be added without a rewrite." Supabase runs Postgres 15+,
+#     and every case we've hit is a constant default (false/0/1/'[]'::jsonb)
+#     on a small config table (feature_routes, tenants — one row per
+#     feature/school, not per end-user). The ACCESS EXCLUSIVE lock this rule
+#     warns about doesn't apply to these. VOLATILE defaults (now(), random(),
+#     etc.) or large per-user tables still need the 3-step nullable/backfill/
+#     not-null pattern in docs/runbooks/migrations.md — manual review catches
+#     those. (We also tried squawk's own inline `-- squawk-ignore <rule>`
+#     comment per its docs; it did not suppress this rule in local testing
+#     against squawk-cli 1.5.4, so this global exclude is the working fix.)
+EXCLUDE="--exclude prefer-big-int,prefer-bigint-over-int,adding-field-with-default"
 
 FAILED=0
 for f in $CHANGED; do

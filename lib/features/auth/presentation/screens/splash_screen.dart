@@ -93,12 +93,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         } else {
           developer.log('SplashScreen: No session, redirecting to login',
               name: 'SplashScreen');
-          context.go(AppRoutes.login);
+          if (mounted) context.go(AppRoutes.login);
         }
       },
       loading: () {
         _authRetryCount++;
-        developer.log('SplashScreen: Auth state loading, retry $_authRetryCount/$_maxAuthRetries',
+        developer.log(
+            'SplashScreen: Auth state loading, retry $_authRetryCount/$_maxAuthRetries',
             name: 'SplashScreen');
         if (_authRetryCount >= _maxAuthRetries) {
           developer.log('SplashScreen: Auth timeout, redirecting to login',
@@ -111,7 +112,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       error: (error, _) {
         developer.log('SplashScreen: Auth error - $error',
             name: 'SplashScreen', level: 900);
-        context.go(AppRoutes.login);
+        if (mounted) context.go(AppRoutes.login);
       },
     );
   }

@@ -1,3 +1,4 @@
+import '../models/paginated_result.dart';
 import '../models/tenant.dart';
 import 'base_repository.dart';
 
@@ -25,6 +26,37 @@ class TenantRepository extends BaseRepository {
 
     final response = await query.order('created_at', ascending: false);
     return (response as List).map((json) => Tenant.fromJson(json)).toList();
+  }
+
+  /// Paginated variant of [getAllTenants].
+  Future<PaginatedResult<Tenant>> getAllTenantsPaginated({
+    String? status,
+    String? searchQuery,
+    int page = 0,
+    int pageSize = 25,
+  }) async {
+    final result = await queryPaginated(
+      table: 'tenants',
+      select: '*',
+      page: page,
+      pageSize: pageSize,
+      builder: (q) {
+        var query = q;
+        if (status != null && status != 'all') {
+          if (status == 'active') {
+            query = query.eq('is_active', true);
+          } else if (status == 'suspended') {
+            query = query.eq('is_active', false);
+          }
+        }
+        if (searchQuery != null && searchQuery.isNotEmpty) {
+          query = query.or(
+              'name.ilike.%$searchQuery%,slug.ilike.%$searchQuery%,email.ilike.%$searchQuery%');
+        }
+        return query.order('created_at', ascending: false);
+      },
+    );
+    return result.map((json) => Tenant.fromJson(json));
   }
 
   /// Get tenant by ID

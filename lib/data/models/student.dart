@@ -247,15 +247,19 @@ class StudentEnrollment {
     }
 
     return StudentEnrollment(
-      id: json['id'],
-      tenantId: json['tenant_id'],
-      studentId: json['student_id'],
-      sectionId: json['section_id'],
-      academicYearId: json['academic_year_id'],
+      id: json['id'] ?? '',
+      tenantId: json['tenant_id'] ?? '',
+      studentId: json['student_id'] ?? '',
+      sectionId: json['section_id'] ?? '',
+      academicYearId: json['academic_year_id'] ?? '',
       rollNumber: json['roll_number'],
-      enrollmentDate: DateTime.parse(json['enrollment_date']),
+      enrollmentDate: json['enrollment_date'] != null
+          ? DateTime.parse(json['enrollment_date'])
+          : DateTime.now(),
       status: json['status'] ?? 'active',
-      createdAt: DateTime.parse(json['created_at']),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
       className: className,
       sectionName: sectionName,
       academicYearName: (json['academic_years'] ?? json['academic_year'])?['name'],

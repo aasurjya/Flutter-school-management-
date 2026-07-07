@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/name_utils.dart';
 import '../../../data/repositories/staff_repository.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../widgets/profile_photo_picker.dart';
@@ -113,7 +114,7 @@ class _AdminProfileSetupScreenState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Welcome, ${user?.fullName?.split(' ').first ?? 'Admin'}!',
+                'Welcome, ${NameUtils.firstNameOf(user?.fullName, fallback: 'Admin')}!',
                 style: theme.textTheme.titleLarge
                     ?.copyWith(fontWeight: FontWeight.w700),
               ),

@@ -6,6 +6,7 @@ import '../../../../core/copy/warm_strings.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/utils/name_utils.dart';
 import '../../../../core/widgets/apple_list_section.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../providers/tenant_provider.dart';
@@ -140,7 +141,7 @@ class _GreetingCard extends ConsumerWidget {
     final cellBg = AppColors.groupedCellFor(brightness);
     final secondary = AppColors.labelFor(brightness, tier: 2);
     final user = ref.watch(currentUserProvider);
-    final firstName = (user?.fullName ?? 'Operator').split(' ').first;
+    final firstName = NameUtils.firstNameOf(user?.fullName, fallback: 'Operator');
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),

@@ -6,6 +6,7 @@ import '../../../../core/preferences/ai_minimal_mode_provider.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/utils/name_utils.dart';
 import '../../../../core/widgets/apple_list_section.dart';
 import '../../../../data/models/leave.dart';
 import '../../../ai_insights/presentation/widgets/admin_ai_narrative_card.dart';
@@ -180,7 +181,8 @@ class _GreetingCard extends ConsumerWidget {
     final isDark = brightness == Brightness.dark;
 
     final user = ref.watch(currentUserProvider);
-    final firstName = (user?.fullName ?? 'Administrator').split(' ').first;
+    final firstName =
+        NameUtils.firstNameOf(user?.fullName, fallback: 'Administrator');
 
     // Academic ivory/parchment neutral theme
     final cardBg = isDark ? const Color(0xFF1E1E1C) : const Color(0xFFFAF9F5);

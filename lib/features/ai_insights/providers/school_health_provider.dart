@@ -11,6 +11,13 @@ import '../../attendance/providers/attendance_provider.dart';
 /// to enrich with real school data (student count, fee collection rate, etc.)
 /// instead of hardcoded placeholder zeroes.
 final schoolHealthNarrativeProvider = FutureProvider.autoDispose<AITextResult>((ref) async {
+  // Keep the result once computed: the narrative card sits behind a
+  // conditional (aiMinimalModeProvider) in the widget tree, and without
+  // this the provider tears down and re-runs the whole AI waterfall
+  // (gateway -> OpenRouter -> DeepSeek) every time it's briefly unwatched,
+  // leaving the card stuck on its loading shimmer forever.
+  ref.keepAlive();
+
   final aiTextGenerator = ref.watch(aiTextGeneratorProvider);
   final contextBuilder = ref.watch(aiContextBuilderProvider);
 

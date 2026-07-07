@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/name_utils.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../widgets/profile_photo_picker.dart';
 
@@ -106,7 +107,7 @@ class _ParentProfileSetupScreenState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Welcome, ${user?.fullName?.split(' ').first ?? 'Parent'}!',
+                'Welcome, ${NameUtils.firstNameOf(user?.fullName, fallback: 'Parent')}!',
                 style: theme.textTheme.titleLarge
                     ?.copyWith(fontWeight: FontWeight.w700),
               ),

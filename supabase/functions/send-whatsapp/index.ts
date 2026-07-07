@@ -68,18 +68,21 @@ interface SendRequest {
   triggeredBy?: string;    // 'attendance_absence' | 'fee_due' | 'result_published' | etc.
 }
 
-function extractTenantId(req: Request): string | null {
+async function getVerifiedTenantId(
+  req: Request,
+  supabaseAdmin: any,
+): Promise<string | null> {
   const authHeader = req.headers.get('authorization') ?? '';
   if (!authHeader.startsWith('Bearer ')) return null;
   const jwt = authHeader.replace(/^Bearer\s+/i, '');
-  try {
-    const parts = jwt.split('.');
-    if (parts.length !== 3) return null;
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-    return (payload?.app_metadata?.tenant_id as string) ?? null;
-  } catch (_) {
-    return null;
-  }
+
+  // Verify the token's signature against Supabase Auth instead of trusting an
+  // unverified base64-decoded payload — an unsigned/forged token must not be
+  // able to claim an arbitrary tenant_id.
+  const { data, error } = await supabaseAdmin.auth.getUser(jwt);
+  if (error || !data?.user) return null;
+
+  return (data.user.app_metadata?.tenant_id as string) ?? null;
 }
 
 serve(async (req: Request) => {
@@ -90,13 +93,17 @@ serve(async (req: Request) => {
     return jsonResponse({ ok: false, reason: 'method_not_allowed' }, 405);
   }
 
-  const tenantId = extractTenantId(req);
-  if (!tenantId) {
-    return jsonResponse({ ok: false, reason: 'no_tenant_in_jwt' }, 403);
-  }
-
   if (!SUPABASE_URL || !SERVICE_ROLE) {
     return jsonResponse({ ok: false, reason: 'server_misconfigured' }, 500);
+  }
+
+  const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
+    auth: { persistSession: false },
+  });
+
+  const tenantId = await getVerifiedTenantId(req, supabase);
+  if (!tenantId) {
+    return jsonResponse({ ok: false, reason: 'no_tenant_in_jwt' }, 403);
   }
 
   let body: SendRequest;
@@ -109,10 +116,6 @@ serve(async (req: Request) => {
   if (!body.to || !body.templateName) {
     return jsonResponse({ ok: false, reason: 'missing_to_or_template' }, 400);
   }
-
-  const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
-    auth: { persistSession: false },
-  });
 
   // ---- 1. Subscription gate: is whatsapp enabled for this plan? ----------
   const { data: planData } = await supabase.rpc('tenant_plan_limits', {
